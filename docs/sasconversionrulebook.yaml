@@ -104,6 +104,16 @@ global_policies:
       regression suite before adopting. Quarterly: review CAMIS updates, YELLOW
       package maintainer status (survey package succession above all), and this
       rulebook's version floors.
+  - policy_id: GP-09
+    name: iml-routing
+    rule: >
+      PROC IML (and any SAS/IML matrix-language program) has no direct
+      translation target in this rulebook. Route IML programs to human
+      review before code generation. numpy.linalg or R matrix algebra may
+      be proposed as candidate equivalents only after the matrix-semantics
+      scope is pinned for the specific program: broadcast versus SAS
+      elementwise behavior, missing handling in matrix operations, and
+      subscripting conventions.
 
 rules:
 

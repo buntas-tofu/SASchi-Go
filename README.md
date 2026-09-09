@@ -73,6 +73,26 @@ The R interpreter is found via `ROSETTA_RSCRIPT`, then `Rscript` on PATH.
   crosstab margins combined with normalize sums normalized values, never
   SAS totals. Compute margins from counts.
 
+## Origins
+
+This project is the open-source realization of a concept that predates it
+by eight years: the Rosetta Wiki, an internal wiki of side-by-side
+SAS, R, and Python examples built to move statisticians off SAS. The
+concept and its worked-example pattern are documented in:
+
+> Rosetta Wiki 1.0 User Guide: Companion to Rosetta Wiki. Nelson Chung,
+> Steve Clark, Philip Leclerc, Aref Dajani, Phyllis Singer. Research
+> Report Series (Disclosure Avoidance #2018-02), Center for Disclosure
+> Avoidance Research, U.S. Census Bureau. September 2018.
+
+The lineage is conceptual only. Nothing in this repository is copied from
+that work; every implementation here is original, and the difference is
+the doctrine: the 2018 wiki compared examples against hand-pinned
+desired results by eye, while this repository demands executable
+byte-equal gates with receipts. One continuity check: the 2018 Fisher
+worked example pinned a two-sided p-value of 0.1238 on its 2x2 fixture,
+and every engine pinned in this repository reproduces it exactly.
+
 ## Provenance
 
 The verification method is documented in the brief: published SAS outputs
