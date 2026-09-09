@@ -1167,3 +1167,41 @@ def sas_temp_array(n, init=None, lo=1):
     simulated iterations exactly as the PDV keeps temporaries."""
     store = {f"__temp{i}__": (init[i] if init else None) for i in range(n)}
     return sas_array(store, list(store.keys()), lo)
+
+
+# ---------------------------------------------------------------------------
+# Fisher exact, 2x2 (the 2018-corpus family). SAS PROC FREQ with an EXACT
+# FISHER statement reports three p-values: left-sided (XPL_FISH),
+# right-sided (XPR_FISH), and two-sided (XP2_FISH). R fisher.test and
+# scipy.stats.fisher_exact BOTH default to two-sided, so a translation that
+# wants the SAS left column must pass alternative='less' explicitly, and
+# misreading XPL as XPR flips the tail silently. The two-sided definition is
+# the standard one: sum the probabilities of every table with the same
+# margins whose probability does not exceed the observed table's. One-sided
+# 'less' is the lower tail on the top-left cell. Zero cells stay exact;
+# scipy does not report the conditional-MLE odds ratio or its interval, so
+# CI rows route to R.
+# ---------------------------------------------------------------------------
+
+
+def sas_fisher_exact(a, b, c, d, alternative="two"):
+    """Exact Fisher p-value for the 2x2 table [[a, b], [c, d]] (top-left
+    cell a). alternative: 'two' (default, matches R and scipy defaults),
+    'less' (lower tail on a, the SAS left-sided column), or 'greater'.
+    Pure integer hypergeometric, no float rounding: the same algorithm R
+    and scipy implement for 2x2 tables."""
+
+    from math import comb
+
+    def pmf(x):
+        return (comb(a + b, x) * comb(c + d, a + c - x)
+                / comb(a + b + c + d, a + c))
+
+    lo = max(0, a - d)
+    hi = min(a + b, a + c)
+    if alternative == "less":
+        return sum(pmf(x) for x in range(lo, a + 1))
+    if alternative == "greater":
+        return sum(pmf(x) for x in range(a, hi + 1))
+    p0 = pmf(a)
+    return sum(pmf(x) for x in range(lo, hi + 1) if pmf(x) <= p0)

@@ -42,6 +42,7 @@ VERIFIERS = [
     ("intnx", HERE / "examples" / "verify_intnx.py"),
     ("formats", HERE / "examples" / "verify_formats.py"),
     ("arrays", HERE / "examples" / "verify_arrays.py"),
+    ("fisher", HERE / "examples" / "verify_fisher.py"),
 ]
 
 
@@ -74,6 +75,7 @@ def main() -> int:
                "constructs": results,
                "all_passed": all(x["passed"] for x in results)}
     (TEL / "verify").mkdir(parents=True, exist_ok=True)
+    (TEL / "runs").mkdir(parents=True, exist_ok=True)
     rp = TEL / "verify" / f"receipt_{ts.replace(':', '')}.json"
     rp.write_text(json.dumps(receipt, indent=2))
 

@@ -528,6 +528,18 @@ rules:
     confidence: medium
     sources: [S-15, SAS-ETS-docs]
 
+  - rule_id: ST-014
+    sas_pattern: "PROC FREQ EXACT FISHER (Fisher exact test on a 2x2 table)"
+    scope: stat-proc
+    python_target: {package: scipy, pattern: "scipy.stats.fisher_exact(t, alternative='two-sided')  # 2x2 ONLY; rxc routes to R"}
+    r_target: {package: stats, pattern: "fisher.test(t, alternative='two.sided')"}
+    required_settings: ["alternative ALWAYS explicit: R and scipy default two-sided; SAS EXACT FISHER emits left (XPL_FISH), right (XPR_FISH), and two-sided (XP2_FISH) columns", "SAS left column means the lower tail on the top-left cell: alternative='less' in both APIs", "scipy reports odds ratio + p only; the conditional-MLE odds ratio and its confidence interval are R-only (fisher.test); route CI rows to R", "zero cells stay exact (no continuity corrections); odds ratio may be 0 or inf"]
+    equivalence_class: EXACT
+    silent_difference_checks: ["misreading XPL as XPR silently flips the tail: both p-values are correct numbers, wrong columns"]
+    validation_test: "p-values to 1e-12 vs SAS; pins: table [[4,21],[6,8]] two-sided 0.1238, left-sided 0.07367"
+    confidence: high
+    sources: [S-15, SAS-DOC]
+
   # ============ SURVEY PROCS (R REQUIRED) ============
 
   - rule_id: SV-001
