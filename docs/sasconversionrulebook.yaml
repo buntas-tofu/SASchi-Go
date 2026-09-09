@@ -354,6 +354,18 @@ rules:
     confidence: high
     sources: [SAS-DOC]
 
+  - rule_id: DS-021
+    sas_pattern: "PROC IMPORT dbms=csv type inference (guessingrows window)"
+    scope: data-step
+    python_target: {package: pandas, pattern: "explicit dtype per column; identifiers as dtype=str; never trust default inference for identifiers or windowed columns"}
+    r_target: {package: base, pattern: "read.csv(colClasses=...) explicit; identifiers colClasses='character'; never default inference"}
+    required_settings: ["PROC IMPORT guesses from the first guessingrows non-blank values (default 20): a column clean in the window but dirty later is read NUMERIC by SAS and the late non-numeric becomes missing with a note; pandas and R infer from the whole file and read it character: pin the divergence per file", "leading-zero identifiers (zip, ids) are stripped by ALL three defaults: read identifiers as character explicitly", "a column of blanks in the window reads CHAR in SAS; pandas/R land float64: normalize empty-but-numeric columns to NUM with missing, not INT", "NA tokens differ: pandas default na_values includes 'N/A' and 'null'; R default na.strings is 'NA' only. The same CSV reads missing in pandas and string in R: pin na_values/na.strings per file"]
+    equivalence_class: EQUIVALENT-WITH-SETTINGS
+    silent_difference_checks: ["the window-vs-full-file mismatch silently changes WHICH values are missing", "SAS numeric-looking cells with commas read character in CSV import; pandas/R also: quote the column explicitly"]
+    validation_test: "fixture: 20 clean rows then a non-numeric token -> SAS NUM (window) vs pandas/R CHAR (full file); leading-zero column byte-preserved under explicit reads"
+    confidence: high
+    sources: [SAS-DOC]
+
   # ============ PROC SQL ============
 
   - rule_id: SQL-001

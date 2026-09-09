@@ -61,6 +61,12 @@ The R interpreter is found via `ROSETTA_RSCRIPT`, then `Rscript` on PATH.
   no %g, so sig figs mean ROUND to an explicit power-of-ten unit (half away
   from zero). R signif() and Python %g round half to even, so 0.125 at two
   digits is 0.13 in SAS and 0.12 in both open languages.
+- PROC IMPORT guesses CSV types from a 20-row window; pandas and R infer
+  from the whole file. A column that looks numeric early but carries a
+  string at row 500 reads NUMERIC in SAS (string becomes missing) and
+  character in pandas/R. Pin the divergence per file; never trust either
+  default. Leading-zero identifiers strip in all three engines: read them
+  as character explicitly.
 
 ## Provenance
 

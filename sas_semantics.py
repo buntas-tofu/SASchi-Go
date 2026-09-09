@@ -1230,3 +1230,46 @@ def sas_sigfig_round(x: float, n: int) -> float:
         return 0.0
     unit = 10.0 ** (math.floor(math.log10(abs(x))) - n + 1)
     return sas_round(x, unit)
+
+
+# ---------------------------------------------------------------------------
+# CSV import type inference (the PROC IMPORT surface). PROC IMPORT
+# dbms=csv guesses column types from a WINDOW: the first guessingrows
+# non-blank values (default 20). A column clean inside the window but dirty
+# later is read NUMERIC by SAS and the late non-numeric value becomes
+# missing with a note; pandas and R infer from the WHOLE file and read the
+# same column character. Both defaults are right for their engine and the
+# missing-value sets differ: the divergence must be pinned per file, never
+# assumed. Leading-zero identifiers (zip codes, ids) are stripped by ALL
+# three engines under default inference; identifiers read as character
+# explicitly. SAS date guessing (informats) is deliberately not
+# characterized here.
+# ---------------------------------------------------------------------------
+
+
+def sas_proc_import_guess(rows, guessingrows=20):
+    """Emulate PROC IMPORT dbms=csv type guessing over a scan window:
+    per column, examine the first guessingrows non-blank values; NUM if
+    every one is numeric-shaped (sign, digits, optional decimal or
+    exponent, surrounding spaces), else CHAR. A column of only blanks in
+    the window reads CHAR. Rows are sequences of str values."""
+    if not rows:
+        return []
+    n_cols = len(rows[0])
+    num_re = (r"^\s*[+-]?(?:\d+(?:\.\d*)?|\.\d+)"
+              r"(?:[eE][+-]?\d+)?\s*$")
+    import re as _re
+    types = []
+    for c in range(n_cols):
+        seen = []
+        for row in rows:
+            if len(seen) >= guessingrows:
+                break
+            v = str(row[c]).strip()
+            if v != "":
+                seen.append(v)
+        if seen and all(_re.match(num_re, v) for v in seen):
+            types.append("NUM")
+        else:
+            types.append("CHAR")
+    return types

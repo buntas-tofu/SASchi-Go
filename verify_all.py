@@ -44,6 +44,7 @@ VERIFIERS = [
     ("arrays", HERE / "examples" / "verify_arrays.py"),
     ("fisher", HERE / "examples" / "verify_fisher.py"),
     ("sigfig", HERE / "examples" / "verify_sigfig.py"),
+    ("csvimport", HERE / "examples" / "verify_csvimport.py"),
 ]
 
 
