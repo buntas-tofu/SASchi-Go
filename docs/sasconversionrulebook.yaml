@@ -1,0 +1,688 @@
+# SAS-to-Python/R Conversion Rulebook
+# Machine-consumable guardrail knowledge base for AI-assisted translation pipelines.
+# Version 1.0 | 2026-08-24 | Companion to SAS Open-Source Crosswalk v1.0 (human reference)
+# Source IDs [S-nn] resolve to the annotated source inventory.
+#
+# CONTRACT FOR THE TRANSLATION AGENT:
+# - One blessed target per language per rule. Alternates are allowed only when the
+#   rule's alternates_when condition is met.
+# - required_settings are mandatory, not advisory. Omitting one is a defect.
+# - forbidden_patterns must never appear in generated code.
+# - equivalence_class NO-DIRECT-EQUIVALENT => STOP. Emit a human-review ticket,
+#   never generated code.
+# - Every translated unit ships with its validation_test wired into the
+#   golden-master harness against stored SAS reference output.
+
+meta:
+  version: "1.0"
+  date: "2026-08-24"
+  python_stack:
+    pandas: ">=2.2, 3.x-compatible"
+    numpy: ">=2.0"
+    pyarrow: ">=15"
+    duckdb: ">=1.4"
+    polars: ">=1.30"
+    scipy: ">=1.14"
+    statsmodels: ">=0.14"
+    pyreadstat: ">=1.2"
+    pandera: "pinned per release"
+  r_stack:
+    dplyr: ">=1.1"
+    tidyr: ">=1.3"
+    haven: ">=2.5"
+    data.table: ">=1.15"
+    survey: ">=4.4"
+    srvyr: ">=1.2"
+    lme4: "current"
+    mmrm: "current"
+    emmeans: "current"
+    car: "current"
+    survival: "current"
+    janitor: "current (round_half_up)"
+  equivalence_classes: [EXACT, EQUIVALENT-WITH-SETTINGS, APPROXIMATE, NO-DIRECT-EQUIVALENT]
+  tolerance_tiers:
+    closed_form: 1.0e-10
+    iterative_mle_coefficients: 1.0e-6
+    iterative_mle_se: 1.0e-5
+    reml_mixed_arima: 1.0e-3
+    survey_point: 1.0e-8
+    survey_se: 1.0e-6
+    stochastic: "validate probabilities/distributions, never draws"
+
+global_policies:
+  - policy_id: GP-01
+    name: language-routing
+    rule: >
+      Complex survey estimation (SURVEYMEANS/FREQ/REG/LOGISTIC/PHREG/SELECT, replicate
+      weights, calibration) and mixed models with repeated-measures covariance
+      structures (MIXED/GLIMMIX) MUST target R. Python is forbidden as primary target
+      for these families. statsmodels MixedLM and archived samplics are not
+      acceptable substitutes. [S-36, S-39, CAMIS]
+  - policy_id: GP-02
+    name: no-dynamic-code
+    rule: >
+      Never emit eval(), exec(), or eval(parse(text=)). CALL EXECUTE, %sysfunc code
+      generation, and macro code-fragment substitution route to human review.
+  - policy_id: GP-03
+    name: data-conversion-first
+    rule: >
+      sas7bdat is read exactly once, at migration time, with pyreadstat
+      (user_missing=True) or haven (catalog_file= when a format catalog exists).
+      Output: Parquet (zstd) plus a metadata sidecar (variable labels, format names,
+      special-missing tags). Downstream code reads Parquet only. Validate the
+      conversion against SAS row counts and per-column checksums before use.
+  - policy_id: GP-04
+    name: dependency-pinning
+    rule: >
+      Every project carries a lockfile (renv.lock pinned to a dated Posit Package
+      Manager snapshot; uv.lock or conda-lock on conda-forge). No unpinned installs.
+      Avoid the Anaconda defaults channel. Version floors from meta section.
+  - policy_id: GP-05
+    name: package-allowlist
+    rule: >
+      Only allowlisted packages may appear in generated code. RED-rated packages
+      (samplics) are forbidden. YELLOW-rated packages (statsmodels, lifelines,
+      pyreadstat, pandera, survey, srvyr, forecast) are allowed with pinned versions
+      and quarterly health review.
+  - policy_id: GP-06
+    name: validation-mandatory
+    rule: >
+      Every translated program unit ships with a golden-master test comparing its
+      output to stored SAS reference output at the rule's tolerance tier, run on the
+      standard trap fixture (duplicate BY keys both sides, missing values including
+      special missings, -2.5, month-end dates, mixed-case blank-padded strings).
+  - policy_id: GP-07
+    name: settings-before-numbers
+    rule: >
+      When a comparison fails, first audit required_settings. Documented default
+      differences explain nearly all SAS vs open-source discrepancies (CAMIS finding).
+      Only escalate a numerical difference after settings are proven pinned.
+  - policy_id: GP-08
+    name: upgrade-cadence
+    rule: >
+      On any major release of a blessed package, re-run the full trap-fixture
+      regression suite before adopting. Quarterly: review CAMIS updates, YELLOW
+      package maintainer status (survey package succession above all), and this
+      rulebook's version floors.
+
+rules:
+
+  # ============ DATA STEP ============
+
+  - rule_id: DS-001
+    sas_pattern: "SET a b; (concatenation)"
+    scope: data-step
+    python_target: {package: pandas, pattern: "pd.concat([a, b], ignore_index=True)"}
+    r_target: {package: dplyr, pattern: "bind_rows(a, b)"}
+    alternates_when: "large data: polars pl.concat(how='diagonal'); duckdb UNION ALL BY NAME"
+    required_settings: ["ignore_index=True", "post-concat dtype audit"]
+    forbidden_patterns: ["append in a loop", "rbind in a loop"]
+    equivalence_class: EQUIVALENT-WITH-SETTINGS
+    silent_difference_checks: ["SAS truncates differing char lengths silently; verify max string widths"]
+    validation_test: "row count == sum of inputs; column set == union; dtypes vs PROC CONTENTS"
+    confidence: high
+    sources: [S-01]
+
+  - rule_id: DS-002
+    sas_pattern: "MERGE a b; BY key; (1:1 or 1:many)"
+    scope: data-step
+    python_target: {package: pandas, pattern: "a.merge(b, on='key', how='outer', validate='one_to_many', indicator=True)"}
+    r_target: {package: dplyr, pattern: "full_join(a, b, by='key', relationship='one-to-many')"}
+    required_settings: ["how='outer' for default MERGE", "validate=/relationship= mandatory", "replicate IN= logic with indicator/anti_join", "re-sort output before comparison"]
+    forbidden_patterns: ["merge without validate/relationship", "silent suffix collisions on overlapping non-BY variables"]
+    equivalence_class: EQUIVALENT-WITH-SETTINGS
+    silent_difference_checks: ["overlapping non-BY variables: SAS overwrites from rightmost dataset; joins create _x/_y — resolve explicitly"]
+    validation_test: "sorted full outer join row-for-row vs SAS output"
+    confidence: high
+    sources: [S-01, SAS-KB-24752]
+
+  - rule_id: DS-003
+    sas_pattern: "MERGE with BY where BOTH datasets repeat BY values (many-to-many)"
+    scope: data-step
+    equivalence_class: NO-DIRECT-EQUIVALENT
+    action: human-review
+    rationale: >
+      SAS pairs rows positionally within the BY group, retaining the last row of the
+      shorter side (max(n,m) rows). Every join produces n*m rows. No join reproduces
+      SAS. Faithful port needs per-group row counters + outer join on (key, seq) +
+      group-wise ffill of the shorter side, but usually the SAS behavior is a latent
+      bug requiring sign-off on SQL semantics instead.
+    detection: "per-key group-size cross-tab of both inputs; flag any key with n>1 AND m>1; also grep legacy logs for 'more than one data set with repeats of BY values'"
+    confidence: high
+    sources: [SAS-KB-24752]
+
+  - rule_id: DS-004
+    sas_pattern: "UPDATE master txns; BY key;"
+    scope: data-step
+    python_target: {package: pandas, pattern: "master.set_index(k).update(collapse_last_nonmissing(txns)); # .update skips NaN, matching UPDATE"}
+    r_target: {package: dplyr, pattern: "rows_update(master, txns |> group_by(key) |> summarize(across(everything(), ~last(na.omit(.x)))), by='key')"}
+    required_settings: ["collapse transactions to last non-missing per variable per key first", "new keys in transactions: rows_upsert"]
+    equivalence_class: APPROXIMATE
+    silent_difference_checks: ["special missing ._ in a transaction SETS the master value to missing in SAS; requires sentinel encoding", "UPDATEMODE=NOMISSINGCHECK changes the rule"]
+    validation_test: "per-variable per-key equality on fixture with multi-transaction keys and deliberate missings"
+    confidence: medium
+    sources: [S-01]
+
+  - rule_id: DS-005
+    sas_pattern: "IF-THEN/ELSE ladder deriving a variable"
+    scope: data-step
+    python_target: {package: numpy, pattern: "np.select([conds...], [values...], default=)"}
+    r_target: {package: dplyr, pattern: "case_when(c1 ~ v1, ..., .default = v)"}
+    required_settings: ["EXPLICIT missing arm FIRST for every inequality on a nullable variable"]
+    forbidden_patterns: ["bare x < N condition on a nullable column without an is-missing guard"]
+    equivalence_class: EQUIVALENT-WITH-SETTINGS
+    silent_difference_checks: ["SAS: . < 0 is TRUE; missings land in the low bucket. Python/R: row falls to ELSE. Bare 'if x' in SAS is false for 0 AND missing"]
+    validation_test: "derived-variable frequency table incl. a missing-input stratum vs PROC FREQ"
+    confidence: high
+    sources: [S-01, SAS-missing-docs]
+
+  - rule_id: DS-006
+    sas_pattern: "FIRST.var / LAST.var / RETAIN / sum statement / counters"
+    scope: data-step
+    python_target: {package: pandas, pattern: "stable sort; g=df.groupby(keys, dropna=False); first=~df.duplicated(keys); last=~df.duplicated(keys, keep='last'); run=g[c].fillna(0).cumsum(); ctr=g.cumcount()+1"}
+    r_target: {package: dplyr, pattern: "arrange(...) |> group_by(...) |> mutate(first=row_number()==1, last=row_number()==n(), run=cumsum(coalesce(x,0)), ctr=row_number())"}
+    required_settings: ["stable sort with SAS-identical order incl. missing-first", "fillna(0)/coalesce before cumsum (sum statement treats missing increment as 0)", "pandas groupby dropna=False (SAS keeps the missing BY group)"]
+    equivalence_class: EQUIVALENT-WITH-SETTINGS
+    silent_difference_checks: ["ungrouped RETAIN carries across BY boundaries — match scoping", "WHERE applied before FIRST./LAST. changes flags; subsetting IF after does not"]
+    validation_test: "(key, first, last, running_sum) tuples row-for-row after identical sort"
+    confidence: high
+    sources: [S-01]
+
+  - rule_id: DS-007
+    sas_pattern: "LAG()/DIF() inside conditional logic"
+    scope: data-step
+    python_target: {package: pandas, pattern: "shift the FULL column first (g[c].shift(1)), then apply the condition"}
+    r_target: {package: dplyr, pattern: "mutate(l = lag(x)) then conditional logic on l"}
+    equivalence_class: EQUIVALENT-WITH-SETTINGS
+    silent_difference_checks: ["SAS LAG is a queue: executed conditionally it returns the value at the previous EXECUTION, not the previous row. Direct translation of conditional LAG is wrong"]
+    validation_test: "fixture where the condition skips rows; compare derived column vs SAS"
+    confidence: high
+    sources: [S-01]
+
+  - rule_id: DS-008
+    sas_pattern: "PROC SORT (incl. NODUPKEY)"
+    scope: data-step
+    python_target: {package: pandas, pattern: "df.sort_values(by, kind='stable', na_position='first'); NODUPKEY: + .drop_duplicates(subset=keys, keep='first')"}
+    r_target: {package: dplyr, pattern: "arrange(across(keys, ~ .x), .locale='C') with NA-first pre-sort: arrange(!is.na(x), x); NODUPKEY: distinct(across(keys), .keep_all=TRUE); or data.table setkey (NA-first native)"}
+    required_settings: ["kind='stable' (pandas default is NOT stable)", "na_position='first' (pandas default last)", "NA-first handling in R (dplyr default last)", "pin collation to C/byte order for mixed-case keys", "SQL: NULLS FIRST"]
+    equivalence_class: EQUIVALENT-WITH-SETTINGS
+    silent_difference_checks: ["NA position flips which row NODUPKEY keeps and flips FIRST. flags", "special missings ._ < . < .A-.Z sort order collapses to NA — recode to companion column BEFORE sorting if meaningful"]
+    validation_test: "checksum of key sequence after sort incl. NA and mixed-case rows; NODUPKEY survivor row IDs identical"
+    confidence: high
+    sources: [S-01, SAS-missing-docs]
+
+  - rule_id: DS-009
+    sas_pattern: "PROC TRANSPOSE"
+    scope: data-step
+    python_target: {package: pandas, pattern: "pivot_table(index=ids, columns=name, values=val, aggfunc='last') / melt(id_vars=ids)"}
+    r_target: {package: tidyr, pattern: "pivot_wider(names_from, values_from, values_fn=last) / pivot_longer(cols)"}
+    required_settings: ["aggfunc='last' / values_fn=last when duplicate IDs possible (SAS keeps last)"]
+    forbidden_patterns: ["pivot_table default aggfunc (silently averages duplicates)"]
+    equivalence_class: EQUIVALENT-WITH-SETTINGS
+    silent_difference_checks: ["mixed numeric+char transposes: SAS converts all to char", "no-ID transpose generates COL1..COLn: replicate with within-group cumcount"]
+    validation_test: "identical wide shape; spot-check a BY group containing duplicate IDs"
+    confidence: high
+    sources: [S-01]
+
+  - rule_id: DS-010
+    sas_pattern: "PROC FORMAT used as recode or display labels"
+    scope: data-step
+    python_target: {package: pandas, pattern: "value maps: s.map(fmt_dict).fillna(other_default); ranges: pd.cut(x, bins, labels, right=False) for low-<high; keep raw value + label as TWO columns"}
+    r_target: {package: dplyr, pattern: "case_when / factor(levels, labels); ranges: cut(right=FALSE); haven labelled -> as_factor()"}
+    required_settings: ["export legacy catalogs via PROC FORMAT CNTLOUT= and implement as a versioned join table", "interval closure matched to SAS range syntax", "OTHER= mapped to explicit default"]
+    forbidden_patterns: ["recoding the analysis variable in place (destroys stored value)"]
+    equivalence_class: EQUIVALENT-WITH-SETTINGS
+    silent_difference_checks: ["SAS PROCs group by FORMATTED value; a port grouping by raw values gets different groups", "MULTILABEL formats are a many-to-many join — flag for review"]
+    validation_test: "PROC FREQ of formatted variable vs value_counts of label column"
+    confidence: high
+    sources: [S-01]
+
+  - rule_id: DS-011
+    sas_pattern: "SAS dates/datetimes/times (epoch 1960-01-01)"
+    scope: data-step
+    python_target: {package: pandas, pattern: "ingest via pyreadstat (auto-converts); manual: to_datetime(x, unit='D'|'s', origin='1960-01-01'); INTNX/INTCK: period arithmetic .dt.to_period()"}
+    r_target: {package: haven, pattern: "auto-converts; manual: as.Date(x, origin='1960-01-01'), as.POSIXct(..., tz='UTC'); intervals via lubridate periods on floor_date boundaries"}
+    required_settings: ["date-vs-datetime decided from FORMAT metadata, never magnitude", "tz-naive handling explicit", "INTCK counts boundary crossings: use period subtraction, not relativedelta"]
+    equivalence_class: EQUIVALENT-WITH-SETTINGS
+    silent_difference_checks: ["misclassified datetime-as-date is off by factor 86400", "two-digit years: verify against YEARCUTOFF window", "pre-1677 dates overflow datetime64[ns]: use datetime64[us]/pyarrow timestamps"]
+    validation_test: "min/max/mean of converted column vs SAS; round-trip 01JAN1960=0"
+    confidence: high
+    sources: [S-01]
+
+  - rule_id: DS-012
+    sas_pattern: "ROUND(x, unit)"
+    scope: data-step
+    python_target: {package: numpy, pattern: "np.sign(x)*np.floor(np.abs(x)/u + 0.5)*u  # half away from zero"}
+    r_target: {package: janitor, pattern: "round_half_up(x, digits)"}
+    forbidden_patterns: ["builtin round() in Python or R for SAS-parity code (banker's rounding: 2.5 -> 2; SAS: 2.5 -> 3)"]
+    equivalence_class: EQUIVALENT-WITH-SETTINGS
+    silent_difference_checks: ["rare 1-ulp float boundary cases remain (SAS fuzzes); verify on real data"]
+    validation_test: "vector {2.5,-2.5,0.5,1.15} reproduces SAS {3,-3,1,SAS value}"
+    confidence: high
+    sources: [CAMIS-rounding]
+
+  - rule_id: DS-013
+    sas_pattern: "MOD(a,b) / INT(x)"
+    scope: data-step
+    python_target: {package: numpy, pattern: "np.fmod(a,b)  # dividend sign; np.trunc(x)"}
+    r_target: {package: base, pattern: "a - b*trunc(a/b); trunc(x)"}
+    forbidden_patterns: ["Python % or R %% for SAS MOD parity (divisor sign: -7%3=2, SAS=-1)", "floor() for INT (INT(-2.7)=-2, floor=-3)"]
+    equivalence_class: EQUIVALENT-WITH-SETTINGS
+    validation_test: "MOD(-7,3)==-1; INT(-2.7)==-2"
+    confidence: high
+    sources: [S-01]
+
+  - rule_id: DS-014
+    sas_pattern: "SUM(a,b,...) function"
+    scope: data-step
+    python_target: {package: pandas, pattern: "df[cols].sum(axis=1)  # skipna"}
+    r_target: {package: base, pattern: "rowSums(cbind(a,b), na.rm=TRUE)"}
+    forbidden_patterns: ["a + b as a port of SUM() (propagates missing; SUM() skips it)"]
+    equivalence_class: EQUIVALENT-WITH-SETTINGS
+    validation_test: "rows with partial missing match SAS SUM output"
+    confidence: high
+    sources: [S-01]
+
+  - rule_id: DS-015
+    sas_pattern: "Character functions (SCAN, CATX, SUBSTR, INDEX, TRANWRD, COMPRESS, PUT/INPUT)"
+    scope: data-step
+    python_target: {package: pandas, pattern: "vectorized .str methods with 1-based offsets corrected; CATX: delimiter-join skipping NA; INPUT: to_numeric(errors='coerce') + coercion count logged"}
+    r_target: {package: stringr, pattern: "word()/str_sub()/str_locate()/str_replace_all(fixed())/str_remove_all(); CATX: tidyr::unite(na.rm=TRUE); INPUT: readr::parse_number()"}
+    required_settings: ["SCAN collapses consecutive delimiters: regex split, not literal split", "regex=False / fixed() for literal replacement", "strip trailing blanks on ingest (SAS fixed-width comparison semantics)", "INDEX absent: SAS 0 vs find -1"]
+    equivalence_class: EQUIVALENT-WITH-SETTINGS
+    validation_test: "fixture with empty strings, doubled blanks, missing, multibyte chars"
+    confidence: high
+    sources: [S-01]
+
+  - rule_id: DS-016
+    sas_pattern: "ARRAY + DO loop over variables"
+    scope: data-step
+    python_target: {package: pandas, pattern: "vectorized: df[cols] = df[cols].replace(...); loop-carried logic: melt -> operate -> pivot back"}
+    r_target: {package: dplyr, pattern: "across(all_of(cols), fn); loop-carried: pivot_longer -> mutate -> pivot_wider"}
+    required_settings: ["OUTPUT inside a DO loop = row multiplication: port as explode/uncount, never mutate"]
+    equivalence_class: EQUIVALENT-WITH-SETTINGS
+    silent_difference_checks: ["x1--y (double-dash) name ranges depend on PDV column order — resolve the actual list from PROC CONTENTS"]
+    validation_test: "aggregate over recoded columns; row-count multiplier for OUTPUT loops"
+    confidence: high
+    sources: [S-01]
+
+  - rule_id: DS-017
+    sas_pattern: "Hash object lookup in DATA step"
+    scope: data-step
+    python_target: {package: pandas, pattern: "merge(how='left', validate='many_to_one') or Series.map(dict)"}
+    r_target: {package: dplyr, pattern: "left_join(relationship='many-to-one'); scale: keyed data.table update join"}
+    required_settings: ["many_to_one validation mandatory: SAS hash find() kept the FIRST duplicate silently; unvalidated join fans out rows"]
+    equivalence_class: EQUIVALENT-WITH-SETTINGS
+    validation_test: "output row count == input row count"
+    confidence: high
+    sources: [S-01]
+
+  - rule_id: DS-018
+    sas_pattern: "Reading sas7bdat/xpt; LIBNAME libraries"
+    scope: data-step
+    python_target: {package: pyreadstat, pattern: "read_sas7bdat(path, user_missing=True) once -> Parquet + metadata sidecar (GP-03)"}
+    r_target: {package: haven, pattern: "read_sas(path, catalog_file=) once -> Parquet + sidecar"}
+    forbidden_patterns: ["pd.read_sas in production pipelines (no metadata, no user_missing, encoding bugs)", "repeated sas7bdat parsing downstream"]
+    equivalence_class: EQUIVALENT-WITH-SETTINGS
+    silent_difference_checks: ["encoding= for WLATIN1 sessions", "unformatted date-valued numerics arrive as raw day/second counts"]
+    validation_test: "n rows/cols, per-column sum/mean/nmiss, PROC FREQ of key categoricals, hash of sorted key"
+    confidence: high
+    sources: [S-29, S-30]
+
+  - rule_id: DS-019
+    sas_pattern: "Special missing values .A-.Z, ._"
+    scope: data-step
+    action: convert-at-ingest
+    rule: >
+      At Parquet conversion, materialize special missings into an explicit companion
+      category column (e.g. x_missreason in {A,B,D,R,...}). haven tagged_na is lost
+      silently by many operations; do not rely on it downstream.
+    equivalence_class: EQUIVALENT-WITH-SETTINGS
+    validation_test: "cross-tab of x_missreason vs SAS special-missing frequencies"
+    confidence: high
+    sources: [S-29, S-30, SAS-missing-docs]
+
+  # ============ PROC SQL ============
+
+  - rule_id: SQL-001
+    sas_pattern: "PROC SQL general queries"
+    scope: proc-sql
+    python_target: {package: duckdb, pattern: "duckdb.sql(query).df() — near-verbatim port incl. correlated subqueries; CALCULATED aliases usually work unchanged"}
+    r_target: {package: duckdb, pattern: "DBI::dbGetQuery(con, query); idiomatic alternative: dplyr verbs"}
+    equivalence_class: EQUIVALENT
+    silent_difference_checks: ["PROC SQL joins ARE Cartesian on duplicate keys (unlike MERGE) — determine which semantics the legacy program relied on before porting"]
+    validation_test: "row-for-row vs SAS on sorted output"
+    confidence: high
+    sources: [S-01]
+
+  - rule_id: SQL-002
+    sas_pattern: "PROC SQL SELECT mixing aggregates and detail columns (remerge)"
+    scope: proc-sql
+    python_target: {package: duckdb, pattern: "window function: AVG(x) OVER (PARTITION BY k); pandas: groupby(k)[x].transform('mean')"}
+    r_target: {package: dplyr, pattern: "mutate(mx = mean(x), .by = k)"}
+    required_settings: ["grep legacy logs for 'remerging summary statistics' NOTE — each one marks a query needing this rewrite", "remerge re-sorts output by GROUP BY columns: re-sort before comparing"]
+    forbidden_patterns: ["porting the query verbatim to an engine that errors or picks arbitrary rows"]
+    equivalence_class: NO-DIRECT-EQUIVALENT-IN-ANSI-SQL
+    validation_test: "row-for-row vs SAS for every remerge-flagged query"
+    confidence: high
+    sources: [SAS-note-4308]
+
+  - rule_id: SQL-003
+    sas_pattern: "SELECT ... INTO :macrovar"
+    scope: proc-sql
+    python_target: {package: python, pattern: "plain host variable: n = df['x'].sum()"}
+    r_target: {package: base, pattern: "n <- sum(df$x)"}
+    equivalence_class: EQUIVALENT
+    silent_difference_checks: ["BEST12. text formatting (leading blanks, precision) if downstream compared the STRING"]
+    validation_test: "value equality"
+    confidence: high
+    sources: [S-01]
+
+  # ============ STATISTICAL PROCS ============
+
+  - rule_id: ST-001
+    sas_pattern: "PROC MEANS/SUMMARY/UNIVARIATE moments"
+    scope: stat-proc
+    python_target: {package: pandas, pattern: "df.groupby(k, dropna=False)[v].agg(['mean','std',...])  # ddof=1 matches VARDEF=DF"}
+    r_target: {package: dplyr, pattern: "summarise(across(v, list(mean=mean, sd=sd)))  # n-1 always"}
+    required_settings: ["numpy paths: ddof=1 explicitly (numpy default 0)", "VARDEF=N legacy code: ddof=0", "skewness/kurtosis: scipy bias=False fisher=True; R e1071 type=2"]
+    equivalence_class: EQUIVALENT-WITH-SETTINGS
+    validation_test: "1e-12 relative on mean/sd/var/skew/kurt vs SAS"
+    confidence: high
+    sources: [S-15]
+
+  - rule_id: ST-002
+    sas_pattern: "Percentiles/quantiles (PCTLDEF default 5)"
+    scope: stat-proc
+    python_target: {package: numpy, pattern: "np.quantile(x, q, method='averaged_inverted_cdf')  # H&F Type 2 = PCTLDEF 5"}
+    r_target: {package: stats, pattern: "quantile(x, p, type=2)"}
+    required_settings: ["PCTLDEF->type map: 5->2, 4->6, 3->1, 2->3, 1->4", "R/numpy default type 7 has NO SAS equivalent"]
+    forbidden_patterns: ["default quantile/percentile calls in SAS-parity code"]
+    equivalence_class: EQUIVALENT-WITH-SETTINGS
+    validation_test: "P25/P40 on fixture (10,20,...,200): SAS gives 30 and 95"
+    confidence: high
+    sources: [S-15, SAS-quantile-blog]
+
+  - rule_id: ST-003
+    sas_pattern: "PROC FREQ chi-square / McNemar"
+    scope: stat-proc
+    python_target: {package: scipy, pattern: "chi2_contingency(t, correction=False); statsmodels mcnemar(exact=False, correction=False)"}
+    r_target: {package: stats, pattern: "chisq.test(t, correct=FALSE); mcnemar.test(correct=FALSE)"}
+    required_settings: ["continuity corrections OFF to match SAS defaults (R/scipy default them ON for 2x2)"]
+    equivalence_class: EXACT
+    validation_test: "statistic and p to 1e-10"
+    confidence: high
+    sources: [S-15]
+
+  - rule_id: ST-004
+    sas_pattern: "PROC FREQ CMH"
+    scope: stat-proc
+    r_target: {package: vcdExtra, pattern: "CMHtest(); robust fallback for sparse strata: stats::mantelhaen.test (general assoc only)"}
+    python_target: {package: statsmodels, pattern: "StratifiedTable (2x2xK ONLY); general rxcxK: route to R"}
+    equivalence_class: EQUIVALENT-WITH-SETTINGS
+    silent_difference_checks: ["CMHtest can error on sparse strata where SAS runs; one documented df discrepancy on row-means in 3x2x3"]
+    validation_test: "all three CMH statistics to 1e-7; include a sparse-strata case"
+    confidence: medium
+    sources: [S-15]
+
+  - rule_id: ST-005
+    sas_pattern: "PROC TTEST"
+    scope: stat-proc
+    python_target: {package: scipy, pattern: "ttest_ind(a, b, equal_var=False)  # Satterthwaite; equal_var=True for pooled row"}
+    r_target: {package: stats, pattern: "t.test(a, b)  # Welch default = SAS Satterthwaite; var.equal=TRUE for pooled"}
+    required_settings: ["scipy default is POOLED (opposite of R) — always set equal_var explicitly"]
+    equivalence_class: EXACT
+    validation_test: "t, df, p to 1e-10 for both rows"
+    confidence: high
+    sources: [S-15]
+
+  - rule_id: ST-006
+    sas_pattern: "PROC NPAR1WAY WILCOXON"
+    scope: stat-proc
+    r_target: {package: stats, pattern: "wilcox.test(exact=FALSE, correct=TRUE) matches SAS default normal-approx-with-CC; exact=TRUE matches EXACT WILCOXON (no ties)"}
+    python_target: {package: scipy, pattern: "mannwhitneyu(method='asymptotic', use_continuity=True)"}
+    required_settings: ["pin exact/asymptotic and continuity to the SAS row being matched; R auto-switches to exact for n<50 without ties"]
+    equivalence_class: EQUIVALENT-WITH-SETTINGS
+    silent_difference_checks: ["signed-rank statistics differ in form (SAS S vs R V): APPROXIMATE across defaults"]
+    validation_test: "Z and p to 1e-8 with ties present (midranks path)"
+    confidence: high
+    sources: [S-15]
+
+  - rule_id: ST-007
+    sas_pattern: "PROC GLM/REG/ANOVA with Type III SS and LSMEANS"
+    scope: stat-proc
+    r_target: {package: car+emmeans, pattern: "options(contrasts=c('contr.sum','contr.poly')); fit <- lm(...); car::Anova(fit, type=3); emmeans(fit, ~trt)"}
+    python_target: {package: statsmodels, pattern: "ols with C(x, Sum) coding; anova_lm(fit, typ=3); LSMEANS-heavy pipelines: route to R (no emmeans equivalent)"}
+    required_settings: ["sum-to-zero contrasts BEFORE fitting — Type III with treatment contrasts is silently wrong on interaction models", "validated alternative: sasLM (published SAS Type I-IV clone)"]
+    equivalence_class: EXACT (R, with settings)
+    validation_test: "unbalanced two-way with interaction: SS, F, p, and emmeans to 1e-10"
+    confidence: high
+    sources: [S-15, S-35]
+
+  - rule_id: ST-008
+    sas_pattern: "PROC LOGISTIC"
+    scope: stat-proc
+    r_target: {package: stats, pattern: "glm(y ~ ., family=binomial)"}
+    python_target: {package: statsmodels, pattern: "Logit / GLM(family=Binomial())"}
+    required_settings: ["event level: SAS models FIRST sorted level (P(Y=0) for 0/1!) unless event='1'; R/Python model P(Y=1) — align before comparing", "CLASS coding: SAS PARAM=EFFECT default vs treatment coding — match", "Firth: R logistf only"]
+    equivalence_class: EQUIVALENT-WITH-SETTINGS
+    validation_test: "coefficients 1e-6, SEs 1e-5 with matched coding and event level"
+    confidence: high
+    sources: [S-15]
+
+  - rule_id: ST-009
+    sas_pattern: "PROC GENMOD GEE"
+    scope: stat-proc
+    r_target: {package: geepack, pattern: "geeglm(..., corstr=)  # robust sandwich SEs default, like GENMOD"}
+    python_target: {package: statsmodels, pattern: "GEE (binary/count, standard working correlations)"}
+    equivalence_class: EQUIVALENT-WITH-SETTINGS
+    silent_difference_checks: ["ordinal GEE: published cross-implementation differences are real — APPROXIMATE, validate per model"]
+    validation_test: "coefficients 1e-4, robust SEs 1e-4"
+    confidence: medium
+    sources: [S-15, Nooraee-2014]
+
+  - rule_id: ST-010
+    sas_pattern: "PROC MIXED / GLIMMIX"
+    scope: stat-proc
+    language_routing: R-required
+    r_target: {package: mmrm+lme4+nlme, pattern: "MMRM/unstructured repeated: mmrm::mmrm(); general: lmer/lme with lmerTest (DDFM=SAT) or pbkrtest (DDFM=KR); REML defaults align"}
+    python_target: {package: none, pattern: "FORBIDDEN as primary: statsmodels MixedLM lacks repeated-measures covariance structures and small-sample df"}
+    required_settings: ["match covariance structure and DDFM method", "GLIMMIX: SAS default pseudo-likelihood (RSPL) reproduced by NO open source default — compare against SAS METHOD=LAPLACE/QUAD"]
+    equivalence_class: EQUIVALENT-WITH-SETTINGS
+    validation_test: "fixed effects and logLik 1e-4; variance components looser near boundaries, document per model"
+    confidence: high
+    sources: [S-15, mmrm-benchmark, S-22]
+
+  - rule_id: ST-011
+    sas_pattern: "PROC PHREG / LIFETEST"
+    scope: stat-proc
+    r_target: {package: survival, pattern: "coxph(..., ties='breslow')  # SAS default; survfit(conf.type='log-log')  # SAS CONFTYPE=LOGLOG; log-rank: survdiff; Gehan-Wilcoxon: coin::logrank_test(type='Gehan-Breslow')"}
+    python_target: {package: lifelines, pattern: "KaplanMeierFitter/CoxPHFitter — viable for KM/Cox; weaker for time-dependent covariates and LIFETEST test variety"}
+    required_settings: ["ties=breslow (R default efron differs whenever event times tie)", "conf.type='log-log'"]
+    forbidden_patterns: ["survdiff(rho=1) as SAS Wilcoxon (that is Peto-Peto, not Gehan)"]
+    equivalence_class: EQUIVALENT-WITH-SETTINGS
+    silent_difference_checks: ["plateau quantiles: SAS returns NE where R extrapolates — reconcile in spec"]
+    validation_test: "HRs 1e-6 on tied-event fixture; KM CI endpoints 1e-8"
+    confidence: high
+    sources: [S-15]
+
+  - rule_id: ST-012
+    sas_pattern: "PROC PRINCOMP / FACTOR / CLUSTER / CORR"
+    scope: stat-proc
+    r_target: {package: stats+psych, pattern: "prcomp (n-1, SVD — matches); psych::fa/principal with every option pinned; hclust(method='ward.D2') for METHOD=WARD; cor.test"}
+    python_target: {package: sklearn+scipy, pattern: "PCA with StandardScaler ddof caveat; AgglomerativeClustering; scipy.stats correlations"}
+    required_settings: ["never princomp() (divisor n)", "sklearn StandardScaler uses ddof=0: rescale with ddof=1 for correlation-PCA parity", "ward.D2 not ward.D", "compare |loadings| (eigenvector signs arbitrary)"]
+    equivalence_class: EXACT (eigenvalues) / APPROXIMATE (factor rotations, FASTCLUS-vs-kmeans)
+    validation_test: "eigenvalues 1e-10; cluster assignments (not centroids) for k-means"
+    confidence: medium
+    sources: [S-15]
+
+  - rule_id: ST-013
+    sas_pattern: "PROC ARIMA / ESM / EXPAND"
+    scope: stat-proc
+    r_target: {package: forecast/fable, pattern: "Arima/ARIMA with method matched; ETS; zoo/na.spline for EXPAND"}
+    python_target: {package: statsmodels, pattern: "ARIMA/SARIMAX; ETSModel; pandas resample().interpolate()"}
+    required_settings: ["PROC ARIMA default METHOD=CLS vs R/statsmodels exact ML: match ML-to-ML (SAS METHOD=ML)", "EXPAND OBSERVED= maps to resample aggregation; spline conversion needs explicit cubic spline"]
+    equivalence_class: EQUIVALENT-WITH-SETTINGS (ML-to-ML) / APPROXIMATE (defaults, ESM)
+    validation_test: "coefficients 1e-4 ML-to-ML; ESM validated on forecast accuracy, not parameters"
+    confidence: medium
+    sources: [S-15, SAS-ETS-docs]
+
+  # ============ SURVEY PROCS (R REQUIRED) ============
+
+  - rule_id: SV-001
+    sas_pattern: "PROC SURVEYMEANS"
+    scope: survey
+    language_routing: R-required
+    r_target: {package: survey+srvyr, pattern: "des <- svydesign(ids=~psu, strata=~str, weights=~wt, data=d, nest=TRUE); svymean(~x, des); confint(..., df=degf(des))"}
+    python_target: {package: none, pattern: "FORBIDDEN as primary (samplics archived; svy unproven). Secondary cross-checks only"}
+    required_settings: ["df=degf(design) on every CI (R defaults to z; SAS uses t with df = PSUs - strata)", "lonely PSU option pinned to agency standard before any comparison"]
+    equivalence_class: EQUIVALENT-WITH-SETTINGS
+    silent_difference_checks: ["survey quantile CIs use different Woodruff variants: APPROXIMATE"]
+    validation_test: "estimates 1e-8, SEs 1e-6, CI endpoints after df pinned"
+    confidence: high
+    sources: [S-36, S-15, S-38]
+
+  - rule_id: SV-002
+    sas_pattern: "DOMAIN statement / subpopulation estimation"
+    scope: survey
+    language_routing: R-required
+    r_target: {package: survey, pattern: "subset(design, domain_condition) or srvyr filter() on tbl_svy — AFTER building the design on the FULL file"}
+    forbidden_patterns: ["filtering the data frame then building the design (wrong SEs, no warning) — the same defect as BY/WHERE instead of DOMAIN inside SAS"]
+    equivalence_class: EQUIVALENT-WITH-SETTINGS
+    validation_test: "domain SEs vs SAS DOMAIN output on a domain crossing strata"
+    confidence: high
+    sources: [S-36, Lumley-domain-vignette]
+
+  - rule_id: SV-003
+    sas_pattern: "Replicate weight variance (BRR/Fay/jackknife/bootstrap/SDR)"
+    scope: survey
+    language_routing: R-required
+    r_target: {package: survey, pattern: "svrepdesign(weights=~wt, repweights='rw[0-9]+', type=..., rho=..., mse=TRUE); Census SDR: type='ACS' (scale=4/R); creating weights: svrep"}
+    required_settings: ["mse=TRUE (SAS/Census point-estimate-centered convention)", "Fay rho matched", "correct type= per weight family"]
+    equivalence_class: EQUIVALENT-WITH-SETTINGS
+    validation_test: "SEs to 1e-10 once scale/rho/mse pinned (public ACS PUMS with published SDR SEs is a ready benchmark)"
+    confidence: high
+    sources: [S-36, svrepdesign-docs]
+
+  - rule_id: SV-004
+    sas_pattern: "PROC SURVEYFREQ"
+    scope: survey
+    language_routing: R-required
+    r_target: {package: survey, pattern: "svytable + svychisq(statistic='Chisq')  # first-order Rao-Scott = SAS default; statistic='F' = second-order"}
+    required_settings: ["pin Rao-Scott correction order — R and SAS defaults are DIFFERENT orders"]
+    equivalence_class: EQUIVALENT-WITH-SETTINGS
+    validation_test: "RS chi-square and p vs SAS with the order pinned"
+    confidence: high
+    sources: [S-36, S-15]
+
+  - rule_id: SV-005
+    sas_pattern: "PROC SURVEYREG / SURVEYLOGISTIC / SURVEYPHREG"
+    scope: survey
+    language_routing: R-required
+    r_target: {package: survey, pattern: "svyglm(gaussian) / svyglm(family=quasibinomial()) / svycoxph; multi-parameter tests via regTermTest with df pinned"}
+    required_settings: ["quasibinomial to suppress spurious warnings (estimates identical to binomial)", "event level and class coding per ST-008", "Wald df convention pinned"]
+    equivalence_class: EQUIVALENT-WITH-SETTINGS
+    validation_test: "coefficients 1e-6, design SEs 1e-6"
+    confidence: high
+    sources: [S-36, CLSA-arXiv-2010.09879]
+
+  - rule_id: SV-006
+    sas_pattern: "PROC SURVEYSELECT"
+    scope: survey
+    language_routing: R-required
+    r_target: {package: sampling, pattern: "srswor/strata/UPsystematic/UPbrewer per METHOD=; see SurveySelectInR for semantics mapping"}
+    equivalence_class: NO-DIRECT-EQUIVALENT (seed-level) / EQUIVALENT (method)
+    required_settings: ["SAS seeds cannot be reproduced: validate inclusion probabilities (deterministic, 1e-12) and repeated-draw distributions, never individual draws"]
+    validation_test: "inclusion probability vector vs SAS; distributional checks over many draws"
+    confidence: high
+    sources: [S-36, SurveySelectInR]
+
+  # ============ MACRO / AUTOMATION ============
+
+  - rule_id: MC-001
+    sas_pattern: "%LET / &var global macro variables"
+    scope: macro
+    python_target: {package: stdlib, pattern: "TOML config via tomllib + typed access; CLI args via argparse; secrets via env vars"}
+    r_target: {package: config, pattern: "config::get() with per-environment YAML; CLI via optparse; secrets via Sys.getenv"}
+    forbidden_patterns: ["global mutable variables as config", "secrets in files"]
+    equivalence_class: PATTERN-REPLACEMENT
+    confidence: high
+    sources: [S-10]
+
+  - rule_id: MC-002
+    sas_pattern: "%MACRO with parameters (value substitution only)"
+    scope: macro
+    python_target: {package: python, pattern: "ordinary function returning a value; iterate over a parameter table"}
+    r_target: {package: purrr, pattern: "function + pmap() over a parameter tibble; declarative: targets tar_map"}
+    equivalence_class: PATTERN-REPLACEMENT
+    detection: "macro substitutes only VALUES (dataset names, variables, cutoffs) -> mechanical; substitutes CODE FRAGMENTS or %IF changes program structure -> MC-004"
+    confidence: high
+    sources: [S-10]
+
+  - rule_id: MC-003
+    sas_pattern: "%DO loops generating code / suffix-named datasets (out_&i)"
+    scope: macro
+    python_target: {package: python, pattern: "build iteration table; loop; collect into one long frame with parameter COLUMNS, never name suffixes"}
+    r_target: {package: purrr, pattern: "pmap over rows; bind_rows with .id"}
+    forbidden_patterns: ["generating code strings", "encoding parameters in object names"]
+    equivalence_class: PATTERN-REPLACEMENT
+    confidence: high
+    sources: [S-10]
+
+  - rule_id: MC-004
+    sas_pattern: "CALL EXECUTE / %sysfunc code generation / dynamic code construction"
+    scope: macro
+    equivalence_class: NO-DIRECT-EQUIVALENT
+    action: human-review
+    rationale: "Highest-risk construct for automated conversion. Usual true pattern: control table driving dict/named-list function dispatch (do.call). Dynamic SQL: parameterized queries / glue::glue_sql only."
+    forbidden_patterns: ["eval()", "exec()", "eval(parse(text=))"]
+    confidence: high
+    sources: [S-10]
+
+  - rule_id: MC-005
+    sas_pattern: "%INCLUDE"
+    scope: macro
+    python_target: {package: python, pattern: "definitions -> importable module/package; steps -> pipeline nodes"}
+    r_target: {package: box/targets, pattern: "definitions -> internal package or box::use module; steps -> targets"}
+    equivalence_class: PATTERN-REPLACEMENT
+    confidence: high
+    sources: [S-10]
+
+  - rule_id: MC-006
+    sas_pattern: "SYSTASK / X commands / batch job flows"
+    scope: macro
+    python_target: {package: snakemake-or-prefect, pattern: "serverless pipeline (Snakemake / Prefect local) driven by enterprise scheduler; shell-outs -> subprocess.run(check=True) or native pathlib/shutil"}
+    r_target: {package: targets, pattern: "_targets.R dependency graph; Rscript entry point under enterprise scheduler; processx/fs for OS work"}
+    required_settings: ["no new always-on services without ATO justification (Airflow only where a hardened instance exists)"]
+    equivalence_class: PATTERN-REPLACEMENT
+    confidence: high
+    sources: [S-10]
+
+  - rule_id: MC-007
+    sas_pattern: "ODS OUTPUT / ODS EXCEL/PDF/RTF reporting"
+    scope: macro
+    python_target: {package: statsmodels+great-tables+quarto, pattern: "results objects accessed programmatically (never text-scraped); tables via great-tables/openpyxl; documents via parameterized Quarto"}
+    r_target: {package: broom+gt+quarto, pattern: "tidy()/glance()/augment(); gt/gtsummary; officer/flextable for Word; parameterized Quarto render for ODS PDF/RTF batch loops"}
+    forbidden_patterns: ["parsing printed model summaries"]
+    equivalence_class: PATTERN-REPLACEMENT
+    confidence: high
+    sources: [S-10]
+
+  - rule_id: MC-008
+    sas_pattern: "Log NOTES QC / SYSERR / SYSCC return codes"
+    scope: macro
+    python_target: {package: logging+pandera, pattern: "structured logging; sys.exit(n); declared schema/value checks (pandera) that FAIL the pipeline"}
+    r_target: {package: logger+pointblank, pattern: "logger; quit(status=n); pointblank validation steps; options(warn=2) in production scripts"}
+    equivalence_class: PATTERN-REPLACEMENT (strictly stronger than log-grepping)
+    confidence: high
+    sources: [S-10]
+
+  - rule_id: MC-009
+    sas_pattern: "Autoexec / PROC DATASETS housekeeping / format catalogs"
+    scope: macro
+    python_target: {package: python, pattern: "explicit settings module; tempfile; Parquet directories as the library successor; versioned data dictionary for labels/formats"}
+    r_target: {package: renv, pattern: ".Rprofile limited to renv activation; withr::local_tempfile; same Parquet/dictionary pattern"}
+    equivalence_class: PATTERN-REPLACEMENT
+    confidence: high
+    sources: [S-10]

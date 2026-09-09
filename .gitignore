@@ -1,0 +1,12 @@
+# Python
+__pycache__/
+*.pyc
+
+# Local run receipts and generated output (the verification record stays
+# out of git; rerun verify_all.py to regenerate)
+telemetry/
+output/
+
+# Editors / OS
+.DS_Store
+*.swp
