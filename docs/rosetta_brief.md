@@ -6,7 +6,7 @@ anyone to trust that it does.*
 
 ## The situation
 
-The SAS license is not being renewed. A large body of production statistical code has
+A SAS license is not being renewed. A large body of production statistical code has
 to move to open languages before it lapses. The obvious plan, hand the code to
 contractors and get Python back, carries a quiet and serious risk: a translation can
 compile, run, and still disagree with SAS on the numbers, at exactly the places where
@@ -57,7 +57,7 @@ it" and "we reproduced it and proved the reproduction."
 
 A concrete case from the first week of work: SAS rounds a half-unit up, away from zero,
 while Python and R by default round a half to the nearest even number. In a
-disclosure-related rounding rule, that single difference flips the result at every
+disclosure-control rounding rule, that single difference flips the result at every
 half-unit boundary, and the boundary is the whole point of the rule. The translated code
 compiled, ran, and was wrong. The verification gate caught it. A manual review would not
 have.
@@ -72,8 +72,8 @@ kept separate from the translation-and-verification core, which already works.
 
 ## Where it stands
 
-The architecture is built and proven on real, in-domain material. An initial corpus of
-Census disclosure-avoidance tool scripts was inventoried cleanly, and roughly three
+The architecture is built and proven on real production material. An initial corpus of
+production statistical tool scripts was inventoried cleanly, and roughly three
 quarters of its procedural surface maps mechanically. A first program was translated into
 both Python and R and verified across hundreds of generated test cases in each language,
 with the two languages required to agree. Two distinct silent-divergence traps, one per
@@ -83,7 +83,7 @@ rather than by eye.
 What has proven the method so far is documented behavior plus cross-language agreement.
 The step that seals the full guarantee is the one named in part one above: run the
 calibration battery against the live SAS license and capture its outputs as the
-reference's ground truth, before decommission. That is what turns proven-against-our-
+reference's ground truth, before the license lapses. That is what turns proven-against-our-
 reference into proven-against-SAS, and it is available only while the licensed
 runtime is still reachable.
 

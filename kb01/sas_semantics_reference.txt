@@ -1209,8 +1209,8 @@ def sas_fisher_exact(a, b, c, d, alternative="two"):
 
 # ---------------------------------------------------------------------------
 # Significant-digit rounding (the four-sig-fig surface). SAS has no %g-style
-# significant-digit format; the policy (Census DSEP: four significant
-# digits) is realized by rounding to an explicit power-of-ten unit with
+# significant-digit format; the policy (four significant digits) is realized
+# by rounding to an explicit power-of-ten unit with
 # ROUND, then rendering with a normal format. R sprintf('%g') and Python
 # '%g' formatting BOTH round half to even, so %g or signif() alone silently
 # disagrees with SAS exactly where the policy lives: 0.125 to two digits is

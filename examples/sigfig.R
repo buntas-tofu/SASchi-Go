@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 # sigfig.R : the R half of the significant-digit gate (rulebook DS-020,
-# the DSEP four-sig-fig surface). Lanes:
+# the four-sig-fig surface). Lanes:
 #
 #   render : value:num, mode:chr -> sprintf of the mode, byte-identical to
 #            the C printf that Python's % formatting wraps. Modes: plain

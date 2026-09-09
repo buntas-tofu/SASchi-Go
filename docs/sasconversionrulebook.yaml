@@ -353,7 +353,7 @@ rules:
     sources: [S-29, S-30, SAS-missing-docs]
 
   - rule_id: DS-020
-    sas_pattern: "Significant-digit rounding and rendering (four sig figs, DSEP policy)"
+    sas_pattern: "Significant-digit rounding and rendering (four sig figs)"
     scope: data-step
     python_target: {package: stdlib, pattern: "unit = 10**(floor(log10(abs(x))) - n + 1); round half-away at unit; then PUT-style fixed format. NEVER '%g' alone"}
     r_target: {package: base, pattern: "unit = 10^(floor(log10(abs(x))) - n + 1); half-away at unit; then formatC. NEVER sprintf('%g') or signif() alone"}

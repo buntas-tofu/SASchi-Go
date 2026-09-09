@@ -2,9 +2,9 @@
 """verify_sigfig.py : the fixture gate for significant-digit rendering and
 rounding (rulebook DS-020, the four-sig-fig surface).
 
-SAS has no %g-style significant-digit format. The Census DSEP policy
-(four significant digits) is realized by rounding the value to an explicit
-power-of-ten unit with ROUND (half away from zero, fuzzed), then rendering
+SAS has no %g-style significant-digit format. The four-significant-digit policy
+is realized by rounding the value to an explicit power-of-ten unit with ROUND
+(half away from zero, fuzzed), then rendering
 with a normal format. R sprintf('%g') and Python '%g' formatting BOTH round
 half to even, so a translation that reaches for %g or signif() to do SAS
 sig-fig work disagrees exactly where the policy lives: 0.125 to two digits
