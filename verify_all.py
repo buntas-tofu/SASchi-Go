@@ -43,6 +43,7 @@ VERIFIERS = [
     ("formats", HERE / "examples" / "verify_formats.py"),
     ("arrays", HERE / "examples" / "verify_arrays.py"),
     ("fisher", HERE / "examples" / "verify_fisher.py"),
+    ("sigfig", HERE / "examples" / "verify_sigfig.py"),
 ]
 
 

@@ -342,6 +342,18 @@ rules:
     confidence: high
     sources: [S-29, S-30, SAS-missing-docs]
 
+  - rule_id: DS-020
+    sas_pattern: "Significant-digit rounding and rendering (four sig figs, DSEP policy)"
+    scope: data-step
+    python_target: {package: stdlib, pattern: "unit = 10**(floor(log10(abs(x))) - n + 1); round half-away at unit; then PUT-style fixed format. NEVER '%g' alone"}
+    r_target: {package: base, pattern: "unit = 10^(floor(log10(abs(x))) - n + 1); half-away at unit; then formatC. NEVER sprintf('%g') or signif() alone"}
+    required_settings: ["SAS has no %g format: sig figs come from ROUND to an explicit power-of-ten unit, then a normal format", "R sprintf('%g'), Python '%g', and R signif() all round half to even; SAS ROUND is half away from zero, so 0.125@2 is 0.13 in SAS and 0.12 in both open languages", "SAS ROUND fuzz absorbs representation error: 9.995@3 is 10.0 in SAS, 9.99 in %g", "the 2**53 cliff applies to the unit exponent: compute the unit in float, never by string truncation"]
+    equivalence_class: EQUIVALENT-WITH-SETTINGS
+    silent_difference_checks: ["%g switches to scientific notation by magnitude (threshold 1e-4 and 1e5 by default), while the SAS pattern renders fixed: pin the render style separately from the rounding"]
+    validation_test: "pins: 0.125@2 -> 0.13 (SAS) vs 0.12 (%g/signif); 9.995@3 -> 10.0 (SAS) vs 9.99; -2.5@1 -> -3 (SAS) vs -2"
+    confidence: high
+    sources: [SAS-DOC]
+
   # ============ PROC SQL ============
 
   - rule_id: SQL-001

@@ -57,6 +57,10 @@ The R interpreter is found via `ROSETTA_RSCRIPT`, then `Rscript` on PATH.
   circuits. Naive translations diverge on out-of-range branches.
 - SAS missing values sort first and compare low; NaN and NA do neither
   consistently.
+- Significant digits are a rounding problem, not a format problem: SAS has
+  no %g, so sig figs mean ROUND to an explicit power-of-ten unit (half away
+  from zero). R signif() and Python %g round half to even, so 0.125 at two
+  digits is 0.13 in SAS and 0.12 in both open languages.
 
 ## Provenance
 

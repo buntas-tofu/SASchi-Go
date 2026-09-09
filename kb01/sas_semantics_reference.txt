@@ -1205,3 +1205,28 @@ def sas_fisher_exact(a, b, c, d, alternative="two"):
         return sum(pmf(x) for x in range(a, hi + 1))
     p0 = pmf(a)
     return sum(pmf(x) for x in range(lo, hi + 1) if pmf(x) <= p0)
+
+
+# ---------------------------------------------------------------------------
+# Significant-digit rounding (the four-sig-fig surface). SAS has no %g-style
+# significant-digit format; the policy (Census DSEP: four significant
+# digits) is realized by rounding to an explicit power-of-ten unit with
+# ROUND, then rendering with a normal format. R sprintf('%g') and Python
+# '%g' formatting BOTH round half to even, so %g or signif() alone silently
+# disagrees with SAS exactly where the policy lives: 0.125 to two digits is
+# 0.13 in SAS and 0.12 in both open languages, and 9.995 to three digits is
+# 10.0 in SAS (the ROUND fuzz absorbs the representation error) and 9.99 in
+# both. Compute the unit from the magnitude first; never format sig figs
+# via %g alone.
+# ---------------------------------------------------------------------------
+
+
+def sas_sigfig_round(x: float, n: int) -> float:
+    """Round x to n significant digits the SAS way: unit from the
+    magnitude, then sas_round (half away from zero, fuzzed). Zero is
+    returned as-is. The rendered digits then come from a normal format
+    (PUT w.d or a bare %f), never from %g."""
+    if x == 0:
+        return 0.0
+    unit = 10.0 ** (math.floor(math.log10(abs(x))) - n + 1)
+    return sas_round(x, unit)
