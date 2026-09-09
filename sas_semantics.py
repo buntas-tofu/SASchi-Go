@@ -1273,3 +1273,49 @@ def sas_proc_import_guess(rows, guessingrows=20):
         else:
             types.append("CHAR")
     return types
+
+
+# ---------------------------------------------------------------------------
+# PROC FREQ descriptive percents (the listing surface). SAS computes three
+# percentages for a two-way table: the cell percent (count / grand total of
+# non-missing), the row percent (count / row total), and the column percent
+# (count / column total), displayed with one decimal by default. Missing
+# levels are EXCLUDED from every denominator unless /MISSING is set. The
+# 0/0 case (a zero cell on a zero row or column total) prints as '.' in the
+# SAS listing; R prop.table and pandas crosstab normalize produce NaN, so a
+# byte-for-byte listing translation must render non-finite percents
+# explicitly. pandas crosstab margins combined with normalize compute
+# normalized-value margins, never SAS totals: pin margins separately.
+# ---------------------------------------------------------------------------
+
+
+def sas_freq_pcts(a, b, c, d):
+    """Cell, row, and column percents for table [[a, b], [c, d]] exactly as
+    PROC FREQ computes them (missing excluded, one-decimal display is the
+    caller's format). None marks a 0/0 percent, the SAS '.' cell."""
+    n = a + b + c + d
+    r1, r2 = a + b, c + d
+    c1, c2 = a + c, b + d
+
+    def pct(num, den):
+        return None if den == 0 else 100.0 * num / den
+
+    return {
+        (0, 0): (a, pct(a, n), pct(a, r1), pct(a, c1)),
+        (0, 1): (b, pct(b, n), pct(b, r1), pct(b, c2)),
+        (1, 0): (c, pct(c, n), pct(c, r2), pct(c, c1)),
+        (1, 1): (d, pct(d, n), pct(d, r2), pct(d, c2)),
+    }
+
+
+def sas_freq_oneway(counts):
+    """One-way listing rows: (count, percent, cumulative count, cumulative
+    percent) per level, the PROC FREQ default listing shape. None for a
+    0/0 cumulative percent."""
+    n = sum(counts)
+    out, acc = [], 0
+    for v in counts:
+        acc += v
+        out.append((v, None if n == 0 else 100.0 * v / n,
+                    acc, None if n == 0 else 100.0 * acc / n))
+    return out

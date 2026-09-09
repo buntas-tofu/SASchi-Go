@@ -67,6 +67,11 @@ The R interpreter is found via `ROSETTA_RSCRIPT`, then `Rscript` on PATH.
   character in pandas/R. Pin the divergence per file; never trust either
   default. Leading-zero identifiers strip in all three engines: read them
   as character explicitly.
+- PROC FREQ percents are three separate denominators (cell, row, column),
+  one decimal, missing levels excluded. R factors materialize zero-count
+  levels as NaN rows that SAS never lists; pandas 3 omits them. And
+  crosstab margins combined with normalize sums normalized values, never
+  SAS totals. Compute margins from counts.
 
 ## Provenance
 

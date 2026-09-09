@@ -564,6 +564,18 @@ rules:
     confidence: high
     sources: [S-15, SAS-DOC]
 
+  - rule_id: ST-015
+    sas_pattern: "PROC FREQ descriptive listings (frequencies, percents, row/col percents, cumulative)"
+    scope: stat-proc
+    python_target: {package: pandas, pattern: "crosstab with counts first, then normalize per denominator; render percents at one decimal; margins from counts, never from normalized values"}
+    r_target: {package: base, pattern: "table() then prop.table(x, 1/2/NULL) per denominator; render at one decimal; drop zero-count factor levels or materialize explicitly"}
+    required_settings: ["percents: cell = count / grand total of non-missing, row = count / row total, col = count / col total, one decimal by default; missing levels excluded unless /MISSING", "zero-count levels: R factors materialize them (NaN percents), pandas 3 crosstab omits them (SAS behavior); pin the choice per listing, never rely on the default", "pandas crosstab(margins=True, normalize=...) puts a normalized margin in the index ('All' row of column means); SAS totals are 100.0% per row and N per column: compute margins from counts", "0/0 percents: SAS prints '.', R/pandas render NaN: emit an explicit token in listings"]
+    equivalence_class: EQUIVALENT-WITH-SETTINGS
+    silent_difference_checks: ["the listing ORDER follows sorted levels in all three engines; a format-defined order in SAS has no automatic equivalent: pin level order explicitly"]
+    validation_test: "fixture 2x2 [[4,21],[6,0]]: cell/row/col percents 12.9/16.0/40.0 family byte-equal R, pandas, and reference; ghost-level and margins traps pinned"
+    confidence: high
+    sources: [S-15, SAS-DOC]
+
   # ============ SURVEY PROCS (R REQUIRED) ============
 
   - rule_id: SV-001
