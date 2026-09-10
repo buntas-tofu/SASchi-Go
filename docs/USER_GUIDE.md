@@ -4,9 +4,9 @@ Reproducing SAS behavior in open languages (Python, R) with receipts.
 
 This guide is for anyone using SASchi-Go: running the fixture gates,
 reading the receipts, and understanding what this repository proves and
-does not prove. It is the companion to the [README](../README.md) (what the
-project is) and the [project brief](rosetta_brief.md) (the method and the
-verification doctrine).
+does not prove. It is the companion to the [README](../README.md). The
+verification method itself is documented in the repository history; the
+doctrine lives in the gate suite and the receipts.
 
 ## What SASchi-Go proves
 
@@ -34,9 +34,6 @@ evidence; the gate suite is the proof; nothing is verified by assertion.
   equivalence class (EXACT, EQUIVALENT-WITH-SETTINGS, APPROXIMATE,
   NO-DIRECT-EQUIVALENT), required settings, forbidden patterns, and
   validation tests.
-- `docs/rosetta_brief.md` : the project brief: the method, the oracle
-  layers (published SAS output, cross-language agreement, live capture),
-  and the verification doctrine.
 - `docs/macro_surface_census.md` (+ `.csv`) : the macro-surface frequency
   table. Data about code, never code: which macro features appear in the
   licensed public testbed, at what density, and under which licenses.

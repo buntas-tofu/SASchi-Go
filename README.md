@@ -25,8 +25,6 @@ checked against hand-pinned truth and the semantics reference.
   rulebook. 54 rules with equivalence classes (EXACT,
   EQUIVALENT-WITH-SETTINGS, APPROXIMATE, NO-DIRECT-EQUIVALENT), required
   settings, forbidden patterns, and validation tests.
-- `docs/rosetta_brief.md` : the project brief: the method, the oracle
-  layers, and the verification doctrine.
 - `docs/USER_GUIDE.md` : the user guide: running the gates, reading the
   receipts, understanding the equivalence classes, and verifying a new
   construct family.
@@ -113,9 +111,9 @@ and every engine pinned in this repository reproduces it exactly.
 
 ## Provenance
 
-The verification method is documented in the brief: published SAS outputs
-and documented behavior first, cross-language agreement second, and capture
-against a live licensed SAS runtime as the last mile where available.
+The verification method: published SAS outputs and documented behavior
+first, cross-language agreement second, and capture against a live
+licensed SAS runtime as the last mile where available.
 Nothing in this repository is a verified claim until it has passed the
 fixture gate; the receipts are the current evidence.
 
