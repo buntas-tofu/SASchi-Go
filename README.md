@@ -35,6 +35,12 @@ checked against hand-pinned truth and the semantics reference.
   gates; the live-SAS capture stage is optional and license-gated.
 - `verify_all.py` : runs every fixture gate, emits a signed receipt JSON.
   One command, the whole proof.
+- `tools/macro_census.py` : token census of the macro surface across the
+  licensed public testbed, deterministic, pure stdlib. Outputs the
+  frequency table in `docs/macro_surface_census.md` plus a CSV.
+- `docs/macro_surface_census.md` : the macro-surface frequency table with
+  method and NOTICE (which public repos were counted, under which
+  licenses). Data about code, never code itself.
 - `AGENTS.md` : the agent contract under the Inertia-Drift-Framework, the
   buntas-tofu principal GLOBAL plus this project's LOCAL layer.
 - `agent-manifest.json` : machine-readable project descriptor, validated

@@ -1,0 +1,207 @@
+repo,license,sas_files,code_lines,rule_id,feature,occurrences,files_using,per_1000_lines
+Boemska_macrocore,LICENSE,76,9085,MC-003,%DO %WHILE loops,2,2,0.2
+Boemska_macrocore,LICENSE,76,9085,MC-003,%DO loops (all variants),425,58,46.8
+Boemska_macrocore,LICENSE,76,9085,INFO,%IF/%THEN macro conditionals,436,59,48.0
+Boemska_macrocore,LICENSE,76,9085,MC-001,%LET statements,457,59,50.3
+Boemska_macrocore,LICENSE,76,9085,MC-002,%MACRO definitions,160,76,17.6
+Boemska_macrocore,LICENSE,76,9085,MC-004,%SYSFUNC calls,220,41,24.2
+Boemska_macrocore,LICENSE,76,9085,MC-004,CALL EXECUTE,18,6,2.0
+Boemska_macrocore,LICENSE,76,9085,MC-009,PROC DATASETS statements,2,2,0.2
+Boemska_macrocore,LICENSE,76,9085,MC-008,SYSCC references,16,4,1.8
+Boemska_macrocore,LICENSE,76,9085,INFO,macro variable refs (&var),2860,74,314.8
+CausalInference_GFORMULA-SAS,LICENSE,11,11567,MC-003,%DO %UNTIL loops,1,1,0.1
+CausalInference_GFORMULA-SAS,LICENSE,11,11567,MC-003,%DO %WHILE loops,1,1,0.1
+CausalInference_GFORMULA-SAS,LICENSE,11,11567,MC-003,%DO loops (all variants),1114,5,96.3
+CausalInference_GFORMULA-SAS,LICENSE,11,11567,INFO,%IF/%THEN macro conditionals,1376,4,119.0
+CausalInference_GFORMULA-SAS,LICENSE,11,11567,MC-005,%INCLUDE statements,9,9,0.8
+CausalInference_GFORMULA-SAS,LICENSE,11,11567,MC-001,%LET statements,808,11,69.9
+CausalInference_GFORMULA-SAS,LICENSE,11,11567,MC-002,%MACRO definitions,42,10,3.6
+CausalInference_GFORMULA-SAS,LICENSE,11,11567,MC-004,%SYSFUNC calls,34,1,2.9
+CausalInference_GFORMULA-SAS,LICENSE,11,11567,MC-007,ODS statements,15,5,1.3
+CausalInference_GFORMULA-SAS,LICENSE,11,11567,MC-009,PROC DATASETS statements,46,5,4.0
+CausalInference_GFORMULA-SAS,LICENSE,11,11567,INFO,macro variable refs (&var),10788,10,932.7
+HHS-AHRQ_MEPS,no license file in clone,58,7115,MC-001,%LET statements,23,11,3.2
+HHS-AHRQ_MEPS,no license file in clone,58,7115,MC-002,%MACRO definitions,2,2,0.3
+HHS-AHRQ_MEPS,no license file in clone,58,7115,MC-004,%SYSFUNC calls,1,1,0.1
+HHS-AHRQ_MEPS,no license file in clone,58,7115,MC-007,ODS statements,94,32,13.2
+HHS-AHRQ_MEPS,no license file in clone,58,7115,MC-009,PROC DATASETS statements,12,10,1.7
+HHS-AHRQ_MEPS,no license file in clone,58,7115,INFO,macro variable refs (&var),219,13,30.8
+PaulSchmidtGit_Heritability,no license file in clone,11,1310,MC-005,%INCLUDE statements,8,8,6.1
+PaulSchmidtGit_Heritability,no license file in clone,11,1310,MC-001,%LET statements,1,1,0.8
+PaulSchmidtGit_Heritability,no license file in clone,11,1310,MC-002,%MACRO definitions,8,6,6.1
+PaulSchmidtGit_Heritability,no license file in clone,11,1310,MC-004,%SYSFUNC calls,8,8,6.1
+PaulSchmidtGit_Heritability,no license file in clone,11,1310,MC-007,ODS statements,18,6,13.7
+PaulSchmidtGit_Heritability,no license file in clone,11,1310,MC-009,PROC DATASETS statements,6,6,4.6
+PaulSchmidtGit_Heritability,no license file in clone,11,1310,INFO,macro variable refs (&var),77,6,58.8
+RhoInc_sas-statistical-data-checks,LICENSE,14,6358,MC-003,%DO loops (all variants),426,14,67.0
+RhoInc_sas-statistical-data-checks,LICENSE,14,6358,INFO,%IF/%THEN macro conditionals,566,14,89.0
+RhoInc_sas-statistical-data-checks,LICENSE,14,6358,MC-001,%LET statements,340,14,53.5
+RhoInc_sas-statistical-data-checks,LICENSE,14,6358,MC-002,%MACRO definitions,27,14,4.2
+RhoInc_sas-statistical-data-checks,LICENSE,14,6358,MC-004,%SYSFUNC calls,221,13,34.8
+RhoInc_sas-statistical-data-checks,LICENSE,14,6358,MC-007,ODS statements,102,7,16.0
+RhoInc_sas-statistical-data-checks,LICENSE,14,6358,INFO,macro variable refs (&var),2876,14,452.3
+atorus-research_atorus-sas-macros,LICENSE,31,4180,MC-003,%DO loops (all variants),354,31,84.7
+atorus-research_atorus-sas-macros,LICENSE,31,4180,INFO,%IF/%THEN macro conditionals,296,31,70.8
+atorus-research_atorus-sas-macros,LICENSE,31,4180,MC-005,%INCLUDE statements,1,1,0.2
+atorus-research_atorus-sas-macros,LICENSE,31,4180,MC-001,%LET statements,291,31,69.6
+atorus-research_atorus-sas-macros,LICENSE,31,4180,MC-002,%MACRO definitions,32,31,7.7
+atorus-research_atorus-sas-macros,LICENSE,31,4180,MC-004,%SYSFUNC calls,138,29,33.0
+atorus-research_atorus-sas-macros,LICENSE,31,4180,MC-007,ODS statements,7,2,1.7
+atorus-research_atorus-sas-macros,LICENSE,31,4180,MC-009,PROC DATASETS statements,22,19,5.3
+atorus-research_atorus-sas-macros,LICENSE,31,4180,INFO,macro variable refs (&var),2046,31,489.5
+cdisc-org_COSMoS,LICENSE,31,4502,MC-003,%DO %WHILE loops,1,1,0.2
+cdisc-org_COSMoS,LICENSE,31,4502,MC-003,%DO loops (all variants),125,18,27.8
+cdisc-org_COSMoS,LICENSE,31,4502,INFO,%IF/%THEN macro conditionals,147,21,32.7
+cdisc-org_COSMoS,LICENSE,31,4502,MC-005,%INCLUDE statements,14,13,3.1
+cdisc-org_COSMoS,LICENSE,31,4502,MC-001,%LET statements,153,20,34.0
+cdisc-org_COSMoS,LICENSE,31,4502,MC-002,%MACRO definitions,24,21,5.3
+cdisc-org_COSMoS,LICENSE,31,4502,MC-004,%SYSFUNC calls,116,14,25.8
+cdisc-org_COSMoS,LICENSE,31,4502,MC-007,ODS statements,83,14,18.4
+cdisc-org_COSMoS,LICENSE,31,4502,MC-009,PROC DATASETS statements,8,8,1.8
+cdisc-org_COSMoS,LICENSE,31,4502,MC-008,SYSERR references,3,3,0.7
+cdisc-org_COSMoS,LICENSE,31,4502,INFO,macro variable refs (&var),850,31,188.8
+danielegiardiello_Prediction_performance_survival,LICENSE,6,6393,MC-003,%DO loops (all variants),56,6,8.8
+danielegiardiello_Prediction_performance_survival,LICENSE,6,6393,INFO,%IF/%THEN macro conditionals,41,2,6.4
+danielegiardiello_Prediction_performance_survival,LICENSE,6,6393,MC-005,%INCLUDE statements,8,4,1.3
+danielegiardiello_Prediction_performance_survival,LICENSE,6,6393,MC-001,%LET statements,27,2,4.2
+danielegiardiello_Prediction_performance_survival,LICENSE,6,6393,MC-002,%MACRO definitions,12,6,1.9
+danielegiardiello_Prediction_performance_survival,LICENSE,6,6393,MC-004,%SYSFUNC calls,13,1,2.0
+danielegiardiello_Prediction_performance_survival,LICENSE,6,6393,MC-007,ODS statements,102,5,16.0
+danielegiardiello_Prediction_performance_survival,LICENSE,6,6393,MC-009,PROC DATASETS statements,5,3,0.8
+danielegiardiello_Prediction_performance_survival,LICENSE,6,6393,INFO,macro variable refs (&var),394,6,61.6
+eleanormurray_CausalSurvivalAnalysisWorkshop,no license file in clone,1,924,MC-001,%LET statements,2,1,2.2
+eleanormurray_CausalSurvivalAnalysisWorkshop,no license file in clone,1,924,MC-004,%SYSFUNC calls,1,1,1.1
+eleanormurray_CausalSurvivalAnalysisWorkshop,no license file in clone,1,924,MC-007,ODS statements,7,1,7.6
+eleanormurray_CausalSurvivalAnalysisWorkshop,no license file in clone,1,924,INFO,macro variable refs (&var),19,1,20.6
+friendly_SAS-macros,no license file in clone,463,104840,MC-003,%DO %UNTIL loops,21,14,0.2
+friendly_SAS-macros,no license file in clone,463,104840,MC-003,%DO %WHILE loops,193,100,1.8
+friendly_SAS-macros,no license file in clone,463,104840,MC-003,%DO loops (all variants),5609,387,53.5
+friendly_SAS-macros,no license file in clone,463,104840,INFO,%IF/%THEN macro conditionals,7043,405,67.2
+friendly_SAS-macros,no license file in clone,463,104840,MC-005,%INCLUDE statements,28,22,0.3
+friendly_SAS-macros,no license file in clone,463,104840,MC-001,%LET statements,6406,383,61.1
+friendly_SAS-macros,no license file in clone,463,104840,MC-002,%MACRO definitions,1007,460,9.6
+friendly_SAS-macros,no license file in clone,463,104840,MC-004,%SYSFUNC calls,355,105,3.4
+friendly_SAS-macros,no license file in clone,463,104840,MC-004,CALL EXECUTE,254,21,2.4
+friendly_SAS-macros,no license file in clone,463,104840,MC-007,ODS statements,71,21,0.7
+friendly_SAS-macros,no license file in clone,463,104840,MC-009,PROC DATASETS statements,119,83,1.1
+friendly_SAS-macros,no license file in clone,463,104840,MC-008,SYSERR references,436,60,4.2
+friendly_SAS-macros,no license file in clone,463,104840,INFO,macro variable refs (&var),34794,458,331.9
+phuse-org_phuse-scripts,"LICENSE, LICENSE.md, LICENSE.txt",164,71130,MC-003,%DO %UNTIL loops,3,1,0.0
+phuse-org_phuse-scripts,"LICENSE, LICENSE.md, LICENSE.txt",164,71130,MC-003,%DO %WHILE loops,74,30,1.0
+phuse-org_phuse-scripts,"LICENSE, LICENSE.md, LICENSE.txt",164,71130,MC-003,%DO loops (all variants),2662,105,37.4
+phuse-org_phuse-scripts,"LICENSE, LICENSE.md, LICENSE.txt",164,71130,INFO,%IF/%THEN macro conditionals,2208,101,31.0
+phuse-org_phuse-scripts,"LICENSE, LICENSE.md, LICENSE.txt",164,71130,MC-005,%INCLUDE statements,100,24,1.4
+phuse-org_phuse-scripts,"LICENSE, LICENSE.md, LICENSE.txt",164,71130,MC-001,%LET statements,2880,119,40.5
+phuse-org_phuse-scripts,"LICENSE, LICENSE.md, LICENSE.txt",164,71130,MC-002,%MACRO definitions,369,118,5.2
+phuse-org_phuse-scripts,"LICENSE, LICENSE.md, LICENSE.txt",164,71130,MC-004,%SYSFUNC calls,803,82,11.3
+phuse-org_phuse-scripts,"LICENSE, LICENSE.md, LICENSE.txt",164,71130,MC-004,CALL EXECUTE,20,16,0.3
+phuse-org_phuse-scripts,"LICENSE, LICENSE.md, LICENSE.txt",164,71130,MC-007,ODS statements,328,40,4.6
+phuse-org_phuse-scripts,"LICENSE, LICENSE.md, LICENSE.txt",164,71130,MC-009,PROC DATASETS statements,184,62,2.6
+phuse-org_phuse-scripts,"LICENSE, LICENSE.md, LICENSE.txt",164,71130,MC-008,SYSCC references,6,2,0.1
+phuse-org_phuse-scripts,"LICENSE, LICENSE.md, LICENSE.txt",164,71130,MC-008,SYSERR references,38,3,0.5
+phuse-org_phuse-scripts,"LICENSE, LICENSE.md, LICENSE.txt",164,71130,MC-006,X command lines,4,1,0.1
+phuse-org_phuse-scripts,"LICENSE, LICENSE.md, LICENSE.txt",164,71130,INFO,macro variable refs (&var),19427,142,273.1
+sascommunities_learning-sas-by-example-2nd,LICENSE,3,6220,MC-001,%LET statements,4,1,0.6
+sascommunities_learning-sas-by-example-2nd,LICENSE,3,6220,MC-002,%MACRO definitions,4,2,0.6
+sascommunities_learning-sas-by-example-2nd,LICENSE,3,6220,MC-007,ODS statements,25,2,4.0
+sascommunities_learning-sas-by-example-2nd,LICENSE,3,6220,INFO,macro variable refs (&var),37,2,5.9
+sascommunities_sas-cert-prep-data,LICENSE,8,17289,INFO,%IF/%THEN macro conditionals,8,6,0.5
+sascommunities_sas-cert-prep-data,LICENSE,8,17289,MC-005,%INCLUDE statements,5,3,0.3
+sascommunities_sas-cert-prep-data,LICENSE,8,17289,MC-001,%LET statements,20,6,1.2
+sascommunities_sas-cert-prep-data,LICENSE,8,17289,MC-002,%MACRO definitions,10,6,0.6
+sascommunities_sas-cert-prep-data,LICENSE,8,17289,INFO,macro variable refs (&var),80,6,4.6
+sascommunities_sas-global-forum-2019,LICENSE,152,108678,MC-003,%DO %UNTIL loops,2,2,0.0
+sascommunities_sas-global-forum-2019,LICENSE,152,108678,MC-003,%DO %WHILE loops,1,1,0.0
+sascommunities_sas-global-forum-2019,LICENSE,152,108678,MC-003,%DO loops (all variants),288,22,2.7
+sascommunities_sas-global-forum-2019,LICENSE,152,108678,INFO,%IF/%THEN macro conditionals,234,19,2.2
+sascommunities_sas-global-forum-2019,LICENSE,152,108678,MC-005,%INCLUDE statements,14,4,0.1
+sascommunities_sas-global-forum-2019,LICENSE,152,108678,MC-001,%LET statements,387,56,3.6
+sascommunities_sas-global-forum-2019,LICENSE,152,108678,MC-002,%MACRO definitions,138,34,1.3
+sascommunities_sas-global-forum-2019,LICENSE,152,108678,MC-004,%SYSFUNC calls,89,26,0.8
+sascommunities_sas-global-forum-2019,LICENSE,152,108678,MC-004,CALL EXECUTE,4,4,0.0
+sascommunities_sas-global-forum-2019,LICENSE,152,108678,MC-007,ODS statements,226,54,2.1
+sascommunities_sas-global-forum-2019,LICENSE,152,108678,MC-009,PROC DATASETS statements,13,8,0.1
+sascommunities_sas-global-forum-2019,LICENSE,152,108678,MC-008,SYSCC references,1,1,0.0
+sascommunities_sas-global-forum-2019,LICENSE,152,108678,MC-008,SYSERR references,3,1,0.0
+sascommunities_sas-global-forum-2019,LICENSE,152,108678,INFO,macro variable refs (&var),2522,94,23.2
+sascommunities_sas-prog-for-r-users,LICENSE,83,7966,MC-003,%DO loops (all variants),12,4,1.5
+sascommunities_sas-prog-for-r-users,LICENSE,83,7966,INFO,%IF/%THEN macro conditionals,9,2,1.1
+sascommunities_sas-prog-for-r-users,LICENSE,83,7966,MC-005,%INCLUDE statements,1,1,0.1
+sascommunities_sas-prog-for-r-users,LICENSE,83,7966,MC-001,%LET statements,6,4,0.8
+sascommunities_sas-prog-for-r-users,LICENSE,83,7966,MC-002,%MACRO definitions,5,5,0.6
+sascommunities_sas-prog-for-r-users,LICENSE,83,7966,MC-007,ODS statements,34,18,4.3
+sascommunities_sas-prog-for-r-users,LICENSE,83,7966,MC-009,PROC DATASETS statements,2,2,0.3
+sascommunities_sas-prog-for-r-users,LICENSE,83,7966,INFO,macro variable refs (&var),91,20,11.4
+sasjs_core,LICENSE,408,53654,MC-003,%DO %UNTIL loops,2,2,0.0
+sasjs_core,LICENSE,408,53654,MC-003,%DO %WHILE loops,4,3,0.1
+sasjs_core,LICENSE,408,53654,MC-003,%DO loops (all variants),3358,214,62.6
+sasjs_core,LICENSE,408,53654,INFO,%IF/%THEN macro conditionals,3302,223,61.5
+sasjs_core,LICENSE,408,53654,MC-001,%LET statements,3043,302,56.7
+sasjs_core,LICENSE,408,53654,MC-002,%MACRO definitions,555,267,10.3
+sasjs_core,LICENSE,408,53654,MC-004,%SYSFUNC calls,1043,161,19.4
+sasjs_core,LICENSE,408,53654,MC-004,CALL EXECUTE,37,13,0.7
+sasjs_core,LICENSE,408,53654,MC-007,ODS statements,18,9,0.3
+sasjs_core,LICENSE,408,53654,MC-009,PROC DATASETS statements,42,22,0.8
+sasjs_core,LICENSE,408,53654,MC-008,SYSCC references,560,105,10.4
+sasjs_core,LICENSE,408,53654,MC-008,SYSERR references,16,3,0.3
+sasjs_core,LICENSE,408,53654,INFO,macro variable refs (&var),18111,370,337.6
+sassoftware_enlighten-apply,"LICENSE, LICENSE.txt",23,6329,MC-003,%DO loops (all variants),188,15,29.7
+sassoftware_enlighten-apply,"LICENSE, LICENSE.txt",23,6329,INFO,%IF/%THEN macro conditionals,116,11,18.3
+sassoftware_enlighten-apply,"LICENSE, LICENSE.txt",23,6329,MC-005,%INCLUDE statements,11,6,1.7
+sassoftware_enlighten-apply,"LICENSE, LICENSE.txt",23,6329,MC-001,%LET statements,212,20,33.5
+sassoftware_enlighten-apply,"LICENSE, LICENSE.txt",23,6329,MC-002,%MACRO definitions,43,17,6.8
+sassoftware_enlighten-apply,"LICENSE, LICENSE.txt",23,6329,MC-004,%SYSFUNC calls,97,15,15.3
+sassoftware_enlighten-apply,"LICENSE, LICENSE.txt",23,6329,MC-007,ODS statements,33,13,5.2
+sassoftware_enlighten-apply,"LICENSE, LICENSE.txt",23,6329,MC-009,PROC DATASETS statements,3,3,0.5
+sassoftware_enlighten-apply,"LICENSE, LICENSE.txt",23,6329,MC-008,SYSCC references,48,3,7.6
+sassoftware_enlighten-apply,"LICENSE, LICENSE.txt",23,6329,INFO,macro variable refs (&var),1342,22,212.0
+sassoftware_sas-code-examples,LICENSE,51,1853,MC-003,%DO %WHILE loops,1,1,0.5
+sassoftware_sas-code-examples,LICENSE,51,1853,MC-003,%DO loops (all variants),29,6,15.7
+sassoftware_sas-code-examples,LICENSE,51,1853,INFO,%IF/%THEN macro conditionals,21,3,11.3
+sassoftware_sas-code-examples,LICENSE,51,1853,MC-001,%LET statements,55,10,29.7
+sassoftware_sas-code-examples,LICENSE,51,1853,MC-002,%MACRO definitions,12,5,6.5
+sassoftware_sas-code-examples,LICENSE,51,1853,MC-004,%SYSFUNC calls,34,6,18.3
+sassoftware_sas-code-examples,LICENSE,51,1853,MC-007,ODS statements,4,2,2.2
+sassoftware_sas-code-examples,LICENSE,51,1853,MC-009,PROC DATASETS statements,1,1,0.5
+sassoftware_sas-code-examples,LICENSE,51,1853,INFO,macro variable refs (&var),112,12,60.4
+sassoftware_sas-iml-packages,LICENSE,42,6375,MC-003,%DO loops (all variants),36,8,5.6
+sassoftware_sas-iml-packages,LICENSE,42,6375,INFO,%IF/%THEN macro conditionals,21,8,3.3
+sassoftware_sas-iml-packages,LICENSE,42,6375,MC-005,%INCLUDE statements,29,12,4.5
+sassoftware_sas-iml-packages,LICENSE,42,6375,MC-001,%LET statements,6,5,0.9
+sassoftware_sas-iml-packages,LICENSE,42,6375,MC-002,%MACRO definitions,9,5,1.4
+sassoftware_sas-iml-packages,LICENSE,42,6375,MC-004,%SYSFUNC calls,4,4,0.6
+sassoftware_sas-iml-packages,LICENSE,42,6375,MC-004,CALL EXECUTE,4,3,0.6
+sassoftware_sas-iml-packages,LICENSE,42,6375,MC-007,ODS statements,11,4,1.7
+sassoftware_sas-iml-packages,LICENSE,42,6375,INFO,macro variable refs (&var),105,14,16.5
+sasutils_macros,LICENSE,49,3796,MC-003,%DO %UNTIL loops,2,2,0.5
+sasutils_macros,LICENSE,49,3796,MC-003,%DO %WHILE loops,6,5,1.6
+sasutils_macros,LICENSE,49,3796,MC-003,%DO loops (all variants),254,33,66.9
+sasutils_macros,LICENSE,49,3796,INFO,%IF/%THEN macro conditionals,411,44,108.3
+sasutils_macros,LICENSE,49,3796,MC-005,%INCLUDE statements,3,3,0.8
+sasutils_macros,LICENSE,49,3796,MC-001,%LET statements,447,38,117.8
+sasutils_macros,LICENSE,49,3796,MC-002,%MACRO definitions,49,49,12.9
+sasutils_macros,LICENSE,49,3796,MC-004,%SYSFUNC calls,206,40,54.3
+sasutils_macros,LICENSE,49,3796,MC-004,CALL EXECUTE,7,1,1.8
+sasutils_macros,LICENSE,49,3796,MC-008,SYSERR references,1,1,0.3
+sasutils_macros,LICENSE,49,3796,INFO,macro variable refs (&var),1265,48,333.2
+wyp1125_SAS-Clinical-Trials-Toolkit,LICENSE,22,1973,MC-003,%DO %WHILE loops,1,1,0.5
+wyp1125_SAS-Clinical-Trials-Toolkit,LICENSE,22,1973,MC-003,%DO loops (all variants),13,4,6.6
+wyp1125_SAS-Clinical-Trials-Toolkit,LICENSE,22,1973,INFO,%IF/%THEN macro conditionals,21,5,10.6
+wyp1125_SAS-Clinical-Trials-Toolkit,LICENSE,22,1973,MC-005,%INCLUDE statements,42,14,21.3
+wyp1125_SAS-Clinical-Trials-Toolkit,LICENSE,22,1973,MC-001,%LET statements,22,5,11.2
+wyp1125_SAS-Clinical-Trials-Toolkit,LICENSE,22,1973,MC-002,%MACRO definitions,8,7,4.1
+wyp1125_SAS-Clinical-Trials-Toolkit,LICENSE,22,1973,MC-004,%SYSFUNC calls,4,1,2.0
+wyp1125_SAS-Clinical-Trials-Toolkit,LICENSE,22,1973,MC-007,ODS statements,1,1,0.5
+wyp1125_SAS-Clinical-Trials-Toolkit,LICENSE,22,1973,INFO,macro variable refs (&var),226,16,114.5
+yabwon_SAS_PACKAGES,"LICENSE, license.sas",48,19980,MC-003,%DO loops (all variants),556,24,27.8
+yabwon_SAS_PACKAGES,"LICENSE, license.sas",48,19980,INFO,%IF/%THEN macro conditionals,548,24,27.4
+yabwon_SAS_PACKAGES,"LICENSE, license.sas",48,19980,MC-005,%INCLUDE statements,110,24,5.5
+yabwon_SAS_PACKAGES,"LICENSE, license.sas",48,19980,MC-001,%LET statements,828,26,41.4
+yabwon_SAS_PACKAGES,"LICENSE, license.sas",48,19980,MC-002,%MACRO definitions,60,29,3.0
+yabwon_SAS_PACKAGES,"LICENSE, license.sas",48,19980,MC-004,%SYSFUNC calls,1075,30,53.8
+yabwon_SAS_PACKAGES,"LICENSE, license.sas",48,19980,MC-004,CALL EXECUTE,214,4,10.7
+yabwon_SAS_PACKAGES,"LICENSE, license.sas",48,19980,MC-007,ODS statements,1,1,0.1
+yabwon_SAS_PACKAGES,"LICENSE, license.sas",48,19980,MC-009,PROC DATASETS statements,5,3,0.3
+yabwon_SAS_PACKAGES,"LICENSE, license.sas",48,19980,MC-008,SYSCC references,8,2,0.4
+yabwon_SAS_PACKAGES,"LICENSE, license.sas",48,19980,MC-006,SYSTASK statements,14,2,0.7
+yabwon_SAS_PACKAGES,"LICENSE, license.sas",48,19980,INFO,macro variable refs (&var),3026,30,151.5
