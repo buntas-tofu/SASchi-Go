@@ -1319,3 +1319,46 @@ def sas_freq_oneway(counts):
         out.append((v, None if n == 0 else 100.0 * v / n,
                     acc, None if n == 0 else 100.0 * acc / n))
     return out
+
+
+# ---------------------------------------------------------------------------
+# LAPLACE distribution surface (the noise lane, Appendix E.2 lineage). SAS
+# documents PDF/CDF/QUANTILE('LAPLACE', x, theta, lambda) with location
+# theta (default 0), scale lambda (default 1, must be positive), and
+# RAND('LAPLACE', theta, lambda) for draws in current releases. The 2018
+# guide's own note records that RAND lacked LAPLACE at the time, so its
+# workaround used PDF values as noise, which are constants, never draws:
+# a density is not a draw. The single-argument form PDF('LAPLACE', 1) is
+# x = 1 with the default parameters (SAS documentation example pin:
+# 0.18393972058572117), never a lone scale. Draw streams are incomparable
+# across engines by construction, so the verifiable surface is the
+# deterministic one: the closed forms below, plus the inverse-CDF
+# construction that turns a pinned uniform value into a draw. The R twin
+# mirrors this arithmetic operation for operation.
+# ---------------------------------------------------------------------------
+
+
+def sas_laplace_pdf(x: float, m: float = 0.0, s: float = 1.0) -> float:
+    """Laplace density f(x) = exp(-|x - m|/s) / (2s), mirroring the
+    arithmetic of SAS PDF('LAPLACE', x, theta, lambda) exactly."""
+    return math.exp(-abs(x - m) / s) / (2.0 * s)
+
+
+def sas_laplace_cdf(x: float, m: float = 0.0, s: float = 1.0) -> float:
+    """Laplace CDF in the two-branch form: 0.5 * exp((x - m)/s) below the
+    location, 1 - 0.5 * exp(-(x - m)/s) at or above it. Both branches give
+    exactly 0.5 at x = m."""
+    if x < m:
+        return 0.5 * math.exp((x - m) / s)
+    return 1.0 - 0.5 * math.exp(-(x - m) / s)
+
+
+def sas_laplace_quantile(p: float, m: float = 0.0, s: float = 1.0) -> float:
+    """Laplace inverse CDF, x = m - s*sign(p - 0.5)*log(1 - 2*abs(p - 0.5)),
+    with p = 0.5 returning m exactly. The same expression is the inverse-CDF
+    sampling construction, the one draw lane that is deterministic and
+    comparable across engines when the uniforms are pinned."""
+    u = p - 0.5
+    if u == 0.0:
+        return m
+    return m - s * (1.0 if u > 0.0 else -1.0) * math.log(1.0 - 2.0 * abs(u))

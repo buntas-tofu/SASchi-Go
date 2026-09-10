@@ -22,7 +22,7 @@ checked against hand-pinned truth and the semantics reference.
   sibling plus a fixture verifier (`verify_*.py`). Run any verifier directly,
   or all of them through `verify_all.py`.
 - `docs/sasconversionrulebook.yaml` : the machine-consumable translation
-  rulebook. 54 rules with equivalence classes (EXACT,
+  rulebook. 55 rules with equivalence classes (EXACT,
   EQUIVALENT-WITH-SETTINGS, APPROXIMATE, NO-DIRECT-EQUIVALENT), required
   settings, forbidden patterns, and validation tests.
 - `docs/USER_GUIDE.md` : the user guide: running the gates, reading the
@@ -88,6 +88,12 @@ The R interpreter is found via `ROSETTA_RSCRIPT`, then `Rscript` on PATH.
   levels as NaN rows that SAS never lists; pandas 3 omits them. And
   crosstab margins combined with normalize sums normalized values, never
   SAS totals. Compute margins from counts.
+- Laplace noise is a distribution problem, not a generator problem. SAS
+  PDF('LAPLACE', x) with the default location 0 and scale 1 is a density
+  value, a constant; the 2018 origin guide's workaround added that
+  constant as its noise. Draw streams are incomparable across engines, so
+  the gate proves the deterministic surface (PDF, CDF, QUANTILE, and the
+  inverse-CDF sampling construction) and never compares draws.
 
 ## Origins
 

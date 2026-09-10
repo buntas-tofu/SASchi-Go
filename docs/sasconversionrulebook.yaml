@@ -586,6 +586,18 @@ rules:
     confidence: high
     sources: [S-15, SAS-DOC]
 
+  - rule_id: ST-016
+    sas_pattern: "Laplace distribution functions and the noise lane (PDF/CDF/QUANTILE('LAPLACE'), RAND('LAPLACE'))"
+    scope: stat-proc
+    python_target: {package: scipy, pattern: "scipy.stats.laplace(loc=theta, scale=lam): .pdf/.cdf/.ppf; draws via .rvs are never comparison lanes"}
+    r_target: {package: base, pattern: "closed forms (base R has no Laplace): exp(-abs(x-m)/s)/(2*s); CDF two-branch at m; quantile m - s*sign(p-0.5)*log(1-2*abs(p-0.5)); rmutil::rlaplace(m, s) for draws only, where available"}
+    required_settings: ["the parameters are the (location, scale) pair with defaults (0, 1) and scale > 0, taken in that order by SAS, scipy (loc, scale), and rmutil (m, s): pin them explicitly in every lane", "the single-argument form PDF('LAPLACE', x) means x with the default parameters, never a lone scale (SAS documentation example: PDF('LAPLACE', 1) = 0.18393972058572117)", "draws are never compared across engines: validate the distribution (pdf, cdf, quantile) and use the inverse-CDF construction from a pinned uniform grid when a deterministic construction test is required"]
+    equivalence_class: EQUIVALENT-WITH-SETTINGS
+    silent_difference_checks: ["a density value is a constant, not noise: the 2018 guide's workaround added PDF('LAPLACE', 1) to every record, shifting the column by exactly that constant while leaving dispersion unchanged", "swapping the location and scale roles produces well-formed but different numbers (0.75 quantile: 2.3465735902799727 at (2, 0.5) versus 1.8862943611198906 at (0.5, 2))", "the closed forms and scipy part by one unit in the last place on some quantiles (log versus log1p seams): the gate bar is byte-equality for reference/R and 1e-15 relative for scipy"]
+    validation_test: "fixture: 26 pinned cases byte-equal reference/R at 17 digits; scipy within 1e-15 (24 of 26 byte-identical); cdf(quantile(p)) roundtrip within 1e-15; single-argument default and role-swap landmines demonstrated"
+    confidence: high
+    sources: [S-15, SAS-DOC]
+
   # ============ SURVEY PROCS (R REQUIRED) ============
 
   - rule_id: SV-001

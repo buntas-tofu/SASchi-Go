@@ -29,7 +29,7 @@ evidence; the gate suite is the proof; nothing is verified by assertion.
   a Python verifier (`verify_*.py`), an R twin (`*.R`), and in most cases
   fixture data embedded in the verifier.
 - `docs/sasconversionrulebook.yaml` : the machine-consumable translation
-  rulebook. 54 rules across data-step (DS), PROC SQL (SQL), statistical
+  rulebook. 55 rules across data-step (DS), PROC SQL (SQL), statistical
   procs (ST), survey procs (SV), and the macro layer (MC), each with an
   equivalence class (EXACT, EQUIVALENT-WITH-SETTINGS, APPROXIMATE,
   NO-DIRECT-EQUIVALENT), required settings, forbidden patterns, and
@@ -238,6 +238,8 @@ The README carries the current list. The shape of the list:
 - PROC IMPORT guesses CSV types from a 20-row window; pandas and R infer
   from the whole file.
 - PROC FREQ percents are three separate denominators (cell, row, column).
+- Laplace noise is a density value, a constant, not a draw; draws are
+  never compared, only distributions.
 
 ## Troubleshooting
 
