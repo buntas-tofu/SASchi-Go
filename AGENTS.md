@@ -329,7 +329,8 @@ right.
   a change that touches the semantics reference, the rulebook, or a gate
   lands as one commit with its receipt.
 - **Project-specific constraints**: no runtime dependencies beyond the gate
-  set (Python standard library plus numpy, pandas, scipy, and base R); every
+  set (Python standard library plus numpy, pandas, scipy, PyYAML for the
+  rulebook loader, and base R); every
   claim in the README or docs is backed by a passing gate or a receipt; the
   sibling SASchi-Roku stays a data repository.
 

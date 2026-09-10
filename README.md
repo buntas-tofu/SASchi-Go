@@ -27,6 +27,9 @@ checked against hand-pinned truth and the semantics reference.
   settings, forbidden patterns, and validation tests.
 - `docs/rosetta_brief.md` : the project brief: the method, the oracle
   layers, and the verification doctrine.
+- `saschi/` : the program-level translator package (Track A). `rules.py`
+  loads the rulebook and routes constructs; tests in `saschi/test_rules.py`
+  run against the shipped YAML.
 - `kb01/sas_semantics_reference.txt` : the semantics reference as plain
   text, for humans and for diffs.
 - `manifest.py` : pin a SAS corpus with content hashes and provenance.
