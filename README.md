@@ -22,7 +22,7 @@ checked against hand-pinned truth and the semantics reference.
   sibling plus a fixture verifier (`verify_*.py`). Run any verifier directly,
   or all of them through `verify_all.py`.
 - `docs/sasconversionrulebook.yaml` : the machine-consumable translation
-  rulebook. 50 rules with equivalence classes (EXACT,
+  rulebook. 54 rules with equivalence classes (EXACT,
   EQUIVALENT-WITH-SETTINGS, APPROXIMATE, NO-DIRECT-EQUIVALENT), required
   settings, forbidden patterns, and validation tests.
 - `docs/rosetta_brief.md` : the project brief: the method, the oracle
@@ -35,6 +35,12 @@ checked against hand-pinned truth and the semantics reference.
   gates; the live-SAS capture stage is optional and license-gated.
 - `verify_all.py` : runs every fixture gate, emits a signed receipt JSON.
   One command, the whole proof.
+- `AGENTS.md` : the agent contract under the Inertia-Drift-Framework, the
+  buntas-tofu principal GLOBAL plus this project's LOCAL layer.
+- `agent-manifest.json` : machine-readable project descriptor, validated
+  against the bundled schema in CI.
+- `scripts/inertia-drift-lint` : the DMF invariant linter (fences, pointers,
+  manifest shape, status lines, style floor). Runs in CI on every push.
 
 ## Running the gates
 
@@ -100,6 +106,19 @@ and documented behavior first, cross-language agreement second, and capture
 against a live licensed SAS runtime as the last mile where available.
 Nothing in this repository is a verified claim until it has passed the
 fixture gate; the receipts are the current evidence.
+
+## Governance
+
+This repository is governed under the
+[Inertia-Drift-Framework](https://github.com/buntas-tofu/Inertia-Drift-Framework)
+(DMF 2.0), file-based governance for projects worked on by humans and agents
+together. The contract is [`AGENTS.md`](AGENTS.md); the machine-readable
+descriptor is [`agent-manifest.json`](agent-manifest.json), validated against
+[`agent-manifest.schema.json`](agent-manifest.schema.json) in CI; and the
+invariants are checked by
+[`scripts/inertia-drift-lint`](scripts/inertia-drift-lint) on every push:
+fences, pointers, manifest shape, status lines, and the style floor of no em
+dashes and no ellipses in artifacts.
 
 ## License
 

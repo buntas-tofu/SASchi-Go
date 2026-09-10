@@ -1,0 +1,218 @@
+#!/usr/bin/env python3
+"""inertia-drift-lint: the DMF invariant linter.
+
+Catches the drift that inertia lets slide: unbalanced fences, broken
+pointers, malformed manifests, missing status lines, and the style floor
+(no em dashes, no ellipses) in artifacts.
+
+Pure standard library. Ships with DMF, lints DMF itself. Exit codes:
+0 clean, 1 violations found, 2 usage error.
+"""
+
+import argparse
+import json
+import os
+import re
+import sys
+from pathlib import Path
+
+FENCE_START = "DMF:GLOBAL:START"
+FENCE_END = "DMF:GLOBAL:END"
+INITIAL_START = "DMF:INITIAL:START"
+INITIAL_END = "DMF:INITIAL:END"
+LOCAL_START = "DMF:LOCAL:START"
+LOCAL_END = "DMF:LOCAL:END"
+
+FLOOR_PATTERNS = [
+    ("em dash", "\u2014"),
+    ("ellipsis", "\u2026"),
+]
+
+DEFAULT_IGNORE_DIRS = {
+    ".git", ".github", "node_modules", "__pycache__", "venv", ".venv",
+    "vendor", "dist", "build", "archive", "examples", "tests",
+}
+
+
+class Finding:
+    def __init__(self, severity, check, path, message, line=None):
+        self.severity = severity  # "error" or "warning"
+        self.check = check
+        self.path = path
+        self.message = message
+        self.line = line
+
+    def __str__(self):
+        loc = f":{self.line}" if self.line else ""
+        return f"{self.severity}: [{self.check}] {self.path}{loc}: {self.message}"
+
+
+def walk_text_files(root, ignore_dirs):
+    for dirpath, dirnames, filenames in os.walk(root):
+        dirnames[:] = [d for d in dirnames if d not in ignore_dirs]
+        for fn in filenames:
+            if fn.endswith((".md", ".json", ".yaml", ".yml", ".txt")):
+                yield Path(dirpath) / fn
+
+
+def read(path):
+    try:
+        return path.read_text(encoding="utf-8", errors="replace")
+    except OSError as e:
+        return ""
+
+
+def check_fences(path, text, findings):
+    """Balanced DMF fences; INITIAL in templates; LOCAL present."""
+    for start, end, label in [
+        (FENCE_START, FENCE_END, "GLOBAL"),
+        (INITIAL_START, INITIAL_END, "INITIAL"),
+        (LOCAL_START, LOCAL_END, "LOCAL"),
+    ]:
+        opens = text.count(start)
+        closes = text.count(end)
+        if opens != closes:
+            findings.append(Finding(
+                "error", "fences", str(path),
+                f"{label} fence imbalance: {opens} opens, {closes} closes"))
+    if "template" in str(path) and path.name == "AGENTS.md":
+        if INITIAL_START not in text:
+            findings.append(Finding(
+                "error", "fences", str(path),
+                "template AGENTS.md must carry a DMF:INITIAL bootstrap block"))
+    if LOCAL_START not in text and path.name in ("AGENTS.md", "CLAUDE.md"):
+        findings.append(Finding(
+            "warning", "fences", str(path),
+            "no DMF:LOCAL section; populated contracts should carry one"))
+
+
+def check_pointers(path, text, findings):
+    """Relative markdown links resolve within the repo. Template files are
+    skipped: their links resolve in the adopting project, not the framework
+    repo."""
+    if "template" in path.parts:
+        return
+    base = path.parent
+    for m in re.finditer(r"\]\(([^)#]+)(?:#[^)]*)?\)", text):
+        target = m.group(1)
+        if target.startswith(("http://", "https://", "mailto:", "#")):
+            continue
+        resolved = (base / target).resolve()
+        if not resolved.exists():
+            findings.append(Finding(
+                "error", "pointers", str(path),
+                f"link target does not exist: {target}", line=text.count("\n", 0, m.start()) + 1))
+
+
+def check_manifests(root, findings):
+    """agent-manifest.json files parse and carry required keys."""
+    for path in sorted(root.rglob("agent-manifest.json")):
+        if any(part in path.parts for part in ("node_modules", ".git")):
+            continue
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as e:
+            findings.append(Finding(
+                "error", "manifest", str(path), f"not valid JSON: {e}"))
+            continue
+        required = {"manifest_version"}
+        missing = required - set(data)
+        if missing:
+            findings.append(Finding(
+                "error", "manifest", str(path),
+                f"missing required keys: {sorted(missing)}"))
+        if "_DMF_global" not in data and "project" not in data:
+            findings.append(Finding(
+                "warning", "manifest", str(path),
+                "neither _DMF_global nor project section present"))
+
+
+def check_status_lines(path, text, findings):
+    """Frontmattered files carry a status; report-shaped files carry a status line."""
+    has_frontmatter = text.startswith("---")
+    if has_frontmatter:
+        fm_end = text.find("---", 3)
+        if fm_end != -1:
+            fm = text[3:fm_end]
+            if not re.search(r"^status\s*:", fm, re.MULTILINE):
+                findings.append(Finding(
+                    "warning", "status", str(path),
+                    "frontmatter present but no status: key"))
+    report_shapes = ("VERIFICATION", "PROCESS", "OUTPUTS", "RECAP",
+                     "REVIEW", "FINDINGS", "REPORT", "ASSESSMENT")
+    if any(shape in path.name.upper() for shape in report_shapes):
+        if not re.search(r"^Status\s*:", text, re.MULTILINE):
+            findings.append(Finding(
+                "warning", "status", str(path),
+                "report-shaped file without a Status: line"))
+
+
+def check_floor(path, text, findings):
+    """Style floor: no em dashes, no ellipses, in artifacts."""
+    if path.suffix not in (".md", ".txt"):
+        return
+    for line_no, line in enumerate(text.splitlines(), 1):
+        for label, char in FLOOR_PATTERNS:
+            if char in line:
+                findings.append(Finding(
+                    "error", "floor", str(path),
+                    f"{label} found in artifact text", line=line_no))
+
+
+def lint(root, ignore_dirs):
+    findings = []
+    for path in walk_text_files(root, ignore_dirs):
+        text = read(path)
+        if not text:
+            continue
+        if path.suffix == ".md":
+            check_fences(path, text, findings)
+            check_pointers(path, text, findings)
+            check_status_lines(path, text, findings)
+            check_floor(path, text, findings)
+        elif path.name == "agent-manifest.json":
+            check_manifests(root, findings)
+    return findings
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(
+        prog="inertia-drift-lint",
+        description="DMF invariant linter: fences, pointers, manifests, status lines, style floor.")
+    parser.add_argument("target", nargs="?", default=".",
+                        help="directory to lint (default: current directory)")
+    parser.add_argument("--json", action="store_true",
+                        help="emit findings as JSON")
+    parser.add_argument("--ignore", action="append", default=[],
+                        help="additional directory names to skip (repeatable)")
+    parser.add_argument("--version", action="version", version="inertia-drift-lint 2.0.0")
+    args = parser.parse_args(argv)
+
+    root = Path(args.target).resolve()
+    if not root.is_dir():
+        print(f"error: not a directory: {root}", file=sys.stderr)
+        return 2
+
+    ignore_dirs = DEFAULT_IGNORE_DIRS | set(args.ignore)
+    findings = lint(root, ignore_dirs)
+
+    if args.json:
+        print(json.dumps([{
+            "severity": f.severity, "check": f.check,
+            "path": f.path, "line": f.line, "message": f.message,
+        } for f in findings], indent=2))
+    else:
+        for f in findings:
+            print(f)
+        if findings:
+            errors = sum(1 for f in findings if f.severity == "error")
+            warnings = len(findings) - errors
+            print(f"\n{errors} error(s), {warnings} warning(s)")
+        else:
+            print("clean: no drift caught")
+
+    return 1 if any(f.severity == "error" for f in findings) else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

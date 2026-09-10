@@ -1,0 +1,50 @@
+name: Governance
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  drift:
+    name: Invariant linter
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Run the DMF invariant linter
+        run: python3 scripts/inertia-drift-lint .
+
+  manifest:
+    name: Manifest validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Install jsonschema
+        run: pip install jsonschema
+      - name: Validate agent-manifest.json
+        run: |
+          python <<'PY'
+          import json
+          from jsonschema import Draft202012Validator
+
+          schema = json.load(open("agent-manifest.schema.json"))
+          Draft202012Validator.check_schema(schema)
+          print("Schema is well-formed (Draft 2020-12).")
+
+          manifest = json.load(open("agent-manifest.json"))
+          errors = sorted(Draft202012Validator(schema).iter_errors(manifest),
+                          key=lambda e: e.path)
+          if errors:
+              for err in errors:
+                  path = "/".join(str(p) for p in err.absolute_path) or "(root)"
+                  print(f"FAIL: {path}: {err.message}")
+              raise SystemExit(1)
+          print("Manifest validates against the schema.")
+          PY

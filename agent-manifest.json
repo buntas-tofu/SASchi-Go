@@ -1,0 +1,60 @@
+{
+  "$schema": "./agent-manifest.schema.json",
+  "manifest_version": "0.1.0",
+
+  "_DMF_global": {
+    "_comment": "buntas-tofu principal defaults, carried from the Inertia-Drift-Framework master instance.",
+    "owner": {
+      "name": "buntas-tofu",
+      "contact": "buntas-tofu@users.noreply.github.com"
+    },
+    "defaults": {
+      "license": "MIT",
+      "versioning_scheme": "semver",
+      "timestamp_format": "RFC3339",
+      "hash_algorithm": "sha256",
+      "changelog": "CHANGELOG.md",
+      "inference_posture": "labeled",
+      "authority_model": "three-tier"
+    }
+  },
+
+  "project": {
+    "name": "SASchi-Go",
+    "description": "SAS-to-open-language migration toolkit: semantics reference, gold-pair verifiers, and translation rulebook.",
+    "version": "0.1.0",
+    "repo_root": ".",
+    "primary_language": "Python",
+    "framework": "dmf",
+    "readme": "README.md",
+    "agents_doc": "AGENTS.md"
+  },
+
+  "agent_contract": {
+    "prompt_pack": "",
+    "policies": ["AGENTS.md"],
+    "schemas": ["agent-manifest.schema.json"],
+    "state_snapshot": ""
+  },
+
+  "tools": [
+    {
+      "tool_id": "inertia-drift-lint",
+      "description": "DMF invariant linter: fences, pointers, manifests, status lines, style floor."
+    },
+    {
+      "tool_id": "verify_all",
+      "description": "Runs every gold-pair fixture gate and emits a signed receipt under telemetry/."
+    }
+  ],
+
+  "provenance": {
+    "run_manifest_dir": "telemetry/",
+    "timestamp_format": "RFC3339",
+    "hash": "sha256"
+  },
+
+  "versioning": {
+    "scheme": "semver"
+  }
+}
