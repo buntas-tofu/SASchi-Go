@@ -115,6 +115,10 @@ byte-equal gates with receipts. One continuity check: the 2018 Fisher
 worked example pinned a two-sided p-value of 0.1238 on its 2x2 fixture,
 and every engine pinned in this repository reproduces it exactly.
 
+A task-level coverage map of that census, cross-referenced to the rules
+and gates here, lives at
+[`docs/rosetta_wiki_coverage.md`](docs/rosetta_wiki_coverage.md).
+
 ## Provenance
 
 The verification method: published SAS outputs and documented behavior

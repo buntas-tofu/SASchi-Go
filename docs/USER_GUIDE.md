@@ -37,6 +37,8 @@ evidence; the gate suite is the proof; nothing is verified by assertion.
 - `docs/macro_surface_census.md` (+ `.csv`) : the macro-surface frequency
   table. Data about code, never code: which macro features appear in the
   licensed public testbed, at what density, and under which licenses.
+- `docs/rosetta_wiki_coverage.md` : the 2018 worked-example census mapped
+  to current coverage: which rule or fixture gate carries each example.
 - `kb01/sas_semantics_reference.txt` : the semantics reference as plain
   text, for humans and for diffs. It stays in lockstep with
   `sas_semantics.py`.
