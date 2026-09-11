@@ -9,7 +9,9 @@ Design: a single-pass character scanner that tracks five states (code,
 double-quoted string, single-quoted string, block comment, macro comment).
 Semicolons are statement terminators only in code state. The scanner emits
 tokens; split_statements groups tokens into statements with source line
-numbers.
+numbers. Statement text is the token stream space-joined with terminators
+dropped: word boundaries survive, and `Statement.terminated` records
+whether a semicolon closed the statement.
 
 Fences handled:
 - /* ... */ block comments (dropped, with nesting tolerance).
@@ -51,10 +53,12 @@ class Token:
 
 @dataclass(frozen=True)
 class Statement:
-    """One SAS statement: its text and the source line it started on."""
+    """One SAS statement: its text, the source line it started on, and
+    whether a semicolon terminated it."""
 
     text: str
     line: int
+    terminated: bool = True
 
 
 def tokenize(source: str) -> list[Token]:
@@ -213,12 +217,24 @@ def _at_statement_start(source: str, i: int) -> bool:
     return j < 0 or source[j] == ";"
 
 
+def _join(buf: list[Token]) -> str:
+    """Statement text: tokens space-joined, terminators dropped.
+
+    The join is deliberate: token boundaries carry word boundaries, which
+    the first consumer (the emitter) needs. The earlier no-separator join
+    compacted 'data rounded_values' into 'datarounded_values' and left
+    statements unparseable. Terminators are dropped because the statement
+    list itself delimits them; Statement.terminated records presence.
+    """
+    return " ".join(t.text for t in buf if t.kind is not Kind.SEMI).strip()
+
+
 def split_statements(source: str) -> list[Statement]:
     """Split source into statements on code-state semicolons.
 
     Statements retain the source line they started on. A trailing
-    statement without a semicolon is kept. Comments and strings never
-    terminate a statement.
+    statement without a semicolon is kept (terminated False). Comments
+    and strings never terminate a statement.
     """
     tokens = tokenize(source)
     statements: list[Statement] = []
@@ -230,14 +246,14 @@ def split_statements(source: str) -> list[Statement]:
             start_line = tok.line
         buf.append(tok)
         if tok.kind is Kind.SEMI:
-            text = "".join(t.text for t in buf).strip()
+            text = _join(buf)
             if text:
-                statements.append(Statement(text, start_line))
+                statements.append(Statement(text, start_line, True))
             buf = []
 
     if buf:
-        text = "".join(t.text for t in buf).strip()
+        text = _join(buf)
         if text:
-            statements.append(Statement(text, start_line))
+            statements.append(Statement(text, start_line, False))
 
     return statements

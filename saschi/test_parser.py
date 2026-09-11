@@ -71,25 +71,26 @@ class TokenizerTests(unittest.TestCase):
 class SplitterTests(unittest.TestCase):
     def test_basic_split(self):
         stmts = split_statements("data a; x=1; run;")
-        # Token join collapses whitespace; boundaries are what matter.
-        self.assertEqual([s.text for s in stmts], ["dataa;", "x=1;", "run;"])
+        # Unspaced source stays one token ('x=1'); spaced source yields
+        # 'x = 1'. Token boundaries are preserved either way.
+        self.assertEqual([s.text for s in stmts], ["data a", "x=1", "run"])
 
     def test_multiline_split(self):
         src = "data a;\n  x = 1;\n  y = 2;\nrun;\n"
         stmts = split_statements(src)
         self.assertEqual([s.text for s in stmts],
-                         ["dataa;", "x=1;", "y=2;", "run;"])
+                         ["data a", "x = 1", "y = 2", "run"])
 
     def test_semicolon_inside_string_does_not_split(self):
         src = 's = "a;b";\ny = 2;'
         stmts = split_statements(src)
         self.assertEqual(len(stmts), 2)
-        self.assertEqual(stmts[0].text, 's="a;b";')
+        self.assertEqual(stmts[0].text, 's = "a;b"')
 
     def test_semicolon_inside_comment_does_not_split(self):
         src = "x = 1; /* a; b; c */ y = 2;"
         stmts = split_statements(src)
-        self.assertEqual([s.text for s in stmts], ["x=1;", "y=2;"])
+        self.assertEqual([s.text for s in stmts], ["x = 1", "y = 2"])
 
     def test_line_numbers_tracked(self):
         src = "data a;\nx=1;\nrun;"
@@ -99,7 +100,8 @@ class SplitterTests(unittest.TestCase):
     def test_no_trailing_semicolon_ok(self):
         stmts = split_statements("x = 1")
         self.assertEqual(len(stmts), 1)
-        self.assertEqual(stmts[0].text, "x=1")
+        self.assertEqual(stmts[0].text, "x = 1")
+        self.assertFalse(stmts[0].terminated)
 
     def test_empty_source(self):
         self.assertEqual(split_statements(""), [])
@@ -120,7 +122,7 @@ class SplitterTests(unittest.TestCase):
         self.assertEqual(len(stmts), 1)
         # The interior semicolon is data, not a boundary; the fence kept
         # the statement whole even though the semicolon is not echoed.
-        self.assertTrue(stmts[0].text.startswith("%letx="))
+        self.assertTrue(stmts[0].text.startswith("%let x = "))
 
 
 class CorpusTests(unittest.TestCase):
@@ -153,22 +155,20 @@ class CorpusTests(unittest.TestCase):
     def test_every_file_semicolons_balanced(self):
         # The corpus is community-written SAS; some files may omit a final
         # semicolon or carry trailing prose. The invariant we hold is that
-        # every CODE-STATE semicolon in the source lands inside exactly one
+        # every CODE-STATE semicolon in the source terminates exactly one
         # statement. Semicolons inside strings and comments are not
         # statement terminators and are excluded from the count.
         for path in self.corpus:
             with self.subTest(file=path.name):
                 src = path.read_text(encoding="utf-8", errors="replace")
                 stmts = split_statements(src)
-                # Reconstruct the code-state semicolons the splitter saw.
-                code_semis = sum(s.text.count(";") for s in stmts)
-                # The tokenizer drops comments and keeps strings; count the
-                # semicolons in the original outside comments and strings.
+                terminated = sum(1 for s in stmts if s.terminated)
                 tokens = tokenize(src)
                 code_semis_src = sum(1 for tok in tokens if tok.kind is Kind.SEMI)
-                self.assertEqual(code_semis, code_semis_src,
+                self.assertEqual(terminated, code_semis_src,
                                  f"{path.name}: semicolon imbalance "
-                                 f"(joined {code_semis} vs tokenized {code_semis_src})")
+                                 f"(terminated {terminated} vs tokenized "
+                                 f"{code_semis_src})")
 
     def test_statement_boundaries_at_provenance_header(self):
         # The provenance header is a comment block; the first statement
