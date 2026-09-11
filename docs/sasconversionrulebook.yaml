@@ -107,13 +107,12 @@ global_policies:
   - policy_id: GP-09
     name: iml-routing
     rule: >
-      PROC IML (and any SAS/IML matrix-language program) has no direct
-      translation target in this rulebook. Route IML programs to human
-      review before code generation. numpy.linalg or R matrix algebra may
-      be proposed as candidate equivalents only after the matrix-semantics
-      scope is pinned for the specific program: broadcast versus SAS
-      elementwise behavior, missing handling in matrix operations, and
-      subscripting conventions.
+      PROC IML (and any SAS/IML matrix-language program) routes to human
+      review before code generation, except for the matrix surface pinned
+      and gated in MX-001 (concatenation, transpose, multiplication, the
+      2x2 inverse). Everything else in IML (general inversions, subscript
+      conventions, missing handling in matrix operations, module syntax)
+      stays review-gated until its own scope is pinned.
 
 rules:
 
@@ -756,3 +755,17 @@ rules:
     equivalence_class: PATTERN-REPLACEMENT
     confidence: high
     sources: [S-10]
+
+  # ============ IML MATRIX SURFACE ============
+
+  - rule_id: MX-001
+    sas_pattern: "PROC IML matrix algebra: concatenation (||, //), transpose t(), matrix product *, elementwise #, inverse inv()"
+    scope: matrix
+    python_target: {package: numpy, pattern: "a @ b (product); a * b is ELEMENTWISE; a.T; np.hstack / np.vstack; np.linalg.inv only at the 1e-13 LAPACK bar, the closed-form 2x2 inverse is exact"}
+    r_target: {package: base, pattern: "a %*% b (product); a * b is ELEMENTWISE; t(a); cbind / rbind; solve(a); matrix(..., byrow = TRUE) for row-major fills"}
+    required_settings: ["IML '*' IS matrix multiplication and '#' is elementwise; R and numpy invert that convention ('*' elementwise, product %*% or '@'): never emit a bare star for a SAS product", "IML matrices fill ROW-wise (shape(x, 2, 4)); R matrix() fills column-wise: byrow = TRUE is mandatory, and R's default (r, c) fill equals the transpose of the row-major fill of (c, r)", "integer-valued fixtures are exact in every engine (byte-pinned); general floating products follow the family tolerance discipline", "inversions larger than 2x2 are NOT gated: route to a human reviewer until their own fixtures exist"]
+    equivalence_class: EQUIVALENT-WITH-SETTINGS
+    silent_difference_checks: ["the same source line 'c = a * b' is a matrix product in SAS and an elementwise product in R/numpy: both run, both valid, silently different numbers", "singular inverses fail differently per engine (IML warns and writes missing values, R solve() errors, numpy raises LinAlgError): detect and route, never translate blind", "numpy's LAPACK 2x2 inverse is not the closed form: byte-exact agreement comes from the adjugate computation, otherwise a 1e-13 relative bar"]
+    validation_test: "fixture: the matrix examples byte-pinned (2x4 row-major fill, || and // joins, transpose, product [[50,21],[24,10],[101,42]], inverse [[3,-2],[-7,5]]); landmines demonstrated (star meaning, fill order, singular failure modes)"
+    confidence: high
+    sources: [S-15, SAS-DOC]

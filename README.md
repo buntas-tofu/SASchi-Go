@@ -22,7 +22,7 @@ checked against hand-pinned truth and the semantics reference.
   sibling plus a fixture verifier (`verify_*.py`). Run any verifier directly,
   or all of them through `verify_all.py`.
 - `docs/sasconversionrulebook.yaml` : the machine-consumable translation
-  rulebook. 55 rules with equivalence classes (EXACT,
+  rulebook. 56 rules with equivalence classes (EXACT,
   EQUIVALENT-WITH-SETTINGS, APPROXIMATE, NO-DIRECT-EQUIVALENT), required
   settings, forbidden patterns, and validation tests.
 - `docs/USER_GUIDE.md` : the user guide: running the gates, reading the
@@ -94,6 +94,13 @@ The R interpreter is found via `ROSETTA_RSCRIPT`, then `Rscript` on PATH.
   constant as its noise. Draw streams are incomparable across engines, so
   the gate proves the deterministic surface (PDF, CDF, QUANTILE, and the
   inverse-CDF sampling construction) and never compares draws.
+- Matrix operators lie across languages. IML's `*` is matrix
+  multiplication and `#` is elementwise; R and numpy read `*` as
+  elementwise (`%*%` / `@` are the products). IML fills matrices
+  row-wise; base R fills column-wise. A singular inverse fails
+  differently in each engine. The matrix gate pins the 2018 worked
+  examples (product `[[50,21],[24,10],[101,42]]`, inverse
+  `[[3,-2],[-7,5]]`) and never emits a bare star for a SAS product.
 
 ## Origins
 

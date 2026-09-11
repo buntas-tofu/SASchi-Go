@@ -22,8 +22,8 @@ Status vocabulary:
 | B.1 to B.3 session mechanics and editor onboarding | none | Out of scope (tools, not constructs) |
 | C.1 Set the working directory | DS-018 | Rule |
 | C.2 Install and load an add-on package | GP-04 | Policy |
-| C.3 Concatenate matrices (create, join horizontally, join vertically) | GP-09 | Human review |
-| C.4 Matrix math (transpose, multiply, invert) | GP-09 | Human review |
+| C.3 Concatenate matrices (create, join horizontally, join vertically) | MX-001; matrix family | Gated |
+| C.4 Matrix math (transpose, multiply, invert) | MX-001; matrix family | Gated |
 | C.5 Merge datasets | DS-002, DS-003; merge family | Gated |
 | C.6 Convert numeric to character | DS-015 | Rule |
 | C.7 Concatenate character strings with a comma | DS-015 | Rule |
@@ -39,9 +39,10 @@ Status vocabulary:
 
 Notes:
 
-- C.3 and C.4 rest on matrix procedures (PROC IML) that have no direct
-  open-language translation target; they route to human review under
-  GP-09, and any matrix equivalence is scoped per program.
+- The matrix surface (concatenation, transpose, multiplication, and the
+  2x2 inverse) is pinned and gated in MX-001; the rest of PROC IML
+  (general inversions, subscripting, missing handling) still routes to
+  human review under GP-09.
 - Every Gated row names a family that runs under `verify_all.py`; the
   newest receipt under `telemetry/verify/` is the evidence, cited by
   timestamp.

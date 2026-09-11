@@ -47,6 +47,7 @@ VERIFIERS = [
     ("csvimport", HERE / "examples" / "verify_csvimport.py"),
     ("freq", HERE / "examples" / "verify_freq.py"),
     ("laplace", HERE / "examples" / "verify_laplace.py"),
+    ("matrix", HERE / "examples" / "verify_matrix.py"),
 ]
 
 

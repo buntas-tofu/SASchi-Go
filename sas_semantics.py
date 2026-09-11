@@ -1362,3 +1362,69 @@ def sas_laplace_quantile(p: float, m: float = 0.0, s: float = 1.0) -> float:
     if u == 0.0:
         return m
     return m - s * (1.0 if u > 0.0 else -1.0) * math.log(1.0 - 2.0 * abs(u))
+
+
+# ---------------------------------------------------------------------------
+# IML matrix algebra surface (the matrix appendix). SAS IML fills matrices
+# ROW-wise (shape(x, 2, 4) reads 1:8 across the rows) and its '*' is MATRIX
+# MULTIPLICATION while '#' is elementwise; R and numpy invert that
+# convention ('*' is elementwise there, the product is '%*%' or '@'), so
+# the same source line is a valid, silently different program in each
+# language. Inversion failures also differ by engine (IML prints missing
+# values with a warning, R solve() errors, numpy raises LinAlgError):
+# detecting a singular matrix is the portable part. The functions below
+# pin the honest arithmetic, explicit loops over row-major lists, that the
+# R twin reproduces operation for operation; inversions larger than 2x2
+# stay routed to review until their own scope is pinned.
+# ---------------------------------------------------------------------------
+
+
+def sas_iml_shape(vec, nrow, ncol):
+    """Row-major fill, as in SAS IML shape(): 1:8 into 2x4 yields
+    [[1, 2, 3, 4], [5, 6, 7, 8]]. R's matrix() fills column-wise and needs
+    byrow = TRUE for the same result; without it, the data silently
+    transposes."""
+    return [list(vec[i * ncol:(i + 1) * ncol]) for i in range(nrow)]
+
+
+def sas_iml_transpose(a):
+    """t(a): rows become columns, pure movement, exact in every engine."""
+    return [list(row) for row in zip(*a)]
+
+
+def sas_iml_hcat(a, b):
+    """a || b: the two matrices side by side, row counts equal."""
+    return [list(ra) + list(rb) for ra, rb in zip(a, b)]
+
+
+def sas_iml_vcat(a, b):
+    """a // b: a's rows stacked above b's rows, column counts equal."""
+    return [list(r) for r in a] + [list(r) for r in b]
+
+
+def sas_iml_matmul(a, b):
+    """The product a * b (SAS IML's star): entry (i, j) is row i of a
+    dotted with column j of b, summed left to right, the order the R twin
+    replays so the fixtures agree byte for byte."""
+    cols = sas_iml_transpose(b)
+    return [[sum(x * y for x, y in zip(row, col)) for col in cols]
+            for row in a]
+
+
+def sas_iml_elemwise(a, b):
+    """a # b (SAS IML's hash): elementwise, which is what a bare '*' means
+    in R and numpy. Translating a product as a bare star is the landmine
+    this surface exists to catch."""
+    return [[x * y for x, y in zip(ra, rb)] for ra, rb in zip(a, b)]
+
+
+def sas_iml_inv2(a):
+    """Closed-form inverse of a 2x2, adjugate over determinant; the
+    documented example [[5, 2], [7, 3]] returns [[3, -2], [-7, 5]].
+    Raises ValueError when the determinant is zero, the portable half of
+    the singular-matrix story."""
+    (a11, a12), (a21, a22) = a
+    det = a11 * a22 - a12 * a21
+    if det == 0:
+        raise ValueError("singular matrix: no inverse")
+    return [[a22 / det, -a12 / det], [-a21 / det, a11 / det]]

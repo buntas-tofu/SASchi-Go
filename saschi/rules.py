@@ -284,7 +284,7 @@ def route_function(call: str) -> tuple[str, str]:
 
 
 def family_counts(rules: dict[str, Rule]) -> dict[str, int]:
-    """Count rules per family prefix (DS, SQL, ST, SV, MC)."""
+    """Count rules per family prefix (DS, SQL, ST, SV, MC, MX)."""
     counts: dict[str, int] = {}
     for rule_id in rules:
         prefix = rule_id.split("-", 1)[0]

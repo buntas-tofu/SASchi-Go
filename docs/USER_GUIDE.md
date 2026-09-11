@@ -29,8 +29,9 @@ evidence; the gate suite is the proof; nothing is verified by assertion.
   a Python verifier (`verify_*.py`), an R twin (`*.R`), and in most cases
   fixture data embedded in the verifier.
 - `docs/sasconversionrulebook.yaml` : the machine-consumable translation
-  rulebook. 55 rules across data-step (DS), PROC SQL (SQL), statistical
-  procs (ST), survey procs (SV), and the macro layer (MC), each with an
+  rulebook. 56 rules across data-step (DS), PROC SQL (SQL), statistical
+  procs (ST), survey procs (SV), the macro layer (MC), and the IML
+  matrix surface (MX), each with an
   equivalence class (EXACT, EQUIVALENT-WITH-SETTINGS, APPROXIMATE,
   NO-DIRECT-EQUIVALENT), required settings, forbidden patterns, and
   validation tests.
@@ -189,7 +190,9 @@ ticket rather than generated code:
   pattern.
 - Survey selection at the seed level (SV-006): inclusion probabilities
   validate, individual draws never.
-- PROC IML (GP-09): no direct translation target; route to human review.
+- PROC IML (GP-09, MX-001): routes to human review, except the pinned
+  matrix surface (concatenation, transpose, multiplication, the 2x2
+  inverse) carried by the matrix family.
 
 ## Verifying a new construct family
 
@@ -242,6 +245,8 @@ The README carries the current list. The shape of the list:
 - PROC FREQ percents are three separate denominators (cell, row, column).
 - Laplace noise is a density value, a constant, not a draw; draws are
   never compared, only distributions.
+- Matrix operators lie across languages: IML's star is a product, R's
+  star is elementwise; fill order diverges (row-major vs column-wise).
 
 ## Troubleshooting
 
