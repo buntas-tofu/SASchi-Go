@@ -49,9 +49,12 @@ evidence; the gate suite is the proof; nothing is verified by assertion.
   gates; the live-SAS capture stage is optional and license-gated.
 - `tools/macro_census.py` : the deterministic, pure-stdlib scanner that
   regenerates the macro-surface census.
-- `saschi/` : the program-level translator package (Track A). `rules.py`
-  loads the rulebook and routes SAS statements and function calls to rule
-  families. Tests in `saschi/test_rules.py`.
+- `saschi/` : the program-level translator package (Track A). `parser.py`
+  is the fence-robust statement splitter, `rules.py` loads the rulebook
+  and routes SAS statements and function calls to rule families, and
+  `emit_py.py` emits Python for the data-step subset (slice one: the
+  rounding fixture). Tests in `saschi/test_parser.py`,
+  `saschi/test_rules.py`, and `saschi/test_emit_py.py`.
 - `verify_all.py` : runs every fixture gate, emits a signed receipt JSON.
   One command, the whole proof.
 - `telemetry/` : run artifacts (receipts, run records). Gitignored;
@@ -147,6 +150,18 @@ run against the shipped YAML:
 NO-DIRECT-EQUIVALENT rules, construct-map integrity, statement routing
 (PROC SORT, TRANSPOSE, FREQ, SQL with INTO and remerge hints, GLM, macro
 statements), and function routing (ROUND, INTCK, LAG, TRANWRD, SUM).
+
+The parser and the translation lane carry their own suites:
+
+```sh
+~/besaid/.venv/bin/python -m unittest saschi.test_parser -v
+~/besaid/.venv/bin/python -m unittest saschi.test_emit_py -v
+```
+
+`test_parser` proves fence robustness, including across the 56-task Roku
+corpus; `test_emit_py` translates the rounding fixture, runs the emitted
+program, and requires its output to match the semantics reference and a
+frozen pin.
 
 ## Running the macro-surface census
 

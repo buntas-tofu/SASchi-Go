@@ -28,9 +28,12 @@ checked against hand-pinned truth and the semantics reference.
 - `docs/USER_GUIDE.md` : the user guide: running the gates, reading the
   receipts, understanding the equivalence classes, and verifying a new
   construct family.
-- `saschi/` : the program-level translator package (Track A). `rules.py`
-  loads the rulebook and routes constructs; tests in `saschi/test_rules.py`
-  run against the shipped YAML.
+- `saschi/` : the program-level translator package (Track A). `parser.py`
+  splits statements fence-robustly, `rules.py` loads the rulebook and
+  routes constructs, and `emit_py.py` emits Python for the data-step
+  subset (slice one: the rounding fixture, emitted code calling the
+  semantics reference). Tests: `saschi/test_parser.py`,
+  `saschi/test_rules.py`, `saschi/test_emit_py.py`.
 - `kb01/sas_semantics_reference.txt` : the semantics reference as plain
   text, for humans and for diffs.
 - `manifest.py` : pin a SAS corpus with content hashes and provenance.
