@@ -33,6 +33,28 @@ DEFAULT_IGNORE_DIRS = {
     "vendor", "dist", "build", "archive", "examples", "tests",
 }
 
+FLOOR_SUFFIXES = {
+    ".md", ".markdown", ".txt", ".rst", ".adoc",
+    ".yaml", ".yml", ".json", ".toml", ".ini", ".cfg", ".conf", ".env",
+    ".py", ".r", ".rmd", ".sh", ".bash", ".zsh", ".fish",
+    ".sql", ".sas", ".js", ".mjs", ".ts", ".jsx", ".tsx",
+    ".html", ".htm", ".css", ".scss", ".xml",
+    ".ps1", ".psm1", ".bat", ".cmd",
+    ".c", ".h", ".cc", ".cpp", ".hpp", ".cs", ".go", ".rs", ".java",
+    ".kt", ".rb", ".pl", ".lua", ".tex", ".mk",
+}
+
+# The floor governs artifacts, so its walk keeps directories that the
+# markdown checks skip (examples/, tests/, archive/) and excludes only
+# what is not an artifact: VCS metadata, dependency trees, build output,
+# and run receipts. Captured data formats (CSV, TSV) are out of scope by
+# suffix, not by directory.
+FLOOR_IGNORE_DIRS = {
+    ".git", ".hg", ".svn", "node_modules", "__pycache__", ".venv",
+    "venv", "env", "vendor", "dist", "build", "out", "target",
+    "telemetry", "output", ".mypy_cache", ".pytest_cache",
+}
+
 
 class Finding:
     def __init__(self, severity, check, path, message, line=None):
@@ -52,6 +74,16 @@ def walk_text_files(root, ignore_dirs):
         dirnames[:] = [d for d in dirnames if d not in ignore_dirs]
         for fn in filenames:
             if fn.endswith((".md", ".json", ".yaml", ".yml", ".txt")):
+                yield Path(dirpath) / fn
+
+
+def walk_floor_files(root):
+    """Every text artifact format, for the style floor. See
+    FLOOR_SUFFIXES and FLOOR_IGNORE_DIRS."""
+    for dirpath, dirnames, filenames in os.walk(root):
+        dirnames[:] = [d for d in dirnames if d not in FLOOR_IGNORE_DIRS]
+        for fn in filenames:
+            if Path(fn).suffix.lower() in FLOOR_SUFFIXES:
                 yield Path(dirpath) / fn
 
 
@@ -148,9 +180,9 @@ def check_status_lines(path, text, findings):
 
 
 def check_floor(path, text, findings):
-    """Style floor: no em dashes, no ellipses, in artifacts."""
-    if path.suffix not in (".md", ".txt"):
-        return
+    """Style floor: no em dashes, no ellipses, in artifacts. The caller
+    walks the text artifact formats; captured data and run receipts stay
+    out of scope by construction."""
     for line_no, line in enumerate(text.splitlines(), 1):
         for label, char in FLOOR_PATTERNS:
             if char in line:
@@ -169,9 +201,12 @@ def lint(root, ignore_dirs):
             check_fences(path, text, findings)
             check_pointers(path, text, findings)
             check_status_lines(path, text, findings)
-            check_floor(path, text, findings)
         elif path.name == "agent-manifest.json":
             check_manifests(root, findings)
+    for path in walk_floor_files(root):
+        text = read(path)
+        if text:
+            check_floor(path, text, findings)
     return findings
 
 
@@ -185,7 +220,7 @@ def main(argv=None):
                         help="emit findings as JSON")
     parser.add_argument("--ignore", action="append", default=[],
                         help="additional directory names to skip (repeatable)")
-    parser.add_argument("--version", action="version", version="inertia-drift-lint 2.0.0")
+    parser.add_argument("--version", action="version", version="inertia-drift-lint 2.1.0")
     args = parser.parse_args(argv)
 
     root = Path(args.target).resolve()
