@@ -162,7 +162,7 @@ def emit_markdown(out_path: Path, repos, public_root: Path):
     lines.append("")
     lines.append("## Method")
     lines.append("")
-    lines.append("- Source: ~/besaid/rosetta_testbed/public, cloned 2026-09-08")
+    lines.append("- Source: a checkout of the licensed public testbed, cloned 2026-09-08")
     lines.append("  (snapshot; upstream may have moved since).")
     lines.append("- Token census, not parsing: comments stripped (block, macro,")
     lines.append("  single-line star), then feature regexes counted per file.")
@@ -230,7 +230,8 @@ def emit_markdown(out_path: Path, repos, public_root: Path):
 def main(argv=None):
     parser = argparse.ArgumentParser(prog="macro_census")
     parser.add_argument("--testbed", type=Path,
-                        default=Path.home() / "besaid/rosetta_testbed/public")
+                        default=Path("testbed/public"),
+                        help="path to a checkout of the licensed public testbed")
     parser.add_argument("--out-dir", type=Path, default=Path("docs"))
     parser.add_argument("--include-local", action="store_true",
                         help="also digest ../local privately on stdout")

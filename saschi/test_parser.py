@@ -10,6 +10,7 @@ Runs against the 56-task Roku corpus where noted. Pure stdlib unittest.
 Run: python -m unittest saschi.test_parser -v
 """
 
+import os
 import unittest
 from pathlib import Path
 
@@ -21,7 +22,10 @@ from saschi.parser import (
 )
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-ROKU_CORPUS = Path.home() / "besaid" / "saschi-roku" / "corpus"
+# Sibling checkout of the SASchi-Roku corpus; override with SASCHI_ROKU_CORPUS.
+ROKU_CORPUS = Path(os.environ.get(
+    "SASCHI_ROKU_CORPUS",
+    REPO_ROOT.parent / "saschi-roku" / "corpus"))
 
 
 class TokenizerTests(unittest.TestCase):
