@@ -62,8 +62,8 @@ evidence; the gate suite is the proof; nothing is verified by assertion.
 
 ## Requirements
 
-- Python 3.11+ with numpy, pandas, scipy, and PyYAML. The repository's
-  own venv (for example `~/besaid/.venv`) carries the gate stack.
+- Python 3.11+ with numpy, pandas, scipy, and PyYAML. A venv with the
+  gate stack (for example `.venv` beside this checkout) carries it.
 - R (for the R halves of the gold pairs). `Rscript` must be on PATH, or
   set `ROSETTA_RSCRIPT` to the full path. The R interpreter is found via
   `ROSETTA_RSCRIPT`, then `Rscript` on PATH.
@@ -81,7 +81,7 @@ python verify_all.py
 Use the venv python that has the gate stack, for example:
 
 ```sh
-~/besaid/.venv/bin/python verify_all.py
+python verify_all.py
 ```
 
 A bare system python3 without numpy and pandas produces phantom
@@ -104,7 +104,7 @@ the failing construct names appear in the output.
 Each verifier also runs standalone, for example:
 
 ```sh
-~/besaid/.venv/bin/python examples/verify_merge.py
+python examples/verify_merge.py
 ```
 
 ## Reading the receipts
@@ -143,7 +143,7 @@ The rulebook loader and construct router carry their own unit tests,
 run against the shipped YAML:
 
 ```sh
-~/besaid/.venv/bin/python -m unittest saschi.test_rules -v
+python -m unittest saschi.test_rules -v
 ```
 
 28 tests: rule count and uniqueness, family counts, ticket semantics for
@@ -154,8 +154,8 @@ statements), and function routing (ROUND, INTCK, LAG, TRANWRD, SUM).
 The parser and the translation lane carry their own suites:
 
 ```sh
-~/besaid/.venv/bin/python -m unittest saschi.test_parser -v
-~/besaid/.venv/bin/python -m unittest saschi.test_emit_py -v
+python -m unittest saschi.test_parser -v
+python -m unittest saschi.test_emit_py -v
 ```
 
 `test_parser` proves fence robustness, including across the 56-task Roku
@@ -171,7 +171,7 @@ python3 tools/macro_census.py
 
 Regenerates `docs/macro_surface_census.csv` and
 `docs/macro_surface_census.md` from the licensed public testbed
-(`~/besaid/rosetta_testbed/public`). Deterministic: identical output on
+(point `--testbed` at your checkout of it). Deterministic: identical output on
 identical input. The estate bench under `testbed/local/` is never written
 to the shipped output; `--include-local` prints a private comparison to
 stdout only.

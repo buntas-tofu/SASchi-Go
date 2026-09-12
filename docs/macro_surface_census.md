@@ -8,7 +8,7 @@ reported here. Corrections land as new commits.
 
 ## Method
 
-- Source: ~/besaid/rosetta_testbed/public, cloned 2026-09-08
+- Source: a checkout of the licensed public testbed, cloned 2026-09-08
   (snapshot; upstream may have moved since).
 - Token census, not parsing: comments stripped (block, macro,
   single-line star), then feature regexes counted per file.
