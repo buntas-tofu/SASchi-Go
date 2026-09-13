@@ -2,13 +2,14 @@
 """verify_weights.py : the fixture gate for WEIGHT semantics (quirk 12,
 second half).
 
-Pins the exclusion rule (missing weight excludes; zero and negative weights
-are INCLUDED by default, which is what the EXCLNPWGT option's existence
-proves, settling the dossier conflict), the documented VARDEF divisor set
-(DF n-1, N n, WDF sum(w)-1, WEIGHT sum(w), refuting the effective-df
-hallucination), the zero-weight DF-divisor shift, the negative-CSS
-pathology reading as missing, and PROC FREQ's weighted cells. Hand-computed
-pins, then Python/R agreement, row-count guarded.
+Pins the exclusion and conversion rules (missing weight excludes; a negative
+weight is converted to zero with the row retained; EXCLNPWGT drops
+nonpositive rows entirely; per SAS documentation, cross-checked by the
+outside review 2026-09-13, live-SAS receipt pending), the documented VARDEF
+divisor set (DF n-1, N n, WDF sum(w)-1, WEIGHT sum(w), refuting the
+effective-df hallucination), the zero-weight DF-divisor shift, and PROC
+FREQ's weighted cells. Hand-computed pins, then Python/R agreement,
+row-count guarded.
 """
 
 import math
@@ -30,13 +31,13 @@ NAN = float("nan")
 BASE = [(1.0, 2.0), (2.0, 3.0), (3.0, 5.0)]           # sw=10, mean 2.3, css 6.1
 ZERO = BASE + [(100.0, 0.0)]                          # n rises to 4, sums hold
 MISSW = BASE + [(100.0, None)]                        # excluded entirely
-NEG = [(1.0, 2.0), (5.0, -1.0)]                       # sw=1, css -32
+NEG = [(1.0, 2.0), (5.0, -1.0)]                       # zeroed: sw=2, mean 1.0, css 0
 
 WSTAT_CASES = [
     ("mean", 0, BASE), ("std_df", 0, BASE), ("std_n", 0, BASE),
     ("std_wdf", 0, BASE), ("std_weight", 0, BASE),
     ("mean", 0, MISSW), ("std_df", 0, ZERO), ("std_df", 1, ZERO),
-    ("mean", 0, NEG), ("std_df", 0, NEG),
+    ("mean", 0, NEG), ("std_df", 0, NEG), ("std_df", 1, NEG),
 ]
 
 PY_STAT = {"mean": lambda p, e: sas_weighted_mean(p, excl_npwgt=e),
@@ -61,23 +62,30 @@ def main() -> int:
             print(f"  FAIL {got} want {want}")
     print(f"  {len(pins)} pins checked")
 
-    print("2) the exclusion rules (the dossier conflict, settled):")
+    print("2) the exclusion and conversion rules:")
     checks = [
         ("missing weight excludes", sas_weighted_mean(MISSW), 2.3),
         ("zero weight shifts the DF divisor",
          sas_weighted_std(ZERO, "DF"), math.sqrt(6.1 / 3)),
         ("EXCLNPWGT restores",
          sas_weighted_std(ZERO, "DF", excl_npwgt=True), math.sqrt(6.1 / 2)),
-        ("negative weights compute the mean", sas_weighted_mean(NEG), -3.0),
+        ("negative weight converts to zero, mean follows",
+         sas_weighted_mean(NEG), 1.0),
+        ("converted row stays in the count, std reads 0",
+         sas_weighted_std(NEG, "DF"), 0.0),
+        ("EXCLNPWGT on negative weights drops the row",
+         sas_weighted_std(NEG, "DF", excl_npwgt=True), None),
     ]
     for name, got, want in checks:
+        if want is None:
+            if got is not None:
+                failed += 1
+                print(f"  FAIL {name}: {got}, want missing")
+            continue
         if got is None or abs(got - want) > 1e-12:
             failed += 1
             print(f"  FAIL {name}: {got} want {want}")
-    if sas_weighted_std(NEG, "DF") is not None:
-        failed += 1
-        print("  FAIL negative CSS must read as missing")
-    print(f"  {len(checks) + 1} rules checked")
+    print(f"  {len(checks)} rules checked")
 
     print("3) weighted FREQ cells:")
     freq = sas_freq_weighted([("a", 1.5), ("a", 2.0), ("b", 0.5),

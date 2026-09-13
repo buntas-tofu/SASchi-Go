@@ -4,11 +4,12 @@
 
 Pins the BEGINNING default (the landmine: month + 1 from the 15th lands on
 the 1st, where every naive same-day idiom lands on the 15th, demonstrated
-inline), SAME's end-clipping across leap and non-leap, END, the MIDDLE
-floor-midpoint, Sunday-first weeks anchored to the epoch's own Friday, and
-INTCK WEEK boundary counting. Then a 240-case grid agreement sweep across
-intervals, alignments, and edge dates, Python against base R, row-count
-guarded.
+inline), SAME's end-clipping across leap and non-leap, the QTR SAME
+month-anchored day-clipping grid (repaired 2026-09-13 per the outside
+review; live-SAS receipt pending), END, the MIDDLE floor-midpoint,
+Sunday-first weeks anchored to the epoch's own Friday, and INTCK WEEK
+boundary counting. Then a grid agreement sweep across intervals,
+alignments, and edge dates, Python against base R, row-count guarded.
 """
 
 import datetime
@@ -40,6 +41,14 @@ PINS = [
     (("week", 0, 0, "B"), -5),
     (("week", 0, 0, "E"), 1),
     (("year", d(2020, 2, 29), 1, "SAME"), d(2021, 2, 28)),
+    (("qtr", d(2020, 1, 31), 1, "SAME"), d(2020, 4, 30)),
+    (("qtr", d(2020, 4, 30), -1, "SAME"), d(2020, 1, 30)),
+    (("qtr", d(2020, 5, 31), -1, "SAME"), d(2020, 2, 29)),
+    (("qtr", d(2021, 11, 30), 1, "SAME"), d(2022, 2, 28)),
+    (("qtr", d(2020, 8, 31), 2, "SAME"), d(2021, 2, 28)),
+    (("qtr", d(2020, 3, 15), 1, "SAME"), d(2020, 6, 15)),
+    (("qtr", d(2020, 12, 31), 1, "SAME"), d(2021, 3, 31)),
+    (("qtr", d(2021, 3, 31), -1, "SAME"), d(2020, 12, 31)),
     (("qtr", d(2020, 5, 20), 1, "B"), d(2020, 7, 1)),
     (("day", d(2020, 1, 15), 10, "B"), d(2020, 1, 25)),
 ]
@@ -105,7 +114,7 @@ def main() -> int:
             for inc in (-1, 0, 1, 5)
             for al in ("B", "E")] + \
            [(iv, dd, 1, al)
-            for iv in ("month", "year")
+            for iv in ("month", "qtr", "year")
             for dd in dates
             for al in ("M", "SAME")]
     py = [sas_intnx(*case) for case in grid]
