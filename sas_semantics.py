@@ -609,36 +609,41 @@ def sas_kurtosis(vals):
 
 
 # ---------------------------------------------------------------------------
-# WEIGHT semantics (quirk 12, second half). PROC MEANS with a WEIGHT variable,
-# pinned against two conflicting dossiers. (1) THE EXCLUSION RULE: a MISSING
-# weight excludes the observation; zero and negative weights are INCLUDED by
-# default, and the documented EXCLNPWGT option exists precisely to exclude
-# nonpositive weights, which proves the default includes them (one dossier
-# asserted excluded-as-missing; the option's existence refutes it). A zero
-# weight therefore contributes nothing to the sums but still counts toward n,
-# which silently changes the VARDEF=DF divisor: the subtlest consequence and
-# a pinned fixture. (2) THE DIVISOR SET: VARDEF=DF divides the weighted CSS
-# by n-1 (observation count, not weight sum), N by n, WDF by sum(w)-1, and
-# WEIGHT by sum(w). One dossier offered sum(w) - sum(w^2)/sum(w) for
-# VARDEF=WEIGHT: that is the effective-df of reliability weights, a real
-# statistics concept hallucinated into SAS, refuted by the documented set.
-# (3) PATHOLOGY IS HONEST: negative weights can drive the weighted CSS
-# negative, and the reference returns missing for the std rather than
-# inventing a number. (4) PROC FREQ's WEIGHT sums possibly non-integer
-# weights into cell counts, missing weights excluded, and levels whose total
-# weight is zero drop from the table by default (the ZEROS option exists to
-# keep them). Weighted skewness and kurtosis are deferred, documented: the
-# SAS weighted higher-moment formulas need their own spec pass.
+# WEIGHT semantics (quirk 12, second half). PROC MEANS with a WEIGHT variable.
+# (1) THE EXCLUSION AND CONVERSION RULES: a MISSING weight excludes the
+# observation. A NEGATIVE weight is converted to zero while the observation
+# is RETAINED in the count, which is what the EXCLNPWGT option proves when it
+# drops nonpositive weights entirely (documented; outside review 2026-09-13,
+# P1; live-SAS receipt pending, probe p13). A zero weight therefore
+# contributes nothing to the sums but still counts toward n, which silently
+# changes the VARDEF=DF divisor: the subtlest consequence and a pinned
+# fixture. (2) THE DIVISOR SET: VARDEF=DF divides the weighted CSS by n-1
+# (observation count, not weight sum), N by n, WDF by sum(w)-1, and WEIGHT by
+# sum(w). One dossier offered sum(w) - sum(w^2)/sum(w) for VARDEF=WEIGHT:
+# that is the effective-df of reliability weights, a real statistics concept
+# hallucinated into SAS, refuted by the documented set. (3) ZEROED ROWS STILL
+# COUNT: once negative weights are converted to zero the weighted CSS cannot
+# go negative; the retired reading carried negative weights numerically and
+# returned missing for the std, superseded by the documented behavior above.
+# (4) PROC FREQ's WEIGHT sums possibly non-integer weights into cell counts,
+# missing weights excluded, and levels whose total weight is zero drop from
+# the table by default (the ZEROS option exists to keep them). Weighted
+# skewness and kurtosis are deferred, documented: the SAS weighted
+# higher-moment formulas need their own spec pass.
 # ---------------------------------------------------------------------------
 
 
 def _weighted_rows(pairs, excl_npwgt=False):
     """(x, w) pairs as PROC MEANS uses them: missing weight excludes the row,
-    missing x excludes the row (analysis variable), EXCLNPWGT drops w <= 0."""
+    missing x excludes the row (analysis variable), EXCLNPWGT drops w <= 0,
+    and by default a negative weight is converted to zero with the row
+    retained in the count (documented, live-SAS receipt pending)."""
     rows = [(float(x), float(w)) for x, w in pairs
             if not is_sas_missing(x) and not is_sas_missing(w)]
     if excl_npwgt:
         rows = [(x, w) for x, w in rows if w > 0]
+    else:
+        rows = [(x, max(w, 0.0)) for x, w in rows]
     return rows
 
 
@@ -990,6 +995,17 @@ def sas_intnx(interval, days, increment, alignment="B"):
                     out = datetime.date(first.year, d.month, d.day)
                 except ValueError:
                     out = datetime.date(first.year, d.month, 28)
+            elif iv == "QTR":
+                # SAME for QTR: same number of MONTHS from the start of
+                # the interval as the input date, day clipped within the
+                # target month (documented; outside review 2026-09-13, P1;
+                # live-SAS receipt pending, probe p14). The retired reading
+                # moved by elapsed days.
+                anchor_idx = (_month_index(d) // step) * step
+                months_in = _month_index(d) - anchor_idx
+                t_first, t_last = _month_bounds(idx + months_in)
+                out = datetime.date(t_first.year, t_first.month,
+                                    min(d.day, t_last.day))
             else:
                 anchor_first, _al = _month_bounds(
                     (_month_index(d) // step) * step)

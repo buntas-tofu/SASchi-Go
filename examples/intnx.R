@@ -5,7 +5,9 @@
 #   week  : d1:num, d2:num -> Sunday boundaries crossed
 #
 # Base R only. Month-family intervals advance by interval INDEX then align
-# (BEGINNING default, MIDDLE floor-midpoint, END last day, SAME clipped);
+# (BEGINNING default, MIDDLE floor-midpoint, END last day, SAME clipped:
+# month-offset arithmetic for QTR per the documented rule, elapsed-day
+# legacy for MONTH);
 # WEEK begins Sunday (epoch 01JAN1960 was a Friday, its week began
 # 27DEC1959, day -5).
 
@@ -56,6 +58,15 @@ sas_intnx <- function(interval, days, inc, align) {
                                        p$mday)),
                        error = function(e) as.Date(NA))
       if (is.na(cand)) as.Date(sprintf("%04d-%02d-28", y, p$mon + 1)) else cand
+    } else if (iv == "QTR") {
+      # SAME for QTR: same number of MONTHS from the interval start as the
+      # input date, day clipped within the target month (documented;
+      # outside review 2026-09-13, P1; live-SAS receipt pending, probe p14).
+      anchor_idx <- (midx(d) %/% 3) * 3
+      months_in <- midx(d) - anchor_idx
+      tf <- mfirst(idx + months_in)
+      ndays <- as.integer(mfirst(idx + months_in + 1) - tf)
+      tf + (min(as.POSIXlt(d)$mday, ndays) - 1)
     } else {
       anchor <- mfirst((midx(d) %/% step) * step)
       offset <- as.integer(d - anchor)
