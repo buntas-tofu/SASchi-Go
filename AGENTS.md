@@ -333,7 +333,7 @@ right.
   lands as one commit with its receipt.
 - **Project-specific constraints**: no runtime dependencies beyond the gate
   set (Python standard library plus numpy, pandas, scipy, PyYAML for the
-  rulebook loader, and base R); every
+  rulebook loader, duckdb for the SQL target gates, and base R); every
   claim in the README or docs is backed by a passing gate or a receipt; the
   sibling SASchi-Roku stays a data repository.
 
