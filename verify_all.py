@@ -64,6 +64,7 @@ SUITES = [
     ("suite-parser", "saschi.test_parser"),
     ("suite-rules", "saschi.test_rules"),
     ("suite-emitter", "saschi.test_emit_py"),
+    ("suite-rulebook", "saschi.test_rulebook"),
 ]
 
 
