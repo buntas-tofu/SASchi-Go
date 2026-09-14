@@ -319,9 +319,12 @@ right.
   it pass; committing `telemetry/` (receipts regenerate); lifting
   estate-derived or third-party material into the tree; changing the four
   core invariants without an issue first.
-- **CI**: the governance workflow runs the invariant linter and validates
-  `agent-manifest.json` against `agent-manifest.schema.json` on every push
-  to main.
+- **CI**: two workflows, both on every push and pull request to main. The
+  governance workflow runs the invariant linter and validates
+  `agent-manifest.json` against `agent-manifest.schema.json`. The verification
+  workflow runs `python verify_all.py`: every fixture gate plus the parser,
+  router, and emitter suites, so ALL VERIFIED covers the translator and not only
+  the fixture surface.
 - **File conventions**: one R twin plus one `verify_*.py` gate per construct
   in `examples/`; `sas_semantics.py` and `kb01/sas_semantics_reference.txt`
   stay in lockstep; receipts live in `telemetry/` (gitignored).
