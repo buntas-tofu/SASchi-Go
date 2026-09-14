@@ -26,6 +26,13 @@ called, and the module raises when executed, so the artifact and the report
 cannot disagree about whether the program ran. The partial body stays readable
 through translate(source, allow_partial=True), which marks the file as an
 inspection artifact rather than a conversion.
+
+Zero tickets means every semantically relevant token was accounted for. A
+statement the emitter accepts and then reduces tickets rather than emitting the
+reduction: `put x= "suffix"` used to emit the name and drop the literal, DATA
+options were consumed as framing, and a statement the splitter could not fence
+was translated whatever fragment it happened to hold. Each of those is refused
+now, and the emitted artifact declares the scope it was checked against.
 """
 
 from __future__ import annotations
@@ -48,7 +55,10 @@ VAR_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 CALL_RE = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*)\s*\((.*)\)$")
 DATA_RE = re.compile(r"^data\s+([A-Za-z_][A-Za-z0-9_]*)", re.I)
 PUT_NAMED_RE = re.compile(r"^put\s+(.*)$", re.I)
-PUT_NAME_RE = re.compile(r"([A-Za-z_][A-Za-z0-9_]*)\s*=")
+# One item of the named-list form: a name immediately followed by `=`. Anchored
+# at the front because the caller consumes items one at a time and then holds
+# whatever is left over against the statement.
+PUT_ITEM_RE = re.compile(r"\s*([A-Za-z_][A-Za-z0-9_]*)\s*=")
 
 EMITTERS_SLICE_ONE = ("round",)
 
@@ -106,6 +116,25 @@ def _translate_atom(atom: str) -> str | None:
     return None
 
 
+def _consume_put_names(items: str) -> tuple[list[str], str]:
+    """Consume the `name=` items of a named-list PUT and return what is left.
+
+    The emitter used to collect every `name=` in the statement and ignore
+    whatever else was there, so `put x= "suffix"` emitted the name, dropped the
+    literal, and reported zero tickets. The leftover text is returned so the
+    caller can refuse a statement it did not fully account for.
+    """
+    names: list[str] = []
+    rest = items
+    while True:
+        m = PUT_ITEM_RE.match(rest)
+        if not m:
+            break
+        names.append(m.group(1))
+        rest = rest[m.end():]
+    return names, rest.strip()
+
+
 def translate(source: str, allow_partial: bool = False) -> Translation:
     """Translate one SAS program (data-step subset) to Python.
 
@@ -131,13 +160,30 @@ def translate(source: str, allow_partial: bool = False) -> Translation:
 
     for st in statements:
         text = st.text
+        # A statement the splitter could not fence has no known boundary. The
+        # text may be a fragment of a longer statement or two statements fused,
+        # so translating it would be a guess wearing the costume of a
+        # translation.
+        if not st.terminated:
+            ticket(st.line, text, "unterminated",
+                   "the splitter could not find this statement's terminator, so "
+                   "its boundary is unknown")
+            continue
         construct, _rule_id = route_statement(text)
         lower = text.lower()
 
         if construct == "data-step":
             m = DATA_RE.match(text)
-            body.append(f"# data step {m.group(1) if m else '?'}"
-                        f" (SAS line {st.line})")
+            name = m.group(1) if m else "?"
+            # DATA options change what the step produces and none of them are
+            # implemented, so accepting them as framing would silently drop
+            # behaviour the program asked for.
+            leftover = text[m.end():].strip() if m else text
+            if leftover:
+                ticket(st.line, text, "data-step",
+                       f"DATA options are not implemented: {leftover!r}")
+                continue
+            body.append(f"# data step {name} (SAS line {st.line})")
             continue
         if lower in ("run", "quit"):
             body.append(f"# {lower}; (SAS line {st.line})")
@@ -183,11 +229,18 @@ def translate(source: str, allow_partial: bool = False) -> Translation:
                 continue
             m = PUT_NAMED_RE.match(text)
             if m:
-                names = PUT_NAME_RE.findall(m.group(1))
-                if names:
+                names, leftover = _consume_put_names(m.group(1))
+                if names and not leftover:
                     uses.add("_put")
                     pairs = ", ".join(f'("{n}", {n})' for n in names)
                     emit(f"_put([{pairs}])", st.line)
+                    continue
+                if names:
+                    # Accepted and then silently reduced is the worst of the
+                    # three outcomes, so the leftover text is refused by name.
+                    ticket(st.line, text, "put",
+                           "the named-list form takes only name= items, so "
+                           f"{leftover!r} is unaccounted for")
                     continue
                 ticket(st.line, text, "put",
                        "only the named-list form (r1= r2=) emits in slice"
@@ -204,6 +257,11 @@ def translate(source: str, allow_partial: bool = False) -> Translation:
         "# rounding program surface). Target language: Python. Emitted code",
         "# calls the semantics reference from sas_semantics; run it with the",
         "# repository root importable. Every line traces to a SAS source line.",
+        "#",
+        "# Scope: a scalar and log demonstration, not a dataset-producing",
+        "# program. It computes values and prints them. SET, MERGE, BY, RETAIN,",
+        "# and OUTPUT are not modelled, so a statement that uses one tickets",
+        "# instead of emitting.",
     ]
     if blocked and not allow_partial:
         header += [
