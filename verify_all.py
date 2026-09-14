@@ -5,6 +5,13 @@ Runs each verifier as a subprocess (with the R runtime on PATH), captures
 pass or fail, writes a receipt JSON to the telemetry drive, and appends a run
 record. The receipt is the deliverable: per construct, proven against the SAS
 rule and agreed across Python and R, traceable to the tool commit that made it.
+
+It also runs the translator suites. Until 2026-09-14 this file covered the 21
+fixture gates and nothing that translates: the parser, the router, and the
+emitter all sat outside the unified command, and CI ran only the governance
+linter and the manifest check. A change that broke translation could pass every
+gate here and both CI jobs, which is a gate that says nothing about the thing
+it appears to cover. ALL VERIFIED now means the translator is covered too.
 """
 
 import datetime
@@ -50,6 +57,15 @@ VERIFIERS = [
     ("matrix", HERE / "examples" / "verify_matrix.py"),
 ]
 
+# The translator suites, run as unittest modules. They carry the same weight as
+# a fixture gate in the verdict: a receipt that says ALL VERIFIED says the
+# translator was covered, not only the fixture surface.
+SUITES = [
+    ("suite-parser", "saschi.test_parser"),
+    ("suite-rules", "saschi.test_rules"),
+    ("suite-emitter", "saschi.test_emit_py"),
+]
+
 
 def git_sha() -> str:
     r = subprocess.run(["git", "-C", str(HERE), "rev-parse", "--short", "HEAD"],
@@ -66,6 +82,7 @@ def main() -> int:
     for name, path in VERIFIERS:
         if not path.exists():
             results.append({"construct": name, "verifier": path.name,
+                            "kind": "fixture",
                             "passed": False, "summary": "verifier missing"})
             print(f"[MISS] {name}: {path.name} not found")
             continue
@@ -73,6 +90,16 @@ def main() -> int:
                            text=True, env=env)
         tail = (r.stdout.strip().splitlines() or [r.stderr.strip()[:120] or ""])[-1]
         results.append({"construct": name, "verifier": path.name,
+                        "kind": "fixture",
+                        "passed": r.returncode == 0, "summary": tail})
+        print(f"[{'PASS' if r.returncode == 0 else 'FAIL'}] {name}: {tail}")
+
+    for name, module in SUITES:
+        r = subprocess.run([sys.executable, "-m", "unittest", module],
+                           capture_output=True, text=True, cwd=str(HERE), env=env)
+        combined = (r.stdout.strip() + "\n" + r.stderr.strip()).strip()
+        tail = (combined.splitlines() or [""])[-1]
+        results.append({"construct": name, "verifier": module, "kind": "suite",
                         "passed": r.returncode == 0, "summary": tail})
         print(f"[{'PASS' if r.returncode == 0 else 'FAIL'}] {name}: {tail}")
 

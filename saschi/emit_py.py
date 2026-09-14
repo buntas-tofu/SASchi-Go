@@ -16,6 +16,16 @@ conditionals, and the rest of the fixture set.
 Output rendering note: PUT is rendered at 17 significant digits, number
 fidelity first. SAS's own PUT display format is a later refinement; the
 translation tests pin the double, not the typography.
+
+A ticket BLOCKS the artifact. Until 2026-09-14 a ticket was a comment at the
+statement site while the rest of the program emitted and ran, so a program
+whose control flow was dropped still produced an executable file that looked
+like a successful translation: the IF became a comment and its body executed
+anyway. A blocked unit now emits diagnostics plus a partial body that is never
+called, and the module raises when executed, so the artifact and the report
+cannot disagree about whether the program ran. The partial body stays readable
+through translate(source, allow_partial=True), which marks the file as an
+inspection artifact rather than a conversion.
 """
 
 from __future__ import annotations
@@ -55,11 +65,18 @@ class Ticket:
 
 @dataclass
 class Translation:
-    """The emitted program plus its accounting."""
+    """The emitted program plus its accounting.
+
+    `blocked` is the load-bearing field: a translation with tickets did not
+    cover the program, so `code` refuses to execute. Anything reading this
+    object must check `blocked` rather than assume a non-empty `code` is
+    runnable.
+    """
 
     code: str
     matched: list = field(default_factory=list)  # (construct, rule_id, line)
     tickets: list = field(default_factory=list)  # Ticket records
+    blocked: bool = False
 
 
 def _split_args(arg_text: str) -> list[str]:
@@ -89,8 +106,15 @@ def _translate_atom(atom: str) -> str | None:
     return None
 
 
-def translate(source: str) -> Translation:
-    """Translate one SAS program (data-step subset) to Python."""
+def translate(source: str, allow_partial: bool = False) -> Translation:
+    """Translate one SAS program (data-step subset) to Python.
+
+    Zero tickets means the whole program was covered and `code` runs. Any
+    ticket means the program was covered only in part: `code` carries the
+    diagnostics and a body that is never called, and executing it raises.
+    `allow_partial` returns the partial body as runnable code for inspection,
+    marked on its face as not a conversion.
+    """
     statements = split_statements(source)
     body: list[str] = []
     matched: list[tuple[str, str, int]] = []
@@ -174,13 +198,34 @@ def translate(source: str) -> Translation:
 
         ticket(st.line, text, construct, "no emitter in slice one")
 
-    code_lines = [
+    blocked = bool(tickets)
+    header = [
         "# Translated by saschi emit_py (Track A step 3, slice one: the",
         "# rounding program surface). Target language: Python. Emitted code",
         "# calls the semantics reference from sas_semantics; run it with the",
         "# repository root importable. Every line traces to a SAS source line.",
-        "",
     ]
+    if blocked and not allow_partial:
+        header += [
+            "#",
+            f"# BLOCKED: {len(tickets)} unsupported construct(s). This is NOT a runnable",
+            "# conversion. Emitting it as code would execute statements whose",
+            "# surrounding control flow was dropped, which changes what the program",
+            "# means while looking like a translation that worked.",
+            "#",
+            "# The partial body below is preserved so a person can read it. It is",
+            "# never called and this module refuses to execute.",
+        ]
+    elif blocked:
+        header += [
+            "#",
+            f"# PARTIAL: {len(tickets)} unsupported construct(s). This body is an",
+            "# inspection artifact, not a conversion. Statements whose control flow",
+            "# was dropped still execute here, so this output is not the program's",
+            "# output.",
+        ]
+
+    code_lines = list(header) + [""]
     if "sas_round" in uses:
         code_lines.append("from sas_semantics import sas_round")
     if "_put" in uses:
@@ -189,8 +234,29 @@ def translate(source: str) -> Translation:
         code_lines.append(
             '    print(" ".join(name + "=" + format(value, ".17g")'
             " for name, value in pairs))")
-    code_lines.append("")
-    code_lines.extend(body)
+
+    if blocked and not allow_partial:
+        # A function whose body is only comments has no body as far as Python is
+        # concerned, so a program that ticketed on every statement would emit a
+        # file that does not compile. That failure is worse than the one this
+        # gate exists to prevent, so the inert body always carries a statement.
+        inert = list(body)
+        if not inert or all(
+            not line.strip() or line.lstrip().startswith("#") for line in inert
+        ):
+            inert = ["pass"] + inert
+        code_lines += ["", "def _unreachable_partial_body():"]
+        code_lines += [f"    {line}" if line else "" for line in inert]
+        code_lines += [
+            "",
+            "raise RuntimeError(",
+            f'    "saschi: blocked translation, {len(tickets)} unsupported construct(s)."',
+            '    " Nothing from this program was executed."',
+            ")",
+        ]
+    else:
+        code_lines.append("")
+        code_lines.extend(body)
     code = "\n".join(code_lines) + "\n"
 
-    return Translation(code=code, matched=matched, tickets=tickets)
+    return Translation(code=code, matched=matched, tickets=tickets, blocked=blocked)
