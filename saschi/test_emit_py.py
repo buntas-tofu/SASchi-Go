@@ -141,5 +141,51 @@ class BlockedProgramTests(unittest.TestCase):
         self.assertNotIn("# BLOCKED", t.code)
 
 
+class FullConsumptionTests(unittest.TestCase):
+    """A4: zero tickets means every semantically relevant token was accounted for.
+
+    The emitter used to accept a statement and then quietly reduce it. The
+    named-list PUT collected every `name=` and ignored the rest, DATA options
+    were consumed as framing, and a statement the splitter could not fence was
+    translated whatever fragment it held. All three produced an artifact that
+    looked complete.
+    """
+
+    def test_put_suffix_is_refused_not_dropped(self):
+        t = translate('data _null_; x=1; put x= "suffix"; run;')
+        self.assertTrue(t.blocked)
+        self.assertTrue(any(tk.construct == "put" for tk in t.tickets))
+        self.assertIn("unaccounted for", t.tickets[0].reason)
+
+    def test_named_list_put_still_emits(self):
+        t = translate("data _null_; x=1; y=2; put x= y=; run;")
+        self.assertFalse(t.blocked)
+        self.assertIn('_put([("x", x), ("y", y)])', t.code)
+
+    def test_data_options_are_refused(self):
+        t = translate("data d (drop=x); x=1; run;")
+        self.assertTrue(t.blocked)
+        self.assertTrue(any("DATA options" in tk.reason for tk in t.tickets))
+
+    def test_unterminated_statement_is_refused(self):
+        t = translate('data _null_; x=1; put x= "suffix"')
+        self.assertTrue(t.blocked)
+        self.assertTrue(any(tk.construct == "unterminated" for tk in t.tickets))
+
+    def test_a_lost_statement_boundary_is_refused(self):
+        # A1's shape. This does not repair the tokenizer. It refuses to
+        # translate a statement whose boundary the splitter lost, which is the
+        # honest answer while the tokenizer still fuses `%str(a;b)` with what
+        # follows it.
+        t = translate("%let x = %str(a;b); y=1;")
+        self.assertTrue(t.blocked)
+        self.assertTrue(any(tk.construct == "unterminated" for tk in t.tickets))
+
+    def test_every_artifact_declares_its_scope(self):
+        for source in ("data d; x = 1.5; run;", "%mend;"):
+            with self.subTest(source=source):
+                self.assertIn("not a dataset-producing", translate(source).code)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
