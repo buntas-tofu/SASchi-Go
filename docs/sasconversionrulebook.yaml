@@ -188,9 +188,9 @@ rules:
   - rule_id: DS-006
     sas_pattern: "FIRST.var / LAST.var / RETAIN / sum statement / counters"
     scope: data-step
-    python_target: {package: pandas, pattern: "stable sort; g=df.groupby(keys, dropna=False); first=~df.duplicated(keys); last=~df.duplicated(keys, keep='last'); run=g[c].fillna(0).cumsum(); ctr=g.cumcount()+1"}
+    python_target: {package: pandas, pattern: "stable sort; g=df.groupby(keys, dropna=False); first=~df.duplicated(keys); last=~df.duplicated(keys, keep='last'); run=df.assign(_x=df[c].fillna(0)).groupby(keys, dropna=False)['_x'].cumsum(); ctr=g.cumcount()+1"}
     r_target: {package: dplyr, pattern: "arrange(...) |> group_by(...) |> mutate(first=row_number()==1, last=row_number()==n(), run=cumsum(coalesce(x,0)), ctr=row_number())"}
-    required_settings: ["stable sort with SAS-identical order incl. missing-first", "fillna(0)/coalesce before cumsum (sum statement treats missing increment as 0)", "pandas groupby dropna=False (SAS keeps the missing BY group)"]
+    required_settings: ["stable sort with SAS-identical order incl. missing-first", "fillna(0)/coalesce before cumsum (sum statement treats missing increment as 0)", "pandas groupby dropna=False (SAS keeps the missing BY group)", "fill the column BEFORE grouping: SeriesGroupBy.fillna was removed in pandas 3, so the cumulative sum has to come from a pre-filled column instead of an aggregation call", "the pattern is executed over multiple groups in saschi/test_rulebook.py rather than trusted"]
     equivalence_class: EQUIVALENT-WITH-SETTINGS
     silent_difference_checks: ["ungrouped RETAIN carries across BY boundaries; match scoping", "WHERE applied before FIRST./LAST. changes flags; subsetting IF after does not"]
     validation_test: "(key, first, last, running_sum) tuples row-for-row after identical sort"
@@ -200,11 +200,13 @@ rules:
   - rule_id: DS-007
     sas_pattern: "LAG()/DIF() inside conditional logic"
     scope: data-step
-    python_target: {package: pandas, pattern: "shift the FULL column first (g[c].shift(1)), then apply the condition"}
-    r_target: {package: dplyr, pattern: "mutate(l = lag(x)) then conditional logic on l"}
+    python_target: {package: pandas, pattern: "two cases, and the difference is the whole rule. Unconditional LAG with conditional USE of its result: shift the full column first (g[c].shift(1)), then apply the condition. LAG called INSIDE the condition: the queue advances only where the call executes, so a column shift is wrong. Model the occurrence's queue directly: read the slot, then push the current value, and only on rows where the call runs."}
+    r_target: {package: dplyr, pattern: "unconditional queue with conditional use: mutate(l = lag(x)) then conditional logic on l. conditional CALL: an explicit queue, because dplyr::lag is row-based and cannot express invocation-driven history"}
+    required_settings: ["decide first whether the CALL SITE is conditional. A conditional use of an unconditional queue is a shift. A conditional call is a queue, and is not"]
+    forbidden_patterns: ["translating a conditional LAG call as a column shift (returns the previous ROW where SAS returns the previous EXECUTION)"]
     equivalence_class: EQUIVALENT-WITH-SETTINGS
-    silent_difference_checks: ["SAS LAG is a queue: executed conditionally it returns the value at the previous EXECUTION, not the previous row. Direct translation of conditional LAG is wrong"]
-    validation_test: "fixture where the condition skips rows; compare derived column vs SAS"
+    silent_difference_checks: ["SAS LAG is a queue: executed conditionally it returns the value at the previous EXECUTION, not the previous row. Direct translation of conditional LAG is wrong", "each LAG occurrence carries its own queue, so two calls in one statement have independent history", "a BY-group boundary does not itself execute or reset a queue"]
+    validation_test: "values 10,20,30,40 with the occurrence executed only on rows two and four: SAS returns missing then 20, where a full-column shift returns 10 and 30. Executed in saschi/test_rulebook.py"
     confidence: high
     sources: [S-01]
 
@@ -223,13 +225,13 @@ rules:
   - rule_id: DS-009
     sas_pattern: "PROC TRANSPOSE"
     scope: data-step
-    python_target: {package: pandas, pattern: "pivot_table(index=ids, columns=name, values=val, aggfunc='last') / melt(id_vars=ids)"}
-    r_target: {package: tidyr, pattern: "pivot_wider(names_from, values_from, values_fn=last) / pivot_longer(cols)"}
-    required_settings: ["aggfunc='last' / values_fn=last when duplicate IDs possible (SAS keeps last)"]
-    forbidden_patterns: ["pivot_table default aggfunc (silently averages duplicates)"]
+    python_target: {package: pandas, pattern: "pivot_table(index=ids, columns=name, values=val, aggfunc='last') where the SAS step specified LET / melt(id_vars=ids). Without LET a duplicate ID is an error in SAS, so the port raises instead of choosing a row."}
+    r_target: {package: tidyr, pattern: "pivot_wider(names_from, values_from, values_fn=last) only where LET was specified / pivot_longer(cols)"}
+    required_settings: ["aggfunc='last' / values_fn=last ONLY where the SAS step specified LET. LET is what makes last-observation behaviour the documented contract rather than a lucky choice", "without LET, preserve the failure: a duplicate ID must raise, not silently keep one"]
+    forbidden_patterns: ["pivot_table default aggfunc (silently averages duplicates)", "aggfunc='last' applied to a step that did not specify LET (converts a SAS error into a silent pick)"]
     equivalence_class: EQUIVALENT-WITH-SETTINGS
-    silent_difference_checks: ["mixed numeric+char transposes: SAS converts all to char", "no-ID transpose generates COL1..COLn: replicate with within-group cumcount"]
-    validation_test: "identical wide shape; spot-check a BY group containing duplicate IDs"
+    silent_difference_checks: ["mixed numeric+char transposes: SAS converts all to char", "no-ID transpose generates COL1..COLn: replicate with within-group cumcount", "duplicate formatted IDs stop processing without LET, and keep the last occurrence with it"]
+    validation_test: "identical wide shape; a duplicate ID with LET keeps the last occurrence and the same input without LET raises. Executed in saschi/test_rulebook.py"
     confidence: high
     sources: [S-01]
 
@@ -380,11 +382,13 @@ rules:
   - rule_id: SQL-001
     sas_pattern: "PROC SQL general queries"
     scope: proc-sql
-    python_target: {package: duckdb, pattern: "duckdb.sql(query).df(); near-verbatim port incl. correlated subqueries; CALCULATED aliases usually work unchanged"}
+    python_target: {package: duckdb, pattern: "duckdb.sql(query).df(); near-verbatim port incl. correlated subqueries. CALCULATED is SAS-only syntax and must be rewritten, not passed through: replace the keyword with the alias expression it refers to, or wrap the query so the alias is already a column."}
     r_target: {package: duckdb, pattern: "DBI::dbGetQuery(con, query); idiomatic alternative: dplyr verbs"}
+    required_settings: ["drop the CALCULATED keyword and inline the SELECT-list expression it refers to before executing. The engine raises a parser error on the keyword, so the query does not run at all as written"]
+    forbidden_patterns: ["passing CALCULATED through to the engine"]
     equivalence_class: EQUIVALENT
-    silent_difference_checks: ["PROC SQL joins ARE Cartesian on duplicate keys (unlike MERGE); determine which semantics the legacy program relied on before porting"]
-    validation_test: "row-for-row vs SAS on sorted output"
+    silent_difference_checks: ["PROC SQL joins ARE Cartesian on duplicate keys (unlike MERGE); determine which semantics the legacy program relied on before porting", "the rewrite changes nothing when the alias is a plain expression, and can change evaluation order when the alias references an aggregate"]
+    validation_test: "row-for-row vs SAS on sorted output, and the rewritten CALCULATED query executes. Executed in saschi/test_rulebook.py"
     confidence: high
     sources: [S-01]
 
