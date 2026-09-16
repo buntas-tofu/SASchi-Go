@@ -1,3 +1,16 @@
+# Changes for 0.2.0
+
+Status: development changes with repository verification; no live SAS claim.
+
+- Repair lexical fences and contextual routing; retain unsupported text as tickets.
+- Add versioned operation plans, numeric Python dataset execution, and a C++17
+  scalar backend with cross-backend tests.
+- Add the operator CLI, installable packaging, dependency snapshot, and a composed
+  rounding/sort/merge example with pinned and base-R output.
+- Record source hashes, full diagnostics, and runtime versions in checksummed
+  receipts; fail synthesis on incomplete execution and preserve binary64 CSV values.
+- Keep the original fixture gates and extend unified verification and CI.
+
 # Changelog
 
 All notable changes to SASchi-Go are recorded here. Versioning is semver per

@@ -19,6 +19,8 @@ from typing import Any, Optional
 import yaml
 
 RULEBOOK_DEFAULT = Path(__file__).resolve().parent.parent / "docs" / "sasconversionrulebook.yaml"
+if not RULEBOOK_DEFAULT.is_file():
+    RULEBOOK_DEFAULT = Path(__file__).resolve().parent / "data" / "sasconversionrulebook.yaml"
 
 
 @dataclass(frozen=True)
@@ -207,19 +209,19 @@ STATEMENT_ROUTER: list[tuple[re.Pattern, str]] = [
     (re.compile(r"^\s*PROC\s+IMPORT\b", re.I), "import"),
     (re.compile(r"^\s*PROC\s+SURVEYSELECT\b", re.I), "survey-select"),
     (re.compile(r"^\s*PROC\s+SURVEYFREQ\b", re.I), "survey-freq"),
-    (re.compile(r"^\s*PROC\s+SURVEYREG\b|SURVEYLOGISTIC\b|SURVEYPHREG\b", re.I), "survey-reg"),
+    (re.compile(r"^\s*PROC\s+(?:SURVEYREG|SURVEYLOGISTIC|SURVEYPHREG)\b", re.I), "survey-reg"),
     (re.compile(r"^\s*PROC\s+SURVEYMEANS\b", re.I), "survey-means"),
-    (re.compile(r"^\s*PROC\s+GLM\b|REG\b|ANOVA\b", re.I), "stat-glm"),
+    (re.compile(r"^\s*PROC\s+(?:GLM|REG|ANOVA)\b", re.I), "stat-glm"),
     (re.compile(r"^\s*PROC\s+LOGISTIC\b", re.I), "stat-logistic"),
     (re.compile(r"^\s*PROC\s+GENMOD\b", re.I), "stat-gee"),
-    (re.compile(r"^\s*PROC\s+MIXED\b|GLIMMIX\b", re.I), "stat-mixed"),
-    (re.compile(r"^\s*PROC\s+PHREG\b|LIFETEST\b", re.I), "stat-survival"),
-    (re.compile(r"^\s*PROC\s+PRINCOMP\b|FACTOR\b|CLUSTER\b|CORR\b", re.I), "stat-multivariate"),
-    (re.compile(r"^\s*PROC\s+ARIMA\b|ESM\b|EXPAND\b", re.I), "stat-timeseries"),
+    (re.compile(r"^\s*PROC\s+(?:MIXED|GLIMMIX)\b", re.I), "stat-mixed"),
+    (re.compile(r"^\s*PROC\s+(?:PHREG|LIFETEST)\b", re.I), "stat-survival"),
+    (re.compile(r"^\s*PROC\s+(?:PRINCOMP|FACTOR|CLUSTER|CORR)\b", re.I), "stat-multivariate"),
+    (re.compile(r"^\s*PROC\s+(?:ARIMA|ESM|EXPAND)\b", re.I), "stat-timeseries"),
     (re.compile(r"^\s*PROC\s+TTEST\b", re.I), "stat-ttest"),
     (re.compile(r"^\s*PROC\s+NPAR1WAY\b", re.I), "stat-wilcoxon"),
     (re.compile(r"^\s*PROC\s+FREQ\b", re.I), "stat-freq"),
-    (re.compile(r"^\s*PROC\s+MEANS\b|SUMMARY\b|UNIVARIATE\b", re.I), "stat-means"),
+    (re.compile(r"^\s*PROC\s+(?:MEANS|SUMMARY|UNIVARIATE)\b", re.I), "stat-means"),
     (re.compile(r"^\s*PROC\s+SQL\b", re.I), "sql-general"),
     (re.compile(r"^\s*PROC\s+DATASETS\b", re.I), "macro-autoexec"),
     (re.compile(r"^\s*UPDATE\b", re.I), "update"),
@@ -256,12 +258,17 @@ REMERGE_HINT = re.compile(r"\bSELECT\b[\s\S]*?(AVG|SUM|MEAN|MAX|MIN)\s*\([\s\S]*
 INTO_MACRO_HINT = re.compile(r"\bINTO\s*:", re.I)
 
 
-def route_statement(statement: str) -> tuple[str, str]:
+def route_statement(statement: str, context: str | None = None) -> tuple[str, str]:
     """Route one statement to (construct_name, rule_id).
 
     Unroutable statements return ("unknown", ""); the caller decides
     whether that is a ticket or a pass-through (v1: ticket).
     """
+    # SQL clauses arrive separately after statement splitting.
+    if context == "sql" and re.match(r"^\s*(select|create|insert|update|delete)\b", statement, re.I):
+        if INTO_MACRO_HINT.search(statement):
+            return "sql-into", CONSTRUCT_MAP["sql-into"]
+        return "sql-general", CONSTRUCT_MAP["sql-general"]
     for rx, construct in STATEMENT_ROUTER:
         if rx.search(statement):
             if construct == "sql-general":
@@ -276,6 +283,8 @@ def route_statement(statement: str) -> tuple[str, str]:
 
 def route_function(call: str) -> tuple[str, str]:
     """Route one function call to (construct_name, rule_id)."""
+    # Function names inside literals are data, not calls.
+    call = re.sub(r"\"(?:\"\"|[^\"])*\"|'(?:''|[^'])*'", " ", call)
     for rx, construct in FUNCTION_ROUTER:
         if rx.search(call):
             rule_id = CONSTRUCT_MAP.get(construct, "")

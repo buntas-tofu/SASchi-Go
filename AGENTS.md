@@ -312,7 +312,8 @@ right.
 ## LOCAL
 
 - **Allowed tools**: Python 3.11+ (numpy, pandas, scipy) and R (Rscript)
-  for the fixture gates; the bundled linter (`scripts/inertia-drift-lint`);
+  for the fixture gates; C++17 compilation for the scalar backend pilot;
+  the bundled linter (`scripts/inertia-drift-lint`);
   git; file operations inside the repository. The golden path is one
   command: `python verify_all.py`.
 - **Prohibited**: weakening, skipping, or reordering a fixture gate to make
@@ -336,5 +337,13 @@ right.
   rulebook loader, duckdb for the SQL target gates, and base R); every
   claim in the README or docs is backed by a passing gate or a receipt; the
   sibling SASchi-Roku stays a data repository.
+
+## Operational direction, 2026-09-15
+
+The principal authorized a target-independent execution plan and permits Julia,
+C++, and algorithm redesign. Python/R remain existing verification references;
+additional targets must carry executable evidence. This session owns operational
+work. The concurrent Bedrock KB session owns knowledge-base work. The current
+host is wutai; cloud and fahrenheit are repository synchronization peers.
 
 <!-- DMF:LOCAL:END -->

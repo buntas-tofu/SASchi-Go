@@ -1,39 +1,38 @@
 name: Verification
-
-# The golden path, run where it cannot be skipped. Until 2026-09-14 CI ran the
-# governance linter and the manifest check and nothing else, so the translator
-# itself had no enforced gate: a change that broke emission could be green here
-# and still be broken. This workflow runs the same command a person runs locally.
-#
-# Dependency bounds rather than a frozen set: the fixture gates produce the
-# numbers this repository is about, and an unbounded numpy or pandas would one
-# day turn a red run into a mystery about which side broke.
-
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
-
 jobs:
   verify:
-    name: Fixture gates and translator suites
+    name: Fixture gates, portable plans, and synthesis
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: buntas-tofu/SASchi-Roku
+          ref: 00b8b8879292309ef67d8351a05d333a0d66b9ae
+          path: .verification-corpus
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.x"
-      - name: Install the gate dependencies
-        run: pip install "numpy>=2.0,<3" "pandas>=3.0,<4" "scipy>=1.15,<2" "PyYAML>=6,<7" "duckdb>=1.0,<2"
-      - name: Install R (the cross-language half of the gold-pair gates)
+          python-version: "3.12"
+      - name: Install the pinned gate dependencies
+        run: |
+          pip install -r requirements-verify.lock
+          pip install --no-deps -e .
+      - name: Install base R and the C++ compiler
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends r-base-core
-          Rscript --version
-      - name: Run every gate
-        run: python verify_all.py
-      - name: Keep the receipt
+          sudo apt-get install -y --no-install-recommends r-base-core g++
+      - name: Check the environment and run every gate
+        env:
+          SASCHI_ROKU_CORPUS: ${{ github.workspace }}/.verification-corpus/corpus
+        run: |
+          saschi doctor
+          python verify_all.py
+      - name: Keep receipts and diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:

@@ -55,19 +55,26 @@ evidence; the gate suite is the proof; nothing is verified by assertion.
   `emit_py.py` emits Python for the data-step subset (slice one: the
   rounding fixture). Tests in `saschi/test_parser.py`,
   `saschi/test_rules.py`, and `saschi/test_emit_py.py`.
-- `verify_all.py` : runs every fixture gate, emits a signed receipt JSON.
+- `verify_all.py` : runs every fixture gate, emits a checksummed receipt JSON.
   One command, the whole proof.
 - `telemetry/` : run artifacts (receipts, run records). Gitignored;
   rerun `verify_all.py` to regenerate.
 
+## Operational additions
+
+[Operations](OPERATIONS.md) is the current installation and execution guide for
+version 0.2. It specifies the shared plan, Python numeric dataset workflow, C++
+scalar pilot, and schema-version-2 verification receipts. The historical fixture
+reference below describes the original interfaces.
+
 ## Requirements
 
-- Python 3.11+ with numpy, pandas, scipy, and PyYAML. A venv with the
+- Python 3.11+ with numpy, pandas, scipy, PyYAML, and duckdb. A venv with the
   gate stack (for example `.venv` beside this checkout) carries it.
 - R (for the R halves of the gold pairs). `Rscript` must be on PATH, or
   set `ROSETTA_RSCRIPT` to the full path. The R interpreter is found via
   `ROSETTA_RSCRIPT`, then `Rscript` on PATH.
-- No other runtime dependencies. The linter and the census tool are pure
+- The C++ pilot gate also requires a C++17 compiler. No other runtime dependencies. The linter and the census tool are pure
   standard library.
 
 ## Running the gates

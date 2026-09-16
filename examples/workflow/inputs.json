@@ -1,0 +1,10 @@
+{
+  "raw": {
+    "schema": {"id": "number", "amount": "number"},
+    "rows": [{"id": 2, "amount": 2.5}, {"id": 1, "amount": -1.5}, {"id": 1, "amount": 3.5}]
+  },
+  "lookup": {
+    "schema": {"id": "number", "flag": "number"},
+    "rows": [{"id": 3, "flag": 30}, {"id": 1, "flag": 10}]
+  }
+}
