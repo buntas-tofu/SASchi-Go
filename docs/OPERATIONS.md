@@ -1,4 +1,4 @@
-# Operating the numeric workflow
+# Operating the bounded workflow
 
 Status: executable repository contract and fixture evidence. No live SAS
 comparison is claimed. The maintainer may use this workflow for development
@@ -46,27 +46,20 @@ labels are normalized to lowercase. PUT uses 17 significant digits, not SAS
 format typography. Inputs are copied; execution does not modify the caller's
 catalog. Empty outputs retain a schema.
 
-The supported source subset is deliberately finite:
-
-- DATA with one simple name and implicit output, or DATA _NULL_ for log output.
-- Numeric/missing assignments and two-argument ROUND over atoms.
-- Named-list PUT with no additional rendering options.
-- One SET input before computations.
-- Two MERGE inputs before computations with ascending BY keys.
-- PROC SORT DATA=name [OUT=name] [NODUPKEY] followed by ascending BY keys.
-
-MERGE requires sorted inputs and rejects keys repeated on both sides (DS-003).
-Macro expansion, statistical procedures, SQL execution, explicit OUTPUT,
-character data, special missing categories, automatic variables, RETAIN, and
-other control flow remain unsupported. Inline data is lexically preserved but
-not executed. A malformed fence blocks translation. Scalar/log operation plans
-can be inspected through the Python API's explicit partial mode; partial output
-is never an accepted conversion and the CLI does not expose that mode.
+The supported source subset includes the numeric workflow above and the
+[version 2 stateful contract](STATEFUL_EXECUTION.md): one DATA destination,
+explicit OUTPUT snapshots, simple WHERE/IF predicates, retained numeric state,
+initial lookup SET, character byte widths, and typed metadata. That document
+specifies syntax, catalog descriptors, comparisons, and remaining review cases.
+Unsupported source still produces tickets; data-dependent incompatibilities
+produce a failed execution receipt. Inline data is preserved but not executed.
+Partial API execution remains inspection-only and is not exposed by the CLI.
 
 ## Shared plan and additional backends
 
-Plan version 1 stores typed numeric/missing/variable atoms, operations with source
-lines, step-local state, input dependencies, BY keys, and review tickets. Python
+Plan version 2 stores typed expressions, declarations, read/output events, source
+lines, retained state, input dependencies, BY keys, and review tickets. Version 1
+serialized plans remain readable. Python
 executes the plan. The C++17 pilot emits scalar DATA _NULL_ programs from the same
 plan and rejects dataset operations. It uses the same binary64 rounding contract.
 The compiled pilot gate compares fixed pins and 40 seeded rounding cases with
@@ -96,7 +89,7 @@ The unified command retains all original fixture gates in their original order,
 runs the translator and operations suites, then runs six synthesized families
 with ten deterministic seeds each. Synthesis uses a 17-digit CSV transport with
 base R, pandas, and the semantics reference. It requires all 60 cases to execute
-and agree. Its drafts are generated directly, so synthesis is separate evidence
+and agree under the explicit typed policy in the stateful contract. Its drafts are generated directly, so synthesis is separate evidence
 from source translation. Missing runtimes, timeouts, missing output, incomplete
 case counts, and numerical divergence fail the gate.
 

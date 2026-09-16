@@ -1,0 +1,12 @@
+{
+  "config": {"schema": {"fee": "number"}, "rows": [{"fee": 6}, {"fee": 100}]},
+  "raw": {
+    "schema": {"group": "number", "keep": "number", "amount": "number"},
+    "rows": [
+      {"group": 7, "keep": 0, "amount": 100},
+      {"group": 7, "keep": 1, "amount": 2},
+      {"group": 7, "keep": 1, "amount": 4},
+      {"group": 9, "keep": 1, "amount": 8}
+    ]
+  }
+}

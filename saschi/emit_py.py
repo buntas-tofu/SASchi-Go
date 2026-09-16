@@ -17,9 +17,9 @@ def translate(source: str, allow_partial: bool = False) -> Translation:
     parsed = compile_plan(source)
     plan = parsed.to_dict()
     lines = [
-        "# SASchi plan version 1, Python target.",
-        "# Scope: numeric DATA steps, scalar assignments, ROUND, named-list PUT,",
-        "# one SET input, two-input MERGE BY, ascending PROC SORT and NODUPKEY.",
+        "# SASchi plan version 2, Python target.",
+        "# Scope: numeric DATA steps and typed character catalogs; bounded stateful events,",
+        "# OUTPUT, WHERE/IF, retained state, SET, numeric MERGE, ascending SORT.",
         "# Evidence: repository fixtures; not a live-SAS comparison.",
     ]
     for step in parsed.steps:

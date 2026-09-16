@@ -58,6 +58,8 @@ VERIFIERS = [
     ("freq", HERE / "examples" / "verify_freq.py"),
     ("laplace", HERE / "examples" / "verify_laplace.py"),
     ("matrix", HERE / "examples" / "verify_matrix.py"),
+    ("data-events", HERE / "examples" / "verify_events.py"),
+    ("typed-metadata", HERE / "examples" / "verify_metadata.py"),
 ]
 
 # The translator suites, run as unittest modules. They carry the same weight as
@@ -71,6 +73,9 @@ SUITES = [
     ("suite-plan", "saschi.test_plan"),
     ("suite-cpp", "saschi.test_cpp"),
     ("suite-operations", "saschi.test_operations"),
+    ("suite-comparison", "saschi.test_compare"),
+    ("suite-events", "saschi.test_events"),
+    ("suite-metadata", "saschi.test_metadata"),
 ]
 
 
