@@ -152,7 +152,10 @@ class CorpusTests(unittest.TestCase):
             with self.subTest(file=path.name):
                 src = path.read_text(encoding="utf-8", errors="replace")
                 stmts = split_statements(src)
-                self.assertGreater(len(stmts), 0, f"{path.name}: no statements")
+                if path.name == "comments.sas":
+                    self.assertEqual(stmts, [], "the comment-only task has no executable statements")
+                else:
+                    self.assertGreater(len(stmts), 0, f"{path.name}: no statements")
                 for s in stmts:
                     self.assertTrue(s.text.strip(), f"{path.name}: empty statement")
 
@@ -183,6 +186,9 @@ class CorpusTests(unittest.TestCase):
                 if not src.lstrip().startswith("/*"):
                     continue
                 stmts = split_statements(src)
+                if not stmts:
+                    self.assertEqual(path.name, "comments.sas")
+                    continue
                 self.assertNotIn("Source:", stmts[0].text,
                                  f"{path.name}: provenance header leaked into statement")
 

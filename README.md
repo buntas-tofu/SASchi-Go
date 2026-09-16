@@ -13,6 +13,16 @@ numbers matched, not because it looked right. Every fixture gate in this
 repository demands byte-equal output between the Python and R translations,
 checked against hand-pinned truth and the semantics reference.
 
+## Operational workflow
+
+The numeric execution workflow and C++ scalar pilot use a shared, versioned
+operation plan. See [Operations](docs/OPERATIONS.md) for installation, the CLI,
+explicit scope, receipts, and peer synchronization. The composed example in
+`examples/workflow/` runs rounding, sorting, and a one-to-many merge against a
+pinned result and a base-R counterpart. Python executes numeric datasets;
+C++ currently supports scalar DATA _NULL_ programs. Julia remains an extension
+option. Algorithm redesign must preserve a stated behavior contract.
+
 ## Layout
 
 - `sas_semantics.py` : reference implementations of SAS-quirk functions
@@ -29,10 +39,9 @@ checked against hand-pinned truth and the semantics reference.
   receipts, understanding the equivalence classes, and verifying a new
   construct family.
 - `saschi/` : the program-level translator package (Track A). `parser.py`
-  splits statements fence-robustly, `rules.py` loads the rulebook and
-  routes constructs, and `emit_py.py` emits Python for the data-step
-  subset (slice one: the rounding fixture, emitted code calling the
-  semantics reference). Tests: `saschi/test_parser.py`,
+  preserves statement fences, `rules.py` loads the rulebook and
+  routes constructs, and the shared plan drives Python numeric dataset execution
+  and a C++ scalar backend. Tests: `saschi/test_parser.py`,
   `saschi/test_rules.py`, `saschi/test_emit_py.py`.
 - `kb01/sas_semantics_reference.txt` : the semantics reference as plain
   text, for humans and for diffs.
@@ -40,7 +49,7 @@ checked against hand-pinned truth and the semantics reference.
 - `synth.py` : program-level synthesis across characterized construct
   families, seeded and deterministic. Runs cross-language and reference
   gates; the live-SAS capture stage is optional and license-gated.
-- `verify_all.py` : runs every fixture gate, emits a signed receipt JSON.
+- `verify_all.py` : runs every fixture gate, emits a checksummed receipt JSON.
   One command, the whole proof.
 - `tools/macro_census.py` : token census of the macro surface across the
   licensed public testbed, deterministic, pure stdlib. Outputs the

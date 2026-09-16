@@ -70,7 +70,9 @@ class TicketTests(unittest.TestCase):
     def test_plain_assignment_emits(self):
         t = translate("data d; x = 1.5; run;")
         self.assertEqual([], t.tickets)
-        self.assertIn("x = 1.5", t.code)
+        namespace = {}
+        exec(t.code, namespace)
+        self.assertEqual(namespace["result"]["datasets"]["d"]["rows"], [{"x": 1.5}])
 
     def test_unroutable_statement_becomes_ticket(self):
         t = translate("data _null_; bogus nonsense here; run;")
@@ -160,7 +162,7 @@ class FullConsumptionTests(unittest.TestCase):
     def test_named_list_put_still_emits(self):
         t = translate("data _null_; x=1; y=2; put x= y=; run;")
         self.assertFalse(t.blocked)
-        self.assertIn('_put([("x", x), ("y", y)])', t.code)
+        self.assertEqual(_run(t.code), "x=1 y=2")
 
     def test_data_options_are_refused(self):
         t = translate("data d (drop=x); x=1; run;")
@@ -173,18 +175,16 @@ class FullConsumptionTests(unittest.TestCase):
         self.assertTrue(any(tk.construct == "unterminated" for tk in t.tickets))
 
     def test_a_lost_statement_boundary_is_refused(self):
-        # A1's shape. This does not repair the tokenizer. It refuses to
-        # translate a statement whose boundary the splitter lost, which is the
-        # honest answer while the tokenizer still fuses `%str(a;b)` with what
-        # follows it.
+        # The repaired scanner preserves boundaries; macro expansion remains
+        # unsupported and the entire program must still refuse execution.
         t = translate("%let x = %str(a;b); y=1;")
         self.assertTrue(t.blocked)
-        self.assertTrue(any(tk.construct == "unterminated" for tk in t.tickets))
+        self.assertTrue(any(tk.construct == "macro-let" for tk in t.tickets))
 
     def test_every_artifact_declares_its_scope(self):
         for source in ("data d; x = 1.5; run;", "%mend;"):
             with self.subTest(source=source):
-                self.assertIn("not a dataset-producing", translate(source).code)
+                self.assertIn("# Scope: numeric DATA steps", translate(source).code)
 
 
 if __name__ == "__main__":

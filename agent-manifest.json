@@ -20,7 +20,7 @@
   "project": {
     "name": "SASchi-Go",
     "description": "SAS-to-open-language migration toolkit: semantics reference, gold-pair verifiers, and translation rulebook.",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "repo_root": ".",
     "primary_language": "Python",
     "framework": "dmf",
@@ -44,7 +44,7 @@
     },
     {
       "tool_id": "verify_all",
-      "description": "Runs every gold-pair fixture gate and emits a signed receipt under telemetry/."
+      "description": "Runs every gold-pair fixture gate and emits a checksummed receipt under telemetry/."
     }
   ],
   "provenance": {

@@ -70,17 +70,26 @@ def sasnum(x):
 # ---- run and compare ------------------------------------------------------
 def run_prog(lang, code, wd):
     fn = "d.py" if lang == "py" else "d.R"
+    if lang == "r":
+        # CSV must preserve binary64 digits; base write.csv otherwise prints
+        # too few significant digits near the integer precision boundary.
+        code = """write_result <- function(d, path, ...) {
+  d[] <- lapply(d, function(x) ifelse(is.na(x), NA_character_, sprintf("%.17g", x)))
+  write.csv(d, path, row.names=FALSE, na="")
+}
+""" + code.replace("write.csv(", "write_result(")
     (wd / fn).write_text(code)
     cmd = [PY, str(wd / fn)] if lang == "py" else [str(RSCRIPT), str(wd / fn)]
+    (wd / "results.csv").unlink(missing_ok=True)
     try:
         r = subprocess.run(cmd, cwd=wd, capture_output=True, text=True, timeout=60)
-    except subprocess.TimeoutExpired:
-        return None, "timeout"
-    f = wd / "results.feather"
+    except (subprocess.TimeoutExpired, OSError) as exc:
+        return None, str(exc)
+    f = wd / "results.csv"
     if r.returncode != 0 or not f.exists():
-        return None, (r.stderr or "no feather")[-400:]
+        return None, (r.stderr or "no CSV")[-400:]
     import pandas as pd
-    df = pd.read_feather(f)
+    df = pd.read_csv(f, float_precision="round_trip")
     return {c: df[c].tolist() for c in df.columns}, None
 
 
@@ -128,14 +137,14 @@ def round_py(s, naive):
     u = s["u"]
     core = (f"rx=[float('nan') if x!=x else round(x/{u})*{u} for x in X]" if naive else
             f"rx=[float('nan') if x!=x else math.copysign(math.floor(abs(x)/{u}+0.5+1e-9)*{u},x) for x in X]")
-    return f"import math\nimport pandas as pd\nX={pylist(s['x'])}\n{core}\npd.DataFrame({{'x':X,'rx':rx}}).to_feather('results.feather')\n"
+    return f"import math\nimport pandas as pd\nX={pylist(s['x'])}\n{core}\npd.DataFrame({{'x':X,'rx':rx}}).to_csv('results.csv',index=False)\n"
 
 
 def round_r(s, naive):
     u = s["u"]
     core = (f"rx<-round(X/{u})*{u}" if naive else
             f"rx<-ifelse(is.na(X),NA_real_,sign(X)*floor(abs(X)/{u}+0.5+1e-9)*{u})")
-    return f"suppressMessages(library(arrow))\nX<-{rvec(s['x'])}\n{core}\nwrite_feather(data.frame(x=X,rx=rx),'results.feather')\n"
+    return f"X<-{rvec(s['x'])}\n{core}\nwrite.csv(data.frame(x=X,rx=rx),'results.csv',row.names=FALSE,na='')\n"
 
 
 def round_sas(s):
@@ -161,12 +170,12 @@ def mc_exp(s):
 def mc_py(s, naive):
     core = ("flag=[(1 if x<0 else 0) for x in X]" if naive else
             "flag=[(1 if (x!=x or x<0) else 0) for x in X]")
-    return f"import pandas as pd\nX={pylist(s['x'])}\n{core}\npd.DataFrame({{'x':X,'flag':flag}}).to_feather('results.feather')\n"
+    return f"import pandas as pd\nX={pylist(s['x'])}\n{core}\npd.DataFrame({{'x':X,'flag':flag}}).to_csv('results.csv',index=False)\n"
 
 
 def mc_r(s, naive):
     expr = "as.integer(X<0)" if naive else "ifelse(is.na(X)|X<0,1L,0L)"
-    return f"suppressMessages(library(arrow))\nX<-{rvec(s['x'])}\nflag<-{expr}\nwrite_feather(data.frame(x=X,flag=flag),'results.feather')\n"
+    return f"X<-{rvec(s['x'])}\nflag<-{expr}\nwrite.csv(data.frame(x=X,flag=flag),'results.csv',row.names=FALSE,na='')\n"
 
 
 def mc_sas(s):
@@ -204,15 +213,15 @@ def mx_py(s, naive):
         core = ("def mx(*v):\n vv=[t for t in v if t==t]\n return max(vv) if vv else float('nan')\n"
                 "m=[mx(x,y,z) for x,y,z in zip(A,B,C)]")
     return (f"import pandas as pd\nA={pylist(a)}\nB={pylist(b)}\nC={pylist(c)}\n{core}\n"
-            "pd.DataFrame({'a':A,'b':B,'c':C,'m':m}).to_feather('results.feather')\n")
+            "pd.DataFrame({'a':A,'b':B,'c':C,'m':m}).to_csv('results.csv',index=False)\n")
 
 
 def mx_r(s, naive):
     a, b, c = mx_cols(s)
     core = ("m<-pmax(A,B,C)" if naive else
             "m<-pmax(A,B,C,na.rm=TRUE)\nm[!is.finite(m)]<-NA_real_")
-    return (f"suppressMessages(library(arrow))\nA<-{rvec(a)}\nB<-{rvec(b)}\nC<-{rvec(c)}\n{core}\n"
-            "write_feather(data.frame(a=A,b=B,c=C,m=m),'results.feather')\n")
+    return (f"A<-{rvec(a)}\nB<-{rvec(b)}\nC<-{rvec(c)}\n{core}\n"
+            "write.csv(data.frame(a=A,b=B,c=C,m=m),'results.csv',row.names=FALSE,na='')\n")
 
 
 def mx_sas(s):
@@ -250,7 +259,7 @@ def ic_py(s, naive):
             "n=[float(yr(b)-yr(a)) for a,b in zip(D1,D2)]")
     return (f"import pandas as pd\nD1={d1!r}\nD2={d2!r}\n{core}\n"
             "pd.DataFrame({'d1':[float(x) for x in D1],'d2':[float(x) for x in D2],'n':n})"
-            ".to_feather('results.feather')\n")
+            ".to_csv('results.csv',index=False)\n")
 
 
 def ic_r(s, naive):
@@ -259,9 +268,9 @@ def ic_r(s, naive):
     core = ("n<-floor((D2-D1)/365.25)" if naive else
             "yr<-function(k) as.integer(format(as.Date(k,origin='1960-01-01'),'%Y'))\n"
             "n<-as.numeric(yr(D2)-yr(D1))")
-    return (f"suppressMessages(library(arrow))\nD1<-{d1}\nD2<-{d2}\n{core}\n"
-            "write_feather(data.frame(d1=as.numeric(D1),d2=as.numeric(D2),n=as.numeric(n)),"
-            "'results.feather')\n")
+    return (f"D1<-{d1}\nD2<-{d2}\n{core}\n"
+            "write.csv(data.frame(d1=as.numeric(D1),d2=as.numeric(D2),n=as.numeric(n)),"
+            "'results.csv',row.names=FALSE,na='')\n")
 
 
 def ic_sas(s):
@@ -295,15 +304,15 @@ def st_py(s, naive):
             "d=pd.DataFrame({'i':[t[0] for t in rows],'x':[t[1] for t in rows]})")
     return (f"import pandas as pd\nI={I!r}\nX={X}\n{core}\n"
             "pd.DataFrame({'oi':[float(v) for v in d['i']],'ox':list(d['x'])})"
-            ".to_feather('results.feather')\n")
+            ".to_csv('results.csv',index=False)\n")
 
 
 def st_r(s, naive):
     I = "c(" + ",".join(str(r["i"]) for r in s["rows"]) + ")"
     X = rvec([r["x"] for r in s["rows"]])
     core = "o<-order(X)" if naive else "o<-order(!is.na(X),X)"
-    return (f"suppressMessages(library(arrow))\nI<-{I}\nX<-{X}\n{core}\n"
-            "write_feather(data.frame(oi=as.numeric(I[o]),ox=X[o]),'results.feather')\n")
+    return (f"I<-{I}\nX<-{X}\n{core}\n"
+            "write.csv(data.frame(oi=as.numeric(I[o]),ox=X[o]),'results.csv',row.names=FALSE,na='')\n")
 
 
 def st_sas(s):
@@ -334,13 +343,13 @@ def np_py(s, naive):
     core = ("ID=list(X)\nID2=[i+1 for i in X]" if naive else
             "ID=[float(i) for i in X]\nID2=[float(i)+1.0 for i in X]")
     return (f"import pandas as pd\nX={s['ids']!r}\n{core}\n"
-            "pd.DataFrame({'id':ID,'id2':ID2}).to_feather('results.feather')\n")
+            "pd.DataFrame({'id':ID,'id2':ID2}).to_csv('results.csv',index=False)\n")
 
 
 def np_r(s, naive):
     ids = "c(" + ",".join(str(i) for i in s["ids"]) + ")"
-    return (f"suppressMessages(library(arrow))\nX<-{ids}\n"
-            "write_feather(data.frame(id=X,id2=X+1),'results.feather')\n")
+    return (f"X<-{ids}\n"
+            "write.csv(data.frame(id=X,id2=X+1),'results.csv',row.names=FALSE,na='')\n")
 
 
 def np_sas(s):
@@ -400,6 +409,8 @@ def run_family(fam, K, outdir):
 
 def main():
     K = int(os.environ.get("K", "10"))
+    if K <= 0:
+        raise ValueError("K must be positive")
     os.makedirs(SYNTH_OUT, exist_ok=True)
     print(f"synthesizing {len(FAMILIES)} families x {K} seeds, three-rung gate:\n")
     grand = {"ran": 0, "fpass": 0, "ncaught": 0, "blind": 0, "ffail": 0}
@@ -416,7 +427,9 @@ def main():
           f"reference-only catches (rung-1 blind) {grand['blind']} | "
           f"faithful divergences to chase: {grand['ffail']}")
     print(f"SAS staged for live capture -> {SYNTH_OUT}/*.sas")
+    expected = len(FAMILIES) * K
+    return 0 if grand["ran"] == expected and grand["fpass"] == expected else 1
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""verify_all.py : run every fixture gate, emit a signed receipt to telemetry.
+"""verify_all.py : run every fixture gate, emit a checksummed receipt to telemetry.
 
 Runs each verifier as a subprocess (with the R runtime on PATH), captures
 pass or fail, writes a receipt JSON to the telemetry drive, and appends a run
@@ -21,6 +21,9 @@ import os
 import shutil
 import subprocess
 import sys
+import time
+import uuid
+from saschi.provenance import environment, source_state
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -65,6 +68,9 @@ SUITES = [
     ("suite-rules", "saschi.test_rules"),
     ("suite-emitter", "saschi.test_emit_py"),
     ("suite-rulebook", "saschi.test_rulebook"),
+    ("suite-plan", "saschi.test_plan"),
+    ("suite-cpp", "saschi.test_cpp"),
+    ("suite-operations", "saschi.test_operations"),
 ]
 
 
@@ -74,52 +80,62 @@ def git_sha() -> str:
     return r.stdout.strip() or "NA"
 
 
-def main() -> int:
-    ts = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    host, sha = "local", git_sha()
-    env = {**os.environ, "PATH": f"{RBIN}:{os.environ.get('PATH', '')}"}
+def run_check(name, command, kind, env):
+    started = time.monotonic()
+    try:
+        run = subprocess.run(command, capture_output=True, text=True, cwd=HERE,
+                             env=env, timeout=900)
+        code, stdout, stderr = run.returncode, run.stdout, run.stderr
+    except subprocess.TimeoutExpired as exc:
+        code = 124
+        stdout = exc.stdout or b""
+        stderr = exc.stderr or b""
+        stdout = stdout.decode(errors="replace") if isinstance(stdout, bytes) else stdout
+        stderr = (stderr.decode(errors="replace") if isinstance(stderr, bytes) else stderr) + "\nverification timeout"
+    except OSError as exc:
+        code, stdout, stderr = 127, "", str(exc)
+    combined = (stdout + "\n" + stderr).strip()
+    summary = (combined.splitlines() or [""])[-1]
+    print(f"[{'PASS' if code == 0 else 'FAIL'}] {name}: {summary}", flush=True)
+    return {"construct": name, "verifier": command[-1], "kind": kind,
+            "passed": code == 0, "returncode": code, "summary": summary,
+            "duration_seconds": time.monotonic() - started,
+            "stdout": stdout, "stderr": stderr}
 
+
+def main() -> int:
+    ts = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    run_id = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S") + "_" + uuid.uuid4().hex[:12]
+    env = {**os.environ, "PATH": f"{RBIN}:{os.environ.get('PATH', '')}"}
+    runtime, source = environment(), source_state(HERE)
     results = []
     for name, path in VERIFIERS:
-        if not path.exists():
-            results.append({"construct": name, "verifier": path.name,
-                            "kind": "fixture",
-                            "passed": False, "summary": "verifier missing"})
-            print(f"[MISS] {name}: {path.name} not found")
-            continue
-        r = subprocess.run([sys.executable, str(path)], capture_output=True,
-                           text=True, env=env)
-        tail = (r.stdout.strip().splitlines() or [r.stderr.strip()[:120] or ""])[-1]
-        results.append({"construct": name, "verifier": path.name,
-                        "kind": "fixture",
-                        "passed": r.returncode == 0, "summary": tail})
-        print(f"[{'PASS' if r.returncode == 0 else 'FAIL'}] {name}: {tail}")
-
+        results.append(run_check(name, [sys.executable, str(path)], "fixture", env))
     for name, module in SUITES:
-        r = subprocess.run([sys.executable, "-m", "unittest", module],
-                           capture_output=True, text=True, cwd=str(HERE), env=env)
-        combined = (r.stdout.strip() + "\n" + r.stderr.strip()).strip()
-        tail = (combined.splitlines() or [""])[-1]
-        results.append({"construct": name, "verifier": module, "kind": "suite",
-                        "passed": r.returncode == 0, "summary": tail})
-        print(f"[{'PASS' if r.returncode == 0 else 'FAIL'}] {name}: {tail}")
-
-    receipt = {"ts_utc": ts, "host": host, "tool_git": sha,
-               "constructs": results,
-               "all_passed": all(x["passed"] for x in results)}
+        results.append(run_check(name, [sys.executable, "-m", "unittest", module], "suite", env))
+    synth_env = {**env, "K": "10", "ROSETTA_TESTBED": str(TEL.resolve() / "synthesis")}
+    results.append(run_check("synthesis", [sys.executable, str(HERE / "synth.py")], "synthesis", synth_env))
+    from saschi.test_parser import ROKU_CORPUS
+    corpus = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(ROKU_CORPUS.glob("*.sas"))}
+    end_source = source_state(HERE)
+    # Generated receipts live in ignored paths and cannot change the source hash.
+    stable = source["source_sha256"] == end_source["source_sha256"]
+    receipt = {"schema_version": 2, "run_id": run_id, "ts_utc": ts,
+               "host": runtime["host"], "tool_git": source["git_commit"],
+               "environment": runtime, "source": source, "source_stable": stable,
+               "corpus": {"files": corpus, "present": bool(corpus)},
+               "evidence": "repository fixtures and cross-language comparisons; no live SAS",
+               "constructs": results, "all_passed": stable and all(x["passed"] for x in results)}
     (TEL / "verify").mkdir(parents=True, exist_ok=True)
     (TEL / "runs").mkdir(parents=True, exist_ok=True)
-    rp = TEL / "verify" / f"receipt_{ts.replace(':', '')}.json"
-    rp.write_text(json.dumps(receipt, indent=2))
-
-    rec = {"run_id": f"verify-{ts}", "ts_utc": ts, "host": host, "op": "verify",
-           "tool": "saschi-go/verify_all.py", "tool_git": sha,
-           "output": f"telemetry/verify/{rp.name}",
-           "output_sha256_16": hashlib.sha256(rp.read_bytes()).hexdigest()[:16],
+    rp = TEL / "verify" / f"receipt_{run_id}.json"
+    rp.write_text(json.dumps(receipt, indent=2) + "\n")
+    rec = {"run_id": run_id, "ts_utc": ts, "host": runtime["host"], "op": "verify",
+           "tool": "saschi-go/verify_all.py", "tool_git": source["git_commit"],
+           "output": str(rp.resolve()), "output_sha256": hashlib.sha256(rp.read_bytes()).hexdigest(),
            "all_passed": receipt["all_passed"]}
-    with open(TEL / "runs" / "runs.jsonl", "a") as f:
-        f.write(json.dumps(rec) + "\n")
-
+    with (TEL / "runs" / "runs.jsonl").open("a") as handle:
+        handle.write(json.dumps(rec) + "\n")
     print(f"\nreceipt -> {rp}")
     print("ALL VERIFIED" if receipt["all_passed"] else "SOME FAILED")
     return 0 if receipt["all_passed"] else 1

@@ -10,3 +10,10 @@ output/
 # Editors / OS
 .DS_Store
 *.swp
+
+# Isolated environments and package builds
+.venv/
+build/
+dist/
+*.egg-info/
+.verification-corpus/
