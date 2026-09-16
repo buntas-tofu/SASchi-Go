@@ -1444,3 +1444,31 @@ def sas_iml_inv2(a):
     if det == 0:
         raise ValueError("singular matrix: no inverse")
     return [[a22 / det, -a12 / det], [-a21 / det, a11 / det]]
+
+
+# Operational catalog helpers. JSON tagged missings preserve identity in transit.
+def sas_numeric_order(value):
+    """Order ._, ordinary missing, .A through .Z, then finite numbers."""
+    if value is None:
+        return (0, 1)
+    if isinstance(value, dict) and set(value) == {'missing'}:
+        tag = value['missing']
+        if tag == '_':
+            return (0, 0)
+        if isinstance(tag, str) and len(tag) == 1 and 'A' <= tag <= 'Z':
+            return (0, ord(tag) - ord('A') + 2)
+        raise ValueError('invalid tagged missing')
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or (isinstance(value, float) and not math.isfinite(value)):
+        raise ValueError('expected a finite SAS number or tagged missing')
+    return (1, value)
+
+
+def sas_fixed_character(value, width, encoding='utf-8'):
+    """Assign into a byte width; refuse a split multibyte code point."""
+    if not isinstance(value, str) or isinstance(width, bool) or not isinstance(width, int) or not 1 <= width <= 32767:
+        raise ValueError('character assignment requires text and a byte width 1..32767')
+    try:
+        encoded = value.encode(encoding)
+        return encoded[:width].decode(encoding) + ' ' * max(0, width - len(encoded))
+    except (UnicodeError, LookupError) as exc:
+        raise ValueError('character assignment cannot represent a complete code point') from exc

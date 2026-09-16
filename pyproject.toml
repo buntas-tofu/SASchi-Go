@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "saschi-go"
-version = "0.2.0"
-description = "SAS migration plans, numeric execution, and verification receipts"
+version = "0.3.0"
+description = "SAS migration plans, typed stateful execution, and verification receipts"
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"

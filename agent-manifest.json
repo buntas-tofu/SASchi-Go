@@ -20,7 +20,7 @@
   "project": {
     "name": "SASchi-Go",
     "description": "SAS-to-open-language migration toolkit: semantics reference, gold-pair verifiers, and translation rulebook.",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "repo_root": ".",
     "primary_language": "Python",
     "framework": "dmf",

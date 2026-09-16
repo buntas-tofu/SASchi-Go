@@ -773,3 +773,32 @@ rules:
     validation_test: "fixture: the matrix examples byte-pinned (2x4 row-major fill, || and // joins, transpose, product [[50,21],[24,10],[101,42]], inverse [[3,-2],[-7,5]]); landmines demonstrated (star meaning, fill order, singular failure modes)"
     confidence: high
     sources: [S-15, SAS-DOC]
+
+
+# Executable subset evidence, separate from the general 56-rule routing catalog.
+runtime_capabilities:
+  plan_version: 2
+  evidence: original repository pins and base-R witnesses; no live SAS
+  comparison:
+    contract: typed exact CLI values, ordered rows and schema, complete metadata
+    validation_test: saschi.test_compare
+    synthesis: numeric CSV; rounding absolute tolerance 1e-10, other families exact
+  data_events:
+    garage_research_ids: [SL003, SL004, SL005]
+    target: saschi.runtime.run_plan
+    scope: one DATA destination, explicit OUTPUT, simple WHERE/IF, numeric RETAIN, initial lookup SET
+    validation_test: examples/verify_events.py
+    r_witness: examples/events.R
+    boundary_tests: saschi.test_events
+  typed_metadata:
+    garage_research_ids: [SL006, SL020]
+    target: saschi.values
+    scope: explicit typed catalog, fixed character byte widths, labels, format descriptors, encoding, tagged missings
+    validation_test: examples/verify_metadata.py
+    r_witness: examples/metadata.R
+    boundary_tests: saschi.test_metadata
+    exclusions: raw SAS-file ingestion, format rendering, linguistic collation, character/tagged MERGE
+  cpp:
+    scope: scalar numeric DATA _NULL_ only
+    validation_test: saschi.test_cpp
+    new_operation_rejection: saschi.test_events

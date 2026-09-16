@@ -1,0 +1,12 @@
+{
+  "snapshots": {
+    "schema": {"total": "number", "fee": "number", "group": "number", "keep": "number", "amount": "number", "scratch": "number"},
+    "rows": [
+      {"total": 2, "fee": 6, "group": 7, "keep": 1, "amount": 2, "scratch": 17},
+      {"total": 6, "fee": 6, "group": 7, "keep": 1, "amount": 4, "scratch": null},
+      {"total": 6, "fee": 6, "group": 7, "keep": 1, "amount": 10, "scratch": null},
+      {"total": 8, "fee": 6, "group": 9, "keep": 1, "amount": 8, "scratch": null},
+      {"total": 8, "fee": 6, "group": 9, "keep": 1, "amount": 14, "scratch": null}
+    ]
+  }
+}

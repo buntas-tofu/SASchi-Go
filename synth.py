@@ -43,7 +43,7 @@ PY = os.environ.get("ROSETTA_PYTHON", sys.executable)
 RSCRIPT = os.environ.get("ROSETTA_RSCRIPT") or shutil.which("Rscript") or "Rscript"
 TB = os.environ.get("ROSETTA_TESTBED", "rosetta_testbed")
 SYNTH_OUT = TB + "/telemetry/synth"
-TOL = 1e-6
+TOL = 1e-10
 
 
 # ---- embedding helpers ----------------------------------------------------
@@ -93,27 +93,15 @@ def run_prog(lang, code, wd):
     return {c: df[c].tolist() for c in df.columns}, None
 
 
-def col_eq(a, b):
-    if len(a) != len(b):
-        return False
-    for x, y in zip(a, b):
-        xm = x is None or (isinstance(x, float) and x != x)
-        ym = y is None or (isinstance(y, float) and y != y)
-        if xm or ym:
-            if xm != ym:
-                return False
-        elif isinstance(x, (int, float)) and isinstance(y, (int, float)):
-            if abs(x - y) > TOL:
-                return False
-        elif str(x) != str(y):
-            return False
-    return True
+def col_eq(a, b, atol=TOL):
+    from saschi.compare import equal
+    return equal(a, b, atol=atol, nan_is_null=True)
 
 
-def frames_equal(a, b):
-    if a is None or b is None or set(a) != set(b):
+def frames_equal(a, b, atol=TOL):
+    if a is None or b is None or list(a) != list(b):
         return False
-    return all(col_eq(a[k], b[k]) for k in a)
+    return all(col_eq(a[k], b[k], atol=atol) for k in a)
 
 
 # ---- families -------------------------------------------------------------
@@ -375,6 +363,9 @@ FAMILIES = [
 
 def run_family(fam, K, outdir):
     t = {"ran": 0, "fpass": 0, "ncaught": 0, "blind": 0, "ffail": []}
+    atol = TOL if fam['name'] == 'round' else 0.0
+    print(f"  comparison: numeric CSV, ordered columns/rows, null=NaN, atol={atol}, no text coercion")
+    compare = lambda a, b: frames_equal(a, b, atol=atol)
     for k in range(K):
         rng = random.Random(198307 + fam["salt"] * 10007 + k)
         spec = fam["gen"](rng)
@@ -389,10 +380,10 @@ def run_family(fam, K, outdir):
             print(f"  {fam['name']:18} seed {k:2d}: RUN FAIL py={ep or '-'} r={er or '-'}")
             continue
         t["ran"] += 1
-        r1 = frames_equal(fp, fr)
-        r2 = frames_equal(fp, exp) and frames_equal(fr, exp)
-        nag = frames_equal(np_, nr)
-        ntr = frames_equal(np_, exp)
+        r1 = compare(fp, fr)
+        r2 = compare(fp, exp) and compare(fr, exp)
+        nag = compare(np_, nr)
+        ntr = compare(np_, exp)
         blind = nag and not ntr
         ncaught = not (nag and ntr)
         t["fpass"] += (r1 and r2)

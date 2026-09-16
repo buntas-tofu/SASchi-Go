@@ -15,6 +15,7 @@ from .emit_cpp import translate as cpp_translate
 from .plan import compile_plan
 from .provenance import digest, environment, implementation_hashes
 from .runtime import run_plan
+from .compare import table_equal
 
 
 def write_json(path, value):
@@ -46,7 +47,7 @@ def execute_job(args):
                'evidence': 'repository behavior contracts; no live SAS',
                'plan_sha256': hashlib.sha256(json.dumps(plan.to_dict(), sort_keys=True).encode()).hexdigest(),
                'tickets': [vars(t) for t in plan.tickets], 'accepted': False,
-               'comparison': 'not requested'}
+               'comparison': 'not requested', 'comparison_contract': 'typed-exact-values-ordered-rows-and-columns-metadata-v1'}
     result, code = None, 2 if plan.blocked else 1
     try:
         if plan.blocked:
@@ -62,7 +63,7 @@ def execute_job(args):
             if not isinstance(expected, dict) or not expected:
                 raise ValueError('expected output must name at least one dataset')
             for name, table in expected.items():
-                if result['datasets'].get(name) != table:
+                if not table_equal(result['datasets'].get(name), table):
                     receipt['comparison'] = 'failed'
                     raise ValueError(f'expected dataset differs: {name}')
             receipt['comparison'] = 'passed'
@@ -95,7 +96,7 @@ def main(argv=None):
     translate.add_argument('source', type=Path)
     translate.add_argument('--target', choices=('python', 'cpp'), default='python')
     translate.add_argument('--output', required=True, type=Path)
-    run = sub.add_parser('run', help='execute a numeric dataset workflow and write a receipt')
+    run = sub.add_parser('run', help='execute a bounded typed dataset workflow and write a receipt')
     run.add_argument('source', type=Path)
     run.add_argument('--inputs', type=Path)
     run.add_argument('--expect', type=Path)

@@ -13,6 +13,13 @@ def translate(source: str) -> Translation:
     for step in parsed.steps:
         if step.kind != "data" or step.inputs or step.name != "_null_":
             parsed.tickets.append(Ticket(step.line, step.name, "cpp-target", "C++ pilot supports scalar DATA _NULL_ steps only"))
+        if step.where or step.retained or step.lengths:
+            parsed.tickets.append(Ticket(step.line, step.name, 'cpp-target', 'state and metadata are outside the scalar pilot'))
+        for op in step.operations:
+            if (op.kind == 'put' and '_n_' in op.args['names']) or op.kind not in ('assign', 'round', 'put') or any(
+                    expr.get('kind') not in ('number', 'missing', 'variable')
+                    for expr in (op.args.get('value', {}), op.args.get('unit', {})) if expr):
+                parsed.tickets.append(Ticket(op.line, op.kind, 'cpp-target', 'operation is outside the scalar numeric pilot'))
     plan = parsed.to_dict()
     if parsed.blocked:
         return Translation('// BLOCKED: unsupported plan for the C++ scalar pilot.\n#error "saschi: blocked translation"\n',

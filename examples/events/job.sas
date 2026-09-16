@@ -1,0 +1,13 @@
+data snapshots;
+  retain total 0;
+  if _n_=1 then set config;
+  set raw;
+  by group;
+  where keep=1;
+  if first.group then total=0;
+  total=total+amount;
+  if _n_=1 then scratch=17;
+  output;
+  amount=amount+fee;
+  if last.group then output snapshots;
+run;
