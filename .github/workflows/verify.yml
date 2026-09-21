@@ -25,7 +25,7 @@ jobs:
         with:
           python-version: "3.x"
       - name: Install the gate dependencies
-        run: pip install "numpy>=2.0,<3" "pandas>=3.0,<4" "scipy>=1.15,<2" "PyYAML>=6,<7" "duckdb>=1.0,<2"
+        run: pip install "numpy>=2.0,<3" "pandas>=3.0,<4" "scipy>=1.15,<2" "PyYAML>=6,<7" "duckdb>=1.0,<2" "rich>=13,<14"
       - name: Install R (the cross-language half of the gold-pair gates)
         run: |
           sudo apt-get update

@@ -1,13 +1,34 @@
 # Changelog
 
 All notable changes to SASchi-Go are recorded here. Versioning is semver per
-`agent-manifest.json`, and the current version is `0.1.0`.
+`agent-manifest.json`, and the current version is `0.2.0`.
 
 The repository carries no release tags yet, so a version named in this file
 describes a state of `main` rather than a published artifact. This file was added
 on 2026-09-14, and the entries below were reconstructed from the commit history of
 `main`, which was the only record before it existed. Short hashes are given so
 every line can be traced to its commit.
+
+## 0.2.0 - 2026-09-21
+
+### Added
+
+- The interface (`python -m saschi`): CLI subcommands `analyze`, `translate`,
+  `check`, and `verify`, plus an interactive rich console when run bare. It
+  wires load, split, function recognition, routing, emission, and the
+  completeness report into one golden path.
+- The DuckDB analysis catalog (`saschi/catalog.py`): every statement,
+  recognized function, and ticket is recorded, and the completeness report is
+  a query over it rather than a print statement.
+- The end-to-end pipeline (`saschi/pipeline.py`): one `run()` carrying the
+  whole process and its completeness accounting.
+- Environment readiness (`saschi/envcheck.py`): `check` reports python, the
+  gate dependencies, the R interpreter, and the rulebook.
+- `saschi.bat` (Windows) and `saschi.sh` (POSIX) launchers.
+- `rich` as a presentation dependency; the pipeline and catalog never import
+  it, so the gate suite stays free of a UI dependency.
+- `saschi/test_pipeline.py` and `saschi/test_catalog.py`, registered in
+  `verify_all.py`, which now runs 21 fixture gates and 6 translator suites.
 
 ## 0.1.0 - 2026-09-14
 

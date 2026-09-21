@@ -32,8 +32,12 @@ checked against hand-pinned truth and the semantics reference.
   splits statements fence-robustly, `rules.py` loads the rulebook and
   routes constructs, and `emit_py.py` emits Python for the data-step
   subset (slice one: the rounding fixture, emitted code calling the
-  semantics reference). Tests: `saschi/test_parser.py`,
-  `saschi/test_rules.py`, `saschi/test_emit_py.py`.
+  semantics reference). `pipeline.py` is the end-to-end orchestrator,
+  `catalog.py` records each pass into DuckDB so completeness is a query,
+  `envcheck.py` reports environment readiness, and `__main__.py` plus
+  `tui.py` are the interface. Tests: `saschi/test_parser.py`,
+  `saschi/test_rules.py`, `saschi/test_emit_py.py`,
+  `saschi/test_pipeline.py`, `saschi/test_catalog.py`.
 - `kb01/sas_semantics_reference.txt` : the semantics reference as plain
   text, for humans and for diffs.
 - `manifest.py` : pin a SAS corpus with content hashes and provenance.
@@ -66,6 +70,26 @@ python verify_all.py
 Each verifier also runs standalone, e.g. `python examples/verify_merge.py`.
 The R interpreter is found via `ROSETTA_RSCRIPT`, then `Rscript` on PATH.
 `verify_all.py` writes its receipts under `telemetry/` (gitignored).
+
+## Running the interface
+
+The translator has a command-line interface that drives the whole process in
+one pass: load, analysis, function recognition, routing, translation, and the
+completeness check.
+
+```sh
+python -m saschi check                       # environment readiness
+python -m saschi analyze prog.sas            # parse, recognize, route; report only
+python -m saschi translate prog.sas -o prog.py
+python -m saschi                             # interactive console (rich)
+```
+
+On Windows, `saschi.bat` bootstraps Python 3.12 and runs the same commands; on
+Linux and macOS, `saschi.sh`. Drag a `.sas` file onto `saschi.bat` to
+translate it. `translate` and `analyze` exit non-zero when the program is
+blocked (any ticket), so a script can detect an incomplete conversion. Add
+`--json` for a machine-readable report, and `--catalog out.duckdb` to persist
+the analysis for later inspection in any DuckDB client.
 
 ## Known landmines (why the gate exists)
 

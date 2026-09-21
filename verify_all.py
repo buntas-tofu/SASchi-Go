@@ -65,6 +65,8 @@ SUITES = [
     ("suite-rules", "saschi.test_rules"),
     ("suite-emitter", "saschi.test_emit_py"),
     ("suite-rulebook", "saschi.test_rulebook"),
+    ("suite-pipeline", "saschi.test_pipeline"),
+    ("suite-catalog", "saschi.test_catalog"),
 ]
 
 

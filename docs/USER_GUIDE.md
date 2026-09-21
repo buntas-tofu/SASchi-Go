@@ -176,6 +176,46 @@ identical input. The estate bench under `testbed/local/` is never written
 to the shipped output; `--include-local` prints a private comparison to
 stdout only.
 
+## Running the interface
+
+The translator package has an interface that runs the whole process in one
+pass: `python -m saschi <command>`. It wraps the splitter, the rulebook
+router, function recognition, the emitter, and a DuckDB catalog that records
+the pass so the completeness report is a query, not a print statement.
+
+```sh
+python -m saschi check                    # environment readiness
+python -m saschi analyze prog.sas         # parse, recognize, route; report only
+python -m saschi translate prog.sas -o prog.py
+python -m saschi translate prog.sas --json
+python -m saschi                          # interactive rich console
+```
+
+Commands:
+
+- `check` reports python, the gate dependencies, the R interpreter, and the
+  rulebook, and exits non-zero if anything is missing.
+- `analyze` splits the program, recognizes functions, routes every statement,
+  and prints the completeness report without writing code.
+- `translate` is the full pipeline: it writes the translated code (to `-o`, or
+  stdout) and the report, and exits non-zero when the program is blocked, so a
+  script can detect an incomplete conversion. `--allow-partial` emits the
+  partial body as an inspection artifact instead of the refusing module.
+- `verify` runs the fixture gate suite.
+
+The completeness report states the verdict, the statement and function counts,
+the ticket count, and coverage (the fraction of statements the translation
+accounted for without a ticket). A translation is complete when it has zero
+tickets; any ticket blocks the artifact, and the report lists the tickets by
+construct. `--catalog out.duckdb` persists the analysis so the statements,
+functions, and tickets tables can be queried directly.
+
+On Windows, `saschi.bat` bootstraps Python 3.12 and runs the same commands;
+`saschi.sh` is the POSIX twin. Drag a `.sas` file onto the batch file to
+translate it. `rich` is the presentation dependency (for the tables and the
+interactive console); the pipeline and catalog never import it, so the gate
+suite and the subcommands run without it.
+
 ## What the equivalence classes mean
 
 - `EXACT` : the open-language implementation reproduces SAS output to the

@@ -1,6 +1,6 @@
 {
   "$schema": "./agent-manifest.schema.json",
-  "manifest_version": "0.1.0",
+  "manifest_version": "0.2.0",
   "_DMF_global": {
     "_comment": "buntas-tofu principal defaults, carried from the Inertia-Drift-Framework master instance.",
     "owner": {
@@ -20,7 +20,7 @@
   "project": {
     "name": "SASchi-Go",
     "description": "SAS-to-open-language migration toolkit: semantics reference, gold-pair verifiers, and translation rulebook.",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "repo_root": ".",
     "primary_language": "Python",
     "framework": "dmf",
