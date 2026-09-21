@@ -101,6 +101,8 @@ def main(argv=None):
     run.add_argument('--inputs', type=Path)
     run.add_argument('--expect', type=Path)
     run.add_argument('--output', required=True, type=Path)
+    tui = sub.add_parser('tui', help='open the rich console interface')
+    tui.add_argument('source', nargs='?', type=Path)
     args = parser.parse_args(argv)
     try:
         if args.command == 'doctor':
@@ -118,6 +120,13 @@ def main(argv=None):
                 handle.write(translation.code)
             print(json.dumps({'blocked': translation.blocked, 'tickets': [vars(t) for t in translation.tickets]}))
             return 2 if translation.blocked else 0
+        if args.command == 'tui':
+            try:
+                from .tui import main as tui_main
+            except ImportError:
+                print(json.dumps({'error': 'the rich package is required for the interface: pip install "rich>=13,<14"'}))
+                return 1
+            return tui_main([] if args.source is None else [str(args.source)])
         return execute_job(args)
     except (OSError, ValueError, KeyError, TypeError) as exc:
         print(json.dumps({'error': str(exc)}))
