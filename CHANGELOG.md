@@ -12,6 +12,10 @@ live SAS comparison. Branch synchronization is separate from a release.
 - Keep version 1 plans readable and make C++ reject new unsupported operations.
 - Add original event and metadata witnesses, base-R twins, and an operator example;
   append the gates after all original fixture gates.
+- Add the LAG/DIF invocation-queue gate: reference functions, a base-R twin, and
+  original witnesses for queue depth, independent occurrence queues, conditional
+  execution, and the missing-argument push. Extends DS-007 from a pattern test to
+  a byte-equal Python/R gate.
 
 # Changes for 0.2.0
 

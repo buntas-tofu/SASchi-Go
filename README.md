@@ -92,6 +92,13 @@ The R interpreter is found via `ROSETTA_RSCRIPT`, then `Rscript` on PATH.
   variables survive iterations while scratch variables reset (`verify_events.py`).
 - Character byte widths affect assignments. Losing leading zeros, missing tags,
   labels, or format descriptors changes the typed result (`verify_metadata.py`).
+- LAG and DIF are queues, never column shifts. Each occurrence carries its own
+  queue of depth n, and the queue advances where the CALL RUNS rather than
+  where the row exists, so a conditional call returns the value at the previous
+  EXECUTION. On values 10, 20, 30, 40 invoked only on rows two and four, SAS
+  returns missing then 20 where the shift model returns 10 and 30. A missing
+  argument is still an execution, which makes a skipped call and a call with a
+  missing argument different histories (`verify_lag.py`).
 
 - SAS `round(x, unit)` rounds half away from zero; Python and R round half
   to even by default. A naive translation disagrees with SAS at every

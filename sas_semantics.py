@@ -1472,3 +1472,76 @@ def sas_fixed_character(value, width, encoding='utf-8'):
         return encoded[:width].decode(encoding) + ' ' * max(0, width - len(encoded))
     except (UnicodeError, LookupError) as exc:
         raise ValueError('character assignment cannot represent a complete code point') from exc
+
+
+# ---------------------------------------------------------------------------
+# LAG and DIF: the invocation queue (the executable half of DS-007). SAS
+# gives each LAG<k>/DIF<k> OCCURRENCE its own queue of length k. On execution
+# the function returns the front of that queue (the value from k executions
+# ago), then stores the current argument; the first k executions return
+# missing. The queue advances where the CALL RUNS, never where the row exists,
+# so a call inside a condition that is false neither returns nor stores, and a
+# full-column shift is the wrong model whenever the call site is conditional.
+# A BY-group boundary does not execute or reset a queue, which the verifier
+# shows as the group-wise queue disagreeing with the whole-column queue.
+# Repeated OUTPUT statements do not add executions. A missing argument IS an
+# execution: it returns the front and stores missing, which is why a skipped
+# call and a call with a missing argument leave different histories. The R
+# twin below mirrors each operation one for one.
+# ---------------------------------------------------------------------------
+
+
+def sas_lag_queue(values, n: int = 1):
+    """LAG<k>(x) executed once per row. Row-aligned output: missing for the
+    first k executions, then the value from k executions ago. Unconditional,
+    which is the only case where a column shift is a correct implementation."""
+    queue = []
+    out = []
+    for value in values:
+        out.append(queue[0] if len(queue) == n else None)
+        queue.append(value)
+        if len(queue) > n:
+            queue.pop(0)
+    return out
+
+
+def sas_lag_conditional(values, invoked, n: int = 1):
+    """One LAG<k> occurrence whose call site is conditional. Rows where the
+    call does not run read as missing and leave the queue untouched."""
+    queue = []
+    out = []
+    for value, runs in zip(values, invoked):
+        if not runs:
+            out.append(None)
+            continue
+        out.append(queue[0] if len(queue) == n else None)
+        queue.append(value)
+        if len(queue) > n:
+            queue.pop(0)
+    return out
+
+
+def sas_dif_conditional(values, invoked, n: int = 1):
+    """DIF<k>(x), the difference against the occurrence's own queue. Missing
+    when the queue is not yet full, when the argument is missing, or when the
+    value LAG returned is missing. The queue advances in every case."""
+    queue = []
+    out = []
+    for value, runs in zip(values, invoked):
+        if not runs:
+            out.append(None)
+            continue
+        front = queue[0] if len(queue) == n else None
+        out.append(None if front is None or value is None else value - front)
+        queue.append(value)
+        if len(queue) > n:
+            queue.pop(0)
+    return out
+
+
+def sas_lag_occurrences(occurrences, n: int = 1):
+    """Several LAG<k> occurrences in one statement. Each entry of occurrences
+    is a (values, invoked) pair and each carries its own queue, so the
+    histories stay independent even when they read the same variable."""
+    return [sas_lag_conditional(values, invoked, n)
+            for values, invoked in occurrences]
