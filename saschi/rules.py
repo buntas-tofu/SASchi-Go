@@ -1,31 +1,31 @@
 """Rulebook loader and construct map for saschi.
 
-Loads docs/sasconversionrulebook.yaml into typed rules, keyed by rule_id,
+Loads docs/sasconversionrulebook.json into typed rules, keyed by rule_id,
 and maps SAS constructs (statements, functions, families) to rules. The
 construct map covers the gated families first (rounding, dates, missing
 handling, merge, sort, character functions, arrays, formats, BY-group);
 NO-DIRECT-EQUIVALENT rules route to human-review tickets.
 
-Pure stdlib plus PyYAML. Deterministic.
+Pure standard library. Deterministic. The rulebook ships as JSON so the tool
+carries no third-party dependency to read its own guardrails.
 """
 
 from __future__ import annotations
 
+import json
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Optional
 
-import yaml
-
-RULEBOOK_DEFAULT = Path(__file__).resolve().parent.parent / "docs" / "sasconversionrulebook.yaml"
+RULEBOOK_DEFAULT = Path(__file__).resolve().parent.parent / "docs" / "sasconversionrulebook.json"
 if not RULEBOOK_DEFAULT.is_file():
-    RULEBOOK_DEFAULT = Path(__file__).resolve().parent / "data" / "sasconversionrulebook.yaml"
+    RULEBOOK_DEFAULT = Path(__file__).resolve().parent / "data" / "sasconversionrulebook.json"
 
 
 @dataclass(frozen=True)
 class Rule:
-    """One rulebook entry, loaded from the shipped YAML."""
+    """One rulebook entry, loaded from the shipped rulebook."""
 
     rule_id: str
     sas_pattern: str
@@ -111,11 +111,11 @@ def load_rulebook(path: Optional[Path] = None) -> dict[str, Rule]:
     """Load and validate the rulebook. Returns {rule_id: Rule}."""
     path = Path(path) if path else RULEBOOK_DEFAULT
     try:
-        raw = yaml.safe_load(path.read_text(encoding="utf-8"))
+        raw = json.loads(path.read_text(encoding="utf-8"))
     except OSError as exc:
         raise RulebookError(f"cannot read rulebook: {path}") from exc
-    except yaml.YAMLError as exc:
-        raise RulebookError(f"rulebook is not valid YAML: {path}") from exc
+    except json.JSONDecodeError as exc:
+        raise RulebookError(f"rulebook is not valid JSON: {path}") from exc
 
     if not isinstance(raw, dict) or "rules" not in raw:
         raise RulebookError("rulebook missing top-level 'rules' list")

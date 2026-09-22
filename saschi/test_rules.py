@@ -1,6 +1,6 @@
 """Tests for saschi.rules: loader, construct map, and statement routing.
 
-Runs against the shipped rulebook (docs/sasconversionrulebook.yaml), so
+Runs against the shipped rulebook (docs/sasconversionrulebook.json), so
 any drift in the canonical file is caught here. Pure stdlib unittest.
 
 Run: python -m unittest saschi.test_rules -v
@@ -24,7 +24,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 
 class LoaderTests(unittest.TestCase):
     def setUp(self):
-        self.rules = load_rulebook(REPO_ROOT / "docs" / "sasconversionrulebook.yaml")
+        self.rules = load_rulebook(REPO_ROOT / "docs" / "sasconversionrulebook.json")
 
     def test_rule_count_is_56(self):
         self.assertEqual(len(self.rules), 56)
@@ -65,12 +65,12 @@ class LoaderTests(unittest.TestCase):
 
     def test_missing_file_raises(self):
         with self.assertRaises(RulebookError):
-            load_rulebook(REPO_ROOT / "docs" / "no-such-file.yaml")
+            load_rulebook(REPO_ROOT / "docs" / "no-such-file.json")
 
 
 class ConstructMapTests(unittest.TestCase):
     def setUp(self):
-        self.rules = load_rulebook(REPO_ROOT / "docs" / "sasconversionrulebook.yaml")
+        self.rules = load_rulebook(REPO_ROOT / "docs" / "sasconversionrulebook.json")
 
     def test_every_construct_resolves(self):
         for construct, rule_id in CONSTRUCT_MAP.items():
