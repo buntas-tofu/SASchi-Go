@@ -60,6 +60,7 @@ VERIFIERS = [
     ("matrix", HERE / "examples" / "verify_matrix.py"),
     ("data-events", HERE / "examples" / "verify_events.py"),
     ("typed-metadata", HERE / "examples" / "verify_metadata.py"),
+    ("lag-dif", HERE / "examples" / "verify_lag.py"),
 ]
 
 # The translator suites, run as unittest modules. They carry the same weight as
