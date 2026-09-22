@@ -9,9 +9,10 @@ description = "SAS migration plans, typed stateful execution, and verification r
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
-dependencies = ["PyYAML>=6,<7", "rich>=13,<14"]
+dependencies = []
 
 [project.optional-dependencies]
+tui = ["rich>=13,<14"]
 verify = ["numpy>=2,<3", "pandas>=3,<4", "scipy>=1.15,<2", "duckdb>=1,<2", "jsonschema>=4,<5"]
 
 [project.scripts]

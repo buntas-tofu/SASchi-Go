@@ -11,7 +11,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-DEPENDENCIES = ('numpy', 'pandas', 'scipy', 'PyYAML', 'duckdb')
+DEPENDENCIES = ('numpy', 'pandas', 'scipy', 'duckdb')
 
 
 def digest(path):

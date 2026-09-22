@@ -37,7 +37,7 @@ fixed expected output and base-R evidence. Special missings retain their tags.
 - `examples/` : gold pairs. Each SAS construct gets a faithful Python and R
   sibling plus a fixture verifier (`verify_*.py`). Run any verifier directly,
   or all of them through `verify_all.py`.
-- `docs/sasconversionrulebook.yaml` : the machine-consumable translation
+- `docs/sasconversionrulebook.json` : the machine-consumable translation
   rulebook. 56 rules with equivalence classes (EXACT,
   EQUIVALENT-WITH-SETTINGS, APPROXIMATE, NO-DIRECT-EQUIVALENT), required
   settings, forbidden patterns, and validation tests.

@@ -28,7 +28,7 @@ evidence; the gate suite is the proof; nothing is verified by assertion.
 - `examples/` : the gold pairs. One SAS construct family per fixture:
   a Python verifier (`verify_*.py`), an R twin (`*.R`), and in most cases
   fixture data embedded in the verifier.
-- `docs/sasconversionrulebook.yaml` : the machine-consumable translation
+- `docs/sasconversionrulebook.json` : the machine-consumable translation
   rulebook. 56 rules across data-step (DS), PROC SQL (SQL), statistical
   procs (ST), survey procs (SV), the macro layer (MC), and the IML
   matrix surface (MX), each with an
@@ -69,8 +69,11 @@ reference below describes the original interfaces.
 
 ## Requirements
 
-- Python 3.11+ with numpy, pandas, scipy, PyYAML, and duckdb. A venv with the
-  gate stack (for example `.venv` beside this checkout) carries it.
+- Python 3.11+. The translator, the CLI, and the linter are pure standard
+  library, so the tool itself installs with no third-party packages at all.
+- The fixture gates need a separate stack: numpy, pandas, scipy, and duckdb
+  (the `verify` extra). A venv with that stack (for example `.venv` beside this
+  checkout) carries it.
 - R (for the R halves of the gold pairs). `Rscript` must be on PATH, or
   set `ROSETTA_RSCRIPT` to the full path. The R interpreter is found via
   `ROSETTA_RSCRIPT`, then `Rscript` on PATH.
@@ -227,7 +230,7 @@ before it is real:
 3. `examples/<fam>.R` : the R twin.
 4. `examples/verify_<fam>.py` : the gate. Reference pins first, then R
    lane agreement, then landmine demonstrations.
-5. `docs/sasconversionrulebook.yaml` : the rule entry.
+5. `docs/sasconversionrulebook.json` : the rule entry.
 6. `verify_all.py` : register the verifier in the VERIFIERS list.
 7. `README.md` : one known-landmine bullet.
 

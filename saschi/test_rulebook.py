@@ -24,7 +24,7 @@ import pandas as pd
 from saschi.rules import Rule, load_rulebook
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-RULEBOOK = REPO_ROOT / "docs" / "sasconversionrulebook.yaml"
+RULEBOOK = REPO_ROOT / "docs" / "sasconversionrulebook.json"
 
 
 class RulebookTargetTests(unittest.TestCase):

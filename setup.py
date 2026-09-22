@@ -9,7 +9,7 @@ class BuildWithRulebook(build_py):
         super().run()
         target = Path(self.build_lib) / 'saschi' / 'data'
         target.mkdir(parents=True, exist_ok=True)
-        self.copy_file('docs/sasconversionrulebook.yaml', str(target / 'sasconversionrulebook.yaml'))
+        self.copy_file('docs/sasconversionrulebook.json', str(target / 'sasconversionrulebook.json'))
 
 
 setup(cmdclass={'build_py': BuildWithRulebook})
