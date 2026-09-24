@@ -8,11 +8,15 @@ from __future__ import annotations
 import math
 import re
 from dataclasses import asdict, dataclass, field
+from .functions import FUNCTIONS, format_token, FORMATS
 from .parser import ParseError, split_statements
 from .rules import route_function, route_statement
 
 NAME = r"[A-Za-z_][A-Za-z0-9_]{0,31}"
 NUMBER = re.compile(r"[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?\Z")
+CALL = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*)\s*\((.*)\)$", re.S)
+_FORMAT_NAMED = re.compile(r"^([A-Za-z][A-Za-z0-9_]*?)(\d*)\.$")
+_FORMAT_NUMERIC = re.compile(r"^(?:(\d+)\.(\d*)|(\d+)\.)$")
 
 
 @dataclass
@@ -81,23 +85,125 @@ def atom(text):
     return None
 
 
-def expression(text):
+def _arithmetic_positions(text):
+    """Offsets of depth-0, unquoted + and - in an expression."""
+    depth, quote, positions = 0, "", []
+    for index, char in enumerate(text):
+        if quote:
+            if char == quote:
+                quote = ""
+            continue
+        if char in "'\"":
+            quote = char
+            continue
+        if char == "(":
+            depth += 1
+        elif char == ")":
+            depth -= 1
+        elif char in "+-" and depth == 0:
+            positions.append(index)
+    return positions
+
+
+def _split_args(text):
+    """Comma-split a call's argument list, respecting quotes and nesting."""
+    parts, depth, quote, current = [], 0, "", ""
+    for char in text:
+        if quote:
+            current += char
+            if char == quote:
+                quote = ""
+            continue
+        if char in "'\"":
+            quote = char
+        elif char == "(":
+            depth += 1
+        elif char == ")":
+            depth -= 1
+            if depth < 0:
+                return None
+        elif char == "," and depth == 0:
+            parts.append(current)
+            current = ""
+            continue
+        current += char
+    if quote or depth != 0:
+        return None
+    parts.append(current)
+    return [part.strip() for part in parts]
+
+
+def _format_argument(text):
+    """A format token, when this slice has a gate for it. Otherwise None."""
+    text = text.strip()
+    match = _FORMAT_NUMERIC.fullmatch(text)
+    if match:
+        return format_token("", int(match[1] or match[3]), int(match[2] or 0))
+    if text.startswith("$"):
+        return None  # dollar formats have no gate yet
+    match = _FORMAT_NAMED.fullmatch(text)
+    if match:
+        name = match[1].lower()
+        if name not in FORMATS:
+            return None
+        return format_token(name, int(match[2] or 0), 0)
+    return None
+
+
+def _argument(text, allow_format=False):
+    """One argument: a format token only in a position this function declares."""
+    if allow_format:
+        value = _format_argument(text)
+        if value is not None:
+            return value
+    return expression(text)
+
+
+def call(text):
+    """Parse a call to a wired function, or None when it is not wired."""
+    match = CALL.fullmatch(text.strip())
+    if not match:
+        return None
+    name = match[1].lower()
+    spec = FUNCTIONS.get(name)
+    if spec is None:
+        return None
+    parts = _split_args(match[2])
+    if parts is None or len(parts) < spec.min_args:
+        return None
+    if spec.max_args >= 0 and len(parts) > spec.max_args:
+        return None
+    values = [_argument(part, index in spec.format_args) for index, part in enumerate(parts)]
+    if any(value is None for value in values):
+        return None
+    return {"kind": "call", "name": name, "args": values}
+
+
+def operand(text):
+    """One expression operand: an atom or a wired call."""
     value = atom(text)
+    return value if value is not None else call(text)
+
+
+def expression(text):
+    text = text.strip()
+    value = operand(text)
     if value is not None:
         return value
-    match = re.fullmatch(r'(' + NAME + r')\s*([+\-])\s*(.+)', text.strip())
-    if match and atom(match[3]) is not None:
-        return {'kind': 'arithmetic', 'left': atom(match[1]), 'op': match[2], 'right': atom(match[3])}
+    for position in _arithmetic_positions(text):
+        left, right = operand(text[:position]), operand(text[position + 1:])
+        if left is not None and right is not None:
+            return {'kind': 'arithmetic', 'left': left, 'op': text[position], 'right': right}
     return None
 
 
 def predicate(text):
-    value = atom(text)
+    value = operand(text)
     if value is not None:
         return {'left': value, 'op': 'truth'}
     match = re.fullmatch(r'(.+?)\s*(<=|>=|\^=|~=|<>|=|<|>|\beq\b|\bne\b|\blt\b|\bgt\b|\ble\b|\bge\b)\s*(.+)', text, re.I)
-    if match and atom(match[1]) is not None and atom(match[3]) is not None:
-        return {'left': atom(match[1]), 'op': match[2].lower(), 'right': atom(match[3])}
+    if match and operand(match[1]) is not None and operand(match[3]) is not None:
+        return {'left': operand(match[1]), 'op': match[2].lower(), 'right': operand(match[3])}
     return None
 
 
@@ -106,8 +212,12 @@ def action(text, line):
     if match:
         return Operation('output', line, {'target': match[1].lower() if match[1] else None})
     match = re.fullmatch(r'(' + NAME + r')\s*=\s*(.+)', text)
-    if match and match[1].lower() != '_n_' and expression(match[2]) is not None:
-        return Operation('assign', line, {'name': match[1].lower(), 'value': expression(match[2])})
+    if match and match[1].lower() != '_n_':
+        value = expression(match[2])
+        # ROUND keeps its dedicated operation: the rule id DS-012 is recorded on
+        # that path, and the C++ pilot emits its scalar call from it.
+        if value is not None and not (value.get('kind') == 'call' and value['name'] == 'round'):
+            return Operation('assign', line, {'name': match[1].lower(), 'value': value})
     return None
 
 
@@ -263,18 +373,23 @@ def compile_plan(source: str) -> Plan:
             step.operations.append(simple)
             continue
         assignment = re.fullmatch(r"(" + NAME + r")\s*=\s*(.+)", text)
-        if assignment and assignment[1].lower() == '_n_':
+        if assignment and assignment[1].lower() == "_n_":
             reject(st, 'automatic-variable', 'assignment to _N_ is outside this slice')
             continue
         if assignment:
-            value = atom(assignment[2])
-            if value is not None:
-                step.operations.append(Operation("assign", st.line, {"name": assignment[1].lower(), "value": value}))
-                continue
-            call = re.fullmatch(r"round\s*\(([^,]+),([^,]+)\)", assignment[2], re.I)
-            if call and atom(call[1]) is not None and atom(call[2]) is not None:
-                step.operations.append(Operation("round", st.line, {"name": assignment[1].lower(), "value": atom(call[1]), "unit": atom(call[2])}))
+            rounded = re.fullmatch(r"round\s*\(([^,]+),([^,]+)\)", assignment[2], re.I)
+            if rounded and atom(rounded[1]) is not None and atom(rounded[2]) is not None:
+                step.operations.append(Operation("round", st.line, {"name": assignment[1].lower(),
+                                                                    "value": atom(rounded[1]),
+                                                                    "unit": atom(rounded[2])}))
                 plan.matched.append(("round", "DS-012", st.line))
+                continue
+            value = expression(assignment[2])
+            if value is not None:
+                if value['kind'] == 'call' and value['name'] == 'round':
+                    plan.matched.append(("round", "DS-012", st.line))
+                step.operations.append(Operation("assign", st.line, {"name": assignment[1].lower(),
+                                                                     "value": value}))
                 continue
             family, _ = route_function(assignment[2])
             reject(st, family if family != "unknown" else "assignment", "unsupported expression")

@@ -4,13 +4,26 @@ import math
 from collections import Counter
 from copy import deepcopy
 from sas_semantics import sas_round, sas_merge_by
+from .functions import apply as apply_function, assign_spec
 from .values import normalize_catalog, column_type, coerce, missing, order
+
+
+def evaluate(expr, row):
+    """Value of one wired function call."""
+    return apply_function(expr['name'], [argument(arg, row) for arg in expr['args']])
+
+
+def argument(expr, row):
+    """One call argument: a format token passes through, everything else is a value."""
+    return expr if expr['kind'] == 'format' else number(expr, row)
 
 
 def number(expr, row):
     kind = expr['kind']
     if kind in ('variable', 'automatic'):
         return row.get(expr['value'])
+    if kind == 'call':
+        return evaluate(expr, row)
     if kind == 'arithmetic':
         left, right = number(expr['left'], row), number(expr['right'], row)
         if isinstance(left, str) or isinstance(right, str):
@@ -175,7 +188,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                     origin = schema.get(expr['value'], 'number')
                     spec = {'type': 'character', 'length': origin['length']} if column_type(origin) == 'character' else 'number'
                 else:
-                    spec = 'number'
+                    spec = (assign_spec(expr) if kind == 'assign' else None) or 'number'
                 if args['name'] in schema and column_type(schema[args['name']]) != column_type(spec):
                     raise ValueError('implicit assignment type conversion is unsupported')
                 schema.setdefault(args['name'], spec)
