@@ -21,6 +21,13 @@ live SAS comparison. Branch synchronization is separate from a release.
   runtime-capabilities note move into the document as data; the six section
   banners retire because the loader derives rule families from rule_id prefixes.
   The tool now declares no required third-party dependency.
+- Add the gate-backed function slice: `saschi/functions.py` holds a registry of ten scalar
+  functions (MAX, MIN, LENGTH, LENGTHN, LENGTHC, SUBSTR, SUM, ROUND, PUT with a numeric w.d or
+  DATE9 format, and INPUT with a character read or the YYMMDD8 informat) in which every entry
+  names the fixture gate that proves it. Call arguments nest and accept arithmetic operands,
+  the parser refuses any function or format token that has no gate so the statement stays a
+  human-review ticket, and `suite-functions` pins both halves. Measured over the variance
+  corpus: tickets 205,577 to 205,318 of 244,678 statements.
 
 # Changes for 0.2.0
 

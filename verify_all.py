@@ -77,6 +77,7 @@ SUITES = [
     ("suite-comparison", "saschi.test_compare"),
     ("suite-events", "saschi.test_events"),
     ("suite-metadata", "saschi.test_metadata"),
+    ("suite-functions", "saschi.test_functions"),
 ]
 
 
