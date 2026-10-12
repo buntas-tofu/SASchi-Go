@@ -1,1 +1,2 @@
 include docs/sasconversionrulebook.json
+recursive-include saschi/web/static *.html *.css *.js

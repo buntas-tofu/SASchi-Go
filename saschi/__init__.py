@@ -1,2 +1,2 @@
 """SASchi: versioned migration plans, Python execution, and a C++ scalar pilot."""
-__version__ = "0.3.0"
+__version__ = "0.4.0"

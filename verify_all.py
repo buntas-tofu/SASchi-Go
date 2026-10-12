@@ -78,6 +78,10 @@ SUITES = [
     ("suite-events", "saschi.test_events"),
     ("suite-metadata", "saschi.test_metadata"),
     ("suite-functions", "saschi.test_functions"),
+    ("suite-job", "saschi.test_job"),
+    ("suite-showcase", "saschi.test_showcase"),
+    ("suite-assistant", "saschi.test_assistant"),
+    ("suite-web", "saschi.test_web"),
 ]
 
 
