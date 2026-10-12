@@ -1,3 +1,30 @@
+# Changes for 0.4.0
+
+Status: development changes with original pins and Python/base-R evidence; no
+live SAS comparison. Branch synchronization is separate from a release.
+
+- Add the web workbench: `saschi serve` runs a standard-library HTTP server
+  (no new runtime dependency) with a JSON API over the job path. A program
+  shelf, a paste-and-run box, and a stage view walk one program through
+  source, parse and route, tickets, translation, execution, comparison, and
+  receipt. A stage the job did not reach is labeled not reached.
+- Add the assistant pane: an OpenAI-compatible Hermes endpoint configured by
+  environment only (SASCHI_HERMES_URL, SASCHI_HERMES_API_KEY,
+  SASCHI_HERMES_MODEL), off by default, and no network call happens unless
+  the operator configured it. The pane attaches the current program and its
+  tickets as context, and every reply carries the advisory banner. The
+  assistant explains, drafts, and interprets; it never verifies.
+- Add the showcase generator: `saschi showcase` renders a job as a
+  self-contained single-file HTML document with the checksummed receipt
+  embedded. The showcase is the output, not the app.
+- Factor the job path (compile, translate, run, compare, receipt) into
+  `saschi/job.py`, shared by the run command, the workbench, and the
+  showcase, so what is rendered is what ran.
+- Extend the verification suites with suite-job, suite-showcase,
+  suite-assistant, and suite-web: the job outcomes, the showcase self-
+  containment, the assistant wire behavior and off state, the workbench
+  routes, the path boundary, and the chat proxy against a stub endpoint.
+
 # Changes for 0.3.0
 
 Status: development changes with original pins and Python/base-R evidence; no

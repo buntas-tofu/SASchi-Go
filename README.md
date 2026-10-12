@@ -49,6 +49,16 @@ fixed expected output and base-R evidence. Special missings retain their tags.
   routes constructs, and the shared plan drives Python typed dataset execution
   and a C++ scalar backend. Tests: `saschi/test_parser.py`,
   `saschi/test_rules.py`, `saschi/test_emit_py.py`.
+- `saschi/job.py` : the shared job path (compile, translate, run, compare,
+  receipt) that the run command, the web workbench, and the showcase all
+  render from, so what is shown is what ran.
+- `saschi/web.py` + `saschi/web/static/` : the web workbench. `saschi serve`
+  runs a standard-library HTTP server (no new runtime dependency) with a JSON
+  API over the job path, a program shelf, a paste-and-run box, and an
+  assistant pane that is environment-configured and off by default.
+- `saschi/showcase.py` : the showcase generator. `saschi showcase` renders a
+  job as a self-contained single-file HTML document with the checksummed
+  receipt embedded.
 - `kb01/sas_semantics_reference.txt` : the semantics reference as plain
   text, for humans and for diffs.
 - `manifest.py` : pin a SAS corpus with content hashes and provenance.

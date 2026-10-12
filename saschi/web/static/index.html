@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SASchi-Go workbench</title>
+<link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+<header>
+  <div class="brand">SASchi-Go <span class="dim">workbench</span> <span id="version" class="dim"></span></div>
+  <div id="env" class="dim"></div>
+</header>
+<main>
+  <section id="shelf" class="pane">
+    <h2>Programs</h2>
+    <div id="program-list"></div>
+    <h2>Paste a program</h2>
+    <textarea id="paste" spellcheck="false"
+      placeholder="data _null;&#10;  x = 2.5;&#10;  put round(x, 1)=;&#10;run;"></textarea>
+    <button id="run-paste">Run treatment</button>
+  </section>
+
+  <section id="stage" class="pane">
+    <div id="verdict" class="empty">Choose a program, or paste one and run it.</div>
+    <div id="status-line" class="dim"></div>
+    <nav id="tabs"></nav>
+    <div id="stage-body"></div>
+  </section>
+
+  <section id="chat" class="pane">
+    <h2>Assistant</h2>
+    <div id="chat-status" class="dim">checking</div>
+    <div id="chat-log"></div>
+    <div id="chat-context" class="dim">context: none attached</div>
+    <div class="chat-row">
+      <textarea id="chat-input" rows="3" spellcheck="false"
+        placeholder="Explain the ticket on line 4, or draft a conversion for the LAG call."></textarea>
+      <button id="chat-send">Ask</button>
+    </div>
+    <div id="chat-advisory" class="advisory">
+      Assistant output is advisory. It is never a verified translation. The gates verify.
+    </div>
+  </section>
+</main>
+<script src="static/app.js"></script>
+</body>
+</html>

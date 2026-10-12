@@ -186,6 +186,55 @@ identical input. The estate bench under `testbed/local/` is never written
 to the shipped output; `--include-local` prints a private comparison to
 stdout only.
 
+## The web workbench
+
+The workbench is a standard-library HTTP server over the same job path the
+CLI uses: nothing is recomputed differently. The CLI, the workbench, and the
+showcase all render the artifacts `saschi/job.py` produces.
+
+```sh
+saschi serve --host 127.0.0.1 --port 8070
+```
+
+Open http://127.0.0.1:8070/. The program shelf lists the shipped workflows
+(`examples/workflow`, `examples/events`, and the `pgm` rounding program),
+each run against its shipped inputs and pinned expectation. A pasted program
+runs through the same path. Bind the tailnet IP instead of `127.0.0.1` to
+open it from another machine.
+
+The stage view walks one program through: source, parse and route (tickets
+highlighted), translation, execution, comparison, receipt. A stage the job
+did not reach is labeled not reached, with the reason, never filled in.
+
+The assistant pane is off unless the server environment carries both
+`SASCHI_HERMES_URL` (the base URL of an OpenAI-compatible API, for example
+`http://host:port/v1`) and `SASCHI_HERMES_API_KEY`; `SASCHI_HERMES_MODEL` is
+optional. No network call happens unless the operator configured it. The
+pane attaches the current program and its tickets as context, and every
+reply carries the advisory banner: the assistant explains, drafts, and
+interprets; it never verifies.
+
+Coverage: `suite-web`, `suite-assistant`, `suite-job`.
+
+## The showcase
+
+The showcase is the output, not the app: one self-contained HTML file that
+details the treatment of one program at every stage.
+
+```sh
+saschi showcase examples/workflow/job.sas \
+  --inputs examples/workflow/inputs.json \
+  --expect examples/workflow/expected.json \
+  --output showcase/workflow.html
+```
+
+The document carries the source, the plan with its tickets, the translation,
+the execution result, the comparison verdict, and the checksummed receipt
+embedded in full. No external assets; it opens offline and prints cleanly.
+The workbench serves the same document for any program it runs.
+
+Coverage: `suite-showcase`.
+
 ## What the equivalence classes mean
 
 - `EXACT` : the open-language implementation reproduces SAS output to the
