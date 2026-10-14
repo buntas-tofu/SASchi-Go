@@ -339,12 +339,4 @@ right.
   claim in the README or docs is backed by a passing gate or a receipt; the
   sibling SASchi-Roku stays a data repository.
 
-## Operational direction, 2026-09-15
-
-The principal authorized a target-independent execution plan and permits Julia,
-C++, and algorithm redesign. Python/R remain existing verification references;
-additional targets must carry executable evidence. This session owns operational
-work. The concurrent Bedrock KB session owns knowledge-base work. The current
-host is wutai; cloud and fahrenheit are repository synchronization peers.
-
 <!-- DMF:LOCAL:END -->
