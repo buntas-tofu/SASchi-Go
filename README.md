@@ -41,6 +41,12 @@ fixed expected output and base-R evidence. Special missings retain their tags.
   rulebook. 56 rules with equivalence classes (EXACT,
   EQUIVALENT-WITH-SETTINGS, APPROXIMATE, NO-DIRECT-EQUIVALENT), required
   settings, forbidden patterns, and validation tests.
+- `docs/capability-manifest.json` : the coverage manifest. Every entry of the
+  SAS reference documents, each carrying one disposition (GATED, RULE,
+  POLICY, HUMAN-REVIEW, DOCTRINE, OUT-OF-SCOPE, or UNASSESSED) with the gate
+  or rule that proves it. The denominator is the published reference listing,
+  not an estimate, and `examples/verify_capability.py` refuses a manifest
+  whose claims do not resolve.
 - `docs/USER_GUIDE.md` : the user guide: running the gates, reading the
   receipts, understanding the equivalence classes, and verifying a new
   construct family.

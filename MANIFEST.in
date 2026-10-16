@@ -1,2 +1,3 @@
 include docs/sasconversionrulebook.json
+include docs/capability-manifest.json
 recursive-include saschi/web/static *.html *.css *.js

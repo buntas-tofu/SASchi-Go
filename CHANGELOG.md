@@ -24,6 +24,21 @@ live SAS comparison. Branch synchronization is separate from a release.
   suite-assistant, and suite-web: the job outcomes, the showcase self-
   containment, the assistant wire behavior and off state, the workbench
   routes, the path boundary, and the chat proxy against a stub endpoint.
+- Add the capability manifest: `docs/capability-manifest.json` enumerates the
+  entries of the SAS reference documents and gives each one a disposition
+  (GATED, RULE, POLICY, HUMAN-REVIEW, DOCTRINE, OUT-OF-SCOPE, or UNASSESSED)
+  with the gate or rule that proves it. The denominator comes from the
+  published reference listing rather than an estimate, so the manifest can
+  state what is not covered as precisely as what is. The first document
+  enumerated is the DATA step statements reference: 108 entries, 21 gated, 31
+  assessed. A document whose index has not been enumerated carries a null
+  universe, which is not the same as zero entries.
+- Add the capability gate: `examples/verify_capability.py` refuses a manifest
+  whose claims do not resolve. It fails on an undeclared disposition, a GATED
+  entry naming a gate that is not registered in `verify_all.py`, a RULE entry
+  naming a rule id absent from the shipped rulebook, a document count that
+  disagrees with its declared universe, or a document declaring a null
+  universe while carrying entries.
 
 # Changes for 0.3.0
 

@@ -1,0 +1,1411 @@
+{
+ "manifest_version": "0.1.0",
+ "reference_frame": {
+  "product": "SAS 9.4",
+  "source": "SAS 9.4 DATA Step Statements: Reference (document 1 of the language reference set)",
+  "note": "One document populated so far. The remaining documents are declared with a null universe, which means the reference index for that document has not been enumerated yet. A null universe is not zero entries.",
+  "documents": [
+   {
+    "id": "stmt",
+    "name": "SAS DATA Step Statements: Reference",
+    "universe": 108,
+    "enumerated": true
+   },
+   {
+    "id": "dso",
+    "name": "SAS Data Set Options: Reference",
+    "universe": null,
+    "enumerated": false
+   },
+   {
+    "id": "fmt",
+    "name": "SAS Formats and Informats: Reference",
+    "universe": null,
+    "enumerated": false
+   },
+   {
+    "id": "func",
+    "name": "SAS Functions and CALL Routines: Reference",
+    "universe": null,
+    "enumerated": false
+   },
+   {
+    "id": "opt",
+    "name": "SAS System Options: Reference",
+    "universe": null,
+    "enumerated": false
+   },
+   {
+    "id": "cobj",
+    "name": "SAS Component Objects: Reference",
+    "universe": null,
+    "enumerated": false
+   },
+   {
+    "id": "util",
+    "name": "Base SAS Utilities: Reference",
+    "universe": null,
+    "enumerated": false
+   },
+   {
+    "id": "macro",
+    "name": "SAS Macro Language: Reference",
+    "universe": null,
+    "enumerated": false
+   },
+   {
+    "id": "proc",
+    "name": "SAS Procedures, by product",
+    "universe": null,
+    "enumerated": false
+   }
+  ]
+ },
+ "dispositions": [
+  "GATED",
+  "RULE",
+  "POLICY",
+  "HUMAN-REVIEW",
+  "DOCTRINE",
+  "OUT-OF-SCOPE",
+  "UNASSESSED"
+ ],
+ "provenance": {
+  "universe_source": "the published contents listing of the reference document, parsed",
+  "disposition_source": "assigned by inspection of the live tree, not machine-derived",
+  "inference": "every disposition assignment is a judgment call; the entry list and the counts are measured",
+  "measured_at": "b6d4579"
+ },
+ "rollup": {
+  "stmt": {
+   "universe": 108,
+   "assessed": 31,
+   "gated": 21,
+   "rule": 7,
+   "human_review": 1,
+   "out_of_scope": 2,
+   "unassessed": 77
+  }
+ },
+ "entries": [
+  {
+   "entry": "ABORT Statement",
+   "document": "stmt",
+   "category": "Action",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 15
+  },
+  {
+   "entry": "ARRAY Statement",
+   "document": "stmt",
+   "category": "CAS",
+   "type": "Declarative",
+   "valid_in": "DATA step",
+   "disposition": "GATED",
+   "rule_ids": [
+    "DS-016"
+   ],
+   "gates": [
+    "arrays"
+   ],
+   "reference_page": 21,
+   "note": "array plus DO loop family"
+  },
+  {
+   "entry": "Array Reference Statement",
+   "document": "stmt",
+   "category": "CAS",
+   "type": "Declarative",
+   "valid_in": "DATA step",
+   "disposition": "GATED",
+   "rule_ids": [
+    "DS-016"
+   ],
+   "gates": [
+    "arrays"
+   ],
+   "reference_page": 27
+  },
+  {
+   "entry": "Assignment Statement",
+   "document": "stmt",
+   "category": "Action",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "GATED",
+   "rule_ids": [],
+   "gates": [
+    "data-events"
+   ],
+   "reference_page": 32,
+   "note": "typed DATA-step execution, version 2 events"
+  },
+  {
+   "entry": "ATTRIB Statement",
+   "document": "stmt",
+   "category": "CAS",
+   "type": "Declarative",
+   "valid_in": "DATA step or PROC step",
+   "disposition": "GATED",
+   "rule_ids": [],
+   "gates": [
+    "typed-metadata"
+   ],
+   "reference_page": 33,
+   "note": "character widths, labels, and format descriptors pinned in the typed-metadata family"
+  },
+  {
+   "entry": "BY Statement",
+   "document": "stmt",
+   "category": "CAS",
+   "type": "Declarative",
+   "valid_in": "DATA step or PROC step",
+   "disposition": "GATED",
+   "rule_ids": [
+    "DS-006"
+   ],
+   "gates": [
+    "bygroup"
+   ],
+   "reference_page": 39,
+   "note": "BY-group processing and FIRST./LAST."
+  },
+  {
+   "entry": "CALL Statement",
+   "document": "stmt",
+   "category": "Action",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "HUMAN-REVIEW",
+   "rule_ids": [
+    "MC-004"
+   ],
+   "gates": [],
+   "reference_page": 46,
+   "note": "CALL EXECUTE routes to human review under GP-02; other CALL routines not assessed"
+  },
+  {
+   "entry": "CARDS Statement",
+   "document": "stmt",
+   "category": "File-Handling",
+   "type": "Declarative",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 47
+  },
+  {
+   "entry": "CARDS4 Statement",
+   "document": "stmt",
+   "category": "File-Handling",
+   "type": "Declarative",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 47
+  },
+  {
+   "entry": "CATNAME Statement",
+   "document": "stmt",
+   "category": "",
+   "type": "",
+   "valid_in": "",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 47
+  },
+  {
+   "entry": "CHECKPOINT EXECUTE_ALWAYS Statement",
+   "document": "stmt",
+   "category": "",
+   "type": "",
+   "valid_in": "",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 48
+  },
+  {
+   "entry": "Comment Statement",
+   "document": "stmt",
+   "category": "CAS",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "OUT-OF-SCOPE",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 48,
+   "note": "carries no executable semantics"
+  },
+  {
+   "entry": "CONTINUE Statement",
+   "document": "stmt",
+   "category": "CAS",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 48
+  },
+  {
+   "entry": "DATA Statement",
+   "document": "stmt",
+   "category": "CAS",
+   "type": "Declarative",
+   "valid_in": "DATA step",
+   "disposition": "GATED",
+   "rule_ids": [],
+   "gates": [
+    "data-events"
+   ],
+   "reference_page": 49,
+   "note": "the DATA step boundary and its options are the runtime's entry point"
+  },
+  {
+   "entry": "DATALINES Statement",
+   "document": "stmt",
+   "category": "File-Handling",
+   "type": "Declarative",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 61
+  },
+  {
+   "entry": "DATALINES4 Statement",
+   "document": "stmt",
+   "category": "File-Handling",
+   "type": "Declarative",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 63
+  },
+  {
+   "entry": "DELETE Statement",
+   "document": "stmt",
+   "category": "Action",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 65
+  },
+  {
+   "entry": "DESCRIBE Statement",
+   "document": "stmt",
+   "category": "Action",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 66
+  },
+  {
+   "entry": "DISPLAY Statement",
+   "document": "stmt",
+   "category": "Window Display",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 67,
+   "note": "window display, SAS windowing environment"
+  },
+  {
+   "entry": "DM Statement",
+   "document": "stmt",
+   "category": "CAS",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 70,
+   "note": "window display"
+  },
+  {
+   "entry": "DO Statement",
+   "document": "stmt",
+   "category": "CAS",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "GATED",
+   "rule_ids": [
+    "DS-016"
+   ],
+   "gates": [
+    "arrays"
+   ],
+   "reference_page": 70
+  },
+  {
+   "entry": "DO Statement: Iterative",
+   "document": "stmt",
+   "category": "CAS",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "GATED",
+   "rule_ids": [
+    "DS-016"
+   ],
+   "gates": [
+    "arrays"
+   ],
+   "reference_page": 72
+  },
+  {
+   "entry": "DO UNTIL Statement",
+   "document": "stmt",
+   "category": "CAS",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "GATED",
+   "rule_ids": [
+    "DS-016"
+   ],
+   "gates": [
+    "arrays"
+   ],
+   "reference_page": 76
+  },
+  {
+   "entry": "DO WHILE Statement",
+   "document": "stmt",
+   "category": "CAS",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "GATED",
+   "rule_ids": [
+    "DS-016"
+   ],
+   "gates": [
+    "arrays"
+   ],
+   "reference_page": 78
+  },
+  {
+   "entry": "DROP Statement",
+   "document": "stmt",
+   "category": "CAS",
+   "type": "Declarative",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 79
+  },
+  {
+   "entry": "END Statement",
+   "document": "stmt",
+   "category": "CAS",
+   "type": "Declarative",
+   "valid_in": "DATA step",
+   "disposition": "GATED",
+   "rule_ids": [
+    "DS-016"
+   ],
+   "gates": [
+    "arrays"
+   ],
+   "reference_page": 81
+  },
+  {
+   "entry": "ENDSAS Statement",
+   "document": "stmt",
+   "category": "Action",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 82
+  },
+  {
+   "entry": "ERROR Statement",
+   "document": "stmt",
+   "category": "Action",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 82
+  },
+  {
+   "entry": "EXECUTE Statement",
+   "document": "stmt",
+   "category": "Action",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 84
+  },
+  {
+   "entry": "FILE Statement",
+   "document": "stmt",
+   "category": "CAS",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 85
+  },
+  {
+   "entry": "FILENAME Statement",
+   "document": "stmt",
+   "category": "",
+   "type": "",
+   "valid_in": "",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 108
+  },
+  {
+   "entry": "FILENAME Statement: Azure Access Method",
+   "document": "stmt",
+   "category": "",
+   "type": "",
+   "valid_in": "",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 108,
+   "note": "access-method variant, not separately assessed"
+  },
+  {
+   "entry": "FILENAME Statement: CATALOG Access Method",
+   "document": "stmt",
+   "category": "",
+   "type": "",
+   "valid_in": "",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 109,
+   "note": "access-method variant, not separately assessed"
+  },
+  {
+   "entry": "FILENAME Statement: CLIPBOARD Access Method",
+   "document": "stmt",
+   "category": "",
+   "type": "",
+   "valid_in": "",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 109,
+   "note": "access-method variant, not separately assessed"
+  },
+  {
+   "entry": "FILENAME Statement: DATAURL Access Method",
+   "document": "stmt",
+   "category": "",
+   "type": "",
+   "valid_in": "",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 109,
+   "note": "access-method variant, not separately assessed"
+  },
+  {
+   "entry": "FILENAME Statement: EMAIL (SMTP) Access Method",
+   "document": "stmt",
+   "category": "",
+   "type": "",
+   "valid_in": "",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 109,
+   "note": "access-method variant, not separately assessed"
+  },
+  {
+   "entry": "FILENAME Statement: FILESRVC Access Method",
+   "document": "stmt",
+   "category": "",
+   "type": "",
+   "valid_in": "",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 109,
+   "note": "access-method variant, not separately assessed"
+  },
+  {
+   "entry": "FILENAME Statement: FTP Access Method",
+   "document": "stmt",
+   "category": "",
+   "type": "",
+   "valid_in": "",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 110,
+   "note": "access-method variant, not separately assessed"
+  },
+  {
+   "entry": "FILENAME Statement: Hadoop Access Method",
+   "document": "stmt",
+   "category": "",
+   "type": "",
+   "valid_in": "",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 110,
+   "note": "access-method variant, not separately assessed"
+  },
+  {
+   "entry": "FILENAME Statement: S3 Access Method",
+   "document": "stmt",
+   "category": "",
+   "type": "",
+   "valid_in": "",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 110,
+   "note": "access-method variant, not separately assessed"
+  },
+  {
+   "entry": "FILENAME Statement: SFTP Access Method",
+   "document": "stmt",
+   "category": "",
+   "type": "",
+   "valid_in": "",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 110,
+   "note": "access-method variant, not separately assessed"
+  },
+  {
+   "entry": "FILENAME Statement: SOCKET Access Method",
+   "document": "stmt",
+   "category": "",
+   "type": "",
+   "valid_in": "",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 110,
+   "note": "access-method variant, not separately assessed"
+  },
+  {
+   "entry": "FILENAME Statement: URL Access Method",
+   "document": "stmt",
+   "category": "",
+   "type": "",
+   "valid_in": "",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 111,
+   "note": "access-method variant, not separately assessed"
+  },
+  {
+   "entry": "FILENAME Statement: WebDAV Access Method",
+   "document": "stmt",
+   "category": "",
+   "type": "",
+   "valid_in": "",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 111,
+   "note": "access-method variant, not separately assessed"
+  },
+  {
+   "entry": "FILENAME Statement: ZIP Access Method",
+   "document": "stmt",
+   "category": "",
+   "type": "",
+   "valid_in": "",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 111,
+   "note": "access-method variant, not separately assessed"
+  },
+  {
+   "entry": "FOOTNOTE Statement",
+   "document": "stmt",
+   "category": "CAS",
+   "type": "Declarative",
+   "valid_in": "DATA step or PROC step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 111
+  },
+  {
+   "entry": "FORMAT Statement",
+   "document": "stmt",
+   "category": "CAS",
+   "type": "Declarative",
+   "valid_in": "DATA step or PROC step",
+   "disposition": "RULE",
+   "rule_ids": [
+    "DS-010",
+    "DS-020"
+   ],
+   "gates": [],
+   "reference_page": 111,
+   "note": "format rendering; PROC FORMAT and significant digits are gated"
+  },
+  {
+   "entry": "GOTO Statement",
+   "document": "stmt",
+   "category": "CAS",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 115
+  },
+  {
+   "entry": "IF Statement: Subsetting",
+   "document": "stmt",
+   "category": "Action",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "GATED",
+   "rule_ids": [],
+   "gates": [
+    "data-events"
+   ],
+   "reference_page": 117,
+   "note": "WHERE and subsetting IF timing pinned in the events family"
+  },
+  {
+   "entry": "IF-THEN/ELSE Statement",
+   "document": "stmt",
+   "category": "",
+   "type": "",
+   "valid_in": "",
+   "disposition": "GATED",
+   "rule_ids": [
+    "DS-005"
+   ],
+   "gates": [
+    "missarith"
+   ],
+   "reference_page": 120
+  },
+  {
+   "entry": "%INCLUDE Statement",
+   "document": "stmt",
+   "category": "",
+   "type": "",
+   "valid_in": "",
+   "disposition": "RULE",
+   "rule_ids": [
+    "MC-005"
+   ],
+   "gates": [],
+   "reference_page": 122,
+   "note": "pattern replacement"
+  },
+  {
+   "entry": "INFILE Statement",
+   "document": "stmt",
+   "category": "File-Handling",
+   "type": "Executable",
+   "valid_in": "DATA Step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 122
+  },
+  {
+   "entry": "INFORMAT Statement",
+   "document": "stmt",
+   "category": "CAS",
+   "type": "Declarative",
+   "valid_in": "DATA step or PROC step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 161
+  },
+  {
+   "entry": "INPUT Statement",
+   "document": "stmt",
+   "category": "File-Handling",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 165
+  },
+  {
+   "entry": "INPUT Statement: Column",
+   "document": "stmt",
+   "category": "File-Handling",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 183
+  },
+  {
+   "entry": "INPUT Statement: Formatted",
+   "document": "stmt",
+   "category": "File-Handling",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 187
+  },
+  {
+   "entry": "INPUT Statement: List",
+   "document": "stmt",
+   "category": "File-Handling",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 192
+  },
+  {
+   "entry": "INPUT Statement: Named",
+   "document": "stmt",
+   "category": "File-Handling",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 200
+  },
+  {
+   "entry": "KEEP Statement",
+   "document": "stmt",
+   "category": "CAS",
+   "type": "Declarative",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 204
+  },
+  {
+   "entry": "LABEL Statement",
+   "document": "stmt",
+   "category": "CAS",
+   "type": "Declarative",
+   "valid_in": "DATA step or PROC step",
+   "disposition": "GATED",
+   "rule_ids": [],
+   "gates": [
+    "typed-metadata"
+   ],
+   "reference_page": 206,
+   "note": "labels pinned in the typed-metadata family"
+  },
+  {
+   "entry": "Label: Statement",
+   "document": "stmt",
+   "category": "",
+   "type": "",
+   "valid_in": "",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 211
+  },
+  {
+   "entry": "LEAVE Statement",
+   "document": "stmt",
+   "category": "CAS",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 214
+  },
+  {
+   "entry": "LENGTH Statement",
+   "document": "stmt",
+   "category": "CAS",
+   "type": "Declarative",
+   "valid_in": "DATA step",
+   "disposition": "GATED",
+   "rule_ids": [],
+   "gates": [
+    "typed-metadata"
+   ],
+   "reference_page": 215,
+   "note": "character byte widths pinned in the typed-metadata family"
+  },
+  {
+   "entry": "LIBNAME Statement",
+   "document": "stmt",
+   "category": "",
+   "type": "",
+   "valid_in": "",
+   "disposition": "RULE",
+   "rule_ids": [
+    "DS-018"
+   ],
+   "gates": [],
+   "reference_page": 221,
+   "note": "library access; sas7bdat and xpt reading"
+  },
+  {
+   "entry": "LIBNAME Statement: CVP Engine",
+   "document": "stmt",
+   "category": "",
+   "type": "",
+   "valid_in": "",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 221,
+   "note": "engine variant, not separately assessed"
+  },
+  {
+   "entry": "LIBNAME Statement: JMP Engine",
+   "document": "stmt",
+   "category": "",
+   "type": "",
+   "valid_in": "",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 221,
+   "note": "engine variant, not separately assessed"
+  },
+  {
+   "entry": "LIBNAME Statement: JSON Engine",
+   "document": "stmt",
+   "category": "",
+   "type": "",
+   "valid_in": "",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 221,
+   "note": "engine variant, not separately assessed"
+  },
+  {
+   "entry": "LIBNAME Statement: WebDAV Server Access",
+   "document": "stmt",
+   "category": "CAS",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 221,
+   "note": "engine variant, not separately assessed"
+  },
+  {
+   "entry": "LINK Statement",
+   "document": "stmt",
+   "category": "CAS",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 222
+  },
+  {
+   "entry": "LIST Statement",
+   "document": "stmt",
+   "category": "Action",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 224
+  },
+  {
+   "entry": "%LIST Statement",
+   "document": "stmt",
+   "category": "",
+   "type": "",
+   "valid_in": "",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 228
+  },
+  {
+   "entry": "LOCK Statement",
+   "document": "stmt",
+   "category": "",
+   "type": "",
+   "valid_in": "",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 228
+  },
+  {
+   "entry": "LOCKDOWN Statement",
+   "document": "stmt",
+   "category": "Action",
+   "type": "",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 229
+  },
+  {
+   "entry": "LOSTCARD Statement",
+   "document": "stmt",
+   "category": "Action",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 229
+  },
+  {
+   "entry": "MERGE Statement",
+   "document": "stmt",
+   "category": "CAS",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "GATED",
+   "rule_ids": [
+    "DS-002",
+    "DS-003"
+   ],
+   "gates": [
+    "merge"
+   ],
+   "reference_page": 231,
+   "note": "1:1 and 1:many gated; many-to-many routes to human review"
+  },
+  {
+   "entry": "MISSING Statement",
+   "document": "stmt",
+   "category": "File-Handling",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "RULE",
+   "rule_ids": [
+    "DS-019"
+   ],
+   "gates": [],
+   "reference_page": 240,
+   "note": "special missing values .A-.Z and ._"
+  },
+  {
+   "entry": "MODIFY Statement",
+   "document": "stmt",
+   "category": "File-Handling",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 240
+  },
+  {
+   "entry": "Null Statement",
+   "document": "stmt",
+   "category": "",
+   "type": "",
+   "valid_in": "DATA step",
+   "disposition": "OUT-OF-SCOPE",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 261,
+   "note": "empty statement, no action"
+  },
+  {
+   "entry": "OPTIONS Statement",
+   "document": "stmt",
+   "category": "Action",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 261
+  },
+  {
+   "entry": "OUTPUT Statement",
+   "document": "stmt",
+   "category": "Action",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "GATED",
+   "rule_ids": [],
+   "gates": [
+    "data-events"
+   ],
+   "reference_page": 261,
+   "note": "explicit OUTPUT snapshots pinned in the events family"
+  },
+  {
+   "entry": "PAGE Statement",
+   "document": "stmt",
+   "category": "CAS",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 265
+  },
+  {
+   "entry": "PUT Statement",
+   "document": "stmt",
+   "category": "CAS",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "RULE",
+   "rule_ids": [
+    "DS-015"
+   ],
+   "gates": [],
+   "reference_page": 265,
+   "note": "emitter handles the named-list form; other forms not assessed"
+  },
+  {
+   "entry": "PUT Statement: Column",
+   "document": "stmt",
+   "category": "CAS",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 289
+  },
+  {
+   "entry": "PUT Statement: Formatted",
+   "document": "stmt",
+   "category": "CAS",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 292
+  },
+  {
+   "entry": "PUT Statement: List",
+   "document": "stmt",
+   "category": "CAS",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 296
+  },
+  {
+   "entry": "PUT Statement: Named",
+   "document": "stmt",
+   "category": "CAS",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "GATED",
+   "rule_ids": [],
+   "gates": [
+    "suite-emitter"
+   ],
+   "reference_page": 302,
+   "note": "the emitter consumes name= items one at a time and tickets the leftover text"
+  },
+  {
+   "entry": "PUTLOG Statement",
+   "document": "stmt",
+   "category": "Action",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 304
+  },
+  {
+   "entry": "REDIRECT Statement",
+   "document": "stmt",
+   "category": "Action",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 310
+  },
+  {
+   "entry": "REMOVE Statement",
+   "document": "stmt",
+   "category": "Action",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 312
+  },
+  {
+   "entry": "RENAME Statement",
+   "document": "stmt",
+   "category": "CAS",
+   "type": "Declarative",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 314
+  },
+  {
+   "entry": "REPLACE Statement",
+   "document": "stmt",
+   "category": "Action",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 316
+  },
+  {
+   "entry": "RESETLINE Statement",
+   "document": "stmt",
+   "category": "CAS",
+   "type": "Declarative",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 319
+  },
+  {
+   "entry": "RETAIN Statement",
+   "document": "stmt",
+   "category": "CAS",
+   "type": "Declarative",
+   "valid_in": "DATA step",
+   "disposition": "GATED",
+   "rule_ids": [
+    "DS-006"
+   ],
+   "gates": [
+    "bygroup"
+   ],
+   "reference_page": 319,
+   "note": "numeric RETAIN pinned in the events and bygroup families"
+  },
+  {
+   "entry": "RETURN Statement",
+   "document": "stmt",
+   "category": "CAS",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 324
+  },
+  {
+   "entry": "RUN Statement",
+   "document": "stmt",
+   "category": "",
+   "type": "",
+   "valid_in": "",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 326
+  },
+  {
+   "entry": "%RUN Statement",
+   "document": "stmt",
+   "category": "",
+   "type": "",
+   "valid_in": "",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 326
+  },
+  {
+   "entry": "SASFILE Statement",
+   "document": "stmt",
+   "category": "CAS",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 326
+  },
+  {
+   "entry": "SELECT Statement",
+   "document": "stmt",
+   "category": "CAS",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 326
+  },
+  {
+   "entry": "SET Statement",
+   "document": "stmt",
+   "category": "CAS",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "RULE",
+   "rule_ids": [
+    "DS-001"
+   ],
+   "gates": [],
+   "reference_page": 331,
+   "note": "concatenation rule; no dedicated fixture"
+  },
+  {
+   "entry": "SKIP Statement",
+   "document": "stmt",
+   "category": "Action",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 346
+  },
+  {
+   "entry": "STOP Statement",
+   "document": "stmt",
+   "category": "Action",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 346
+  },
+  {
+   "entry": "Sum Statement",
+   "document": "stmt",
+   "category": "Action",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "GATED",
+   "rule_ids": [
+    "DS-006"
+   ],
+   "gates": [
+    "bygroup"
+   ],
+   "reference_page": 348
+  },
+  {
+   "entry": "SYSECHO Statement",
+   "document": "stmt",
+   "category": "",
+   "type": "",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 350
+  },
+  {
+   "entry": "TITLE Statement",
+   "document": "stmt",
+   "category": "File-Handling",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 350
+  },
+  {
+   "entry": "UPDATE Statement",
+   "document": "stmt",
+   "category": "File-Handling",
+   "type": "Executable",
+   "valid_in": "DATA step",
+   "disposition": "RULE",
+   "rule_ids": [
+    "DS-004"
+   ],
+   "gates": [],
+   "reference_page": 350,
+   "note": "equivalence class APPROXIMATE"
+  },
+  {
+   "entry": "WHERE Statement",
+   "document": "stmt",
+   "category": "Action",
+   "type": "Declarative",
+   "valid_in": "DATA step or PROC step",
+   "disposition": "GATED",
+   "rule_ids": [],
+   "gates": [
+    "data-events"
+   ],
+   "reference_page": 359,
+   "note": "WHERE runs before BY groups form; timing pinned"
+  },
+  {
+   "entry": "WINDOW Statement",
+   "document": "stmt",
+   "category": "Window Display",
+   "type": "Declarative",
+   "valid_in": "DATA step",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 367,
+   "note": "window display"
+  },
+  {
+   "entry": "X Statement",
+   "document": "stmt",
+   "category": "",
+   "type": "",
+   "valid_in": "",
+   "disposition": "UNASSESSED",
+   "rule_ids": [
+    "MC-006"
+   ],
+   "gates": [],
+   "reference_page": 380,
+   "note": "operating-system command surface, policy MC-006"
+  }
+ ]
+}
