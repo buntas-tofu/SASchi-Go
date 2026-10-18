@@ -39,6 +39,13 @@ live SAS comparison. Branch synchronization is separate from a release.
   naming a rule id absent from the shipped rulebook, a document count that
   disagrees with its declared universe, or a document declaring a null
   universe while carrying entries.
+- Enumerate the Data Set Options reference in the capability manifest: 40
+  entries from the document's own dictionary, each with its page, category,
+  and Valid in. 29 of 40 assessed: IN= and LABEL= are gated (the merge
+  gate pins the group-retained flags, the typed-metadata family pins
+  labels), the seven file-protection options route to human review, the
+  storage and engine options are out of scope, and the eleven
+  data-semantics options the translator does not parse yet stay unassessed.
 
 # Changes for 0.3.0
 

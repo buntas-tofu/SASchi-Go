@@ -3,7 +3,7 @@
  "reference_frame": {
   "product": "SAS 9.4",
   "source": "SAS 9.4 DATA Step Statements: Reference (document 1 of the language reference set)",
-  "note": "One document populated so far. The remaining documents are declared with a null universe, which means the reference index for that document has not been enumerated yet. A null universe is not zero entries.",
+  "note": "Two documents populated so far. The remaining documents are declared with a null universe, which means the reference index for that document has not been enumerated yet. A null universe is not zero entries.",
   "documents": [
    {
     "id": "stmt",
@@ -14,8 +14,8 @@
    {
     "id": "dso",
     "name": "SAS Data Set Options: Reference",
-    "universe": null,
-    "enumerated": false
+    "universe": 40,
+    "enumerated": true
    },
    {
     "id": "fmt",
@@ -74,7 +74,10 @@
   "universe_source": "the published contents listing of the reference document, parsed",
   "disposition_source": "assigned by inspection of the live tree, not machine-derived",
   "inference": "every disposition assignment is a judgment call; the entry list and the counts are measured",
-  "measured_at": "b6d4579"
+  "measured_at": {
+   "stmt": "b6d4579",
+   "dso": "e5ca315"
+  }
  },
  "rollup": {
   "stmt": {
@@ -85,6 +88,15 @@
    "human_review": 1,
    "out_of_scope": 2,
    "unassessed": 77
+  },
+  "dso": {
+   "universe": 40,
+   "assessed": 29,
+   "gated": 2,
+   "rule": 0,
+   "human_review": 7,
+   "out_of_scope": 20,
+   "unassessed": 11
   }
  },
  "entries": [
@@ -1406,6 +1418,490 @@
    "gates": [],
    "reference_page": 380,
    "note": "operating-system command surface, policy MC-006"
+  },
+  {
+   "entry": "ALTER= Data Set Option",
+   "document": "dso",
+   "category": "Data Set Control",
+   "type": null,
+   "valid_in": "DATA step and PROC steps",
+   "disposition": "HUMAN-REVIEW",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 9,
+   "note": "file ALTER password; silent drop loses protection, human rules on access control"
+  },
+  {
+   "entry": "BUFNO= Data Set Option",
+   "document": "dso",
+   "category": "Data Set Control",
+   "type": null,
+   "valid_in": "DATA step and PROC steps",
+   "disposition": "OUT-OF-SCOPE",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 11,
+   "note": "I/O buffer count; no effect on data values"
+  },
+  {
+   "entry": "BUFSIZE= Data Set Option",
+   "document": "dso",
+   "category": "Data Set Control",
+   "type": null,
+   "valid_in": "DATA step and PROC steps",
+   "disposition": "OUT-OF-SCOPE",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 13,
+   "note": "buffer page size; no effect on data values"
+  },
+  {
+   "entry": "CNTLLEV= Data Set Option",
+   "document": "dso",
+   "category": "Data Set Control",
+   "type": null,
+   "valid_in": "DATA step and PROC steps",
+   "disposition": "OUT-OF-SCOPE",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 14,
+   "note": "shared-access level for multi-user sessions; single-process targets have no such surface"
+  },
+  {
+   "entry": "COMPRESS= Data Set Option",
+   "document": "dso",
+   "category": "Data Set Control",
+   "type": null,
+   "valid_in": "DATA step and PROC steps",
+   "disposition": "OUT-OF-SCOPE",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 16,
+   "note": "storage-level compression; does not change data values"
+  },
+  {
+   "entry": "DLDMGACTION= Data Set Option",
+   "document": "dso",
+   "category": "Data Set Control",
+   "type": null,
+   "valid_in": "DATA step and PROC steps",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 19,
+   "note": "damaged-file handling policy (ASK/IGNORE/FATAL); open targets surface read errors differently"
+  },
+  {
+   "entry": "DROP= Data Set Option",
+   "document": "dso",
+   "category": "Variable Control",
+   "type": null,
+   "valid_in": "DATA step and PROC steps",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 20,
+   "note": "variable exclusion; not parsed by the translator yet; strong candidate for the next gate"
+  },
+  {
+   "entry": "ENCRYPT= Data Set Option",
+   "document": "dso",
+   "category": "Data Set Control",
+   "type": null,
+   "valid_in": "DATA step and PROC steps",
+   "disposition": "HUMAN-REVIEW",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 22,
+   "note": "output data set encryption; no open target equivalent, human rules on it"
+  },
+  {
+   "entry": "ENCRYPTKEY= Data Set Option",
+   "document": "dso",
+   "category": "Data Set Control",
+   "type": null,
+   "valid_in": "DATA step and PROC steps",
+   "disposition": "HUMAN-REVIEW",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 27,
+   "note": "AES encryption key; no open target equivalent, human rules on it"
+  },
+  {
+   "entry": "EXTENDOBSCOUNTER= Data Set Option",
+   "document": "dso",
+   "category": "Data Set Control",
+   "type": null,
+   "valid_in": "DATA step and PROC steps",
+   "disposition": "OUT-OF-SCOPE",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 30,
+   "note": "observation-count file capacity; no effect on data values"
+  },
+  {
+   "entry": "FILECLOSE= Data Set Option",
+   "document": "dso",
+   "category": "Miscellaneous",
+   "type": null,
+   "valid_in": "DATA step and PROC steps",
+   "disposition": "OUT-OF-SCOPE",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 32,
+   "note": "tape volume close behavior; tape is out of scope"
+  },
+  {
+   "entry": "FIRSTOBS= Data Set Option",
+   "document": "dso",
+   "category": "Observation Control",
+   "type": null,
+   "valid_in": "DATA step and PROC steps",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 33,
+   "note": "observation range floor; not parsed by the translator yet"
+  },
+  {
+   "entry": "GENMAX= Data Set Option",
+   "document": "dso",
+   "category": "Data Set Control",
+   "type": null,
+   "valid_in": "DATA step and PROC steps",
+   "disposition": "OUT-OF-SCOPE",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 35,
+   "note": "data set generation count; no open target equivalent"
+  },
+  {
+   "entry": "GENNUM= Data Set Option",
+   "document": "dso",
+   "category": "Data Set Control",
+   "type": null,
+   "valid_in": "DATA step and PROC steps",
+   "disposition": "OUT-OF-SCOPE",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 36,
+   "note": "data set generation selection; no open target equivalent"
+  },
+  {
+   "entry": "IDXNAME= Data Set Option",
+   "document": "dso",
+   "category": "User Control of SAS Index Usage",
+   "type": null,
+   "valid_in": "DATA step and PROC steps",
+   "disposition": "OUT-OF-SCOPE",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 38,
+   "note": "index naming; access paths belong to the target engine"
+  },
+  {
+   "entry": "IDXWHERE= Data Set Option",
+   "document": "dso",
+   "category": "User Control of SAS Index Usage",
+   "type": null,
+   "valid_in": "DATA step and PROC steps",
+   "disposition": "OUT-OF-SCOPE",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 40,
+   "note": "index usage hint; access paths belong to the target engine"
+  },
+  {
+   "entry": "INDEX= Data Set Option",
+   "document": "dso",
+   "category": "Data Set Control",
+   "type": null,
+   "valid_in": "DATA step and PROC steps",
+   "disposition": "OUT-OF-SCOPE",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 42,
+   "note": "index definition; access paths belong to the target engine"
+  },
+  {
+   "entry": "IN= Data Set Option",
+   "document": "dso",
+   "category": "Observation Control",
+   "type": null,
+   "valid_in": "DATA step",
+   "disposition": "GATED",
+   "rule_ids": [],
+   "gates": [
+    "merge"
+   ],
+   "reference_page": 44,
+   "note": "group-retained IN= flags pinned in the MERGE BY gate (fixture F6, in_l and in_r columns)"
+  },
+  {
+   "entry": "KEEP= Data Set Option",
+   "document": "dso",
+   "category": "Variable Control",
+   "type": null,
+   "valid_in": "DATA step and PROC steps",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 45,
+   "note": "variable selection; not parsed by the translator yet; strong candidate for the next gate"
+  },
+  {
+   "entry": "LABEL= Data Set Option",
+   "document": "dso",
+   "category": "Data Set Control",
+   "type": null,
+   "valid_in": "DATA step and PROC steps",
+   "disposition": "GATED",
+   "rule_ids": [],
+   "gates": [
+    "typed-metadata"
+   ],
+   "reference_page": 47,
+   "note": "label handling pinned in the typed-metadata family, as for the LABEL statement"
+  },
+  {
+   "entry": "MAXTABLEMEM= Data Set Option",
+   "document": "dso",
+   "category": "CAS",
+   "type": null,
+   "valid_in": "DATA step and PROC steps",
+   "disposition": "OUT-OF-SCOPE",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 49,
+   "note": "CAS server memory allocation; no local target equivalent"
+  },
+  {
+   "entry": "OBSBUF= Data Set Option",
+   "document": "dso",
+   "category": "Data Set Control",
+   "type": null,
+   "valid_in": "DATA step and PROC steps",
+   "disposition": "OUT-OF-SCOPE",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 50,
+   "note": "DATA step view buffer size; no effect on data values"
+  },
+  {
+   "entry": "OBS= Data Set Option",
+   "document": "dso",
+   "category": "Observation Control",
+   "type": null,
+   "valid_in": "DATA step and PROC steps",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 52,
+   "note": "observation range ceiling; not parsed by the translator yet"
+  },
+  {
+   "entry": "OUTREP= Data Set Option",
+   "document": "dso",
+   "category": "Data Set Control",
+   "type": null,
+   "valid_in": "DATA step and PROC steps",
+   "disposition": "OUT-OF-SCOPE",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 61,
+   "note": "SAS-internal data representation control; no open target equivalent"
+  },
+  {
+   "entry": "POINTOBS= Data Set Option",
+   "document": "dso",
+   "category": "Observation Control",
+   "type": null,
+   "valid_in": "DATA step and PROC steps",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 64,
+   "note": "point observation random access; not modeled by the runtime yet"
+  },
+  {
+   "entry": "PW= Data Set Option",
+   "document": "dso",
+   "category": "Data Set Control",
+   "type": null,
+   "valid_in": "DATA step and PROC steps",
+   "disposition": "HUMAN-REVIEW",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 66,
+   "note": "READ/WRITE/ALTER passwords; no open target equivalent, human rules on access control"
+  },
+  {
+   "entry": "PWREQ= Data Set Option",
+   "document": "dso",
+   "category": "Data Set Control",
+   "type": null,
+   "valid_in": "DATA step and PROC steps",
+   "disposition": "HUMAN-REVIEW",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 67,
+   "note": "password dialog request; part of the access-control surface"
+  },
+  {
+   "entry": "READ= Data Set Option",
+   "document": "dso",
+   "category": "Data Set Control",
+   "type": null,
+   "valid_in": "DATA step and PROC steps",
+   "disposition": "HUMAN-REVIEW",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 68,
+   "note": "read password; no open target equivalent, human rules on access control"
+  },
+  {
+   "entry": "RENAME= Data Set Option",
+   "document": "dso",
+   "category": "Variable Control",
+   "type": null,
+   "valid_in": "DATA step and PROC steps",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 70,
+   "note": "variable renaming; not parsed by the translator yet; strong candidate for the next gate"
+  },
+  {
+   "entry": "REPEMPTY= Data Set Option",
+   "document": "dso",
+   "category": "Data Set Control",
+   "type": null,
+   "valid_in": "DATA step and PROC steps",
+   "disposition": "OUT-OF-SCOPE",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 73,
+   "note": "empty-overwrite policy; no effect on data values"
+  },
+  {
+   "entry": "REPLACE= Data Set Option",
+   "document": "dso",
+   "category": "Data Set Control",
+   "type": null,
+   "valid_in": "DATA step and PROC steps",
+   "disposition": "OUT-OF-SCOPE",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 76,
+   "note": "overwrite policy; no effect on data values"
+  },
+  {
+   "entry": "REUSE= Data Set Option",
+   "document": "dso",
+   "category": "Data Set Control",
+   "type": null,
+   "valid_in": "DATA step and PROC steps",
+   "disposition": "OUT-OF-SCOPE",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 77,
+   "note": "free-space reuse in compressed data sets; no effect on data values"
+  },
+  {
+   "entry": "ROLE= Data Set Option",
+   "document": "dso",
+   "category": "Data Set Control",
+   "type": null,
+   "valid_in": "PROC SQL",
+   "disposition": "OUT-OF-SCOPE",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 78,
+   "note": "CAS star-schema fact-table role; no target equivalent"
+  },
+  {
+   "entry": "SORTEDBY= Data Set Option",
+   "document": "dso",
+   "category": "Data Set Control",
+   "type": null,
+   "valid_in": "DATA step and PROC steps",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 79,
+   "note": "declared sort order; the runtime verifies sorted input for SET BY itself"
+  },
+  {
+   "entry": "SPILL= Data Set Option",
+   "document": "dso",
+   "category": "Data Set Control",
+   "type": null,
+   "valid_in": "DATA step and PROC steps",
+   "disposition": "OUT-OF-SCOPE",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 82,
+   "note": "spill file for view processing; no effect on data values"
+  },
+  {
+   "entry": "TOBSNO= Data Set Option",
+   "document": "dso",
+   "category": "Data Set Control",
+   "type": null,
+   "valid_in": "DATA step and PROC steps",
+   "disposition": "OUT-OF-SCOPE",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 90,
+   "note": "server-side observation transfer count; no local target equivalent"
+  },
+  {
+   "entry": "TYPE= Data Set Option",
+   "document": "dso",
+   "category": "Data Set Control",
+   "type": null,
+   "valid_in": "DATA step and PROC steps",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 91,
+   "note": "structured data set types (hierarchical); no flat open equivalent identified"
+  },
+  {
+   "entry": "WHERE= Data Set Option",
+   "document": "dso",
+   "category": "Observation Control",
+   "type": null,
+   "valid_in": "DATA step and PROC steps",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 93,
+   "note": "option form not parsed by the translator yet; the WHERE statement is gated in data-events"
+  },
+  {
+   "entry": "WHEREUP= Data Set Option",
+   "document": "dso",
+   "category": "Observation Control",
+   "type": null,
+   "valid_in": "DATA step and PROC steps",
+   "disposition": "UNASSESSED",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 96,
+   "note": "WHERE re-evaluation on UPDATE; not modeled yet"
+  },
+  {
+   "entry": "WRITE= Data Set Option",
+   "document": "dso",
+   "category": "Data Set Control",
+   "type": null,
+   "valid_in": "DATA step and PROC steps",
+   "disposition": "HUMAN-REVIEW",
+   "rule_ids": [],
+   "gates": [],
+   "reference_page": 98,
+   "note": "write password; no open target equivalent, human rules on access control"
   }
  ]
 }
