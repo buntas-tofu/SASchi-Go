@@ -339,4 +339,30 @@ right.
   claim in the README or docs is backed by a passing gate or a receipt; the
   sibling SASchi-Roku stays a data repository.
 
+### Sibling lane: the professional cut
+
+SASchi-Go ships in two public lanes. This repository is the persona lane. The
+second lane is `the-pgh-cid/sas-campaign`, the professional lane, cut from a
+named commit here. The two lanes are not forks, and they never merge.
+
+- **Principal and naming**: this lane is the `buntas-tofu` principal with
+  package `saschi`; the professional lane is the Matthew Haubach principal
+  with package `sas_campaign`.
+- **Direction**: feature work lands here first. The professional lane is
+  generated from a commit in this repository, with the package, launcher, and
+  linter names rewritten and persona strings removed. It is never the origin
+  of a change.
+- **Parity is stated, not implied**: the professional lane records the source
+  commit it mirrors. Falling behind is allowed, but it must be visible in that
+  lane rather than assumed away.
+- **Cut on record**: `43eaa56` of this repository (2026-09-24, version
+  0.3.0), from a match between that commit's subject and the professional
+  lane's head (inference, not a recorded cut receipt). This repository has
+  since moved to 0.4.0, so the lanes currently differ by that gap and not by
+  intent.
+- **Auth**: when both accounts are configured on one machine, address each
+  lane with that account's own token (`gh auth token --user <account>`). A
+  bare `gh` command authenticates as the active account, which reads cleanly
+  against the other lane and fails only on write.
+
 <!-- DMF:LOCAL:END -->
