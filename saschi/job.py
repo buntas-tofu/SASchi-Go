@@ -33,6 +33,27 @@ class Job:
     code: int
 
 
+def _completeness_record(source: str, plan, target: str, ts_utc: str) -> dict:
+    """The analysis accounting for this pass, or an explicit unavailable status.
+
+    duckdb lives in the verify extra, not in the base install, so the job path
+    must keep working on a machine that has only the package. Silence is not an
+    option: the receipt says which case it is, the same way every other claim in
+    it carries its own status.
+    """
+    try:
+        from .catalog import record_pass
+    except ImportError as exc:
+        return {'status': 'unavailable',
+                'reason': f'catalog requires duckdb (verify extra): {exc}'}
+    cat, completeness = record_pass(source, plan, file='<job>', target=target,
+                                    ts_utc=ts_utc)
+    try:
+        return completeness.as_record()
+    finally:
+        cat.close()
+
+
 def build_job(source: str, inputs: "Path | None" = None, expect: "Path | None" = None,
               target: str = "python") -> Job:
     """Run one program through the full treatment and return every artifact."""
@@ -46,6 +67,7 @@ def build_job(source: str, inputs: "Path | None" = None, expect: "Path | None" =
                'tickets': [vars(t) for t in plan.tickets], 'accepted': False,
                'comparison': 'not requested', 'comparison_contract': 'typed-exact-values-ordered-rows-and-columns-metadata-v1'}
     translation = (python_translate if target == 'python' else cpp_translate)(source)
+    receipt['completeness'] = _completeness_record(source, plan, target, receipt['ts_utc'])
     result, code = None, 2 if plan.blocked else 1
     try:
         if plan.blocked:

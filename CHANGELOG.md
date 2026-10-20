@@ -46,6 +46,17 @@ live SAS comparison. Branch synchronization is separate from a release.
   labels), the seven file-protection options route to human review, the
   storage and engine options are out of scope, and the eleven
   data-semantics options the translator does not parse yet stay unassessed.
+- Port the DuckDB analysis catalog onto the job path: `saschi/catalog.py`
+  records every pass (each statement with its routed construct and rule, the
+  functions recognized in code and not inside string literals, the plan's
+  tickets, and the run summary) and answers completeness as a query rather
+  than a print statement. The job receipt carries the accounting under
+  `completeness`, whose `status` is `recorded` or `unavailable`: duckdb ships
+  in the verify extra, so a base install still runs jobs and says why the
+  block is absent instead of going silent. Registered as suite-catalog in
+  `verify_all.py`. The proof is a cross-check and not a tautology: the
+  statement count comes from the parser, the ticket count from the compiled
+  plan, and the suite requires the two sides to agree on real repo programs.
 
 # Changes for 0.3.0
 
