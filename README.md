@@ -58,6 +58,13 @@ fixed expected output and base-R evidence. Special missings retain their tags.
 - `saschi/job.py` : the shared job path (compile, translate, run, compare,
   receipt) that the run command, the web workbench, and the showcase all
   render from, so what is shown is what ran.
+- `saschi/catalog.py` : the DuckDB analysis layer. Every job records its pass
+  (statements with the construct and rule they routed to, the functions
+  recognized in code rather than inside string literals, the plan's tickets,
+  and the run summary) into a catalog, and the receipt carries the resulting
+  accounting under `completeness`. Completeness is a query, not a print
+  statement. duckdb ships in the verify extra, so a base install still runs
+  jobs and the receipt says `status: unavailable` with the reason.
 - `saschi/web.py` + `saschi/web/static/` : the web workbench. `saschi serve`
   runs a standard-library HTTP server (no new runtime dependency) with a JSON
   API over the job path, a program shelf, a paste-and-run box, and an
