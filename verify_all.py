@@ -66,6 +66,7 @@ VERIFIERS = [
     ("put-literal", HERE / "examples" / "verify_put.py"),
     ("mod", HERE / "examples" / "verify_mod.py"),
     ("put-character-list", HERE / "examples" / "verify_put_list.py"),
+    ("wheel-install", HERE / "tools" / "verify_wheel.py"),
 ]
 
 # The translator suites, run as unittest modules. They carry the same weight as
