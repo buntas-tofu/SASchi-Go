@@ -8,7 +8,7 @@ from __future__ import annotations
 import math
 import re
 from dataclasses import asdict, dataclass, field
-from sas_semantics import sas_put_literals, sas_put_character_list, sas_put_numeric_list, sas_do_counted
+from sas_semantics import sas_put_literals, sas_put_character_list, sas_put_numeric_list, sas_do_counted, SAS_BITWISE_ARITY
 from .functions import FUNCTIONS, format_token, FORMATS, function_call_lines, substr_context_errors, catx_arguments_allowed
 from .parser import Kind, ParseError, Statement, split_statements, tokenize
 from .operations import walk_operations as _walk_operations
@@ -773,4 +773,7 @@ def compile_plan(source: str) -> Plan:
                     reject(st, 'length-reverse', 'REVERSE requires macro-free source character values')
                 if any(not 32 <= ord(char) <= 126 for char in token.text):
                     reject(st, 'length-reverse', 'REVERSE requires printable ASCII source character values')
+    for name in SAS_BITWISE_ARITY:
+        plan.matched.extend(('bitwise', 'DS-032', line or 1)
+                            for line in function_call_lines(plan.to_dict(), name))
     return plan

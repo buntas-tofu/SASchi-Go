@@ -25,6 +25,8 @@ Gate provenance, function by function:
   and padding-insensitive checked SUBSTR CATX items, with local temporary refusals.
 - `examples/verify_substr.py`  checked ASCII SUBSTR bounds and source-derived
   DATA-step destination widths; the raw extraction fixture above is unchanged.
+- `examples/verify_bitwise.py`  unsigned32 BAND/BOR/BXOR/BNOT/BLSHIFT/BRSHIFT,
+  with strict finite integral inputs and error-state refusal.
 - `examples/verify_mod.py`  MOD, dividend-signed remainder for bounded exact
   binary64 integers; fractional, missing, and zero-divisor inputs require review.
 """
@@ -37,7 +39,8 @@ from sas_semantics import (is_sas_missing, sas_charnum, sas_count, sas_input_yym
                            sas_length, sas_lengthc, sas_lengthn, sas_max,
                            sas_min, sas_mod, sas_numeric_length, sas_put_date9, sas_putn, sas_round,
                            sas_sum, sas_reverse, sas_catx, _sas_concat_text,
-                           sas_substr_checked, sas_substr_bound, _sas_substr_text)
+                           sas_substr_checked, sas_substr_bound, _sas_substr_text,
+                           SAS_BITWISE_ARITY, sas_bitwise, sas_bitwise_integer)
 
 GATE_FUNCS = "examples/verify_funcs.py"
 GATE_MISSARITH = "examples/verify_missarith.py"
@@ -48,6 +51,7 @@ GATE_MOD = "examples/verify_mod.py"
 GATE_LENGTH_REVERSE = "examples/verify_length_reverse.py"
 GATE_CONCAT = "examples/verify_concat_catx.py"
 GATE_SUBSTR = "examples/verify_substr.py"
+GATE_BITWISE = "examples/verify_bitwise.py"
 
 DATE9_WIDTH = 9
 
@@ -81,6 +85,8 @@ FUNCTIONS: dict[str, FunctionSpec] = {
         FunctionSpec("catx", "character", GATE_CONCAT, 2, 33),
         FunctionSpec("count", "number", GATE_COUNT, 2, 3),
         FunctionSpec("mod", "number", GATE_MOD, 2, 2),
+        *(FunctionSpec(name, "number", GATE_BITWISE, arity, arity)
+          for name, arity in SAS_BITWISE_ARITY.items()),
         FunctionSpec("sum", "number", GATE_MISSARITH, 1, -1),
         FunctionSpec("round", "number", GATE_ROUNDING, 2, 2),
         FunctionSpec("put", "character", GATE_NUMFMT, 2, 2, (1,)),
@@ -128,6 +134,8 @@ def _width_decimals(fmt) -> tuple[int, int]:
 
 def apply(name: str, values: list):
     """Evaluate one wired function over already-evaluated argument values."""
+    if name in SAS_BITWISE_ARITY:
+        return sas_bitwise(name, *values)
     if name == "reverse":
         return sas_reverse(values[0])
     if name == "catx":
@@ -319,7 +327,7 @@ def _substr_arguments(expr):
     return args
 
 
-def _substr_numeric(expr, schema):
+def _numeric_expression(expr, schema):
     kind = expr.get('kind')
     if kind in ('number', 'missing', 'tagged_missing', 'automatic'):
         return True
@@ -330,7 +338,7 @@ def _substr_numeric(expr, schema):
         spec = FUNCTIONS.get(expr.get('name'))
         return spec is not None and spec.returns == 'number'
     if kind == 'arithmetic':
-        return _substr_numeric(expr['left'], schema) and _substr_numeric(expr['right'], schema)
+        return _numeric_expression(expr['left'], schema) and _numeric_expression(expr['right'], schema)
     return False
 
 
@@ -343,7 +351,7 @@ def validate_substr_calls(value, schema):
         width = character_width(node, schema)
         literals = []
         for arg in args[1:]:
-            if not _substr_numeric(arg, schema):
+            if not _numeric_expression(arg, schema):
                 raise ValueError('SUBSTR bounds require numeric expressions')
             if arg.get('kind') in ('number', 'missing', 'tagged_missing'):
                 literals.append(sas_substr_bound(arg.get('value')))
@@ -385,3 +393,21 @@ def substr_context_errors(value, context='other'):
     elif isinstance(value, (list, tuple)):
         for child in value:
             yield from substr_context_errors(child, context)
+
+
+
+def validate_bitwise_calls(value, schema):
+    """Check numeric descriptors and literal limits even if no row executes."""
+    for node, _ in expression_nodes(value):
+        name = node.get('name')
+        if node.get('kind') != 'call' or name not in SAS_BITWISE_ARITY:
+            continue
+        args = node.get('args')
+        if (not isinstance(args, list) or len(args) != SAS_BITWISE_ARITY[name] or
+                any(not isinstance(arg, dict) for arg in args)):
+            raise ValueError('bitwise requires exact expression argument count')
+        for index, arg in enumerate(args):
+            if not _numeric_expression(arg, schema):
+                raise ValueError('bitwise requires numeric expressions without implicit coercion')
+            if arg.get('kind') in ('number', 'missing', 'tagged_missing'):
+                sas_bitwise_integer(arg.get('value'), shift=index == 1 and name in ('blshift', 'brshift'))

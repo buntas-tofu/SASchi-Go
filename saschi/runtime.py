@@ -5,7 +5,7 @@ import re
 from collections import Counter
 from copy import deepcopy
 from sas_semantics import sas_round, sas_merge_by, sas_put_literals, sas_put_character_list, sas_put_numeric_list, sas_put_all, sas_do_counted, sas_concat
-from .functions import apply as apply_function, assign_spec, character_width, validate_reverse_calls, validate_string_expressions, expression_nodes, validate_substr_calls, substr_context_errors
+from .functions import apply as apply_function, assign_spec, character_width, validate_reverse_calls, validate_string_expressions, expression_nodes, validate_substr_calls, substr_context_errors, validate_bitwise_calls, SAS_BITWISE_ARITY
 from .operations import walk_operations as operations
 from .values import normalize_catalog, column_type, coerce, missing, order
 
@@ -103,7 +103,7 @@ def put_all_value(expr, row):
     """Error-free scalar expressions for the DS-025 _ERROR_=0 contract."""
     if expr['kind'] == 'call':
         name = expr['name']
-        if name not in ('length', 'lengthn', 'lengthc', 'substr'):
+        if name not in ('length', 'lengthn', 'lengthc', 'substr') and name not in SAS_BITWISE_ARITY:
             raise ValueError('PUT _ALL_: function requires error-flag review')
         values = [put_all_value(arg, row) for arg in expr['args']]
         if name == 'substr':
@@ -205,6 +205,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
             if context_error:
                 raise ValueError(context_error)
             validate_substr_calls(where, where_schema)
+            validate_bitwise_calls(where, where_schema)
             rows = [r for r in rows if condition(where, r, where_schema)]
         if keys and any(key(a) > key(b) for a, b in zip(rows, rows[1:])):
             raise ValueError('SET BY requires ascending sorted rows after WHERE')
@@ -240,6 +241,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                 if context_error:
                     raise ValueError(context_error)
                 validate_substr_calls(payload, schema)
+                validate_bitwise_calls(payload, schema)
             if kind == 'declare':
                 name, spec = args['name'], args['spec']
                 if name in schema and column_type(schema[name]) != column_type(spec):

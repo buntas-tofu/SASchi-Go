@@ -38,7 +38,7 @@ fixed expected output and base-R evidence. Special missings retain their tags.
   sibling plus a fixture verifier (`verify_*.py`). Run any verifier directly,
   or all of them through `verify_all.py`.
 - `docs/sasconversionrulebook.json` : the machine-consumable translation
-  rulebook. 66 rules with equivalence classes (EXACT,
+  rulebook. 67 rules with equivalence classes (EXACT,
   EQUIVALENT-WITH-SETTINGS, APPROXIMATE, NO-DIRECT-EQUIVALENT), required
   settings, forbidden patterns, and validation tests.
 - `docs/capability-manifest.json` : the coverage manifest. Every entry of the
@@ -328,3 +328,13 @@ subsetting IF, nested/grouped DO, input/declarations and PUT_ALL in counted bodi
 and conditional ROUND remain refused. `examples/verify_do_if.py` and `saschi.test_do_if` provide original
 base-R branch evidence and an unmodified external FizzBuzz source/stdout/complete-
 result hash proof. Repository/base-R evidence for maintainer review, no live SAS.
+
+DS-032 gates unsigned32 BAND, BOR, BXOR, BNOT, BLSHIFT and BRSHIFT with finite
+integral operands0..4294967295 and shift counts0..31. Invalid/missing/coercion
+cases are refused atomically, including static checks on skipped or empty input.
+The independent R gate uses32-element bit vectors. The existing64-column PUT_ALL
+profile remains intact: the unmodified bitwise corpus reaches its67-column output
+refusal after its scalar PDV agrees with independent R. That refusal is evidence
+of the current boundary, not a successful whole-program execution proof.
+`examples/verify_bitwise.py` and `saschi.test_bitwise` provide repository/base-R
+evidence for maintainer review, without live SAS or C++ bitwise claims.
