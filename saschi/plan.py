@@ -188,8 +188,59 @@ def operand(text):
     return value if value is not None else call(text)
 
 
+def _concat_parts(text):
+    """Split only complete depth-zero operators outside quoted literals."""
+    parts, depth, quote, start, index = [], 0, None, 0, 0
+    while index < len(text):
+        char = text[index]
+        if quote:
+            if char == quote:
+                if index + 1 < len(text) and text[index + 1] == quote:
+                    index += 2
+                    continue
+                quote = None
+        elif char in "'\"":
+            quote = char
+        elif char == '(':
+            depth += 1
+        elif char == ')':
+            depth -= 1
+            if depth < 0:
+                return []
+        elif depth == 0 and char in '!|':
+            if text[index:index + 2] not in ('!!', '||'):
+                return []
+            parts.append(text[start:index].strip())
+            index += 2
+            start = index
+            continue
+        index += 1
+    if quote or depth:
+        return []
+    return parts + [text[start:].strip()] if parts else None
+
+
+def _string_nodes(value):
+    if isinstance(value, dict):
+        if value.get('kind') == 'concat' or value.get('kind') == 'call' and value.get('name') == 'catx':
+            yield value
+        for child in value.values():
+            yield from _string_nodes(child)
+    elif isinstance(value, list):
+        for child in value:
+            yield from _string_nodes(child)
+
+
 def expression(text):
     text = text.strip()
+    parts = _concat_parts(text)
+    if parts is not None:
+        if not 2 <= len(parts) <= 32:
+            return None
+        values = [operand(part) for part in parts]
+        if any(value is None for value in values):
+            return None
+        return {'kind': 'concat', 'args': values}
     value = operand(text)
     if value is not None:
         return value
@@ -238,7 +289,7 @@ def put_known_types(ops):
         kind = expr['kind']
         if kind in ('number', 'missing', 'tagged_missing', 'automatic'):
             return 'number'
-        if kind == 'character':
+        if kind in ('character', 'concat'):
             return 'character'
         if kind == 'variable':
             return known.get(expr['value'])
@@ -288,6 +339,22 @@ def compile_plan(source: str) -> Plan:
                     'PUT _ALL_ supports scalar declarations, safe assignments, and named-destination OUTPUT only; SET, BY, conditions, DATA _NULL_ OUTPUT, and other operations require review'))
         if step:
             flat = list(walk_operations(step.operations))
+            for op in flat:
+                payload = op.args.get('value') if op.kind == 'assign' else op.args.get('condition')
+                nodes = list(_string_nodes(payload))
+                if nodes:
+                    plan.matched.append(('concat-catx', 'DS-029', op.line))
+                cats = [node for node in nodes if node['kind'] == 'call']
+                if cats and not (op.kind == 'assign' and payload.get('kind') == 'call' and
+                                 payload.get('name') == 'catx' and len(cats) == 1 and
+                                 all(arg['kind'] in ('character', 'variable') for arg in payload['args'])):
+                    plan.tickets.append(Ticket(op.line, 'CATX', 'concat-catx',
+                        'CATX is gated only as a direct assignment RHS with literal/variable character arguments; temporary contexts require review'))
+            where_nodes = list(_string_nodes(step.where))
+            if where_nodes:
+                plan.matched.append(('concat-catx', 'DS-029', step.line))
+            if any(node.get('name') == 'catx' for node in where_nodes):
+                plan.tickets.append(Ticket(step.line, 'CATX', 'concat-catx', 'CATX in WHERE requires temporary-buffer review'))
             if (step.name == '_null_' and any(o.kind == 'do_counted' for o in flat)
                     and any(o.kind == 'output' for o in flat)):
                 plan.tickets.append(Ticket(step.line, 'OUTPUT', 'do-counted', 'explicit OUTPUT in DATA _NULL_ counted DO steps is deferred'))
@@ -586,19 +653,24 @@ def compile_plan(source: str) -> Plan:
         family, _ = route_function(text)
         reject(st, family if family != "unknown" else construct, "no operation for this statement")
     finish()
-    if any(contains_put(compiled.operations, {'put_character_list', 'put_numeric_list', 'put_all'}) for compiled in plan.steps):
+    has_strings = any(item[0] == 'concat-catx' for item in plan.matched)
+    if has_strings:
+        for line in sorted(set(function_call_lines(plan.to_dict(), 'substr'))):
+            plan.tickets.append(Ticket(line, 'SUBSTR', 'substr-quarantine',
+                'new character features are quarantined from actual SUBSTR calls until the legacy SUBSTR width contract is repaired separately'))
+    if has_strings or any(contains_put(compiled.operations, {'put_character_list', 'put_numeric_list', 'put_all'}) for compiled in plan.steps):
         # Macros resolve before DATA execution. Without taint tracking, even
         # unused or prior-step literals can affect this output contract.
         for st in statements:
             if any(token.kind == Kind.STRING and token.text.startswith('"') and
                    any(char in token.text for char in '&%') for token in st.tokens):
-                reject(st, 'put', 'bounded PUT requires macro-free source: double-quoted & or % anywhere in the program requires macro review')
+                reject(st, 'concat-catx' if has_strings else 'put', ('bounded character operations' if has_strings else 'bounded PUT') + ' require macro-free source: double-quoted & or % anywhere in the program requires macro review')
     has_all_put = any(contains_put(compiled.operations, {'put_all'}) for compiled in plan.steps)
-    if has_all_put or any(contains_put(compiled.operations, {'put_numeric_list'}) for compiled in plan.steps):
+    if has_strings or has_all_put or any(contains_put(compiled.operations, {'put_numeric_list'}) for compiled in plan.steps):
         for st in statements:
             if any(token.kind == Kind.STRING and any(not 32 <= ord(c) <= 126 for c in token.text) for token in st.tokens):
-                reject(st, 'put-all' if has_all_put else 'put',
-                       ('PUT _ALL_' if has_all_put else 'PUT numeric list') + ' requires printable ASCII source character values')
+                reject(st, 'concat-catx' if has_strings else 'put-all' if has_all_put else 'put',
+                       ('bounded character operations' if has_strings else 'PUT _ALL_' if has_all_put else 'PUT numeric list') + ' require printable ASCII source character values')
     reverse_ops = [op for compiled in plan.steps for op in walk_operations(compiled.operations) if function_call_lines({key:value for key,value in op.args.items() if key not in ('operation','body')}, 'reverse')]
     reverse_in_where = any(function_call_lines(compiled.where, 'reverse') for compiled in plan.steps)
     if reverse_ops or reverse_in_where:

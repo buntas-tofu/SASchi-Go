@@ -4,8 +4,8 @@ import math
 import re
 from collections import Counter
 from copy import deepcopy
-from sas_semantics import sas_round, sas_merge_by, sas_put_literals, sas_put_character_list, sas_put_numeric_list, sas_put_all, sas_do_counted
-from .functions import apply as apply_function, assign_spec, character_width, validate_reverse_calls, function_call_lines
+from sas_semantics import sas_round, sas_merge_by, sas_put_literals, sas_put_character_list, sas_put_numeric_list, sas_put_all, sas_do_counted, sas_concat
+from .functions import apply as apply_function, assign_spec, character_width, validate_reverse_calls, validate_string_expressions, expression_nodes, function_call_lines
 from .operations import walk_operations as operations
 from .values import normalize_catalog, column_type, coerce, missing, order
 
@@ -33,6 +33,15 @@ def number(expr, row, schema=None):
         return row.get(expr['value'])
     if kind == 'call':
         return evaluate(expr, row, schema)
+    if kind == 'concat':
+        values = []
+        for arg in expr['args']:
+            value = number(arg, row, schema)
+            width = character_width(arg, schema)
+            if not isinstance(value, str) or width is None:
+                raise ValueError('character concatenation requires character operands')
+            values.append(value.ljust(width)[:width])
+        return sas_concat(values)
     if kind == 'arithmetic':
         left, right = number(expr['left'], row, schema), number(expr['right'], row, schema)
         if isinstance(left, str) or isinstance(right, str):
@@ -123,8 +132,11 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
         raise RuntimeError('saschi: blocked translation. Nothing from this program was executed.')
     new_length_group = any(isinstance(item, (list, tuple)) and item and item[0] == 'length-list'
                            for item in plan.get('matched', []))
-    if function_call_lines(plan, 'substr') and (function_call_lines(plan, 'reverse') or new_length_group):
-        raise ValueError('DS-028 SUBSTR composition is quarantined pending separate legacy width repair')
+    new_strings = any(node.get('kind') == 'concat' or
+                      node.get('kind') == 'call' and node.get('name') in ('catx', 'reverse')
+                      for node, _ in expression_nodes(plan))
+    if function_call_lines(plan, 'substr') and (new_strings or new_length_group):
+        raise ValueError('new string features are quarantined from actual SUBSTR calls pending separate legacy width repair')
     tables, logs = normalize_catalog({} if catalog is None else catalog), []
     for step in plan['steps']:
         inputs, keys, ops = step['inputs'], step['by'], step['operations']
@@ -190,9 +202,11 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
         if where:
             if not inputs or step['kind'] != 'data':
                 raise ValueError('WHERE requires one driving SET')
+            # WHERE sees driving input descriptors before PDV LENGTH changes.
+            where_schema = tables[inputs[0]]['schema']
+            validate_string_expressions(where, where_schema)
             if any(e['kind'] == 'automatic' or e['value'] not in tables[inputs[0]]['schema'] for e in expressions(where)):
                 raise ValueError('WHERE can reference only driving input columns')
-            where_schema = tables[inputs[0]]['schema']
             validate_reverse_calls(where, where_schema)
             rows = [r for r in rows if condition(where, r, where_schema)]
         if keys and any(key(a) > key(b) for a, b in zip(rows, rows[1:])):
@@ -234,6 +248,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                 add_input(args['dataset'])
             elif kind in ('assign', 'round'):
                 expr = args['value']
+                validate_string_expressions(expr, schema, direct_catx=kind == 'assign')
                 if kind == 'assign' and expr['kind'] == 'character':
                     spec = {'type': 'character', 'length': max(1, len(expr['value'].encode(encoding)))}
                 elif kind == 'assign' and expr['kind'] == 'variable':
@@ -294,6 +309,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                     if name != '_n_':
                         schema.setdefault(name, 'number')
             elif kind in ('if', 'subset'):
+                validate_string_expressions(args['condition'], schema)
                 for value in expressions(args['condition']):
                     add_reference(value)
             elif kind == 'output':
@@ -374,6 +390,9 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                 args, kind = op['args'], op['kind']
                 if kind == 'assign':
                     value = put_all_value(args['value'], row) if put_all else number(args['value'], row, schema)
+                    if args['value'].get('kind') == 'call' and args['value'].get('name') == 'catx':
+                        if len(value) > schema[args['name']]['length']:
+                            raise ValueError('CATX destination is too short; buffer/error-flag review required')
                     row[args['name']] = coerce(value, schema[args['name']], encoding)
                 elif kind == 'round':
                     row[args['name']] = round_value(number(args['value'], row, schema), number(args['unit'], row, schema))

@@ -1735,6 +1735,38 @@
         "https://support.sas.com/documentation/cdl/en/lestmtsref/63323/HTML/default/p1hgqgmxm3dpqcn1d4w5za5qbz0d.htm",
         "https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/n0r87nwd0lt2rzn1h348larywe0r.htm"
       ]
+    },
+    {
+      "rule_id": "DS-029",
+      "sas_pattern": "Character !!/|| concatenation and direct DATA-step CATX assignment",
+      "scope": "data-step",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "sas_concat and sas_catx with schema-aware static character widths; CATX destination overflow is refused before assignment"
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "examples/concat_catx.R independent typed renderers and external-program parser"
+      },
+      "required_settings": [
+        "Only nonempty printable ASCII character operands, individual widths at most32767. Operator chains have2..32 operands and sum-of-widths at most32767. Preserve every operand blank; earlier target widths retain ordinary assignment truncation/padding. Numeric implicit conversions remain deferred.",
+        "CATX has1..32 literal/variable character items and a literal/variable character delimiter. It strips item edge spaces, omits blank items, preserves delimiter spaces, and gives a previously untyped DATA-step target width200.",
+        "CATX is a direct assignment RHS only, including directly guarded IF THEN assignments. Nested calls, concat operands, function arguments, predicates and WHERE are refused because temporary capacities depend on context. This slice caps result bytes at200 even when an earlier target is wider.",
+        "Refuse actual CATX destination-capacity overflow atomically before coerce. No approximation of SAS blanking, warnings or _ERROR_ state. Static operand descriptors are validated even on empty/filtered input and zero-trip bodies; unsupported values are refused when executed.",
+        "Refuse source double-quoted macro triggers and non-ASCII/control character literals anywhere when these new constructs occur, even without PUT. Existing PUT record/blank-field limits, PUT _ALL_ new-expression refusals and C++ refusals remain. These are bounded implementation policies, not SAS language limits.",
+        "Principal-directed quarantine: refuse any program combining this new slice with an actual SUBSTR call anywhere in the complete AST, including prior steps, unreachable branches, WHERE and intermediate assignments. Literal SUBSTR text is not a call. Preserve the old SUBSTR path for separate width-contract repair."
+      ],
+      "silent_difference_checks": [
+        "Python trimming would erase operator blanks; generic join would emit delimiters for blank CATX items.",
+        "CATX default target length is not the current result length or concatenation-width sum. Ordinary truncation would conceal CATX buffer/error-state differences."
+      ],
+      "validation_test": "examples/verify_concat_catx.py:10 pins,2000 generated Python/R cases,15 shared refusals and4 naive detectors. saschi.test_concat_catx: static widths, truncation/overflow, skipped rows/bodies, source guards, target refusal and unmodified complete-program source/stdout/result hashes with an independent R parser.",
+      "confidence": "high within bounded repository/R evidence; no live SAS",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/lrcon/62955/HTML/default/a000780367.htm",
+        "https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/n0p7wxtk0hvn83n1pveisbcp2ae9.htm"
+      ]
     }
   ],
   "runtime_capabilities": {

@@ -372,3 +372,55 @@ Runtime refusal remains in force when partial execution is requested. Existing
 single-name/standalone SUBSTR paths and their old gates remain unchanged as
 repository compatibility evidence pending a separate repair. Those old width
 pins are not promoted into new SAS equivalence claims here.
+
+## Bounded character concatenation and CATX
+
+Status: DS-029 repository and independent base-R evidence for maintainer review,
+without live SAS equivalence. Operator chains use `{kind: concat, args: [...]}`
+and preserve every character operand blank. The result descriptor is the sum
+of source widths. Earlier target descriptors retain truncation and padding.
+There are2..32 operands, nonempty printable ASCII, at most32767 bytes each and
+in total. Arithmetic mixed into a chain is deferred rather than given guessed
+precedence. Quoted operator text and operators inside function arguments remain
+lexically separate from top-level chains.
+
+CATX uses the existing call form with1..32 literal/variable character items and
+a character delimiter. It trims ASCII spaces from item edges, skips blank items,
+and preserves the delimiter. A new target is200 bytes. This slice admits direct
+assignment RHS calls, including IF THEN assignments, with at most200 result
+bytes. Actual target overflow is refused before assignment, preserving atomic
+job failure rather than approximating SAS blanking, warnings and error flags.
+Nested CATX, concatenation operands, function arguments, predicates and WHERE
+remain refused because temporary-buffer behavior depends on context.
+
+Source-order schema inference validates operand types even on empty or filtered
+SET inputs and zero-trip loop bodies. New constructs impose source-wide macro
+and ASCII guards even without PUT. Existing PUT blank-field/64-column rules,
+PUT _ALL_ new-expression refusal and C++ refusal stay intact. All-blank CATX is
+a padded blank target, not a successful nonblank PUT field.
+
+Evidence: `examples/verify_concat_catx.py`, original `examples/concat_catx.R` and
+`saschi.test_concat_catx`. The external `string_concatenation.sas` program is read
+in place and checked by source/stdout/complete-result hashes, shared job results
+and an independent original R parser. No external source or derived output text
+is shipped. Primary documentary sources: [SAS operators](https://support.sas.com/documentation/cdl/en/lrcon/62955/HTML/default/a000780367.htm)
+and [CATX](https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/n0p7wxtk0hvn83n1pveisbcp2ae9.htm).
+
+
+Principal quarantine: any program using new DS-029 concatenation/CATX together
+with an actual SUBSTR call is refused across all steps and expression contexts,
+including prior, unreachable, WHERE and intermediate-value dependencies. Literal
+SUBSTR text does not trigger it. The legacy SUBSTR width contract will be repaired
+separately; its existing gates and programs are unchanged by this feature lane.
+
+
+## String-feature composition
+
+Repository and independent R evidence for maintainer review, not live SAS:
+`saschi.test_string_composition` verifies descriptor-based REVERSE/concatenation
+composition, first-target width retained across direct CATX, DO/OUTPUT state,
+input-side WHERE widths and atomic later capacity failure. Programs mixing any
+new string entry point with actual SUBSTR remain quarantined by the principal's
+scope ruling; literal text is ignored and the legacy-only path is retained for
+separate repair. The two new external program proofs and three earlier proofs
+remain registered, without copying external source or output text into the tree.

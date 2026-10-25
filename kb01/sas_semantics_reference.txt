@@ -1807,3 +1807,33 @@ def sas_reverse(value):
             any(not 32 <= ord(char) <= 126 for char in value)):
         raise ValueError('REVERSE requires nonempty printable ASCII character input, at most 32767 bytes')
     return value[::-1]
+
+# DS-029 is a bounded printable-ASCII character slice, not numeric conversion.
+def _sas_concat_text(value):
+    if not isinstance(value, str) or not 1 <= len(value) <= 32767:
+        raise ValueError('character concatenation requires nonempty character values of at most 32767 bytes')
+    if any(not 32 <= ord(char) <= 126 for char in value):
+        raise ValueError('character concatenation requires printable ASCII')
+    return value
+
+
+def sas_concat(values):
+    """Character ||/!! preserving every operand blank; bounded total width."""
+    if not isinstance(values, (list, tuple)) or not 2 <= len(values) <= 32:
+        raise ValueError('character concatenation requires 2..32 operands')
+    result = ''.join(_sas_concat_text(value) for value in values)
+    if len(result) > 32767:
+        raise ValueError('character concatenation exceeds 32767 bytes')
+    return result
+
+
+def sas_catx(delimiter, *items):
+    """Bounded DATA-step CATX records; caller checks destination capacity."""
+    delimiter = _sas_concat_text(delimiter)
+    if not 1 <= len(items) <= 32:
+        raise ValueError('CATX requires 1..32 character items')
+    fields = [_sas_concat_text(value).strip(' ') for value in items]
+    result = delimiter.join(value for value in fields if value)
+    if len(result) > 200:
+        raise ValueError('CATX result exceeds bounded 200-byte policy; buffer/error-flag review required')
+    return result
