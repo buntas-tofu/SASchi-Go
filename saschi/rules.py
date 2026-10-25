@@ -157,6 +157,8 @@ CONSTRUCT_MAP: dict[str, str] = {
     "put-numeric-list": "DS-027",
     "length-reverse": "DS-028",
     "length-list": "DS-028",
+
+    "concat-catx": "DS-029",
     "arrays": "DS-016",
     "formats": "DS-010",
     "by-group": "DS-006",

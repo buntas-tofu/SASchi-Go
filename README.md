@@ -38,7 +38,7 @@ fixed expected output and base-R evidence. Special missings retain their tags.
   sibling plus a fixture verifier (`verify_*.py`). Run any verifier directly,
   or all of them through `verify_all.py`.
 - `docs/sasconversionrulebook.json` : the machine-consumable translation
-  rulebook. 63 rules with equivalence classes (EXACT,
+  rulebook. 64 rules with equivalence classes (EXACT,
   EQUIVALENT-WITH-SETTINGS, APPROXIMATE, NO-DIRECT-EQUIVALENT), required
   settings, forbidden patterns, and validation tests.
 - `docs/capability-manifest.json` : the coverage manifest. Every entry of the
@@ -284,3 +284,19 @@ existing paths. The external reversal program passes source/stdout/complete-resu
 hash pins, shared-job execution and an independent base-R program witness
 (`examples/verify_length_reverse.py`, `saschi.test_length_reverse`). Repository
 and cross-language evidence, no live SAS verification.
+
+DS-029 adds bounded printable-ASCII character `!!`/`||` concatenation and direct
+CATX assignment. Operator widths sum, blanks remain intact, and existing target
+widths retain assignment truncation. CATX trims item edge blanks, omits blank
+items, preserves delimiters and defaults a new target to200 bytes. Its result
+is bounded to200 bytes; destination overflow and temporary contexts are refused.
+The original R gate and translator suite pin these implementation bounds and
+an unmodified external whole-program hash proof (`examples/verify_concat_catx.py`,
+`saschi.test_concat_catx`). Repository/R evidence, no live SAS claim.
+
+
+Principal quarantine: any program using new DS-029 concatenation/CATX together
+with an actual SUBSTR call is refused across all steps and expression contexts,
+including prior, unreachable, WHERE and intermediate-value dependencies. Literal
+SUBSTR text does not trigger it. The legacy SUBSTR width contract will be repaired
+separately; its existing gates and programs are unchanged by this feature lane.

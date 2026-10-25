@@ -20,6 +20,7 @@ Gate provenance, function by function:
   modifiers, preserved blanks, and refusal of undefined overlapping matches.
 - `examples/verify_length_reverse.py`  REVERSE, fixed-width printable ASCII
   character reversal with descriptor-derived return length.
+- `examples/verify_concat_catx.py`  bounded character CATX and operator concatenation.
 - `examples/verify_mod.py`  MOD, dividend-signed remainder for bounded exact
   binary64 integers; fractional, missing, and zero-divisor inputs require review.
 """
@@ -31,7 +32,7 @@ import math
 from sas_semantics import (is_sas_missing, sas_charnum, sas_count, sas_input_yymmdd8,
                            sas_length, sas_lengthc, sas_lengthn, sas_max,
                            sas_min, sas_mod, sas_numeric_length, sas_put_date9, sas_putn, sas_round,
-                           sas_substr, sas_sum, sas_reverse)
+                           sas_substr, sas_sum, sas_reverse, sas_catx, _sas_concat_text)
 
 GATE_FUNCS = "examples/verify_funcs.py"
 GATE_MISSARITH = "examples/verify_missarith.py"
@@ -40,6 +41,7 @@ GATE_ROUNDING = "examples/verify_rounding.py"
 GATE_COUNT = "examples/verify_count.py"
 GATE_MOD = "examples/verify_mod.py"
 GATE_LENGTH_REVERSE = "examples/verify_length_reverse.py"
+GATE_CONCAT = "examples/verify_concat_catx.py"
 
 DATE9_WIDTH = 9
 
@@ -70,6 +72,7 @@ FUNCTIONS: dict[str, FunctionSpec] = {
         FunctionSpec("lengthc", "number", GATE_FUNCS, 1, 1),
         FunctionSpec("substr", "character", GATE_FUNCS, 3, 3),
         FunctionSpec("reverse", "character", GATE_LENGTH_REVERSE, 1, 1),
+        FunctionSpec("catx", "character", GATE_CONCAT, 2, 33),
         FunctionSpec("count", "number", GATE_COUNT, 2, 3),
         FunctionSpec("mod", "number", GATE_MOD, 2, 2),
         FunctionSpec("sum", "number", GATE_MISSARITH, 1, -1),
@@ -121,6 +124,8 @@ def apply(name: str, values: list):
     """Evaluate one wired function over already-evaluated argument values."""
     if name == "reverse":
         return sas_reverse(values[0])
+    if name == "catx":
+        return sas_catx(*values)
     if name == "count":
         return sas_count(*values)
     if name == "mod":
@@ -181,10 +186,23 @@ def character_width(expr, schema=None) -> int | None:
     """
     kind = expr.get('kind')
     if kind == 'character':
-        return max(1, len(expr['value'].encode('utf-8')))
+        value = expr['value']
+        _sas_concat_text(value)
+        return len(value)
     if kind == 'variable':
         spec = (schema or {}).get(expr['value'])
         return spec['length'] if isinstance(spec, dict) and spec.get('type') == 'character' else None
+    if kind == 'concat':
+        parts = expr.get('args')
+        if not isinstance(parts, list) or not 2 <= len(parts) <= 32:
+            raise ValueError('character concatenation requires 2..32 operands')
+        widths = [character_width(part, schema) for part in parts]
+        if any(width is None for width in widths):
+            raise ValueError('character concatenation requires statically known character operands')
+        width = sum(widths)
+        if width > 32767:
+            raise ValueError('character concatenation exceeds 32767 bytes')
+        return width
     name = expr.get("name")
     if name == 'reverse':
         argument = expr['args'][0]
@@ -194,6 +212,12 @@ def character_width(expr, schema=None) -> int | None:
         if width is None or not 1 <= width <= 32767:
             raise ValueError('REVERSE requires a known character argument width, 1..32767')
         return width
+    if name == 'catx':
+        if not 2 <= len(expr['args']) <= 33 or any(arg['kind'] not in ('character', 'variable') for arg in expr['args']):
+            raise ValueError('CATX direct assignment requires literal or variable character arguments')
+        if any(character_width(arg, schema) is None for arg in expr['args']):
+            raise ValueError('CATX requires statically known character arguments')
+        return 200
     if name == "substr":
         length = expr["args"][2]
         return int(length["value"]) if length.get("kind") == "number" else None
@@ -207,6 +231,8 @@ def character_width(expr, schema=None) -> int | None:
 
 def assign_spec(expr, schema=None):
     """Column descriptor for an assignment target, or None for plain numeric."""
+    if expr.get('kind') == 'concat':
+        return {'type': 'character', 'length': character_width(expr, schema)}
     if expr.get("kind") == "call":
         spec = FUNCTIONS[expr["name"]]
         if spec.returns == "character":
@@ -227,6 +253,20 @@ def validate_reverse_calls(value, schema):
     elif isinstance(value, list):
         for child in value:
             validate_reverse_calls(child, schema)
+
+
+def validate_string_expressions(value, schema, *, direct_catx=False):
+    """Check new character operand descriptors even when no row executes."""
+    if isinstance(value, dict):
+        if value.get('kind') == 'call' and value.get('name') == 'catx' and not direct_catx:
+            raise ValueError('CATX temporary contexts require review; direct assignment RHS only')
+        if value.get('kind') == 'concat' or (value.get('kind') == 'call' and value.get('name') == 'catx'):
+            character_width(value, schema)
+        for child in value.values():
+            validate_string_expressions(child, schema)
+    elif isinstance(value, list):
+        for child in value:
+            validate_string_expressions(child, schema)
 
 
 def expression_nodes(value, line=None):

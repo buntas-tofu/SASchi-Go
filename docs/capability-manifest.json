@@ -81,7 +81,8 @@
   "put_update": "DS-023/DS-024 and the put-literal/put-character-list/suite-put/suite-put-list gates update PUT and PUT List; other entries retain their recorded assessment.",
   "counted_do_update": "DS-026 adds bounded single-level counted DO and its END closure; do-counted and suite-do-counted gates. Existing broader array evidence remains recorded separately.",
   "numeric_put_update": "DS-027 and put-numeric-list/suite-put-numeric add bounded source-order known numeric variable list output to PUT and PUT List. Existing numeric descriptor-only SET refusals remain.",
-  "length_reverse_update": "DS-028 adds bounded character LENGTH name groups and REVERSE; length-reverse and suite-length-reverse gates. The function slice does not add to this statement/procedure document universe. Programs with actual SUBSTR and either REVERSE or new multi-name LENGTH are quarantined pending separate legacy width repair."
+  "length_reverse_update": "DS-028 adds bounded character LENGTH name groups and REVERSE; length-reverse and suite-length-reverse gates. The function slice does not add to this statement/procedure document universe. Programs with actual SUBSTR and either REVERSE or new multi-name LENGTH are quarantined pending separate legacy width repair.",
+  "concat_catx_update": "DS-029 adds bounded character assignment expressions, concat-catx and suite-concat-catx; new-expression PUT_ALL and C++ remain refused."
  },
  "rollup": {
   "stmt": {
@@ -153,12 +154,16 @@
    "type": "Executable",
    "valid_in": "DATA step",
    "disposition": "GATED",
-   "rule_ids": [],
+   "rule_ids": [
+    "DS-029"
+   ],
    "gates": [
-    "data-events"
+    "data-events",
+    "concat-catx",
+    "suite-concat-catx"
    ],
    "reference_page": 32,
-   "note": "typed DATA-step execution, version 2 events"
+   "note": "typed DATA-step execution, version 2 events DS-029 separately pins printable-ASCII character !!/|| chains and direct CATX RHS calls with static widths, guarded IF assignment, default200, empty-input checks and atomic overflow refusal. No general temporary CATX or numeric conversion claim."
   },
   {
    "entry": "ATTRIB Statement",
