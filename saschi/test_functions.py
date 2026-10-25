@@ -4,6 +4,8 @@ Every function wired into the executable slice must name the fixture gate that
 proves it, and a function with no gate must stay a ticket. These tests pin both
 halves: the wired behavior and the refusal.
 """
+import json
+import tempfile
 import unittest
 from datetime import date
 from pathlib import Path
@@ -165,6 +167,97 @@ class CountFunctionTests(unittest.TestCase):
 
     def test_cpp_pilot_still_refuses_character_function_calls(self):
         source = "data _null_; x=count('abc','a'); run;"
+        self.assertTrue(translate_cpp(source).blocked)
+        job = build_job(source, target='cpp')
+        self.assertFalse(job.receipt['accepted'])
+        self.assertIsNone(job.result)
+        self.assertTrue(job.plan.blocked)
+        self.assertEqual(job.code, 2)
+        self.assertTrue(any(t['construct'] == 'cpp-target' for t in job.receipt['tickets']))
+
+
+class ModFunctionTests(unittest.TestCase):
+    def test_signs_exact_division_and_boundary_execute_in_emitted_python(self):
+        source = ("data d; a=mod(7,3); b=mod(-7,3); c=MOD(7,-3); d=mod(-7,-3); "
+                  "e=mod(0,-3); f=mod(-12,3); g=mod(9007199254740992,3); "
+                  "h=mod(-9007199254740992,3); i=mod(9007199254740991,9007199254740992); "
+                  "j=mod(9007199254740992,9007199254740991); run;")
+        translation = translate(source)
+        self.assertFalse(translation.blocked)
+        namespace = {}
+        exec(translation.code, namespace)
+        row = namespace['result']['datasets']['d']['rows'][0]
+        self.assertEqual(tuple(row.values()),
+                         (1., -1., 1., -1., 0., 0., 2., -2., 9007199254740991., 1.))
+        job = build_job(source)
+        self.assertTrue(job.receipt['accepted'])
+        self.assertEqual(job.receipt['tickets'], [])
+        self.assertEqual(job.result, namespace['result'])
+
+    def test_calls_compose_with_expressions_predicates_and_variables(self):
+        row = one("data d; a=-7; b=-3; x=mod(a,b)+2; "
+                  "y=mod(max(7,2)+1,3); z=mod(mod(-20,7),4); "
+                  "flag=0; if mod(a,b)=-1 then flag=1; run;")
+        self.assertEqual((row['x'], row['y'], row['z'], row['flag']), (1., 2., -2., 1.))
+
+    def test_typed_numeric_catalog_preserves_signs(self):
+        inputs = {'raw': {'schema': {'a': 'number', 'b': 'number'},
+                          'rows': [{'a': -7, 'b': 3}, {'a': 7, 'b': -3}]}}
+        result = execute("data d; set raw; x=mod(a,b); run;", inputs)
+        self.assertEqual([row['x'] for row in result['datasets']['d']['rows']], [-1., 1.])
+
+    def test_unsupported_domain_does_not_accept_a_job(self):
+        cases = [("mod(7,0)", 'zero divisor'), ("mod(0,0)", 'zero divisor'),
+                 ("mod(7,-0)", 'zero divisor'), ("mod(.,3)", 'missing or structured'),
+                 ("mod(7,.A)", 'missing or structured'), ("mod(._,3)", 'missing or structured'),
+                 ("mod(7.5,3)", 'fractional'), ("mod(7,.5)", 'fractional'),
+                 ("mod(.3,-.1)", 'fractional'), ("mod(.9,.3)", 'fractional'),
+                 ("mod(9007199254740994,3)", 'exact-integer bound'),
+                 ("mod(7,-9007199254740994)", 'exact-integer bound'),
+                 ("mod('7',3)", 'numeric arguments'), ("mod(7,'3')", 'numeric arguments')]
+        for expression, reason in cases:
+            with self.subTest(expression=expression):
+                job = build_job(f"data d; x={expression}; run;")
+                self.assertFalse(job.receipt['accepted'])
+                self.assertIsNone(job.result)
+                self.assertEqual(job.code, 1)
+                self.assertIn(reason, job.receipt['error'])
+
+    def test_later_dynamic_refusal_cannot_accept_a_partial_dataset(self):
+        source = "data d; set raw; x=mod(a,b); output; run;"
+        for invalid in (0, 0.5, None, {'missing': 'A'}, 9007199254740994):
+            with self.subTest(invalid=invalid):
+                inputs = {'raw': {'schema': {'a': 'number', 'b': 'number'},
+                                  'rows': [{'a': 7, 'b': 3}, {'a': 7, 'b': invalid}]}}
+                with self.assertRaisesRegex(ValueError, 'MOD:'):
+                    execute(source, inputs)
+                with tempfile.TemporaryDirectory() as directory:
+                    path = Path(directory) / 'inputs.json'
+                    path.write_text(json.dumps(inputs))
+                    job = build_job(source, inputs=path)
+                self.assertFalse(job.receipt['accepted'])
+                self.assertIsNone(job.result)
+                self.assertEqual(job.code, 1)
+
+    def test_wrong_arities_and_ungated_related_functions_remain_tickets(self):
+        for call in ('mod()', 'mod(7)', 'mod(7,3,2)', 'int(-2.7)', 'modz(7,3)'):
+            with self.subTest(call=call):
+                self.assertTrue(compile_plan(f'data d; x={call}; run;').blocked)
+        self.assertNotIn('int', FUNCTIONS)
+        self.assertNotIn('modz', FUNCTIONS)
+
+    def test_rule_and_gate_provenance_describe_only_bounded_mod(self):
+        self.assertEqual(route_function('x=MOD(-7,3);'), ('mod-int', 'DS-013'))
+        self.assertEqual(route_function("'mod(-7,3)'"), ('unknown', ''))
+        self.assertEqual(FUNCTIONS['mod'].gate, 'examples/verify_mod.py')
+        rule = load_rulebook()['DS-013']
+        self.assertIn('sas_semantics.sas_mod', rule.python_target['pattern'])
+        self.assertIn('examples/verify_mod.py', rule.validation_test)
+        self.assertIn('2**53', ' '.join(rule.required_settings))
+        self.assertIn('INT', ' '.join(rule.required_settings))
+
+    def test_cpp_pilot_still_refuses_mod_calls(self):
+        source = 'data _null_; x=mod(-7,3); put x=; run;'
         self.assertTrue(translate_cpp(source).blocked)
         job = build_job(source, target='cpp')
         self.assertFalse(job.receipt['accepted'])

@@ -17,6 +17,8 @@ Gate provenance, function by function:
 - `examples/verify_rounding.py`  ROUND, ties away from zero.
 - `examples/verify_count.py`  COUNT, bounded ASCII substring matching with I/T
   modifiers, preserved blanks, and refusal of undefined overlapping matches.
+- `examples/verify_mod.py`  MOD, dividend-signed remainder for bounded exact
+  binary64 integers; fractional, missing, and zero-divisor inputs require review.
 """
 from __future__ import annotations
 
@@ -25,7 +27,7 @@ import math
 
 from sas_semantics import (is_sas_missing, sas_charnum, sas_count, sas_input_yymmdd8,
                            sas_length, sas_lengthc, sas_lengthn, sas_max,
-                           sas_min, sas_put_date9, sas_putn, sas_round,
+                           sas_min, sas_mod, sas_put_date9, sas_putn, sas_round,
                            sas_substr, sas_sum)
 
 GATE_FUNCS = "examples/verify_funcs.py"
@@ -33,6 +35,7 @@ GATE_MISSARITH = "examples/verify_missarith.py"
 GATE_NUMFMT = "examples/verify_numfmt.py"
 GATE_ROUNDING = "examples/verify_rounding.py"
 GATE_COUNT = "examples/verify_count.py"
+GATE_MOD = "examples/verify_mod.py"
 
 DATE9_WIDTH = 9
 
@@ -63,6 +66,7 @@ FUNCTIONS: dict[str, FunctionSpec] = {
         FunctionSpec("lengthc", "number", GATE_FUNCS, 1, 1),
         FunctionSpec("substr", "character", GATE_FUNCS, 3, 3),
         FunctionSpec("count", "number", GATE_COUNT, 2, 3),
+        FunctionSpec("mod", "number", GATE_MOD, 2, 2),
         FunctionSpec("sum", "number", GATE_MISSARITH, 1, -1),
         FunctionSpec("round", "number", GATE_ROUNDING, 2, 2),
         FunctionSpec("put", "character", GATE_NUMFMT, 2, 2, (1,)),
@@ -112,6 +116,8 @@ def apply(name: str, values: list):
     """Evaluate one wired function over already-evaluated argument values."""
     if name == "count":
         return sas_count(*values)
+    if name == "mod":
+        return sas_mod(*values)
     if name in ("max", "min"):
         return (sas_max if name == "max" else sas_min)(*_numeric(name, values))
     if name in ("length", "lengthn", "lengthc"):
