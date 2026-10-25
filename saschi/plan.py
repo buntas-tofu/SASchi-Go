@@ -9,7 +9,7 @@ import math
 import re
 from dataclasses import asdict, dataclass, field
 from sas_semantics import sas_put_literals, sas_put_character_list, sas_put_numeric_list, sas_do_counted
-from .functions import FUNCTIONS, format_token, FORMATS
+from .functions import FUNCTIONS, format_token, FORMATS, function_call_lines
 from .parser import Kind, ParseError, split_statements
 from .operations import walk_operations as _walk_operations
 from .rules import route_function, route_statement
@@ -445,14 +445,23 @@ def compile_plan(source: str) -> Plan:
             else:
                 reject(st, 'retain', 'RETAIN requires one variable and a numeric or missing initializer')
             continue
-        declaration = re.fullmatch(r'length\s+(' + NAME + r')\s+\$\s*(\d+)', text, re.I)
+        declaration = re.fullmatch(r'length\s+(' + NAME + r'(?:\s+' + NAME + r')*)\s+\$\s*([0-9]+)', text, re.I | re.ASCII)
         if declaration:
-            name, width = declaration[1].lower(), int(declaration[2])
-            if step.inputs or any(o.kind != 'declare' for o in step.operations) or name in step.lengths or name == '_n_' or not 1 <= width <= 32767:
-                reject(st, 'length', 'character LENGTH must precede SET and computations; width 1..32767')
+            names = [name.lower() for name in declaration[1].split()]
+            try:
+                width = int(declaration[2])
+            except ValueError:
+                width = 0
+            automatic = {'_n_', '_error_', '_infile_', '_file_', '_ods_', '_page_', '_blankpage_'}
+            if (step.inputs or any(o.kind != 'declare' for o in step.operations) or
+                    len(names) != len(set(names)) or any(name in step.lengths or name in automatic for name in names) or
+                    not 1 <= width <= 32767):
+                reject(st, 'length', 'character LENGTH requires unique ordinary names before SET/computations; width 1..32767')
             else:
-                step.lengths[name] = width
-                append_operation(Operation('declare', st.line, {'name': name, 'spec': {'type': 'character', 'length': width}}))
+                for name in names:
+                    step.lengths[name] = width
+                    append_operation(Operation('declare', st.line, {'name': name, 'spec': {'type': 'character', 'length': width}}))
+                plan.matched.append(('length-list' if len(names) > 1 else 'length-reverse', 'DS-028', st.line))
             continue
         lookup = re.fullmatch(r'if\s+_n_\s*=\s*1\s+then\s+set\s+(' + NAME + r')', text, re.I)
         if lookup:
@@ -590,4 +599,23 @@ def compile_plan(source: str) -> Plan:
             if any(token.kind == Kind.STRING and any(not 32 <= ord(c) <= 126 for c in token.text) for token in st.tokens):
                 reject(st, 'put-all' if has_all_put else 'put',
                        ('PUT _ALL_' if has_all_put else 'PUT numeric list') + ' requires printable ASCII source character values')
+    reverse_ops = [op for compiled in plan.steps for op in walk_operations(compiled.operations) if function_call_lines({key:value for key,value in op.args.items() if key not in ('operation','body')}, 'reverse')]
+    reverse_in_where = any(function_call_lines(compiled.where, 'reverse') for compiled in plan.steps)
+    if reverse_ops or reverse_in_where:
+        plan.matched.extend(('length-reverse', 'DS-028', op.line) for op in reverse_ops)
+        for st in statements:
+            for token in st.tokens:
+                if token.kind != Kind.STRING:
+                    continue
+                if token.text.startswith('"') and any(char in token.text for char in '&%'):
+                    reject(st, 'length-reverse', 'REVERSE requires macro-free source character values')
+                if any(not 32 <= ord(char) <= 126 for char in token.text):
+                    reject(st, 'length-reverse', 'REVERSE requires printable ASCII source character values')
+    serialized = plan.to_dict()
+    substr_lines = function_call_lines(serialized, 'substr')
+    uses_new_character_slice = (function_call_lines(serialized, 'reverse') or
+                                any(construct == 'length-list' for construct, _, _ in plan.matched))
+    if substr_lines and uses_new_character_slice:
+        plan.tickets.append(Ticket(min(line or 1 for line in substr_lines), 'SUBSTR', 'length-reverse',
+            'DS-028 quarantines programs containing SUBSTR with REVERSE or multi-name LENGTH until the legacy SUBSTR width contract is repaired separately'))
     return plan

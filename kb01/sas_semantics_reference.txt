@@ -1798,3 +1798,12 @@ def sas_do_counted(start, stop, by=1):
     if count > 10000:
         raise ValueError('counted DO exceeds 10000 iterations')
     return [start + trip * by for trip in range(count)], start + count * by
+
+
+# DS-028: single-byte fixed-character reversal, independently gated in base R.
+def sas_reverse(value):
+    """Reverse every byte-position, including blanks, in the bounded ASCII slice."""
+    if (not isinstance(value, str) or not 1 <= len(value) <= 32767 or
+            any(not 32 <= ord(char) <= 126 for char in value)):
+        raise ValueError('REVERSE requires nonempty printable ASCII character input, at most 32767 bytes')
+    return value[::-1]

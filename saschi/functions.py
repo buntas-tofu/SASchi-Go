@@ -18,6 +18,8 @@ Gate provenance, function by function:
 - `examples/verify_rounding.py`  ROUND, ties away from zero.
 - `examples/verify_count.py`  COUNT, bounded ASCII substring matching with I/T
   modifiers, preserved blanks, and refusal of undefined overlapping matches.
+- `examples/verify_length_reverse.py`  REVERSE, fixed-width printable ASCII
+  character reversal with descriptor-derived return length.
 - `examples/verify_mod.py`  MOD, dividend-signed remainder for bounded exact
   binary64 integers; fractional, missing, and zero-divisor inputs require review.
 """
@@ -29,7 +31,7 @@ import math
 from sas_semantics import (is_sas_missing, sas_charnum, sas_count, sas_input_yymmdd8,
                            sas_length, sas_lengthc, sas_lengthn, sas_max,
                            sas_min, sas_mod, sas_numeric_length, sas_put_date9, sas_putn, sas_round,
-                           sas_substr, sas_sum)
+                           sas_substr, sas_sum, sas_reverse)
 
 GATE_FUNCS = "examples/verify_funcs.py"
 GATE_MISSARITH = "examples/verify_missarith.py"
@@ -37,6 +39,7 @@ GATE_NUMFMT = "examples/verify_numfmt.py"
 GATE_ROUNDING = "examples/verify_rounding.py"
 GATE_COUNT = "examples/verify_count.py"
 GATE_MOD = "examples/verify_mod.py"
+GATE_LENGTH_REVERSE = "examples/verify_length_reverse.py"
 
 DATE9_WIDTH = 9
 
@@ -66,6 +69,7 @@ FUNCTIONS: dict[str, FunctionSpec] = {
         FunctionSpec("lengthn", "number", GATE_FUNCS, 1, 1),
         FunctionSpec("lengthc", "number", GATE_FUNCS, 1, 1),
         FunctionSpec("substr", "character", GATE_FUNCS, 3, 3),
+        FunctionSpec("reverse", "character", GATE_LENGTH_REVERSE, 1, 1),
         FunctionSpec("count", "number", GATE_COUNT, 2, 3),
         FunctionSpec("mod", "number", GATE_MOD, 2, 2),
         FunctionSpec("sum", "number", GATE_MISSARITH, 1, -1),
@@ -115,6 +119,8 @@ def _width_decimals(fmt) -> tuple[int, int]:
 
 def apply(name: str, values: list):
     """Evaluate one wired function over already-evaluated argument values."""
+    if name == "reverse":
+        return sas_reverse(values[0])
     if name == "count":
         return sas_count(*values)
     if name == "mod":
@@ -166,14 +172,28 @@ def apply(name: str, values: list):
     raise ValueError(f"unwired function: {name}")
 
 
-def character_width(expr) -> int | None:
+def character_width(expr, schema=None) -> int | None:
     """Declared width of a character-returning call, or None when not derivable.
 
-    SAS fixes the width of a character expression at compile time. SUBSTR takes
-    its width from the length argument, so a non-literal length is refused by the
-    parser rather than guessed here.
+    Widths come from static descriptors rather than current row values. The
+    legacy SUBSTR branch retains its extraction-length rule pending separate
+    repair; new string-feature programs containing SUBSTR are quarantined.
     """
+    kind = expr.get('kind')
+    if kind == 'character':
+        return max(1, len(expr['value'].encode('utf-8')))
+    if kind == 'variable':
+        spec = (schema or {}).get(expr['value'])
+        return spec['length'] if isinstance(spec, dict) and spec.get('type') == 'character' else None
     name = expr.get("name")
+    if name == 'reverse':
+        argument = expr['args'][0]
+        if argument.get('kind') == 'character':
+            sas_reverse(argument['value'])
+        width = character_width(argument, schema)
+        if width is None or not 1 <= width <= 32767:
+            raise ValueError('REVERSE requires a known character argument width, 1..32767')
+        return width
     if name == "substr":
         length = expr["args"][2]
         return int(length["value"]) if length.get("kind") == "number" else None
@@ -185,13 +205,43 @@ def character_width(expr) -> int | None:
     return None
 
 
-def assign_spec(expr):
+def assign_spec(expr, schema=None):
     """Column descriptor for an assignment target, or None for plain numeric."""
     if expr.get("kind") == "call":
         spec = FUNCTIONS[expr["name"]]
         if spec.returns == "character":
-            width = character_width(expr)
+            width = character_width(expr, schema)
             if width is None:
                 raise ValueError(f"{spec.name}: character width is not derivable")
             return {"type": "character", "length": width}
     return None
+
+
+def validate_reverse_calls(value, schema):
+    """Validate REVERSE descriptors even when no DATA row executes a call."""
+    if isinstance(value, dict):
+        if value.get('kind') == 'call' and value.get('name') == 'reverse':
+            character_width(value, schema)
+        for child in value.values():
+            validate_reverse_calls(child, schema)
+    elif isinstance(value, list):
+        for child in value:
+            validate_reverse_calls(child, schema)
+
+
+def expression_nodes(value, line=None):
+    """Read-only expression dictionaries with their enclosing source line."""
+    if isinstance(value, dict):
+        line = value.get('line', line)
+        yield value, line
+        for child in value.values():
+            yield from expression_nodes(child, line)
+    elif isinstance(value, (list, tuple)):
+        for child in value:
+            yield from expression_nodes(child, line)
+
+
+def function_call_lines(value, name, line=None):
+    """Find actual calls in AST dictionaries, ignoring function-shaped text."""
+    return [source_line for node, source_line in expression_nodes(value, line)
+            if node.get('kind') == 'call' and node.get('name') == name]
