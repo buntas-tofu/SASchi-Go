@@ -6,6 +6,7 @@ from collections import Counter
 from copy import deepcopy
 from sas_semantics import sas_round, sas_merge_by, sas_put_literals, sas_put_character_list, sas_put_numeric_list, sas_put_all, sas_do_counted
 from .functions import apply as apply_function, assign_spec
+from .operations import walk_operations as operations
 from .values import normalize_catalog, column_type, coerce, missing, order
 
 
@@ -80,18 +81,6 @@ def expressions(value):
     elif isinstance(value, list):
         for child in value:
             yield from expressions(child)
-
-
-def operations(ops):
-    for op in ops:
-        yield op
-        if op['kind'] == 'if':
-            yield from operations([op['args']['operation']])
-        elif op['kind'] == 'do_counted':
-            body = op['args'].get('body')
-            if not isinstance(body, list):
-                raise ValueError('counted DO body must be a list')
-            yield from operations(body)
 
 
 def put_all_value(expr, row):

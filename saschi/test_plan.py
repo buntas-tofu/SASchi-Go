@@ -159,3 +159,63 @@ class ComposedFixtureTests(unittest.TestCase):
         self.assertEqual(run.returncode,0,run.stderr)
         rows = [{k: float(v) if v else None for k,v in row.items()} for row in csv.DictReader(io.StringIO(run.stdout))]
         self.assertEqual(rows,expected['rows'])
+
+
+class OperationTraversalTests(unittest.TestCase):
+    def test_compiler_and_runtime_share_order_without_mutating_payloads(self):
+        from copy import deepcopy
+        from dataclasses import asdict
+        from .operations import walk_operations as walk_tree
+        from .plan import Operation, walk_operations
+        from .runtime import operations
+
+        leaf = {'kind': 'output', 'line': 4, 'args': {'target': None}}
+        loop = {'kind': 'do_counted', 'line': 3, 'args': {
+            'index': 'i', 'start': 2, 'stop': 1, 'by': 1, 'body': [leaf]}}
+        root = Operation('if', 2, {'condition': {}, 'operation': loop})
+        tail = Operation('put_numeric_list', 5, {'names': ['i']})
+        original = deepcopy([root, tail])
+        walked = list(walk_tree([root, tail]))
+        self.assertIs(walked[0], root)
+        self.assertIs(walked[1], loop)
+        self.assertIs(walked[2], leaf)
+        self.assertIs(walked[3], tail)
+        compiled = list(walk_operations([root, tail]))
+        serialized = list(operations([asdict(root), asdict(tail)]))
+        self.assertEqual([op.line for op in compiled], [2, 3, 4, 5])
+        self.assertEqual([asdict(op) for op in compiled], serialized)
+        self.assertEqual([root, tail], original)
+        # An analysis walk of nested shapes does not admit nested SAS control.
+        self.assertTrue(compile_plan('data d; do i=1 to 2; do j=1 to 2; output; end; end; run;').blocked)
+
+    def test_output_target_tickets_keep_source_order_in_skipped_bodies(self):
+        source = ('data d;\nif 0 then output first;\ndo i=2 to 1;\n'
+                  'output second;\nend;\noutput third;\nrun;')
+        plan = compile_plan(source)
+        self.assertTrue(plan.blocked)
+        self.assertEqual([(t.line, t.statement) for t in plan.tickets],
+                         [(2, 'first'), (4, 'second'), (6, 'third')])
+
+    def test_guards_scan_unknown_containers_without_widening_runtime_walk(self):
+        from .operations import walk_operations
+        from .plan import Operation, contains_put
+        from .runtime import operations
+
+        leaf = {'kind': 'put_numeric_list', 'line': 2, 'args': {'names': ['n']}}
+        root = Operation('container', 1, {'operation': leaf, 'body': [leaf]})
+        self.assertEqual(list(walk_operations([root])), [root])
+        self.assertTrue(contains_put([root], {'put_numeric_list'}))
+        self.assertEqual(list(operations([{'kind': 'container', 'line': 1, 'args': root.args}])),
+                         [{'kind': 'container', 'line': 1, 'args': root.args}])
+
+    def test_malformed_counted_bodies_keep_runtime_refusal(self):
+        from .operations import walk_operations
+        from .plan import Operation, walk_operations as compiler_walk
+        from .runtime import operations
+
+        for body in (None, {}, 'output'):
+            root = {'kind': 'do_counted', 'line': 1, 'args': {'body': body}}
+            for walk, node in ((walk_operations, root), (operations, root),
+                               (compiler_walk, Operation(**root))):
+                with self.subTest(body=body, walk=walk), self.assertRaisesRegex(ValueError, 'counted DO body must be a list'):
+                    list(walk([node]))
