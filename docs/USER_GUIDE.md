@@ -74,7 +74,8 @@ version 0.4.0. It specifies the shared plan, Python typed DATA-step workflow,
 C++ scalar pilot, isolated installed-wheel smoke check and schema-version-2
 verification receipts. The [stateful contract](STATEFUL_EXECUTION.md) describes
 checked SUBSTR descriptors and supported string compositions, including the
-remaining local temporary-width refusals. The historical fixture
+remaining local temporary-width refusals, bounded conditional actions, unsigned32
+bitwise calls and numeric direct-RHS LAG/DIF invocation queues. The historical fixture
 reference below describes the original interfaces.
 
 ## Requirements

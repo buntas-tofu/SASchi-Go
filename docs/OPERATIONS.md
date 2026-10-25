@@ -88,9 +88,11 @@ The measurement is not a production throughput comparison.
 Julia remains a future backend option. Adding a language must preserve the plan's
 contracts and add execution evidence. Algorithm replacements can consume these
 operations, but no statistical method change is silently treated as equivalence.
-The next stateful algorithm candidate is conditional LAG: retain a queue per call
-site and advance it only on invocation. The existing DS-007 target tests pin that
-behavior; the source compiler still sends LAG to review.
+DS-007 now executes bounded numeric direct-RHS LAG/DIF calls with one queue per
+source occurrence, advancing only on invocation, including selected IF/ELSE and
+counted-DO leaves. The original raw queue gate remains, with a separate source-
+execution/R gate. Nested/temp/WHERE/PUT_ALL and character/error-state contexts
+remain review cases; see the stateful contract for the exact supported slice.
 
 ## Evidence and reproducibility
 

@@ -27,6 +27,8 @@ Gate provenance, function by function:
   DATA-step destination widths; the raw extraction fixture above is unchanged.
 - `examples/verify_bitwise.py`  unsigned32 BAND/BOR/BXOR/BNOT/BLSHIFT/BRSHIFT,
   with strict finite integral inputs and error-state refusal.
+- `examples/verify_lag_execution.py`  bounded numeric direct-assignment LAG/DIF
+  occurrence queues; selected IF/ELSE and counted DO scheduling, no stateless calls.
 - `examples/verify_mod.py`  MOD, dividend-signed remainder for bounded exact
   binary64 integers; fractional, missing, and zero-divisor inputs require review.
 """
@@ -34,13 +36,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import math
+import re
 
 from sas_semantics import (is_sas_missing, sas_charnum, sas_count, sas_input_yymmdd8,
                            sas_length, sas_lengthc, sas_lengthn, sas_max,
                            sas_min, sas_mod, sas_numeric_length, sas_put_date9, sas_putn, sas_round,
                            sas_sum, sas_reverse, sas_catx, _sas_concat_text,
                            sas_substr_checked, sas_substr_bound, _sas_substr_text,
-                           SAS_BITWISE_ARITY, sas_bitwise, sas_bitwise_integer)
+                           SAS_BITWISE_ARITY, sas_bitwise, sas_bitwise_integer, sas_lag_numeric)
 
 GATE_FUNCS = "examples/verify_funcs.py"
 GATE_MISSARITH = "examples/verify_missarith.py"
@@ -52,6 +55,11 @@ GATE_LENGTH_REVERSE = "examples/verify_length_reverse.py"
 GATE_CONCAT = "examples/verify_concat_catx.py"
 GATE_SUBSTR = "examples/verify_substr.py"
 GATE_BITWISE = "examples/verify_bitwise.py"
+GATE_LAG_EXECUTION = "examples/verify_lag_execution.py"
+
+LAG_FUNCTIONS = {family + suffix: (family, depth)
+                 for family in ("lag", "dif")
+                 for suffix, depth in [("", 1)] + [(str(n), n) for n in range(1, 101)]}
 
 DATE9_WIDTH = 9
 
@@ -91,6 +99,7 @@ FUNCTIONS: dict[str, FunctionSpec] = {
         FunctionSpec("round", "number", GATE_ROUNDING, 2, 2),
         FunctionSpec("put", "character", GATE_NUMFMT, 2, 2, (1,)),
         FunctionSpec("input", "number", GATE_FUNCS, 1, 2, (1,)),
+        *(FunctionSpec(name, "number", GATE_LAG_EXECUTION, 1, 1) for name in LAG_FUNCTIONS),
     )
 }
 
@@ -134,6 +143,8 @@ def _width_decimals(fmt) -> tuple[int, int]:
 
 def apply(name: str, values: list):
     """Evaluate one wired function over already-evaluated argument values."""
+    if name in LAG_FUNCTIONS:
+        raise ValueError("LAG/DIF requires a scoped DATA-step occurrence queue")
     if name in SAS_BITWISE_ARITY:
         return sas_bitwise(name, *values)
     if name == "reverse":
@@ -411,3 +422,40 @@ def validate_bitwise_calls(value, schema):
                 raise ValueError('bitwise requires numeric expressions without implicit coercion')
             if arg.get('kind') in ('number', 'missing', 'tagged_missing'):
                 sas_bitwise_integer(arg.get('value'), shift=index == 1 and name in ('blshift', 'brshift'))
+
+
+LAG_RESERVED_NAMES = {'_n_', '_error_', '_all_', '_numeric_', '_character_',
+                      '_infile_', '_file_', '_ods_', '_page_', '_blankpage_'}
+
+
+def validate_lag_calls(value, schema=None, *, direct=False):
+    """Local stateful context and descriptor checks, including skipped source."""
+    for node, _ in expression_nodes(value):
+        if node.get('kind') != 'call' or node.get('name') not in LAG_FUNCTIONS:
+            continue
+        if not direct or node is not value:
+            raise ValueError('LAG/DIF is gated only as a direct numeric assignment RHS; temporary/predicate contexts require review')
+        args = node.get('args')
+        if not isinstance(args, list) or len(args) != 1 or not isinstance(args[0], dict):
+            raise ValueError('LAG/DIF requires exactly one expression argument')
+        arg = args[0]
+        kind, item = arg.get('kind'), arg.get('value')
+        if kind == 'number':
+            if item is None:
+                raise ValueError('LAG/DIF numeric literal requires a finite number')
+            sas_lag_numeric(item)
+        elif kind == 'missing':
+            if item is not None:
+                raise ValueError('LAG/DIF ordinary missing literal requires None')
+        elif kind == 'automatic' and item == '_n_':
+            continue
+        elif kind == 'variable':
+            if (not isinstance(item, str) or not re.fullmatch(r'[a-z_][a-z0-9_]{0,31}', item) or
+                    item in LAG_RESERVED_NAMES):
+                raise ValueError('LAG/DIF reserved automatic argument requires review; only _N_ is gated')
+            if schema is not None:
+                spec = schema.get(item, 'number')
+                if (spec if isinstance(spec, str) else spec.get('type')) != 'number':
+                    raise ValueError('LAG/DIF requires a numeric variable descriptor')
+        else:
+            raise ValueError('LAG/DIF argument requires a finite numeric/ordinary-missing literal, numeric variable or _N_; coercion and expressions require review')

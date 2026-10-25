@@ -60,12 +60,16 @@ class RoundingProgramTests(unittest.TestCase):
 
 
 class TicketTests(unittest.TestCase):
-    def test_unhandled_function_becomes_ticket_not_code(self):
+    def test_former_unhandled_lag_source_is_now_bounded_execution(self):
+        # Preserve the exact legacy unsupported source as a missing/log assertion.
         t = translate("data _null_; y = lag(x); run;")
-        self.assertEqual(len(t.tickets), 1)
-        self.assertEqual(t.tickets[0].construct, "lag-dif")
-        self.assertIn("TICKET", t.code)
-        self.assertNotIn("y =", t.code)
+        self.assertFalse(t.blocked, t.tickets)
+        namespace, printed = {}, io.StringIO()
+        with contextlib.redirect_stdout(printed):
+            exec(t.code, namespace)
+        self.assertEqual(namespace['result'], {'datasets': {}, 'log': []})
+        self.assertEqual(printed.getvalue(), '')
+        self.assertIn(('lag-dif', 'DS-007', 1), t.matched)
 
     def test_plain_assignment_emits(self):
         t = translate("data d; x = 1.5; run;")
