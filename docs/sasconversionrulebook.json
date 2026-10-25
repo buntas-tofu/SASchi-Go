@@ -665,6 +665,37 @@
       ]
     },
     {
+      "rule_id": "DS-022",
+      "sas_pattern": "COUNT(string, substring <, modifiers>)",
+      "scope": "data-step",
+      "python_target": {
+        "package": "stdlib",
+        "pattern": "sas_semantics.sas_count(string, substring, modifiers): bounded ASCII literal matching with explicit I/T and overlap refusal"
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "examples/count.R sas_count: enumerate literal substring windows, reject overlapping positions, count the remaining matches"
+      },
+      "required_settings": [
+        "Case-sensitive by default; I ignores ASCII case; T removes trailing ASCII blanks from both operands; modifier letters accept either case",
+        "Preserve leading and trailing blanks unless T applies; do not apply DS-015 ingest trimming to COUNT operands",
+        "SAS documents overlapping matches as undefined: detect them after I/T processing and refuse execution for human review",
+        "Bounded support policy: refuse zero-length input strings, empty substrings including after T, non-ASCII/NUL text, numeric or null arguments, and modifier characters other than I/T",
+        "Blank character variables retain their declared padding; they are not numeric missing values. Python translation and the R reference are gated; the C++ scalar pilot does not support COUNT"
+      ],
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "forbidden_patterns": [
+        "Bare Python str.count or R regex counting without the modifier and overlap guards",
+        "A numeric expectation for an overlapping match or Python's empty-needle len(string)+1 default",
+        "Treating this fixture evidence as a live-SAS comparison or as support for SQL COUNT, COUNTC, or COUNTW"
+      ],
+      "validation_test": "examples/verify_count.py: synthetic documented pins, I/T and blank discriminators, refusal pins, exhaustive short-string regex/Python/R agreement; saschi.test_functions checks translated execution and runtime refusal",
+      "confidence": "high within the bounded slice; repository evidence, no live SAS",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/p02vuhb5ijuirbn1p7azkyianjd8.htm"
+      ]
+    },
+    {
       "rule_id": "SQL-001",
       "sas_pattern": "PROC SQL general queries",
       "scope": "proc-sql",

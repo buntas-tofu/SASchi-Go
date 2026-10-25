@@ -11,6 +11,10 @@ from pathlib import Path
 from .functions import FUNCTIONS, character_width
 from .plan import compile_plan
 from .runtime import run_plan
+from .emit_py import translate
+from .emit_cpp import translate as translate_cpp
+from .job import build_job
+from .rules import load_rulebook, route_function
 
 REPO = Path(__file__).resolve().parent.parent
 
@@ -74,6 +78,100 @@ class CharacterFunctionTests(unittest.TestCase):
     def test_input_yymmdd8_reads_a_sas_day_number(self):
         row = one("data d; x=input('20260101',yymmdd8.); run;")
         self.assertEqual(row["x"], float((date(2026, 1, 1) - date(1960, 1, 1)).days))
+
+
+class CountFunctionTests(unittest.TestCase):
+    def test_original_ticket_executes_in_emitted_python(self):
+        source = "data _null_; x=count('abc','a'); run;"
+        translation = translate(source)
+        self.assertFalse(translation.blocked)
+        namespace = {}
+        exec(translation.code, namespace)
+        self.assertEqual(namespace['result']['log'], [])
+        row = one("data d; x=count('abc','a'); run;")
+        self.assertEqual(row['x'], 1.0)
+        job = build_job(source)
+        self.assertTrue(job.receipt['accepted'])
+        self.assertEqual(job.receipt['tickets'], [])
+
+    def test_case_and_trimming_discriminators(self):
+        row = one("data d; a=count('abc','A'); b=count('abc','A','i'); "
+                  "c=count('abc','abc '); d=count('abc','abc ','T'); "
+                  "e=count('ab ','b '); f=count('ab ','b ','T'); "
+                  "g=count(' Ab AB ','ab ','It'); run;")
+        self.assertEqual(tuple(row.values()), (0., 1., 0., 1., 1., 1., 2.))
+
+    def test_typed_catalog_preserves_blanks_and_accepts_variable_modifiers(self):
+        inputs = {'raw': {'schema': {'text': {'type': 'character', 'length': 2},
+                                     'needle': {'type': 'character', 'length': 2},
+                                     'mod': {'type': 'character', 'length': 1}},
+                          'rows': [{'text': 'ab', 'needle': 'b', 'mod': 't'}]}}
+        result = execute("data d; set raw; a=count(text,needle); "
+                         "b=count(text,needle,mod); run;", inputs)
+        row = result['datasets']['d']['rows'][0]
+        self.assertEqual(row['needle'], 'b ')
+        self.assertEqual((row['a'], row['b']), (0., 1.))
+
+    def test_missing_character_variable_is_padded_not_numeric_missing(self):
+        inputs = {'raw': {'schema': {'text': {'type': 'character', 'length': 3}},
+                          'rows': [{'text': ''}]}}
+        row = execute("data d; set raw; a=count(text,' '); b=count(text,'x'); run;",
+                      inputs)['datasets']['d']['rows'][0]
+        self.assertEqual((row['a'], row['b']), (3., 0.))
+
+    def test_calls_compose_with_expressions_and_predicates(self):
+        row = one("data d; a=count(substr('zabc',2,3),'a')+1; "
+                  "b=max(count('abab','ab'),1); c=0; "
+                  "if count('Aa','a','I')=2 then c=7; run;")
+        self.assertEqual(tuple(row.values()), (2., 2., 7.))
+
+    def test_overlap_and_ungated_inputs_fail_without_an_accepted_job(self):
+        cases = [("count('aaa','aa')", 'overlapping'),
+                 ("count('AaA','aa','I')", 'overlapping'),
+                 ("count('abc','')", 'empty substring'),
+                 ("count('abc',' ','T')", 'empty substring'),
+                 ("count('','a')", 'zero-length string'),
+                 ("count('abc','a','x')", 'unsupported modifier'),
+                 ("count('café','é')", 'encoding review'),
+                 ("count(123,'1')", 'character arguments'),
+                 ("count(.,'a')", 'character arguments')]
+        for expression, reason in cases:
+            with self.subTest(expression=expression):
+                job = build_job(f"data d; x={expression}; run;")
+                self.assertFalse(job.receipt['accepted'])
+                self.assertIsNone(job.result)
+                self.assertIn(reason, job.receipt['error'])
+
+    def test_dynamic_overlap_cannot_emit_a_partial_dataset(self):
+        inputs = {'raw': {'schema': {'text': {'type': 'character', 'length': 3}},
+                          'rows': [{'text': 'abc'}, {'text': 'aaa'}]}}
+        with self.assertRaisesRegex(ValueError, 'overlapping'):
+            execute("data d; set raw; n=count(text,'aa'); output; run;", inputs)
+
+    def test_wrong_arities_and_other_count_functions_remain_tickets(self):
+        for call in ("count()", "count('a')", "count('a','a','i','t')",
+                     "countc('abc','a')", "countw('a b')"):
+            with self.subTest(call=call):
+                self.assertTrue(compile_plan(f"data d; x={call}; run;").blocked)
+
+    def test_rule_and_gate_provenance_are_specific_to_count(self):
+        self.assertEqual(route_function("count('abc','a')"), ('count', 'DS-022'))
+        self.assertEqual(route_function("'count(abc,a)'"), ('unknown', ''))
+        self.assertEqual(FUNCTIONS['count'].gate, 'examples/verify_count.py')
+        rule = load_rulebook()['DS-022']
+        self.assertIn('sas_semantics.sas_count', rule.python_target['pattern'])
+        self.assertIn('examples/verify_count.py', rule.validation_test)
+        self.assertIn('undefined', ' '.join(rule.required_settings))
+
+    def test_cpp_pilot_still_refuses_character_function_calls(self):
+        source = "data _null_; x=count('abc','a'); run;"
+        self.assertTrue(translate_cpp(source).blocked)
+        job = build_job(source, target='cpp')
+        self.assertFalse(job.receipt['accepted'])
+        self.assertIsNone(job.result)
+        self.assertTrue(job.plan.blocked)
+        self.assertEqual(job.code, 2)
+        self.assertTrue(any(t['construct'] == 'cpp-target' for t in job.receipt['tickets']))
 
 
 class NumericFunctionTests(unittest.TestCase):
