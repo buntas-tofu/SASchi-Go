@@ -11,6 +11,7 @@ from dataclasses import asdict, dataclass, field
 from sas_semantics import sas_put_literals, sas_put_character_list, sas_put_numeric_list, sas_do_counted
 from .functions import FUNCTIONS, format_token, FORMATS
 from .parser import Kind, ParseError, split_statements
+from .operations import walk_operations as _walk_operations
 from .rules import route_function, route_statement
 
 NAME = r"[A-Za-z_][A-Za-z0-9_]{0,31}"
@@ -223,14 +224,10 @@ def action(text, line):
     return None
 
 
-def walk_operations(ops):
-    """Walk source-order operations, including statically present loop bodies."""
-    for op in ops:
-        yield op
-        if op.kind == 'if':
-            yield from walk_operations([Operation(**op.args['operation'])])
-        elif op.kind == 'do_counted':
-            yield from walk_operations([Operation(**body) for body in op.args['body']])
+def walk_operations(ops, *, all_containers=False):
+    """Expose shared traversal nodes as compiler operations."""
+    for op in _walk_operations(ops, all_containers=all_containers):
+        yield op if isinstance(op, Operation) else Operation(**op)
 
 
 def put_known_types(ops):
@@ -251,11 +248,8 @@ def put_known_types(ops):
             return 'number'
         return None
 
-    for previous in ops:
-        previous = asdict(previous) if isinstance(previous, Operation) else previous
-        while previous['kind'] == 'if':
-            previous = previous['args']['operation']
-        args, kind = previous['args'], previous['kind']
+    for previous in walk_operations(ops):
+        args, kind = previous.args, previous.kind
         if kind == 'declare':
             spec = args['spec']
             known.setdefault(args['name'], spec if isinstance(spec, str) else spec['type'])
@@ -265,17 +259,8 @@ def put_known_types(ops):
 
 
 def contains_put(ops, kinds):
-    """Inspect serialized nested operations for program-wide PUT guards."""
-    for op in ops:
-        op = asdict(op) if isinstance(op, Operation) else op
-        if op['kind'] in kinds:
-            return True
-        args = op['args']
-        if 'operation' in args and contains_put([args['operation']], kinds):
-            return True
-        if 'body' in args and contains_put(args['body'], kinds):
-            return True
-    return False
+    """Inspect structural containers conservatively for source-wide guards."""
+    return any(op.kind in kinds for op in walk_operations(ops, all_containers=True))
 
 
 def compile_plan(source: str) -> Plan:
@@ -306,16 +291,9 @@ def compile_plan(source: str) -> Plan:
             if (step.name == '_null_' and any(o.kind == 'do_counted' for o in flat)
                     and any(o.kind == 'output' for o in flat)):
                 plan.tickets.append(Ticket(step.line, 'OUTPUT', 'do-counted', 'explicit OUTPUT in DATA _NULL_ counted DO steps is deferred'))
-            def check(ops):
-                for op in ops:
-                    if op.kind == 'output' and op.args['target'] not in (None, step.name):
-                        plan.tickets.append(Ticket(op.line, str(op.args['target']), 'output', 'OUTPUT target must be the declared DATA destination'))
-                    if op.kind == 'do_counted':
-                        check([Operation(**child) for child in op.args['body']])
-                    if op.kind == 'if':
-                        nested = op.args['operation']
-                        check([Operation(**nested)])
-            check(step.operations)
+            for op in flat:
+                if op.kind == 'output' and op.args['target'] not in (None, step.name):
+                    plan.tickets.append(Ticket(op.line, str(op.args['target']), 'output', 'OUTPUT target must be the declared DATA destination'))
             if step.where and (not step.inputs or step.kind != 'data'):
                 plan.tickets.append(Ticket(step.line, step.name, 'where', 'WHERE requires one driving SET'))
             if any(o.kind == 'lookup' for o in step.operations) and (not step.inputs or step.kind != 'data'):
@@ -551,7 +529,7 @@ def compile_plan(source: str) -> Plan:
                     reject(st, 'put', 'literal-to-variable PUT requires source whitespace; typed literals and comment-only separation need review')
                     continue
                 names = [item.text.lower() for item in items if item.kind == Kind.WORD]
-                types = put_known_types(walk_operations(step.operations))
+                types = put_known_types(step.operations)
                 if all(item.kind == Kind.WORD for item in items) and all(types.get(name) == 'number' for name in names):
                     if any(name in ('_n_', '_infile_', '_file_', '_ods_', '_page_', '_blankpage_') for name in names):
                         reject(st, 'put', 'PUT automatic variables and special controls require review')
@@ -566,11 +544,8 @@ def compile_plan(source: str) -> Plan:
                     continue
                 known = set(step.lengths)
                 for previous in walk_operations(step.operations):
-                    previous = asdict(previous)
-                    while previous['kind'] == 'if':
-                        previous = previous['args']['operation']
-                    if previous['kind'] in ('assign', 'round', 'declare'):
-                        known.add(previous['args']['name'])
+                    if previous.kind in ('assign', 'round', 'declare'):
+                        known.add(previous.args['name'])
                 if any(name in ('_n_', '_infile_', '_file_', '_ods_', '_page_', '_blankpage_') for name in names) or (
                         not step.inputs and not any(o.kind == 'lookup' for o in step.operations)
                         and any(name not in known for name in names)):

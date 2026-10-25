@@ -315,3 +315,18 @@ stdout, and complete-result hash pins. The witness reads that program in place;
 no corpus source or derived output text is shipped. The two earlier complete
 program proofs in `saschi.test_put_all` remain registered. Passing these three
 programs does not establish equivalence for other corpus programs.
+
+
+## Shared operation-tree analysis
+
+The compiler and runtime validation use `saschi.operations.walk_operations` for
+source-order preorder traversal of IF children and counted-DO bodies. Mixed
+compiled objects and serialized nodes retain their original payloads. Static
+schema/type discovery, OUTPUT target checks, descriptor validation and source
+guards therefore share the control-container structure, including zero-trip
+bodies. Conservative PUT guards also inspect structural containers of unknown
+kinds; this does not admit those kinds for execution. Runtime IF/DO scheduling
+and all operation allowlists remain separate from this read-only analysis.
+`saschi.test_plan` pins traversal order, payload preservation, malformed-body
+refusal, and skipped-body output-target diagnostics. Existing DO/PUT suites and
+whole-program witnesses retain the execution contract.
