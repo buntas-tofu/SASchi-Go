@@ -1801,8 +1801,7 @@
       "confidence": "bounded repository/base-R evidence, no live SAS",
       "sources": [
         "https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/n0n08xougp40i5n1xw7njpcy0a2b.htm",
-        "https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/n0p7wxtk0hvn83n1pveisbcp2ae9.htm",
-        "https://blogs.sas.com/content/sgf/2021/02/22/deleting-a-substring-from-a-sas-string/"
+        "https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/n0p7wxtk0hvn83n1pveisbcp2ae9.htm"
       ]
     },
     {
