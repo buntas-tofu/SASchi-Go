@@ -7,7 +7,7 @@ containers of unknown kinds as well, preserving conservative source checks.
 from collections.abc import Mapping
 
 
-def walk_operations(ops, *, all_containers=False):
+def walk_operations(ops, *, all_containers=False, _if_depth=0):
     """Yield original object/mapping nodes in source-order preorder.
 
     Compiled roots may contain serialized children. Preserve their identity and
@@ -17,11 +17,21 @@ def walk_operations(ops, *, all_containers=False):
     for op in ops:
         yield op
         kind, args = (op['kind'], op['args']) if isinstance(op, Mapping) else (op.kind, op.args)
+        if kind == 'if' and _if_depth >= 32:
+            raise ValueError('IF branch nesting exceeds the bounded32-condition policy')
         if kind == 'if' or (all_containers and 'operation' in args):
-            yield from walk_operations([args['operation']], all_containers=all_containers)
+            child = args.get('operation')
+            if not isinstance(child, Mapping) and not (hasattr(child, 'kind') and hasattr(child, 'args')):
+                raise ValueError('IF then branch must be an operation')
+            yield from walk_operations([child], all_containers=all_containers, _if_depth=_if_depth + 1)
+        if (kind == 'if' or all_containers) and 'otherwise' in args:
+            child = args['otherwise']
+            if not isinstance(child, Mapping) and not (hasattr(child, 'kind') and hasattr(child, 'args')):
+                raise ValueError('IF otherwise branch must be an operation')
+            yield from walk_operations([child], all_containers=all_containers, _if_depth=_if_depth + 1)
         if kind == 'do_counted' or (all_containers and 'body' in args):
             body = args.get('body')
             if not isinstance(body, list):
                 label = 'counted DO' if kind == 'do_counted' else 'operation'
                 raise ValueError(f'{label} body must be a list')
-            yield from walk_operations(body, all_containers=all_containers)
+            yield from walk_operations(body, all_containers=all_containers, _if_depth=_if_depth)

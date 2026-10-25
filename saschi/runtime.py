@@ -234,7 +234,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
         for op in flat:
             args, kind = op['args'], op['kind']
             payloads = [(args.get('value'), 'assignment')] if kind == 'assign' else [
-                (value, 'other') for key, value in args.items() if key not in ('body', 'operation')]
+                (value, 'other') for key, value in args.items() if key not in ('body', 'operation', 'otherwise')]
             for payload, context in payloads:
                 context_error = next(substr_context_errors(payload, context), None)
                 if context_error:
@@ -277,8 +277,8 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                 sas_do_counted(args['start'], args['stop'], args['by'])
                 if name not in schema or column_type(schema[name]) != 'number':
                     raise ValueError('counted DO index requires a preceding numeric declaration')
-                allowed = {'assign', 'round', 'put', 'put_literal', 'put_character_list', 'put_numeric_list', 'output'}
-                for child in args['body']:
+                allowed = {'assign', 'round', 'if', 'put', 'put_literal', 'put_character_list', 'put_numeric_list', 'output'}
+                for child in operations(args['body']):
                     if (child['kind'] not in allowed or
                             child['kind'] in ('assign', 'round') and child['args']['name'] == name):
                         raise ValueError('counted DO body operation is outside the bounded contract')
@@ -313,6 +313,23 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                     if name != '_n_':
                         schema.setdefault(name, 'number')
             elif kind in ('if', 'subset'):
+                if kind == 'if':
+                    if set(args) not in ({'condition', 'operation'}, {'condition', 'operation', 'otherwise'}):
+                        raise ValueError('IF has unexpected plan arguments')
+                    leaves = {'assign', 'output', 'put', 'put_literal', 'put_character_list', 'put_numeric_list'}
+                    true_branch = args['operation']
+                    false_branch = args.get('otherwise')
+                    if (not isinstance(true_branch, dict) or true_branch.get('kind') not in leaves or
+                            false_branch is not None and (not isinstance(false_branch, dict) or
+                                false_branch.get('kind') not in leaves | {'if'})):
+                        raise ValueError('IF branches require simple actions or an ELSE IF chain')
+                    test = args['condition']
+                    comparisons = {'=', 'eq', '^=', '~=', '<>', 'ne', '<', 'lt', '>', 'gt', '<=', 'le', '>=', 'ge'}
+                    if (not isinstance(test, dict) or test.get('op') not in comparisons | {'truth'} or
+                            set(test) != ({'left', 'op'} if test.get('op') == 'truth' else {'left', 'op', 'right'}) or
+                            not isinstance(test['left'], dict) or
+                            test.get('op') != 'truth' and not isinstance(test['right'], dict)):
+                        raise ValueError('IF requires a supported predicate')
                 validate_string_expressions(args['condition'], schema)
                 for value in expressions(args['condition']):
                     add_reference(value)
@@ -410,6 +427,8 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                 elif kind == 'if':
                     if condition(args['condition'], row, schema):
                         return perform(args['operation'])
+                    if 'otherwise' in args:
+                        return perform(args['otherwise'])
                 elif kind == 'subset':
                     return condition(args['condition'], row, schema)
                 elif kind == 'output':

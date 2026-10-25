@@ -10,7 +10,7 @@ import re
 from dataclasses import asdict, dataclass, field
 from sas_semantics import sas_put_literals, sas_put_character_list, sas_put_numeric_list, sas_do_counted
 from .functions import FUNCTIONS, format_token, FORMATS, function_call_lines, substr_context_errors, catx_arguments_allowed
-from .parser import Kind, ParseError, split_statements
+from .parser import Kind, ParseError, Statement, split_statements, tokenize
 from .operations import walk_operations as _walk_operations
 from .rules import route_function, route_statement
 
@@ -316,15 +316,122 @@ def contains_put(ops, kinds):
 
 def compile_plan(source: str) -> Plan:
     plan, step, context, active_do = Plan(), None, None, None
+    pending_if, chain_length, pending_end = None, 0, None
 
     def append_operation(op):
         if active_do is None:
             step.operations.append(op)
-        else:
-            active_do.args['body'].append(asdict(op))
+            return op.args
+        serialized = asdict(op)
+        active_do.args['body'].append(serialized)
+        return serialized['args']
 
     def reject(st, construct, reason):
         plan.tickets.append(Ticket(st.line, st.text, construct, reason))
+
+    def put_action(st):
+        """Reuse every bounded PUT path with original token offsets/source text."""
+        text = st.text
+        if re.fullmatch(r'put\s+_all_', text, re.I):
+            plan.matched.append(('put-all', 'DS-025', st.line))
+            return Operation('put_all', st.line, {})
+        items = st.tokens[1:]
+        if items and all(item.kind == Kind.STRING for item in items):
+            literals = [item.text for item in items]
+            try:
+                sas_put_literals(literals)
+            except ValueError as exc:
+                reject(st, 'put', str(exc))
+            else:
+                plan.matched.append(('put-literal', 'DS-023', st.line))
+                return Operation('put_literal', st.line, {'literals': literals})
+            return None
+        if items and all(item.kind == Kind.STRING or
+                         item.kind == Kind.WORD and re.fullmatch(NAME, item.text) for item in items):
+            if any(left.kind == Kind.STRING and right.kind == Kind.WORD and
+                   (left.end is None or not source[left.end:left.end + 1].isspace())
+                   for left, right in zip(items, items[1:])):
+                reject(st, 'put', 'literal-to-variable PUT requires source whitespace; typed literals and comment-only separation need review')
+                return None
+            names = [item.text.lower() for item in items if item.kind == Kind.WORD]
+            types = put_known_types(step.operations)
+            if all(item.kind == Kind.WORD for item in items) and all(types.get(name) == 'number' for name in names):
+                if any(name in ('_n_', '_infile_', '_file_', '_ods_', '_page_', '_blankpage_') for name in names):
+                    reject(st, 'put', 'PUT automatic variables and special controls require review')
+                    return None
+                try:
+                    sas_put_numeric_list([None] * len(names))
+                except ValueError as exc:
+                    reject(st, 'put', str(exc))
+                else:
+                    plan.matched.append(('put-numeric-list', 'DS-027', st.line))
+                    return Operation('put_numeric_list', st.line, {'names': names})
+                return None
+            known = set(step.lengths)
+            for previous in walk_operations(step.operations):
+                if previous.kind in ('assign', 'round', 'declare'):
+                    known.add(previous.args['name'])
+            if any(name in ('_n_', '_infile_', '_file_', '_ods_', '_page_', '_blankpage_') for name in names) or (
+                    not step.inputs and not any(o.kind == 'lookup' for o in step.operations)
+                    and any(name not in known for name in names)):
+                reject(st, 'put', 'character-list PUT requires declared character variables; automatic or uninitialized numeric variables need review')
+                return None
+            resolved = [{'kind': 'literal', 'value': item.text} if item.kind == Kind.STRING
+                        else {'kind': 'character', 'value': 'x'} for item in items]
+            try:
+                sas_put_character_list(resolved)
+            except ValueError as exc:
+                reject(st, 'put', str(exc))
+            else:
+                plan.matched.append(('put-character-list', 'DS-024', st.line))
+                return Operation('put_character_list', st.line, {'items': [
+                    {'kind': 'literal', 'value': item.text} if item.kind == Kind.STRING
+                    else {'kind': 'variable', 'value': item.text.lower()} for item in items]})
+            return None
+        rest, names = re.sub(r'^put\s*', '', text, flags=re.I), []
+        while match := re.match(r'\s*(' + NAME + r')\s*=', rest):
+            names.append(match[1].lower())
+            rest = rest[match.end():]
+        if not names or rest.strip():
+            reject(st, 'put', 'unaccounted for text in named-list PUT')
+            return None
+        return Operation('put', st.line, {'names': names})
+
+    def simple_branch(st):
+        nested = action(st.text, st.line)
+        if nested is None and re.match(r'^put\b', st.text, re.I):
+            nested = put_action(st)
+        if nested is None or nested.kind == 'put_all':
+            return None
+        return nested
+
+    def conditional_action(st):
+        # THEN inside quoted strings is data, and token offsets remain original.
+        if not st.tokens or st.tokens[0].text.lower() != 'if':
+            return None
+        for pos, token in enumerate(st.tokens[1:], 1):
+            if token.kind != Kind.WORD or token.text.lower() != 'then':
+                continue
+            condition = predicate(' '.join(t.text for t in st.tokens[1:pos]))
+            tail = st.tokens[pos + 1:]
+            if condition is None or not tail:
+                continue
+            leaf = Statement(' '.join(t.text for t in tail), tail[0].line, st.terminated, tail)
+            nested = simple_branch(leaf)
+            if nested is not None:
+                return Operation('if', st.line, {'condition': condition, 'operation': asdict(nested)})
+        return None
+
+    def admit_loop_branch(op, st):
+        if active_do is None:
+            return True
+        allowed = {'assign', 'round', 'if', 'put', 'put_literal', 'put_character_list', 'put_numeric_list', 'output'}
+        if any(child.kind not in allowed or
+               child.kind in ('assign', 'round') and child.args['name'] == active_do.args['index']
+               for child in walk_operations([op])):
+            reject(st, 'do-counted', 'counted DO branches require simple actions and cannot write the loop index')
+            return False
+        return True
 
     def finish():
         nonlocal active_do
@@ -375,6 +482,9 @@ def compile_plan(source: str) -> Plan:
         return plan
     for st in statements:
         text = st.text
+        is_else = bool(re.match(r'^else\b(?!\s*=)', text, re.I))
+        if not is_else:
+            pending_if, chain_length, pending_end = None, 0, None
         # Quoted words are data, including names that resemble variable lists.
         unquoted = re.sub(r"'(?:[^']|'')*'|\"(?:[^\"]|\"\")*\"", ' ', text)
         if re.search(r"\b(?:_ERROR_|_ALL_|_NUMERIC_|_CHARACTER_)\b", unquoted, re.I) and not re.fullmatch(r'put\s+_all_', text, re.I):
@@ -455,8 +565,8 @@ def compile_plan(source: str) -> Plan:
             if target and target[1].lower() == active_do.args['index']:
                 reject(st, 'do-counted', 'assignment to the counted DO index inside its body is deferred')
                 continue
-            if not target and not re.match(r'^(?:put|output)\b', text, re.I):
-                reject(st, 'do-counted', 'counted DO body supports direct assignments, PUT, and OUTPUT only')
+            if not target and not re.match(r'^(?:put|output|if|else)\b', text, re.I):
+                reject(st, 'do-counted', 'counted DO body supports simple actions and bounded IF/ELSE branches only')
                 continue
             if re.fullmatch(r'put\s+_all_', text, re.I):
                 reject(st, 'do-counted', 'PUT _ALL_ error-flag contract excludes counted DO')
@@ -537,15 +647,46 @@ def compile_plan(source: str) -> Plan:
             else:
                 append_operation(Operation('lookup', st.line, {'dataset': lookup[1].lower()}))
             continue
-        conditional = re.fullmatch(r'if\s+(.+?)\s+then\s+(.+)', text, re.I)
-        if conditional:
-            condition, nested = predicate(conditional[1]), action(conditional[2], st.line)
-            if condition and nested:
-                append_operation(Operation('if', st.line, {'condition': condition, 'operation': asdict(nested)}))
-            else:
-                reject(st, 'if', 'simple IF THEN assignment or OUTPUT only')
+        if is_else:
+            gap = (tokenize(source[pending_end:st.tokens[0].start])
+                   if pending_end is not None and st.tokens and st.tokens[0].start is not None else [])
+            if pending_if is None or len(gap) != 1 or gap[0].kind != Kind.SEMI:
+                reject(st, 'do-if', 'ELSE requires an immediately preceding unmatched IF in the same body')
+                pending_if = None
+                continue
+            tail = st.tokens[1:]
+            branch = Statement(' '.join(t.text for t in tail), tail[0].line if tail else st.line,
+                               st.terminated, tail)
+            nested = conditional_action(branch) if tail and tail[0].text.lower() == 'if' else simple_branch(branch)
+            if nested is None or not admit_loop_branch(nested, st):
+                reject(st, 'do-if', 'ELSE requires a simple action or ELSE IF with a simple action')
+                pending_if = None
+                continue
+            if nested.kind == 'if' and chain_length >= 32:
+                reject(st, 'do-if', 'IF/ELSE chain exceeds the bounded32-condition policy')
+                pending_if = None
+                continue
+            pending_if['otherwise'] = asdict(nested)
+            pending_if = pending_if['otherwise']['args'] if nested.kind == 'if' else None
+            pending_end = st.tokens[-1].end
+            chain_length += int(nested.kind == 'if')
+            plan.matched.append(('do-if', 'DS-031', st.line))
+            continue
+        conditional = conditional_action(st)
+        if conditional is not None:
+            if admit_loop_branch(conditional, st):
+                pending_if = append_operation(conditional)
+                chain_length = 1
+                pending_end = st.tokens[-1].end
+                plan.matched.append(('do-if', 'DS-031', st.line))
+            continue
+        if re.match(r'^if\b', text, re.I) and any(t.kind == Kind.WORD and t.text.lower() == 'then' for t in st.tokens):
+            reject(st, 'if', 'IF THEN requires a simple assignment, OUTPUT or bounded PUT action')
             continue
         if re.match(r'^if\b', text, re.I):
+            if active_do is not None:
+                reject(st, 'do-counted', 'subsetting IF inside counted DO is deferred')
+                continue
             condition = predicate(re.sub(r'^if\s*', '', text, flags=re.I))
             if condition:
                 append_operation(Operation('subset', st.line, {'condition': condition}))
@@ -579,76 +720,9 @@ def compile_plan(source: str) -> Plan:
             reject(st, family if family != "unknown" else "assignment", "unsupported expression")
             continue
         if re.match(r"^put\b", text, re.I):
-            if re.fullmatch(r'put\s+_all_', text, re.I):
-                append_operation(Operation('put_all', st.line, {}))
-                plan.matched.append(('put-all', 'DS-025', st.line))
-                continue
-            items = st.tokens[1:]
-            if items and all(item.kind == Kind.STRING for item in items):
-                literals = [item.text for item in items]
-                try:
-                    sas_put_literals(literals)
-                except ValueError as exc:
-                    reject(st, "put", str(exc))
-                else:
-                    append_operation(Operation("put_literal", st.line, {"literals": literals}))
-                    plan.matched.append(("put-literal", "DS-023", st.line))
-                continue
-            if items and all(item.kind == Kind.STRING or
-                             item.kind == Kind.WORD and re.fullmatch(NAME, item.text)
-                             for item in items):
-                # Normalized statement text cannot distinguish '41'x from
-                # '41' x. Require actual source whitespace before a variable.
-                if any(left.kind == Kind.STRING and right.kind == Kind.WORD and
-                       (left.end is None or not source[left.end:left.end + 1].isspace())
-                       for left, right in zip(items, items[1:])):
-                    reject(st, 'put', 'literal-to-variable PUT requires source whitespace; typed literals and comment-only separation need review')
-                    continue
-                names = [item.text.lower() for item in items if item.kind == Kind.WORD]
-                types = put_known_types(step.operations)
-                if all(item.kind == Kind.WORD for item in items) and all(types.get(name) == 'number' for name in names):
-                    if any(name in ('_n_', '_infile_', '_file_', '_ods_', '_page_', '_blankpage_') for name in names):
-                        reject(st, 'put', 'PUT automatic variables and special controls require review')
-                        continue
-                    try:
-                        sas_put_numeric_list([None] * len(names))
-                    except ValueError as exc:
-                        reject(st, 'put', str(exc))
-                    else:
-                        append_operation(Operation('put_numeric_list', st.line, {'names': names}))
-                        plan.matched.append(('put-numeric-list', 'DS-027', st.line))
-                    continue
-                known = set(step.lengths)
-                for previous in walk_operations(step.operations):
-                    if previous.kind in ('assign', 'round', 'declare'):
-                        known.add(previous.args['name'])
-                if any(name in ('_n_', '_infile_', '_file_', '_ods_', '_page_', '_blankpage_') for name in names) or (
-                        not step.inputs and not any(o.kind == 'lookup' for o in step.operations)
-                        and any(name not in known for name in names)):
-                    reject(st, 'put', 'character-list PUT requires declared character variables; automatic or uninitialized numeric variables need review')
-                    continue
-                resolved = [{'kind': 'literal', 'value': item.text} if item.kind == Kind.STRING
-                            else {'kind': 'character', 'value': 'x'} for item in items]
-                try:
-                    # Minimum-width validation catches literal hazards now;
-                    # runtime checks the actual descriptors and values.
-                    sas_put_character_list(resolved)
-                except ValueError as exc:
-                    reject(st, 'put', str(exc))
-                else:
-                    append_operation(Operation('put_character_list', st.line, {'items': [
-                        {'kind': 'literal', 'value': item.text} if item.kind == Kind.STRING
-                        else {'kind': 'variable', 'value': item.text.lower()} for item in items]}))
-                    plan.matched.append(('put-character-list', 'DS-024', st.line))
-                continue
-            rest, names = re.sub(r"^put\s*", "", text, flags=re.I), []
-            while match := re.match(r"\s*(" + NAME + r")\s*=", rest):
-                names.append(match[1].lower())
-                rest = rest[match.end():]
-            if not names or rest.strip():
-                reject(st, "put", "unaccounted for text in named-list PUT")
-            else:
-                append_operation(Operation("put", st.line, {"names": names}))
+            nested = put_action(st)
+            if nested is not None:
+                append_operation(nested)
             continue
         family, _ = route_function(text)
         reject(st, family if family != "unknown" else construct, "no operation for this statement")
@@ -656,7 +730,7 @@ def compile_plan(source: str) -> Plan:
     for compiled in plan.steps:
         for op in walk_operations(compiled.operations):
             payloads = [(op.args.get('value'), 'assignment')] if op.kind == 'assign' else [
-                (value, 'other') for key, value in op.args.items() if key not in ('body', 'operation')]
+                (value, 'other') for key, value in op.args.items() if key not in ('body', 'operation', 'otherwise')]
             for payload, context in payloads:
                 for message in substr_context_errors(payload, context):
                     plan.tickets.append(Ticket(op.line, 'SUBSTR', 'substr', message))

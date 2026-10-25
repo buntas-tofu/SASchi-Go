@@ -78,13 +78,18 @@ class LiteralPutTests(unittest.TestCase):
                           "put 'value' / 'next'", "put 'value' +2 'next'",
                           "put 2*'value'", "put ('value')", "put 'value' $8.",
                           "put '41'x", "put '01JAN2020'd", "put _all_",
-                          "if 1 then put 'value'", "file log; put 'value'"):
+                           "file log; put 'value'"):
             with self.subTest(statement=statement):
                 job = build_job("data _null_; put 'first'; " + statement + '; run;')
                 self.assertEqual(job.code, 2)
                 self.assertFalse(job.receipt['accepted'])
                 self.assertIsNone(job.result)
                 self.assertTrue(job.receipt['tickets'])
+
+    def test_former_conditional_literal_put_refusal_is_now_gated(self):
+        job=build_job("data _null_; put 'first'; if 1 then put 'value'; run;")
+        self.assertEqual(job.code,0)
+        self.assertEqual(job.result,{'datasets':{},'log':['first','value']})
 
     def test_encoding_macro_and_line_size_refusals_are_compile_time_tickets(self):
         for literal in ("'café'", "'a\nb'", "'a\tb'", "'a\x00b'", '"&name"',

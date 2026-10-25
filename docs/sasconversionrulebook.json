@@ -1653,7 +1653,7 @@
       },
       "required_settings": [
         "Only signed ASCII integer literal controls with magnitude at most 2**31-1; BY defaults to 1 and must be nonzero. At most 10000 trips, rejected before execution. These are implementation bounds, not SAS limits.",
-        "Single-level body: direct assignment, existing direct PUT, and named-destination OUTPUT. No nesting, WHILE/UNTIL, LEAVE/CONTINUE, conditions, index writes, declarations, SET, or other input operations inside the body. MERGE with counted DO is deferred.",
+        "Single-level body: direct assignment, existing PUT, named-destination OUTPUT and DS-031 bounded conditional actions. No nested/grouped DO, WHILE/UNTIL, LEAVE/CONTINUE, subsetting IF, index writes, declarations, SET or other input operations inside the body. MERGE with counted DO is deferred.",
         "Declare the numeric index immediately before do_counted. Compile body schema and detect explicit OUTPUT even for zero-trip loops. OUTPUT suppresses implicit output across the entire DATA step; DATA _NULL_ explicit OUTPUT and PUT _ALL_ combinations are deferred.",
         "Leave the index at its first value past stop after normal completion; zero-trip loops leave start. _N_ counts DATA iterations. Existing SET can drive DATA iterations outside the loop. C++ refuses this operation."
       ],
@@ -1799,6 +1799,35 @@
         "https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/n0p7wxtk0hvn83n1pveisbcp2ae9.htm",
         "https://blogs.sas.com/content/sgf/2021/02/22/deleting-a-substring-from-a-sas-string/"
       ]
+    },
+    {
+      "rule_id": "DS-031",
+      "sas_pattern": "Bounded IF THEN / ELSE IF / ELSE simple actions, including counted DO bodies",
+      "scope": "data-step",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "Recursive if operations with optional otherwise child; source-order schema discovery and first-true execution"
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "examples/do_if.R independent branch scheduling and in-place external FizzBuzz parser"
+      },
+      "required_settings": [
+        "Only existing bounded predicates and simple assignment, existing PUT or OUTPUT branch actions. ELSE immediately follows its IF chain, with first-true short-circuiting. Zero and missing numeric truth are false. At most32 conditions per chain. Conditional ROUND operations remain deferred.",
+        "Counted DO retains its literal signed integer controls and iteration bound. Recursively validate both branches, including unreachable index writes and skipped-body descriptors. Input/declarations, subsetting IF and nested/grouped DO inside the body remain refused.",
+        "Walk both branches in source-order preorder for schema, source guards, function validation and explicit OUTPUT suppression. Queue/state execution follows only the selected branch.",
+        "Retain PUT width/type/macro/encoding limits, whole-job atomic failure, DATA_NULL explicit OUTPUT limits, PUT_ALL restrictions and C++ refusal. No SAS diagnostic equivalence claimed."
+      ],
+      "silent_difference_checks": [
+        "Executing both branches advances state incorrectly and can evaluate invalid unreachable calls.",
+        "Ignoring a skipped OUTPUT changes automatic output cardinality; ignoring a false branch loses its schema and source guards."
+      ],
+      "validation_test": "examples/verify_do_if.py and saschi.test_do_if: original branch pins, independent base-R scheduling, skipped/empty validation, recursive refusals, atomic failure and unchanged external FizzBuzz source/stdout/complete-result hashes with shared-job/R agreement.",
+      "confidence": "bounded repository/base-R evidence; no live SAS",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000202239.htm"
+      ]
     }
   ],
   "runtime_capabilities": {
@@ -1873,6 +1902,15 @@
       "boundary_tests": "saschi.test_substr_compositions",
       "scope": "stored values with new character features, fixed-width expression sources, padding-insensitive CATX items; unproven temporary widths refused",
       "evidence": "original repository and independent base-R comparisons; no live SAS"
+    },
+    "do_if": {
+      "rule_id": "DS-031",
+      "target": "saschi.runtime.run_plan",
+      "validation_test": "examples/verify_do_if.py",
+      "r_witness": "examples/do_if.R",
+      "boundary_tests": "saschi.test_do_if",
+      "scope": "bounded conditional simple actions, including first-true IF/ELSE chains in counted DO",
+      "evidence": "original repository/base-R comparisons and unmodified external-program proof; no live SAS"
     }
   }
 }

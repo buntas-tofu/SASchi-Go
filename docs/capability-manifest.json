@@ -83,7 +83,8 @@
   "numeric_put_update": "DS-027 and put-numeric-list/suite-put-numeric add bounded source-order known numeric variable list output to PUT and PUT List. Existing numeric descriptor-only SET refusals remain.",
   "length_reverse_update": "DS-028 adds bounded character LENGTH name groups and REVERSE; length-reverse and suite-length-reverse gates. The function slice does not add to this statement/procedure document universe. DS-030 composition evidence admits stored SUBSTR values with local temporary-consumer checks.",
   "concat_catx_update": "DS-029 adds bounded character assignment expressions, concat-catx and suite-concat-catx; new-expression PUT_ALL and C++ remain refused.",
-  "substr_update": "DS-030 repairs source-derived SUBSTR destination widths with bounded checked execution, an original base-R twin and appended substr/suite-substr gates. No statement/procedure universe change. Composition gates admit stored SUBSTR values, fixed REVERSE/concat source expressions and direct SUBSTR CATX items. Local width-sensitive temporary/error-state refusals remain; no global cooccurrence quarantine."
+  "substr_update": "DS-030 repairs source-derived SUBSTR destination widths with bounded checked execution, an original base-R twin and appended substr/suite-substr gates. No statement/procedure universe change. Composition gates admit stored SUBSTR values, fixed REVERSE/concat source expressions and direct SUBSTR CATX items. Local width-sensitive temporary/error-state refusals remain; no global cooccurrence quarantine.",
+  "do_if_update": "DS-031 and do-if/suite-do-if add bounded first-true IF/ELSE simple actions, including counted DO bodies, preserving both-branch schema/source/OUTPUT discovery and recursive index-write refusal."
  },
  "rollup": {
   "stmt": {
@@ -735,10 +736,12 @@
    "valid_in": "",
    "disposition": "GATED",
    "rule_ids": [
-    "DS-005"
+    "DS-005",
+    "DS-031"
    ],
    "gates": [
-    "missarith"
+    "missarith",
+    "do-if"
    ],
    "reference_page": 120
   },

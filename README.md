@@ -38,7 +38,7 @@ fixed expected output and base-R evidence. Special missings retain their tags.
   sibling plus a fixture verifier (`verify_*.py`). Run any verifier directly,
   or all of them through `verify_all.py`.
 - `docs/sasconversionrulebook.json` : the machine-consumable translation
-  rulebook. 65 rules with equivalence classes (EXACT,
+  rulebook. 66 rules with equivalence classes (EXACT,
   EQUIVALENT-WITH-SETTINGS, APPROXIMATE, NO-DIRECT-EQUIVALENT), required
   settings, forbidden patterns, and validation tests.
 - `docs/capability-manifest.json` : the coverage manifest. Every entry of the
@@ -264,7 +264,8 @@ MIT. See [LICENSE](LICENSE).
 DS-026 gates one counted DO level in a DATA step: `do i=1 to 5 by 2;`
 with signed integer literal controls, each magnitude at most 2**31-1, nonzero
 step, and at most 10000 iterations. These are implementation bounds. Direct
-assignments, existing PUT, and OUTPUT may occur in the body; schema and OUTPUT
+assignments, existing PUT, OUTPUT and DS-031 bounded conditional actions may
+occur in the body; schema and OUTPUT
 suppression still apply at zero trips. The final index passes the stop, and
 `_N_` counts DATA iterations. Nested or conditional loops, computed controls,
 index writes, declarations or input operations inside the body, MERGE,
@@ -317,3 +318,13 @@ unclaimed. The original raw SUBSTR fixture remains extraction-only evidence.
 `examples/verify_substr.py` and `saschi.test_substr` cover destination descriptors,
 independent R cases, WHERE input widths, atomic refusals and local temporary-consumer checks.
 Repository/base-R evidence for maintainer review, no live SAS claim.
+
+DS-031 gates first-true IF THEN / ELSE IF / ELSE dispatch, at most32 conditions,
+with simple assignment,
+existing PUT and OUTPUT leaves, including bounded counted-DO bodies. Both branches
+participate in static schema discovery, source guards and explicit OUTPUT
+suppression; only the selected branch executes. Unreachable index writes,
+subsetting IF, nested/grouped DO, input/declarations and PUT_ALL in counted bodies
+and conditional ROUND remain refused. `examples/verify_do_if.py` and `saschi.test_do_if` provide original
+base-R branch evidence and an unmodified external FizzBuzz source/stdout/complete-
+result hash proof. Repository/base-R evidence for maintainer review, no live SAS.

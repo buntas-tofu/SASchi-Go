@@ -236,10 +236,15 @@ class CharacterListPutTests(unittest.TestCase):
         for statement in ('put c $10.', 'put c : $10.', 'put c ~', 'put c @',
                           'put c @@', 'put @4 c', 'put c /', 'put c +2',
                           "put c= 'x'", 'put c 7', 'put (c)', 'put c*2',
-                          'if 1 then put c', 'file log; put c'):
+                          'file log; put c'):
             job = build_job("data _null_; c='A'; " + statement + '; run;')
             self.assertEqual(job.code, 2, statement)
             self.assertIsNone(job.result)
+
+    def test_former_conditional_character_put_refusal_is_now_gated(self):
+        job=build_job("data _null_; c='A'; if 1 then put c; run;")
+        self.assertEqual(job.code,0)
+        self.assertEqual(job.result,{'datasets':{},'log':['A ']})
 
     def test_forged_plan_revalidated_without_rows(self):
         for items in (None, [], ['c'], [{'kind': 'numeric', 'value': '1'}],
