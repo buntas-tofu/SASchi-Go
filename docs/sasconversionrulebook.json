@@ -1828,6 +1828,40 @@
       "sources": [
         "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000202239.htm"
       ]
+    },
+    {
+      "rule_id": "DS-032",
+      "sas_pattern": "BAND, BOR, BXOR, BNOT, BLSHIFT and BRSHIFT scalar unsigned32 calls",
+      "scope": "data-step",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "sas_bitwise checked finite unsigned32 operands and shifts; numeric DATA-step results"
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "examples/bitwise.R independent32-element low-to-high bit vectors, avoiding signed bitw primitives"
+      },
+      "required_settings": [
+        "Finite integral int/float operands in0..4294967295, excluding booleans, text, ordinary/tagged missing, fractions and nonfinite/out-of-range values. Unary BNOT, binary other calls. These are bounded implementation policies, not equivalent SAS diagnostics.",
+        "BLSHIFT and BRSHIFT counts are integral0..31. Left shift discards high bits beyond32, right shift zero-fills, BNOT complements exactly32 bits.",
+        "Validate numeric descriptors and literal bounds even on empty/filtered input or skipped branches/bodies; dynamic values are checked when executed. Error-state cases refuse atomically. No new C++ backend support.",
+        "The checked calls join the PUT_ALL error-free function allowlist, with every existing64-column bound and fixture unchanged. The unmodified bitwise corpus program produces67 columns and remains an atomic output-width refusal; this is not a successful whole-program proof."
+      ],
+      "silent_difference_checks": [
+        "Signed R bitwise primitives and unlimited-width Python complement have different high-bit behavior.",
+        "A successful scalar computation does not imply the complete PUT_ALL output fits the current profile."
+      ],
+      "validation_test": "examples/verify_bitwise.py and saschi.test_bitwise:22 pins,6320 generated/boundary R cases,149 shared refusals,4 naive catches, skipped/empty validation, atomic failure and unchanged external-program source/R-PDV agreement followed by67-column refusal.",
+      "confidence": "bounded repository/base-R evidence; no live SAS or successful corpus-program proof",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000245865.htm",
+        "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000245868.htm",
+        "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000245869.htm",
+        "https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/n0cboltjahpi01n1r229i69aepa0.htm",
+        "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000245871.htm",
+        "https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/PDF/default/lefunctionsref.pdf"
+      ]
     }
   ],
   "runtime_capabilities": {
@@ -1911,6 +1945,15 @@
       "boundary_tests": "saschi.test_do_if",
       "scope": "bounded conditional simple actions, including first-true IF/ELSE chains in counted DO",
       "evidence": "original repository/base-R comparisons and unmodified external-program proof; no live SAS"
+    },
+    "bitwise": {
+      "rule_id": "DS-032",
+      "target": "saschi.runtime.run_plan",
+      "scope": "six checked scalar unsigned32 calls; existing64-column PUT_ALL profile retained",
+      "validation_test": "examples/verify_bitwise.py",
+      "r_witness": "examples/bitwise.R",
+      "boundary_tests": "saschi.test_bitwise",
+      "evidence": "original repository/base-R comparisons and explicit external-program width refusal, no live SAS"
     }
   }
 }

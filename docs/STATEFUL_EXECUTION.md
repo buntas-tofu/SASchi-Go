@@ -482,3 +482,24 @@ verify scheduling, branch descriptors, source guards, atomic failure and the
 unmodified external FizzBuzz program through source/stdout/complete-result
 hashes, shared-job execution and independent R parsing. No external source or
 derived output text is shipped.
+
+## Bounded unsigned32 bitwise calls
+
+Status: DS-032 repository/base-R evidence for maintainer review, no live SAS.
+BAND/BOR/BXOR and shifts have two arguments; BNOT has one. All operands are
+finite integral numeric values0..4294967295, booleans excluded. Shift counts
+are integral0..31. BNOT complements32 bits, left shift discards excess high
+bits, and right shift zero-fills. Numeric descriptors and literal limits are
+validated even on skipped/empty input; dynamic invalid values fail atomically.
+Missing/error-state behavior, coercion and C++ bitwise execution remain refused.
+
+Checked bitwise calls are safe scalar expressions for the existing PUT_ALL
+error-zero contract, whose64-column record bound is unchanged. The unmodified
+external bitwise program has matching independent R and observed runtime PDV
+values before its67-column output refuses atomically. No successful whole-
+program output-equivalence claim is made. An explicit wider output profile is
+a separate future capability; function identity does not change output limits.
+
+Evidence: `examples/verify_bitwise.py`, original `examples/bitwise.R` bit-vector
+model and in-place corpus parser, and `saschi.test_bitwise`. Existing fixtures
+and raw semantic helpers retain their prior contracts.

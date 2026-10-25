@@ -1867,3 +1867,59 @@ def sas_substr_checked(value, position, length):
     if position + length - 1 > len(text):
         raise ValueError('SUBSTR bounds exceed the source width; error-flag review required')
     return text[position - 1:position - 1 + length]
+
+
+# DS-032 bounded unsigned32 bitwise calls. Invalid/error-state inputs are
+# refused, rather than approximating SAS diagnostics or _ERROR_ changes.
+SAS_BITWISE_ARITY = {'band': 2, 'bor': 2, 'bxor': 2, 'bnot': 1,
+                     'blshift': 2, 'brshift': 2}
+
+
+def sas_bitwise_integer(value, *, shift=False):
+    """Finite integral numeric operand with no implicit conversion."""
+    upper = 31 if shift else 4294967295
+    if (isinstance(value, bool) or not isinstance(value, (int, float)) or
+            not 0 <= value <= upper or not math.isfinite(value) or value != int(value)):
+        raise ValueError('bitwise requires finite integral numeric ' +
+                         ('shift counts in 0..31' if shift else 'operands in 0..4294967295') +
+                         '; missing/error-state and coercion behavior require review')
+    return int(value)
+
+
+def sas_bitwise(name, *values):
+    """Six unsigned32 SAS calls, with fixed arity and checked arguments."""
+    if not isinstance(name, str) or name not in SAS_BITWISE_ARITY or len(values) != SAS_BITWISE_ARITY[name]:
+        raise ValueError('bitwise requires a supported name and exact argument count')
+    first = sas_bitwise_integer(values[0])
+    if name == 'bnot':
+        return 4294967295 ^ first
+    second = sas_bitwise_integer(values[1], shift=name in ('blshift', 'brshift'))
+    if name == 'band': return first & second
+    if name == 'bor': return first | second
+    if name == 'bxor': return first ^ second
+    if name == 'blshift': return (first << second) & 4294967295
+    return first >> second
+
+
+def sas_band(first, second):
+    return sas_bitwise('band', first, second)
+
+
+def sas_bor(first, second):
+    return sas_bitwise('bor', first, second)
+
+
+def sas_bxor(first, second):
+    return sas_bitwise('bxor', first, second)
+
+
+def sas_bnot(value):
+    return sas_bitwise('bnot', value)
+
+
+def sas_blshift(value, count):
+    return sas_bitwise('blshift', value, count)
+
+
+def sas_brshift(value, count):
+    return sas_bitwise('brshift', value, count)
