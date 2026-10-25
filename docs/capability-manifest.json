@@ -1104,16 +1104,19 @@
    "disposition": "GATED",
    "rule_ids": [
     "DS-023",
-    "DS-024"
+    "DS-024",
+    "DS-025"
    ],
    "gates": [
     "put-literal",
     "suite-put",
     "put-character-list",
-    "suite-put-list"
+    "suite-put-list",
+    "put-all",
+    "suite-put-all"
    ],
    "reference_page": 265,
-   "note": "Bounded logical records of quoted literals and ordinary unformatted nonblank character variables: printable ASCII, at most 64 columns including variable separators, documented spacing and quote decoding. Blank fields, numeric output, attached formats, special controls, literal adjacency/comment-only separation, FILE, pointers, macros, and C++ require review. Named-list output has a separate entry."
+   "note": "Bounded logical records of quoted literals and ordinary unformatted nonblank character variables: printable ASCII, at most 64 columns including variable separators, documented spacing and quote decoding. Blank fields, numeric output, attached formats, special controls, literal adjacency/comment-only separation, FILE, pointers, macros, and C++ require review. Named-list output has a separate entry. DS-025 adds bounded scalar PUT _ALL_: ordered named PDV fields, ordinary numeric missing and conservative BEST12 integers, _ERROR_=0 and _N_=1. No general error-flag or physical SAS log equivalence."
   },
   {
    "entry": "PUT Statement: Column",
@@ -1164,12 +1167,16 @@
    "type": "Executable",
    "valid_in": "DATA step",
    "disposition": "GATED",
-   "rule_ids": [],
+   "rule_ids": [
+    "DS-025"
+   ],
    "gates": [
-    "suite-emitter"
+    "suite-emitter",
+    "put-all",
+    "suite-put-all"
    ],
    "reference_page": 302,
-   "note": "the emitter consumes name= items one at a time and tickets the leftover text"
+   "note": "the emitter consumes name= items one at a time and tickets the leftover text DS-025 adds bounded scalar PUT _ALL_: ordered named PDV fields, ordinary numeric missing and conservative BEST12 integers, _ERROR_=0 and _N_=1. No general error-flag or physical SAS log equivalence."
   },
   {
    "entry": "PUTLOG Statement",

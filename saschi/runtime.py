@@ -3,7 +3,7 @@ from __future__ import annotations
 import math
 from collections import Counter
 from copy import deepcopy
-from sas_semantics import sas_round, sas_merge_by, sas_put_literals, sas_put_character_list
+from sas_semantics import sas_round, sas_merge_by, sas_put_literals, sas_put_character_list, sas_put_all
 from .functions import apply as apply_function, assign_spec
 from .values import normalize_catalog, column_type, coerce, missing, order
 
@@ -88,6 +88,32 @@ def operations(ops):
             yield from operations([op['args']['operation']])
 
 
+def put_all_value(expr, row):
+    """Error-free scalar expressions for the DS-025 _ERROR_=0 contract."""
+    if expr['kind'] == 'call':
+        name = expr['name']
+        if name not in ('length', 'lengthn', 'lengthc', 'substr'):
+            raise ValueError('PUT _ALL_: function requires error-flag review')
+        values = [put_all_value(arg, row) for arg in expr['args']]
+        if name == 'substr':
+            text, position, width = values
+            if (not isinstance(text, str) or any(isinstance(v, bool) or not isinstance(v, (int, float))
+                    or not math.isfinite(v) or v != int(v) or v < 1 for v in (position, width))
+                    or position + width - 1 > len(text)):
+                raise ValueError('PUT _ALL_: SUBSTR bounds/type require error-flag review')
+        return apply_function(name, values)
+    if expr['kind'] not in ('number', 'missing', 'tagged_missing', 'character', 'variable', 'automatic'):
+        raise ValueError('PUT _ALL_: expression requires error-flag review')
+    if expr['kind'] == 'automatic' and expr['value'] != '_n_':
+        raise ValueError('PUT _ALL_: only the scalar _N_ automatic reference is gated')
+    value = number(expr, row)
+    if expr['kind'] == 'character' and value == '':
+        raise ValueError('PUT _ALL_: empty character literals require source-blank review')
+    if isinstance(value, str) and any(not 32 <= ord(c) <= 126 for c in value):
+        raise ValueError('PUT _ALL_: printable ASCII expressions required')
+    return value
+
+
 def run_plan(plan, catalog=None, *, allow_partial=False):
     if plan['version'] not in (1, 2):
         raise ValueError('unsupported plan version')
@@ -97,6 +123,11 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
     for step in plan['steps']:
         inputs, keys, ops = step['inputs'], step['by'], step['operations']
         flat = list(operations(ops))
+        put_all = any(op['kind'] == 'put_all' for op in flat)
+        if put_all and (step['kind'] != 'data' or inputs or keys or step.get('retained') or step.get('where') or
+                        (step['name'] == '_null_' and any(op['kind'] == 'output' for op in flat)) or
+                        any(op['kind'] not in ('declare', 'assign', 'put_all', 'output') for op in flat)):
+            raise ValueError('PUT _ALL_: only scalar declarations, safe assignments, and named-destination OUTPUT are gated')
         lookups = [op['args']['dataset'] for op in flat if op['kind'] == 'lookup']
         for name in inputs + lookups:
             if name not in tables:
@@ -203,6 +234,9 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                     add_reference(value)
             elif kind == 'put_literal':
                 sas_put_literals(args['literals'])
+            elif kind == 'put_all':
+                if args:
+                    raise ValueError('PUT _ALL_: unexpected plan arguments')
             elif kind == 'put_character_list':
                 if not isinstance(args.get('items'), list) or not args['items']:
                     raise ValueError('PUT character list: nonempty plan items required')
@@ -243,6 +277,17 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
             schema.setdefault(name, 'number')
             if column_type(schema[name]) != 'number':
                 raise ValueError('RETAIN initializers in this slice must be numeric')
+        if put_all:
+            display = step.get('display_names', {})
+            for name, spec in schema.items():
+                shown = display.get(name, name)
+                if not isinstance(shown, str) or shown.lower() != name:
+                    raise ValueError('PUT _ALL_: display name must match its PDV variable')
+                if isinstance(spec, dict) and spec.get('format'):
+                    raise ValueError('PUT _ALL_: attached formats require review')
+            sas_put_all([{'name': display.get(n, n), 'kind': column_type(s),
+                          'value': 'x' if column_type(s) == 'character' else None}
+                         for n, s in schema.items()])
         if inputs and step['kind'] == 'data' and any(
                 column_type(schema[k]) == 'character' and schema[k]['length'] != tables[inputs[0]]['schema'][k]['length'] for k in keys):
             raise ValueError('BY key width changes require review')
@@ -278,7 +323,8 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
             def perform(op):
                 args, kind = op['args'], op['kind']
                 if kind == 'assign':
-                    row[args['name']] = coerce(number(args['value'], row), schema[args['name']], encoding)
+                    value = put_all_value(args['value'], row) if put_all else number(args['value'], row)
+                    row[args['name']] = coerce(value, schema[args['name']], encoding)
                 elif kind == 'round':
                     row[args['name']] = round_value(number(args['value'], row), number(args['unit'], row))
                 elif kind == 'if':
@@ -290,6 +336,9 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                     snapshot()
                 elif kind == 'put_literal':
                     logs.append(sas_put_literals(args['literals']))
+                elif kind == 'put_all':
+                    logs.append(sas_put_all([{'name': display.get(n, n), 'kind': column_type(s), 'value': row[n]}
+                                             for n, s in schema.items()]))
                 elif kind == 'put_character_list':
                     resolved = [item if item['kind'] == 'literal' else
                                 {'kind': 'character', 'value': row[item['value']]}

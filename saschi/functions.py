@@ -9,7 +9,8 @@ Gate provenance, function by function:
 
 - `examples/verify_funcs.py`  MAX, MIN (ignore missing), the LENGTH family
   (trailing blanks excluded, floored at 1), SUBSTR (1-based), character to
-  numeric coercion (blank or invalid reads as missing).
+  numeric coercion (blank or invalid reads as missing). Typed numeric LENGTH
+  arguments use the documented right-justified BEST12 conversion and return 12.
 - `examples/verify_missarith.py`  SUM (ignores missing, where the `+` operator
   propagates it).
 - `examples/verify_numfmt.py`  PUT with a numeric w.d format, PUT DATE9, and the
@@ -27,7 +28,7 @@ import math
 
 from sas_semantics import (is_sas_missing, sas_charnum, sas_count, sas_input_yymmdd8,
                            sas_length, sas_lengthc, sas_lengthn, sas_max,
-                           sas_min, sas_mod, sas_put_date9, sas_putn, sas_round,
+                           sas_min, sas_mod, sas_numeric_length, sas_put_date9, sas_putn, sas_round,
                            sas_substr, sas_sum)
 
 GATE_FUNCS = "examples/verify_funcs.py"
@@ -122,7 +123,7 @@ def apply(name: str, values: list):
         return (sas_max if name == "max" else sas_min)(*_numeric(name, values))
     if name in ("length", "lengthn", "lengthc"):
         function = {"length": sas_length, "lengthn": sas_lengthn, "lengthc": sas_lengthc}[name]
-        return function(_text(name, values[0]))
+        return function(values[0]) if isinstance(values[0], str) else sas_numeric_length(values[0])
     if name == "substr":
         text, position, length = _text(name, values[0]), values[1], values[2]
         if is_sas_missing(position) or is_sas_missing(length):

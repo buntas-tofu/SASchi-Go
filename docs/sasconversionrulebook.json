@@ -782,6 +782,42 @@
       ]
     },
     {
+      "rule_id": "DS-025",
+      "sas_pattern": "PUT _ALL_ scalar named PDV output",
+      "scope": "data-step",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "sas_semantics.sas_put_all over the complete ordered PDV, preserving source spelling"
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "independent named-field renderer and scalar program witness in examples/put_all.R"
+      },
+      "required_settings": [
+        "Scalar DATA steps only: declarations, assignments, PUT _ALL_, and OUTPUT. No SET, BY, retention, conditional statements, FILE, formats, or C++ fallback. Explicit OUTPUT requires a named DATA destination; DATA _NULL_ OUTPUT is deferred.",
+        "Preserve compilation PDV order, include variables referenced before assignment and declared after PUT, then append _ERROR_=0 and _N_=1. Automatic variables stay out of datasets.",
+        "Only error-free literals, variable copies, LENGTH/LENGTHN/LENGTHC, and in-range character SUBSTR expressions are gated; other expressions require error-flag review.",
+        "Numeric LENGTH-family arguments, including uninitialized or tagged missing values, return 12 through documented right-justified BEST12 conversion. SAS notes are not PUT records.",
+        "Render nonblank printable ASCII character fields with edge blanks removed. Ordinary numeric missing is a period. Numeric fields are integer-valued with magnitude at most 99999999999, a conservative signed BEST12 subset.",
+        "Keep one separator after every field, including _N_. Complete logical record at most 64 columns. Fractional or tagged numeric output, blank character fields, other formats, and physical log typography require review.",
+        "Refuse double-quoted macro triggers and non-ASCII/control source literals anywhere in a program using this operation. Empty character source literals require a separate source-blank contract."
+      ],
+      "forbidden_patterns": [
+        "Alphabetical PDV sorting or collecting only variables assigned before PUT",
+        "Omitting automatic variables or treating an uninitialized numeric LENGTH argument as an empty character string",
+        "Using Python str or general .17g formatting as SAS BEST12 for arbitrary numeric output"
+      ],
+      "validation_test": "examples/verify_put_all.py and saschi.test_put_all: original pins, independent base-R records and unmodified hash-pinned Roku programs",
+      "confidence": "high within the stated scalar slice; no live SAS capture",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/lestmtsref/63323/HTML/default/n1spe7nmkmi7ywn175002rof97fv.htm",
+        "https://support.sas.com/documentation/cdl/en/lestmtsref/63323/HTML/default/n177esg96c9hkgn10bforsq2886s.htm",
+        "https://support.sas.com/documentation/cdl/en/lrcon/62955/HTML/default/a000695104.htm",
+        "https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/n0f6jve4kdxnh1n1m7c82fhosgih.htm"
+      ]
+    },
+    {
       "rule_id": "SQL-001",
       "sas_pattern": "PROC SQL general queries",
       "scope": "proc-sql",

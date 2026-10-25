@@ -61,6 +61,53 @@ as data. `examples/verify_put_list.py` and
 `saschi.test_put_list` gate Python and independent base-R logical records;
 C++ refuses this operation. No live SAS was used.
 
+DS-025 adds bare `PUT _ALL_;` in scalar DATA steps. It writes the complete PDV
+in compilation order, preserving the first source spelling of each variable,
+then `_ERROR_=0` and `_N_=1`. References to uninitialized variables create
+numeric PDV slots; declarations after PUT still belong to the complete PDV.
+Automatic variables do not enter the output dataset. Each named field has one
+following blank, including the final `_N_` field. This is a logical output
+buffer contract, not a physical SAS log transcript.
+
+The numeric output slice is ordinary missing (`.`) or integer-valued numbers
+with magnitude at most 99999999999. This conservative subset fits signed
+BEST12 without exponent notation. Nonblank printable ASCII character values
+lose edge blanks. Names, equal signs, separators, and automatic variables all
+count toward the 64-column limit. Fractions, special-missing output, blank
+character fields, attached formats, and wider records refuse explicitly.
+
+The source slice allows declarations, assignments, bare PUT _ALL_, and OUTPUT,
+without inputs, BY, retention, or conditions.
+Explicit OUTPUT in this slice requires a named DATA destination; DATA _NULL_
+OUTPUT is deferred.
+Assignments may use literals, variable copies, the LENGTH family, and in-range
+character SUBSTR. Arithmetic, other functions, and invalid SUBSTR bounds refuse
+pending error-flag modeling.
+Empty character source literals also refuse pending their source-blank contract.
+The implementation never fabricates a zero `_ERROR_` after those operations.
+As with DS-024, program-wide double-quoted macro triggers refuse. DS-025 also
+refuses non-ASCII/control source strings, including intermediate expressions.
+C++ remains blocked. The older literal, character-list, and named-list paths
+retain their own contracts.
+
+Typed numeric LENGTH, LENGTHN, and LENGTHC arguments return 12, including
+uninitialized and tagged-missing numeric values: SAS converts them to a
+right-justified BEST12 character representation. Character missing remains a
+blank-padded string in the typed executor and follows the original character
+length rules. `examples/verify_funcs.py` and `examples/funcs.R` gate this
+conversion separately from the PUT field renderer. Conversion and uninitialized
+variable notes are diagnostic log content, not user PUT records.
+
+`examples/verify_put_all.py` checks original pins and constructed cases against
+an independent base-R renderer. `saschi.test_put_all` also reads the unmodified
+Roku `string_length.sas` and `substring.sas` programs in place. It pins source,
+emitted stdout, and complete result hashes, executes the emitted Python and job
+paths, and requires a separately parsed base-R program witness to agree. It
+stores hashes rather than third-party source or derived text. These two tests
+skip only when the optional sibling corpus is absent; CI uses its pinned
+revision. Their passing result establishes the recorded logical output under
+these contracts, with no live SAS execution or physical log equivalence.
+
 A single simple DATA destination is supported. `OUTPUT;` and `OUTPUT name;`
 snapshot the current PDV immediately. Any explicit OUTPUT in the step disables
 implicit end-of-iteration output, including an OUTPUT in a false IF branch.
@@ -84,7 +131,8 @@ BY key changes. Automatic variables are excluded from output schema and rows.
 Predicates accept a numeric truth value or one comparison (`=`, `^=`, `~=`, `<>`,
 `<`, `>`, `<=`, `>=`, and EQ/NE/LT/GT/LE/GE). IF THEN accepts one assignment or
 OUTPUT. Expressions accept atoms, two-argument ROUND, and `variable + atom` or
-`variable - atom`. Implicit character/numeric conversions are refused.
+`variable - atom`. Implicit character/numeric conversions are refused except
+for the explicitly gated numeric LENGTH-family conversion above.
 
 Declarations and input descriptors establish column order and types before row
 execution, including empty outputs and assignments inside skipped branches.
@@ -173,3 +221,6 @@ the separate session.
 - [SAS RETAIN statement](https://support.sas.com/documentation/cdl/en/lestmtsref/63323/HTML/default/p0t2ac0tfzcgbjn112mu96hkgg9o.htm)
 - [SAS missing-value order](https://support.sas.com/documentation/cdl/en/lrcon/62955/HTML/default/a000989180.htm)
 - [SAS character-length discussion](https://support.sas.com/resources/papers/proceedings14/1468-2014.pdf)
+- [SAS PUT and _ALL_](https://support.sas.com/documentation/cdl/en/lestmtsref/63323/HTML/default/n1spe7nmkmi7ywn175002rof97fv.htm)
+- [SAS named PUT](https://support.sas.com/documentation/cdl/en/lestmtsref/63323/HTML/default/n177esg96c9hkgn10bforsq2886s.htm)
+- [SAS numeric LENGTH conversion](https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/n0f6jve4kdxnh1n1m7c82fhosgih.htm)

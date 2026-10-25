@@ -148,6 +148,11 @@ class CharacterListPutTests(unittest.TestCase):
             self.assertEqual(job.code, 2, name)
             self.assertIsNone(job.result)
 
+    def test_all_with_catalog_input_stays_outside_the_scalar_slice(self):
+        job = build_job('data _null_; set raw; put _all_; run;', catalog(['A']))
+        self.assertEqual(job.code, 2)
+        self.assertIsNone(job.result)
+
     def test_numeric_missing_tagged_and_unknown_variables_refuse(self):
         for value in (7, None, {'missing': 'A'}):
             inputs = {'raw': {'schema': {'c': 'number'}, 'rows': [{'c': value}]}}

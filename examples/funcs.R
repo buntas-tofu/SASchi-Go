@@ -8,6 +8,14 @@ sas_min <- function(v) { v <- v[!is.na(v)]; if (length(v) == 0) NA_real_ else mi
 sas_length  <- function(x) { if (is.na(x)) return(1L); s <- sub("[ ]+$", "", x); if (nchar(s) == 0) 1L else nchar(s) }
 sas_lengthn <- function(x) { if (is.na(x)) return(0L); nchar(sub("[ ]+$", "", x)) }
 sas_lengthc <- function(x) { if (is.na(x)) return(0L); nchar(x) }
+numeric_length <- function(kind, value) {
+  if (kind == 'missing') marker <- '.'
+  else if (kind == 'tagged' && grepl('^[_A-Z]$', value)) marker <- value
+  else if (kind == 'number' && is.finite(suppressWarnings(as.numeric(value)))) marker <- '0'
+  else stop('numeric LENGTH requires finite numeric or missing input')
+  # Every numeric BEST12 representation ends in a nonblank in column twelve.
+  nchar(sprintf('%12s', marker), type='bytes')
+}
 # SAS char->num: trim, accept only the standard numeric informat, else missing.
 # Uses the same regex as sas_semantics.py, NOT R's as.numeric (which would read
 # "0x10" as 16). The regex is the gate; as.numeric only parses what it passes.
@@ -31,6 +39,12 @@ if (mode == "length") {
     nt <- as.integer(fx$n_trail[i])
     s <- paste0(base, strrep(" ", nt))
     cat(sas_length(s), sas_lengthn(s), sas_lengthc(s), "\n")
+  }
+} else if (mode == 'numeric-length') {
+  for (i in seq_len(nrow(fx))) {
+    result <- tryCatch(as.character(numeric_length(fx$kind[i], fx$value[i])),
+                       error=function(e) 'ERROR')
+    cat(result, '\n', sep='')
   }
 } else if (mode == "maxmin") {
   for (i in seq_len(nrow(fx))) {

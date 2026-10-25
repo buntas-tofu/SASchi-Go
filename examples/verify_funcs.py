@@ -21,7 +21,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent))
 from sas_semantics import (sas_charnum, sas_eval, sas_length,  # noqa: E402
                            sas_lengthc, sas_lengthn, sas_max, sas_min,
-                           sas_substr, sas_sysevalf)
+                           sas_substr, sas_sysevalf, sas_numeric_length)
 
 RSCRIPT = os.environ.get("ROSETTA_RSCRIPT") or shutil.which("Rscript") or "Rscript"
 
@@ -125,6 +125,38 @@ def r_charnum(strings):
 def charnum_eq(a, b):
     return (a is None and b is None) or (
         a is not None and b is not None and math.isclose(a, b))
+
+
+def verify_numeric_lengths():
+    pins = [None, {'missing': '_'}, {'missing': 'A'}, {'missing': 'Z'},
+            0, -0.0, 7, -31, 3.125, 1e-200, 1e200, 2**53]
+    refused = [True, '7', [], {'missing': 'bad'}, float('nan'), float('inf')]
+    for value in pins:
+        assert sas_numeric_length(value) == 12, value
+    for value in refused:
+        try:
+            sas_numeric_length(value)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError(('numeric LENGTH must refuse', value))
+    with tempfile.TemporaryDirectory() as directory:
+        path = Path(directory) / 'numeric-length.csv'
+        with path.open('w', newline='') as stream:
+            writer = csv.writer(stream)
+            writer.writerow(['kind', 'value'])
+            for value in pins + refused:
+                if value is None: item = ('missing', '.')
+                elif isinstance(value, dict): item = ('tagged', value['missing'])
+                elif isinstance(value, bool): item = ('boolean', str(value))
+                elif isinstance(value, (int, float)): item = ('number', repr(value))
+                else: item = ('text', str(value))
+                writer.writerow(item)
+        run = subprocess.run([str(RSCRIPT), str(HERE / 'funcs.R'), 'numeric-length', str(path)],
+                             capture_output=True, text=True, check=True, timeout=60)
+    assert run.stdout.splitlines() == ['12'] * len(pins) + ['ERROR'] * len(refused)
+    assert sas_length(None) != sas_numeric_length(None), 'character and numeric missing differ'
+    print(f'  numeric LENGTH: {len(pins)} pins, {len(refused)} refusals, independent base R')
 
 
 def _raises_float(s):
@@ -239,6 +271,8 @@ def main() -> int:
     failed += cmis
     print(f"  CHAR->NUM: {len(cstrings)} fixtures, {cmis} Python/R mismatches")
 
+    print('8) Typed numeric LENGTH-family conversion, including uninitialized PDV references:')
+    verify_numeric_lengths()
     print()
     print("VERIFIED: MAX/MIN, LENGTH, SUBSTR, %EVAL, and CHAR->NUM match the rule "
           "and agree Python/R" if failed == 0 else f"FAILED: {failed} problems")
