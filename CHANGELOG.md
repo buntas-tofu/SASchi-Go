@@ -3,6 +3,17 @@
 Status: development changes with original pins and Python/base-R evidence; no
 live SAS comparison. Branch synchronization is separate from a release.
 
+- Add bounded counted DO and first-true IF/ELSE actions, including the unchanged
+  external FizzBuzz complete-program proof. Preserve skipped-branch schema,
+  OUTPUT suppression and recursive loop-index protection.
+- Add character LENGTH/REVERSE, concatenation/CATX and checked SUBSTR execution
+  with independent base-R evidence and explicit temporary-width refusals.
+- Add six checked unsigned32 bitwise calls. The external bitwise program still
+  refuses its 67-column output under the existing 64-column profile.
+- Add finite numeric direct-assignment LAG/DIF queues through depth 100, with
+  occurrence-specific invocation history, row/loop persistence, per-step/run
+  reset and atomic refusal of invalid values or DIF overflow.
+
 - Add the web workbench: `saschi serve` runs a standard-library HTTP server
   (no new runtime dependency) with a JSON API over the job path. A program
   shelf, a paste-and-run box, and a stage view walk one program through
@@ -105,7 +116,7 @@ Status: development changes with repository verification; no live SAS claim.
 # Changelog
 
 All notable changes to SASchi-Go are recorded here. Versioning is semver per
-`agent-manifest.json`, and the current version is `0.3.0`.
+`agent-manifest.json`, and the current version is `0.4.0`.
 
 The repository carries no release tags yet, so a version named in this file
 describes a state of `main` rather than a published artifact. This file was added

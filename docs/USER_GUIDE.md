@@ -11,11 +11,12 @@ doctrine lives in the gate suite and the receipts.
 ## What SASchi-Go proves
 
 SASchi-Go proves that specific SAS constructs behave the way this
-repository says they do in Python and R. The proof is executable: every
-construct family has a fixture gate that pins hand-derived truth, runs the
-Python reference implementation and the R twin, and requires byte-equal
-agreement at a documented tolerance. A claim in the README or the rulebook
-is only as good as the gate behind it.
+repository says they do in Python and R. The proof is executable: construct
+gates combine hand-derived pins, independent implementations and cross-language
+comparisons under a documented policy. Exact rendered or typed equality and
+numerical tolerances are separate checks. The unified command also verifies the
+translator, runtime, packaging and interfaces. A claim in the README or the
+rulebook is only as good as the gate behind it.
 
 The core doctrine: a translated program is accepted because it ran and
 its numbers matched, not because it looked right. The receipt is the

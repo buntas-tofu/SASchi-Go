@@ -9,16 +9,30 @@ the rulebook for translating SAS constructs. The corpus it is tested against
 lives in the sibling repository, [SASchi-Roku](https://github.com/buntas-tofu/SASchi-Roku).
 
 The core claim: a translated program is accepted because it ran and its
-numbers matched, not because it looked right. Every fixture gate in this
-repository demands byte-equal output between the Python and R translations,
-checked against hand-pinned truth and the semantics reference.
+numbers matched, not because it looked right. The gates combine hand-pinned
+truth, Python/R comparisons and typed execution checks under explicit comparison
+policies. Receipts record what passed for the source and environment tested.
+
+## Current verification
+
+Status: version 0.4.0 development evidence for maintainer review, checked on
+2026-10-25. With the pinned Roku corpus present, `python verify_all.py` passes
+40 fixture gates, 30 suites and 485 tests with zero skips. Synthesis adds 60/60
+faithful passes and catches 60/60 naive variants. Receipts bind these results to
+the recorded source and environment; live-SAS validation remains outstanding.
+
+Six unmodified external programs pass complete-program checks, including
+FizzBuzz. The bitwise program remains an explicit 67-column output refusal under
+the unchanged 64-column profile. See the
+[stateful execution contract](docs/STATEFUL_EXECUTION.md) for the supported slices
+and their remaining boundaries.
 
 ## Operational workflow
 
 The typed execution workflow and C++ scalar pilot use a shared, versioned
 operation plan. See [Operations](docs/OPERATIONS.md) for installation, the CLI,
 explicit scope, receipts, and peer synchronization. The composed example in
-`examples/workflow/` runs rounding, sorting, and a one-to-many merge against a
+[examples/workflow/](examples/workflow/) runs rounding, sorting, and a one-to-many merge against a
 pinned result and a base-R counterpart. Python executes bounded typed datasets;
 C++ currently supports scalar DATA _NULL_ programs. Julia remains an extension
 option. Algorithm redesign must preserve a stated behavior contract.
@@ -26,71 +40,71 @@ option. Algorithm redesign must preserve a stated behavior contract.
 
 The [stateful execution contract](docs/STATEFUL_EXECUTION.md) adds typed expected
 comparisons, explicit OUTPUT snapshots, WHERE/IF timing, retained variables, and
-character/metadata preservation. `examples/events/` provides a runnable job with
+character/metadata preservation. [examples/events/](examples/events/) provides a runnable job with
 fixed expected output and base-R evidence. Special missings retain their tags.
 
 ## Layout
 
-- `sas_semantics.py` : reference implementations of SAS-quirk functions
+- [sas_semantics.py](sas_semantics.py) : reference implementations of SAS-quirk functions
   (round half away from zero, INTCK/INTNX, missing-value ordering, character
   truncation, merge mechanics, formats, and the family). The verifier's law.
-- `examples/` : gold pairs. Each SAS construct gets a faithful Python and R
+- [examples/](examples/) : gold pairs. Each SAS construct gets a faithful Python and R
   sibling plus a fixture verifier (`verify_*.py`). Run any verifier directly,
-  or all of them through `verify_all.py`.
-- `docs/sasconversionrulebook.json` : the machine-consumable translation
+  or all of them through [verify_all.py](verify_all.py).
+- [docs/sasconversionrulebook.json](docs/sasconversionrulebook.json) : the machine-consumable translation
   rulebook. 67 rules with equivalence classes (EXACT,
   EQUIVALENT-WITH-SETTINGS, APPROXIMATE, NO-DIRECT-EQUIVALENT), required
   settings, forbidden patterns, and validation tests.
-- `docs/capability-manifest.json` : the coverage manifest. Every entry of the
-  SAS reference documents, each carrying one disposition (GATED, RULE,
+- [docs/capability-manifest.json](docs/capability-manifest.json) : the coverage manifest. Enumerated entries of
+  the SAS reference documents each carry one disposition (GATED, RULE,
   POLICY, HUMAN-REVIEW, DOCTRINE, OUT-OF-SCOPE, or UNASSESSED) with the gate
   or rule that proves it. The denominator is the published reference listing,
-  not an estimate, and `examples/verify_capability.py` refuses a manifest
+  not an estimate, and [examples/verify_capability.py](examples/verify_capability.py) refuses a manifest
   whose claims do not resolve.
-- `docs/USER_GUIDE.md` : the user guide: running the gates, reading the
+- [docs/USER_GUIDE.md](docs/USER_GUIDE.md) : the user guide: running the gates, reading the
   receipts, understanding the equivalence classes, and verifying a new
   construct family.
-- `saschi/` : the program-level translator package (Track A). `parser.py`
-  preserves statement fences, `rules.py` loads the rulebook and
+- [saschi/](saschi/) : the program-level translator package (Track A). [parser.py](saschi/parser.py)
+  preserves statement fences, [rules.py](saschi/rules.py) loads the rulebook and
   routes constructs, and the shared plan drives Python typed dataset execution
-  and a C++ scalar backend. Tests: `saschi/test_parser.py`,
-  `saschi/test_rules.py`, `saschi/test_emit_py.py`.
-- `saschi/job.py` : the shared job path (compile, translate, run, compare,
+  and a C++ scalar backend. Tests: [saschi/test_parser.py](saschi/test_parser.py),
+  [saschi/test_rules.py](saschi/test_rules.py), [saschi/test_emit_py.py](saschi/test_emit_py.py).
+- [saschi/job.py](saschi/job.py) : the shared job path (compile, translate, run, compare,
   receipt) that the run command, the web workbench, and the showcase all
   render from, so what is shown is what ran.
-- `saschi/catalog.py` : the DuckDB analysis layer. Every job records its pass
+- [saschi/catalog.py](saschi/catalog.py) : the DuckDB analysis layer. Every job records its pass
   (statements with the construct and rule they routed to, the functions
   recognized in code rather than inside string literals, the plan's tickets,
   and the run summary) into a catalog, and the receipt carries the resulting
   accounting under `completeness`. Completeness is a query, not a print
   statement. duckdb ships in the verify extra, so a base install still runs
   jobs and the receipt says `status: unavailable` with the reason.
-- `saschi/web.py` + `saschi/web/static/` : the web workbench. `saschi serve`
+- [saschi/web.py](saschi/web.py) + [saschi/web/static/](saschi/web/static/) : the web workbench. `saschi serve`
   runs a standard-library HTTP server (no new runtime dependency) with a JSON
   API over the job path, a program shelf, a paste-and-run box, and an
   assistant pane that is environment-configured and off by default.
-- `saschi/showcase.py` : the showcase generator. `saschi showcase` renders a
+- [saschi/showcase.py](saschi/showcase.py) : the showcase generator. `saschi showcase` renders a
   job as a self-contained single-file HTML document with the checksummed
   receipt embedded.
-- `kb01/sas_semantics_reference.txt` : the semantics reference as plain
+- [kb01/sas_semantics_reference.txt](kb01/sas_semantics_reference.txt) : the semantics reference as plain
   text, for humans and for diffs.
-- `manifest.py` : pin a SAS corpus with content hashes and provenance.
-- `synth.py` : program-level synthesis across characterized construct
+- [manifest.py](manifest.py) : pin a SAS corpus with content hashes and provenance.
+- [synth.py](synth.py) : program-level synthesis across characterized construct
   families, seeded and deterministic. Runs cross-language and reference
   gates; the live-SAS capture stage is optional and license-gated.
-- `verify_all.py` : runs every fixture gate, emits a checksummed receipt JSON.
+- [verify_all.py](verify_all.py) : runs every fixture gate, emits a checksummed receipt JSON.
   One command, the whole proof.
-- `tools/macro_census.py` : token census of the macro surface across the
+- [tools/macro_census.py](tools/macro_census.py) : token census of the macro surface across the
   licensed public testbed, deterministic, pure stdlib. Outputs the
-  frequency table in `docs/macro_surface_census.md` plus a CSV.
-- `docs/macro_surface_census.md` : the macro-surface frequency table with
+  frequency table in [docs/macro_surface_census.md](docs/macro_surface_census.md) plus a CSV.
+- [docs/macro_surface_census.md](docs/macro_surface_census.md) : the macro-surface frequency table with
   method and NOTICE (which public repos were counted, under which
   licenses). Data about code, never code itself.
-- `AGENTS.md` : the agent contract under the Inertia-Drift-Framework, the
+- [AGENTS.md](AGENTS.md) : the agent contract under the Inertia-Drift-Framework, the
   buntas-tofu principal GLOBAL plus this project's LOCAL layer.
-- `agent-manifest.json` : machine-readable project descriptor, validated
+- [agent-manifest.json](agent-manifest.json) : machine-readable project descriptor, validated
   against the bundled schema in CI.
-- `scripts/inertia-drift-lint` : the DMF invariant linter (fences, pointers,
+- [scripts/inertia-drift-lint](scripts/inertia-drift-lint) : the DMF invariant linter (fences, pointers,
   manifest shape, status lines, style floor). Runs in CI on every push.
 
 ## Running the gates
@@ -106,7 +120,7 @@ python verify_all.py
 
 Each verifier also runs standalone, e.g. `python examples/verify_merge.py`.
 The R interpreter is found via `ROSETTA_RSCRIPT`, then `Rscript` on PATH.
-`verify_all.py` writes its receipts under `telemetry/` (gitignored).
+[verify_all.py](verify_all.py) writes its receipts under `telemetry/` (gitignored).
 
 ## Known landmines (why the gate exists)
 
@@ -117,20 +131,20 @@ The R interpreter is found via `ROSETTA_RSCRIPT`, then `Rscript` on PATH.
   12 through SAS's right-justified BEST12 conversion. Source and result hashes
   are checked without copying corpus code. See the [stateful contract](docs/STATEFUL_EXECUTION.md)
   for the 64-column, numeric-format, expression, and diagnostic-log boundaries
-  (`examples/verify_put_all.py`, `saschi.test_put_all`).
+  ([examples/verify_put_all.py](examples/verify_put_all.py), [saschi.test_put_all](saschi/test_put_all.py)).
 
 - MOD takes its nonzero result's sign from the dividend. Python `%` and R `%%`
   take the divisor's sign instead. DS-013 now gates exact integer MOD within
   binary64 magnitudes of 2**53; missing, nonfinite, fractional, oversized, and
   zero-divisor inputs require review. Fractional SAS fuzzing and log diagnostics
-  remain unmodeled, and INT remains unwired (`examples/verify_mod.py`).
+  remain unmodeled, and INT remains unwired ([examples/verify_mod.py](examples/verify_mod.py)).
 - Quoted-literal PUT inserts no separating blank. Spaces inside literals remain
   significant; doubled quotes decode once, and a bare quote pair writes one
   quote. Each statement produces one logical log record. The gated slice is
   printable ASCII up to 64 columns, without FILE, pointer controls, or
   double-quoted macro triggers. Python execution and a base-R
-  witness are covered, not a live-SAS log capture (`examples/verify_put.py`,
-  `saschi.test_put`, DS-023).
+  witness are covered, not a live-SAS log capture ([examples/verify_put.py](examples/verify_put.py),
+  [saschi.test_put](saschi/test_put.py), DS-023).
 - Character-variable list PUT removes both leading and trailing blanks, then
   advances one blank after each value. Literals add no separator: with
   `c='  A  '`, `put '[' c ']';` records `[A ]`. DS-024 gates ordinary
@@ -141,8 +155,8 @@ The R interpreter is found via `ROSETTA_RSCRIPT`, then `Rscript` on PATH.
   refused; source whitespace is required. Programs using DS-024 also refuse
   double-quoted source macro triggers anywhere, including earlier DATA steps.
   These are logical-record contracts,
-  not physical SAS log equivalence (`examples/verify_put_list.py`,
-  `saschi.test_put_list`).
+  not physical SAS log equivalence ([examples/verify_put_list.py](examples/verify_put_list.py),
+  [saschi.test_put_list](saschi/test_put_list.py)).
 - Numeric-variable list PUT has its own DS-027 slice. Preceding numeric
   declarations or statically numeric assignments enable simple lists such as
   `n=7; m=.; put n m;`, with logical record `7 . `. Ordinary missing and finite
@@ -152,29 +166,29 @@ The R interpreter is found via `ROSETTA_RSCRIPT`, then `Rscript` on PATH.
   attached formats, and descriptor-only numeric SET variables require review.
   Descriptor checks also run on empty or filtered inputs. These are bounded
   repository and independent base-R records, without a live SAS log capture
-  (`examples/verify_put_numeric.py`, `saschi.test_put_numeric`). The composed
+  ([examples/verify_put_numeric.py](examples/verify_put_numeric.py), [saschi.test_put_numeric](saschi/test_put_numeric.py)). The composed
   counted-DO program also passes source/stdout/complete-result hash pins and an
-  independent R program witness (`saschi.test_do_put`).
+  independent R program witness ([saschi.test_do_put](saschi/test_do_put.py)).
 - COUNT preserves trailing blanks by default. I ignores case, T trims both
   arguments, and overlapping matches are undefined in SAS. The bounded ASCII
   Python/R slice rejects overlap, empty needles, zero-length input strings,
   non-ASCII/NUL text, implicit conversions, and modifiers outside I/T rather
-  than inheriting Python's defaults (`examples/verify_count.py`, DS-022).
+  than inheriting Python's defaults ([examples/verify_count.py](examples/verify_count.py), DS-022).
 - Ordinary equality can accept true as 1, and string conversion can accept text
   "1.0" as numeric 1.0. Typed comparisons reject both; row/schema order and metadata
-  matter too (`saschi/test_compare.py`).
+  matter too ([saschi/test_compare.py](saschi/test_compare.py)).
 - Explicit OUTPUT disables automatic output even when its branch is skipped.
   WHERE runs before BY groups form; subsetting IF runs afterward. Input/retained
-  variables survive iterations while scratch variables reset (`verify_events.py`).
+  variables survive iterations while scratch variables reset ([verify_events.py](examples/verify_events.py)).
 - Character byte widths affect assignments. Losing leading zeros, missing tags,
-  labels, or format descriptors changes the typed result (`verify_metadata.py`).
+  labels, or format descriptors changes the typed result ([verify_metadata.py](examples/verify_metadata.py)).
 - LAG and DIF are queues, never column shifts. Each occurrence carries its own
   queue of depth n, and the queue advances where the CALL RUNS rather than
   where the row exists, so a conditional call returns the value at the previous
   EXECUTION. On values 10, 20, 30, 40 invoked only on rows two and four, SAS
   returns missing then 20 where the shift model returns 10 and 30. A missing
   argument is still an execution, which makes a skipped call and a call with a
-  missing argument different histories (`verify_lag.py`).
+  missing argument different histories ([verify_lag.py](examples/verify_lag.py)).
 
 - SAS `round(x, unit)` rounds half away from zero; Python and R round half
   to even by default. A naive translation disagrees with SAS at every
@@ -212,6 +226,98 @@ The R interpreter is found via `ROSETTA_RSCRIPT`, then `Rscript` on PATH.
   examples (product `[[50,21],[24,10],[101,42]]`, inverse
   `[[3,-2],[-7,5]]`) and never emits a bare star for a SAS product.
 
+## Bounded source execution
+
+DS-026 gates one counted DO level in a DATA step: `do i=1 to 5 by 2;`
+with signed integer literal controls, each magnitude at most 2**31-1, nonzero
+step, and at most 10000 iterations. These are implementation bounds. Direct
+assignments, existing PUT, OUTPUT and DS-031 bounded conditional actions may
+occur in the body; schema and OUTPUT
+suppression still apply at zero trips. The final index passes the stop, and
+`_N_` counts DATA iterations. Nested or conditional loops, computed controls,
+index writes, declarations or input operations inside the body, MERGE,
+DATA _NULL_ explicit OUTPUT, PUT _ALL_ combinations, and C++ are deferred.
+[examples/verify_do_counted.py](examples/verify_do_counted.py) and [saschi.test_do_counted](saschi/test_do_counted.py) provide original
+repository pins and an independent base-R witness, with no live SAS claim.
+
+
+Bounded character LENGTH name groups and REVERSE are gated under DS-028.
+REVERSE preserves fixed-width blanks and inherits its character argument width;
+nonempty printable ASCII up to 32767 bytes is the supported slice. Numeric
+coercion, zero-length source literals, Unicode and control characters remain
+review cases. DS-030 composition evidence permits multi-name LENGTH and REVERSE
+over stored SUBSTR values, with local checks on temporary consumers. The external reversal program passes source/stdout/complete-result
+hash pins, shared-job execution and an independent base-R program witness
+([examples/verify_length_reverse.py](examples/verify_length_reverse.py), [saschi.test_length_reverse](saschi/test_length_reverse.py)). Repository
+and cross-language evidence, no live SAS verification.
+
+DS-029 adds bounded printable-ASCII character `!!`/`||` concatenation and direct
+CATX assignment. Operator widths sum, blanks remain intact, and existing target
+widths retain assignment truncation. CATX trims item edge blanks, omits blank
+items, preserves delimiters and defaults a new target to200 bytes. Its result
+is bounded to200 bytes; destination overflow and temporary contexts are refused.
+The original R gate and translator suite pin these implementation bounds and
+an unmodified external whole-program hash proof ([examples/verify_concat_catx.py](examples/verify_concat_catx.py),
+[saschi.test_concat_catx](saschi/test_concat_catx.py)). Repository/R evidence, no live SAS claim.
+
+
+DS-030 composition gates replace the program-wide SUBSTR quarantine. Stored
+SUBSTR variables compose with LENGTH groups, REVERSE, concatenation and CATX.
+SUBSTR can also extract from fixed-width REVERSE/concatenation source expressions.
+CATX accepts checked SUBSTR items under a padding-insensitive inference, tested
+against raw and padded R models, with its existing 200-byte/capacity limits.
+Width-sensitive temporaries such as REVERSE(SUBSTR), SUBSTR concatenation operands
+and SUBSTR delimiters still require assigning the substring to a variable first.
+No SUBSTR temporary width or SAS error-state behavior is claimed.
+[examples/verify_substr_compositions.py](examples/verify_substr_compositions.py) and [saschi.test_substr_compositions](saschi/test_substr_compositions.py)
+provide complete runtime/R agreement, local refusal and atomic failure checks.
+Repository/base-R evidence for maintainer review, no live SAS claim.
+
+DS-030 repairs three-argument SUBSTR assignment widths: a new destination gets
+the first argument width; an earlier target keeps its own width. Checked execution
+accepts nonempty printable ASCII literals or known character variables, with
+positive integral numeric bounds inside the source. Invalid bounds, coercion,
+error-state behavior and unproven temporary consumers are refused. Static checks
+also cover empty input and skipped bodies. LENGTH/LENGTHN, direct comparisons
+and COUNT with a constant space-free needle are bounded padding-insensitive
+consumer inferences tested with raw and padded R models; temporary widths remain
+unclaimed. The original raw SUBSTR fixture remains extraction-only evidence.
+[examples/verify_substr.py](examples/verify_substr.py) and [saschi.test_substr](saschi/test_substr.py) cover destination descriptors,
+independent R cases, WHERE input widths, atomic refusals and local temporary-consumer checks.
+Repository/base-R evidence for maintainer review, no live SAS claim.
+
+DS-031 gates first-true IF THEN / ELSE IF / ELSE dispatch, at most32 conditions,
+with simple assignment,
+existing PUT and OUTPUT leaves, including bounded counted-DO bodies. Both branches
+participate in static schema discovery, source guards and explicit OUTPUT
+suppression; only the selected branch executes. Unreachable index writes,
+subsetting IF, nested/grouped DO, input/declarations and PUT_ALL in counted bodies
+and conditional ROUND remain refused. [examples/verify_do_if.py](examples/verify_do_if.py) and [saschi.test_do_if](saschi/test_do_if.py) provide original
+base-R branch evidence and an unmodified external FizzBuzz source/stdout/complete-
+result hash proof. Repository/base-R evidence for maintainer review, no live SAS.
+
+DS-032 gates unsigned32 BAND, BOR, BXOR, BNOT, BLSHIFT and BRSHIFT with finite
+integral operands0..4294967295 and shift counts0..31. Invalid/missing/coercion
+cases are refused atomically, including static checks on skipped or empty input.
+The independent R gate uses32-element bit vectors. The existing64-column PUT_ALL
+profile remains intact: the unmodified bitwise corpus reaches its67-column output
+refusal after its scalar PDV agrees with independent R. That refusal is evidence
+of the current boundary, not a successful whole-program execution proof.
+[examples/verify_bitwise.py](examples/verify_bitwise.py) and [saschi.test_bitwise](saschi/test_bitwise.py) provide repository/base-R
+evidence for maintainer review, without live SAS or C++ bitwise claims.
+
+DS-007 source execution now supports canonical LAG/DIF and depths1..100 as numeric
+direct assignment RHS calls, including selected IF/ELSE and counted-DO leaves.
+Each structural source occurrence has its own queue, advancing only on invocation
+and persisting across DATA rows/loop iterations. Ordinary missing advances it;
+BY boundaries and OUTPUT do not reset or call it. State resets for each step/run.
+Static type/context checks also cover skipped/empty input; invalid dynamic values
+and DIF overflow fail atomically. Unproven argument expressions, temporary/WHERE
+consumers, character/tagged values, PUT_ALL and C++ remain refused. The original
+raw gate is unchanged; [examples/verify_lag_execution.py](examples/verify_lag_execution.py) and
+[saschi.test_lag_execution](saschi/test_lag_execution.py) add independent base-R prior-invocation evidence for
+maintainer review, no live SAS claim.
+
 ## Origins
 
 This project is the open-source realization of a concept that predates it
@@ -219,7 +325,7 @@ by eight years: the Rosetta Wiki, an internal wiki of side-by-side
 SAS, R, and Python examples built to move statisticians off SAS. The
 concept and its worked-example pattern are documented in:
 
-> Rosetta Wiki 1.0 User Guide: Companion to Rosetta Wiki. Nelson Chung,
+> [Rosetta Wiki 1.0 User Guide: Companion to Rosetta Wiki](https://www.census.gov/library/working-papers/2018/adrm/rosetta-wiki.html). Nelson Chung,
 > Steve Clark, Philip Leclerc, Aref Dajani, Phyllis Singer. Research
 > Report Series (Disclosure Avoidance #2018-02), Center for Disclosure
 > Avoidance Research, U.S. Census Bureau. September 2018.
@@ -228,7 +334,7 @@ The lineage is conceptual only. Nothing in this repository is copied from
 that work; every implementation here is original, and the difference is
 the doctrine: the 2018 wiki compared examples against hand-pinned
 desired results by eye, while this repository demands executable
-byte-equal gates with receipts. One continuity check: the 2018 Fisher
+gates with explicit comparison policies and receipts. One continuity check: the 2018 Fisher
 worked example pinned a two-sided p-value of 0.1238 on its 2x2 fixture,
 and every engine pinned in this repository reproduces it exactly.
 
@@ -260,93 +366,3 @@ dashes and no ellipses in artifacts.
 ## License
 
 MIT. See [LICENSE](LICENSE).
-
-DS-026 gates one counted DO level in a DATA step: `do i=1 to 5 by 2;`
-with signed integer literal controls, each magnitude at most 2**31-1, nonzero
-step, and at most 10000 iterations. These are implementation bounds. Direct
-assignments, existing PUT, OUTPUT and DS-031 bounded conditional actions may
-occur in the body; schema and OUTPUT
-suppression still apply at zero trips. The final index passes the stop, and
-`_N_` counts DATA iterations. Nested or conditional loops, computed controls,
-index writes, declarations or input operations inside the body, MERGE,
-DATA _NULL_ explicit OUTPUT, PUT _ALL_ combinations, and C++ are deferred.
-`examples/verify_do_counted.py` and `saschi.test_do_counted` provide original
-repository pins and an independent base-R witness, with no live SAS claim.
-
-
-Bounded character LENGTH name groups and REVERSE are gated under DS-028.
-REVERSE preserves fixed-width blanks and inherits its character argument width;
-nonempty printable ASCII up to 32767 bytes is the supported slice. Numeric
-coercion, zero-length source literals, Unicode and control characters remain
-review cases. DS-030 composition evidence permits multi-name LENGTH and REVERSE
-over stored SUBSTR values, with local checks on temporary consumers. The external reversal program passes source/stdout/complete-result
-hash pins, shared-job execution and an independent base-R program witness
-(`examples/verify_length_reverse.py`, `saschi.test_length_reverse`). Repository
-and cross-language evidence, no live SAS verification.
-
-DS-029 adds bounded printable-ASCII character `!!`/`||` concatenation and direct
-CATX assignment. Operator widths sum, blanks remain intact, and existing target
-widths retain assignment truncation. CATX trims item edge blanks, omits blank
-items, preserves delimiters and defaults a new target to200 bytes. Its result
-is bounded to200 bytes; destination overflow and temporary contexts are refused.
-The original R gate and translator suite pin these implementation bounds and
-an unmodified external whole-program hash proof (`examples/verify_concat_catx.py`,
-`saschi.test_concat_catx`). Repository/R evidence, no live SAS claim.
-
-
-DS-030 composition gates replace the program-wide SUBSTR quarantine. Stored
-SUBSTR variables compose with LENGTH groups, REVERSE, concatenation and CATX.
-SUBSTR can also extract from fixed-width REVERSE/concatenation source expressions.
-CATX accepts checked SUBSTR items under a padding-insensitive inference, tested
-against raw and padded R models, with its existing 200-byte/capacity limits.
-Width-sensitive temporaries such as REVERSE(SUBSTR), SUBSTR concatenation operands
-and SUBSTR delimiters still require assigning the substring to a variable first.
-No SUBSTR temporary width or SAS error-state behavior is claimed.
-`examples/verify_substr_compositions.py` and `saschi.test_substr_compositions`
-provide complete runtime/R agreement, local refusal and atomic failure checks.
-Repository/base-R evidence for maintainer review, no live SAS claim.
-
-DS-030 repairs three-argument SUBSTR assignment widths: a new destination gets
-the first argument width; an earlier target keeps its own width. Checked execution
-accepts nonempty printable ASCII literals or known character variables, with
-positive integral numeric bounds inside the source. Invalid bounds, coercion,
-error-state behavior and unproven temporary consumers are refused. Static checks
-also cover empty input and skipped bodies. LENGTH/LENGTHN, direct comparisons
-and COUNT with a constant space-free needle are bounded padding-insensitive
-consumer inferences tested with raw and padded R models; temporary widths remain
-unclaimed. The original raw SUBSTR fixture remains extraction-only evidence.
-`examples/verify_substr.py` and `saschi.test_substr` cover destination descriptors,
-independent R cases, WHERE input widths, atomic refusals and local temporary-consumer checks.
-Repository/base-R evidence for maintainer review, no live SAS claim.
-
-DS-031 gates first-true IF THEN / ELSE IF / ELSE dispatch, at most32 conditions,
-with simple assignment,
-existing PUT and OUTPUT leaves, including bounded counted-DO bodies. Both branches
-participate in static schema discovery, source guards and explicit OUTPUT
-suppression; only the selected branch executes. Unreachable index writes,
-subsetting IF, nested/grouped DO, input/declarations and PUT_ALL in counted bodies
-and conditional ROUND remain refused. `examples/verify_do_if.py` and `saschi.test_do_if` provide original
-base-R branch evidence and an unmodified external FizzBuzz source/stdout/complete-
-result hash proof. Repository/base-R evidence for maintainer review, no live SAS.
-
-DS-032 gates unsigned32 BAND, BOR, BXOR, BNOT, BLSHIFT and BRSHIFT with finite
-integral operands0..4294967295 and shift counts0..31. Invalid/missing/coercion
-cases are refused atomically, including static checks on skipped or empty input.
-The independent R gate uses32-element bit vectors. The existing64-column PUT_ALL
-profile remains intact: the unmodified bitwise corpus reaches its67-column output
-refusal after its scalar PDV agrees with independent R. That refusal is evidence
-of the current boundary, not a successful whole-program execution proof.
-`examples/verify_bitwise.py` and `saschi.test_bitwise` provide repository/base-R
-evidence for maintainer review, without live SAS or C++ bitwise claims.
-
-DS-007 source execution now supports canonical LAG/DIF and depths1..100 as numeric
-direct assignment RHS calls, including selected IF/ELSE and counted-DO leaves.
-Each structural source occurrence has its own queue, advancing only on invocation
-and persisting across DATA rows/loop iterations. Ordinary missing advances it;
-BY boundaries and OUTPUT do not reset or call it. State resets for each step/run.
-Static type/context checks also cover skipped/empty input; invalid dynamic values
-and DIF overflow fail atomically. Unproven argument expressions, temporary/WHERE
-consumers, character/tagged values, PUT_ALL and C++ remain refused. The original
-raw gate is unchanged; `examples/verify_lag_execution.py` and
-`saschi.test_lag_execution` add independent base-R prior-invocation evidence for
-maintainer review, no live SAS claim.
