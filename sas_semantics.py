@@ -1843,6 +1843,8 @@ def sas_catx(delimiter, *items):
 
 # DS-030 checked executable SUBSTR. Raw extraction and destination descriptors
 # are distinct: the runtime assigns the first argument width to a new target.
+# Stored-value and padding-insensitive CATX compositions have their own R gate;
+# width-sensitive SUBSTR temporary consumers require an explicit stored value.
 def _sas_substr_text(value):
     if (not isinstance(value, str) or not 1 <= len(value) <= 32767 or
             any(not 32 <= ord(char) <= 126 for char in value)):

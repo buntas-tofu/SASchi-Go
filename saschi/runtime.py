@@ -5,7 +5,7 @@ import re
 from collections import Counter
 from copy import deepcopy
 from sas_semantics import sas_round, sas_merge_by, sas_put_literals, sas_put_character_list, sas_put_numeric_list, sas_put_all, sas_do_counted, sas_concat
-from .functions import apply as apply_function, assign_spec, character_width, validate_reverse_calls, validate_string_expressions, expression_nodes, function_call_lines, validate_substr_calls, substr_context_errors
+from .functions import apply as apply_function, assign_spec, character_width, validate_reverse_calls, validate_string_expressions, expression_nodes, validate_substr_calls, substr_context_errors
 from .operations import walk_operations as operations
 from .values import normalize_catalog, column_type, coerce, missing, order
 
@@ -130,13 +130,6 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
         raise ValueError('unsupported plan version')
     if plan['tickets'] and not allow_partial:
         raise RuntimeError('saschi: blocked translation. Nothing from this program was executed.')
-    new_length_group = any(isinstance(item, (list, tuple)) and item and item[0] == 'length-list'
-                           for item in plan.get('matched', []))
-    new_strings = any(node.get('kind') == 'concat' or
-                      node.get('kind') == 'call' and node.get('name') in ('catx', 'reverse')
-                      for node, _ in expression_nodes(plan))
-    if function_call_lines(plan, 'substr') and (new_strings or new_length_group):
-        raise ValueError('new string features are quarantined from actual SUBSTR calls pending separate temporary-width and composition evidence')
     tables, logs = normalize_catalog({} if catalog is None else catalog), []
     for step in plan['steps']:
         inputs, keys, ops = step['inputs'], step['by'], step['operations']

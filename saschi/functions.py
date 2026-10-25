@@ -21,6 +21,8 @@ Gate provenance, function by function:
 - `examples/verify_length_reverse.py`  REVERSE, fixed-width printable ASCII
   character reversal with descriptor-derived return length.
 - `examples/verify_concat_catx.py`  bounded character CATX and operator concatenation.
+- `examples/verify_substr_compositions.py`  stored-value/fixed-source combinations
+  and padding-insensitive checked SUBSTR CATX items, with local temporary refusals.
 - `examples/verify_substr.py`  checked ASCII SUBSTR bounds and source-derived
   DATA-step destination widths; the raw extraction fixture above is unchanged.
 - `examples/verify_mod.py`  MOD, dividend-signed remainder for bounded exact
@@ -178,12 +180,22 @@ def apply(name: str, values: list):
     raise ValueError(f"unwired function: {name}")
 
 
+def catx_arguments_allowed(expr):
+    """CATX trims SUBSTR item padding; delimiter padding remains significant."""
+    args = expr.get('args')
+    if not isinstance(args, list) or not 2 <= len(args) <= 33 or any(not isinstance(arg, dict) for arg in args):
+        return False
+    return (args[0].get('kind') in ('character', 'variable') and
+            all(arg.get('kind') in ('character', 'variable') or
+                arg.get('kind') == 'call' and arg.get('name') == 'substr' for arg in args[1:]))
+
+
 def character_width(expr, schema=None) -> int | None:
     """Declared width of a character-returning call, or None when not derivable.
 
     Widths come from static descriptors rather than current row values. The
     SUBSTR branch derives new destination width from its first argument.
-    Temporary widths remain unclaimed; new string compositions stay quarantined.
+    SUBSTR temporary widths remain unclaimed; local consumer checks apply.
     """
     kind = expr.get('kind')
     if kind == 'character':
@@ -214,8 +226,8 @@ def character_width(expr, schema=None) -> int | None:
             raise ValueError('REVERSE requires a known character argument width, 1..32767')
         return width
     if name == 'catx':
-        if not 2 <= len(expr['args']) <= 33 or any(arg['kind'] not in ('character', 'variable') for arg in expr['args']):
-            raise ValueError('CATX direct assignment requires literal or variable character arguments')
+        if not catx_arguments_allowed(expr):
+            raise ValueError('CATX requires literal/variable delimiter and literal/variable or checked SUBSTR items')
         if any(character_width(arg, schema) is None for arg in expr['args']):
             raise ValueError('CATX requires statically known character arguments')
         return 200
@@ -228,7 +240,11 @@ def character_width(expr, schema=None) -> int | None:
             spec = (schema or {}).get(source['value'])
             if isinstance(spec, dict) and spec.get('type') == 'character':
                 return spec['length']
-        raise ValueError('SUBSTR source requires a known character literal or variable width')
+        if source.get('kind') == 'concat' or source.get('kind') == 'call' and source.get('name') == 'reverse':
+            width = character_width(source, schema)
+            if width is not None:
+                return width
+        raise ValueError('SUBSTR source requires a known fixed-width character literal, variable, REVERSE or concatenation expression')
     if name == "put":
         fmt = expr["args"][1]
         if not isinstance(fmt, dict) or fmt.get("kind") != "format":
@@ -351,7 +367,7 @@ def substr_context_errors(value, context='other'):
             if name == 'substr' and context not in ('assignment', 'padding-insensitive'):
                 yield 'SUBSTR temporary consumer requires width review; store the result in a variable first'
             for index, arg in enumerate(args):
-                safe = name in ('length', 'lengthn')
+                safe = name in ('length', 'lengthn') or name == 'catx' and index > 0
                 if name == 'count' and index == 0 and len(args) >= 2:
                     needle = args[1]
                     safe = (needle.get('kind') == 'character' and bool(needle.get('value')) and

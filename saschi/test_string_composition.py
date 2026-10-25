@@ -8,6 +8,8 @@ import unittest
 
 from .emit_py import translate
 from .job import build_job
+from .plan import compile_plan
+from .runtime import run_plan
 
 
 def execute(source):
@@ -87,7 +89,7 @@ class StringCompositionTests(unittest.TestCase):
                 self.assertIsNone(job.result)
 
 
-    def test_substr_quarantine_covers_all_new_entry_points_and_steps(self):
+    def test_substr_cooccurrence_is_gated_by_each_expression(self):
         sources = (
             "data d; length a b $5; a=substr('ABCDE',2,3); run;",
             "data prior; x=substr('ABCDE',2,3); run; data d; r=reverse('AB'); run;",
@@ -95,18 +97,21 @@ class StringCompositionTests(unittest.TestCase):
             "data d; do i=2 to 1; x=substr('ABCDE',2,3); end; c=catx('|','A','B'); run;",
             "data d; set raw; where substr(a,1,1)='A'; r=reverse(a); run;",
         )
-        for source in sources:
+        pins=[('d','a','BCD  '),('prior','x','BCD  '),('prior','x',3.),
+              ('d','x',' '*5),('d','r','   BA')]
+        inputs={'raw':{'schema':{'a':{'type':'character','length':5}},'rows':[{'a':'AB'}]}}
+        for source,(dataset,column,value) in zip(sources,pins):
             with self.subTest(source=source):
-                job = build_job(source)
-                self.assertEqual(job.code, 2)
-                self.assertIsNone(job.result)
-                self.assertIn('substr', str(job.receipt['tickets']).lower())
+                plan=compile_plan(source)
+                self.assertFalse(plan.blocked,plan.tickets)
+                result=run_plan(plan.to_dict(),inputs)
+                self.assertEqual(result['datasets'][dataset]['rows'][0][column],value)
 
-    def test_quarantine_does_not_treat_literal_text_as_a_function_call(self):
+    def test_function_text_remains_literal(self):
         job = build_job("data d; a='substr(x,1,2)'; b=reverse(a); c=a!!b; run;")
         self.assertEqual(job.code, 0)
         self.assertTrue(job.receipt['accepted'])
-        # Legacy-only source keeps its recorded path pending the separate repair.
+        # The original standalone source retains its corrected descriptor.
         legacy = build_job("data d; length a $5; a='ABCDE'; x=substr(a,2,3); run;")
         self.assertEqual(legacy.code, 0)
         self.assertTrue(legacy.receipt['accepted'])

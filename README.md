@@ -277,9 +277,8 @@ Bounded character LENGTH name groups and REVERSE are gated under DS-028.
 REVERSE preserves fixed-width blanks and inherits its character argument width;
 nonempty printable ASCII up to 32767 bytes is the supported slice. Numeric
 coercion, zero-length source literals, Unicode and control characters remain
-review cases. Programs combining actual SUBSTR calls with REVERSE or new
-multi-name LENGTH declarations are quarantined pending separate temporary-width and composition evidence. Function-shaped string text and legacy single-name programs retain their
-existing paths. The external reversal program passes source/stdout/complete-result
+review cases. DS-030 composition evidence permits multi-name LENGTH and REVERSE
+over stored SUBSTR values, with local checks on temporary consumers. The external reversal program passes source/stdout/complete-result
 hash pins, shared-job execution and an independent base-R program witness
 (`examples/verify_length_reverse.py`, `saschi.test_length_reverse`). Repository
 and cross-language evidence, no live SAS verification.
@@ -294,11 +293,17 @@ an unmodified external whole-program hash proof (`examples/verify_concat_catx.py
 `saschi.test_concat_catx`). Repository/R evidence, no live SAS claim.
 
 
-Principal quarantine: any program using new DS-029 concatenation/CATX together
-with an actual SUBSTR call is refused across all steps and expression contexts,
-including prior, unreachable, WHERE and intermediate-value dependencies. Literal
-SUBSTR text does not trigger it. DS-030 repairs direct SUBSTR destination widths separately; the quarantine remains
-until temporary-width and composition behavior has its own evidence.
+DS-030 composition gates replace the program-wide SUBSTR quarantine. Stored
+SUBSTR variables compose with LENGTH groups, REVERSE, concatenation and CATX.
+SUBSTR can also extract from fixed-width REVERSE/concatenation source expressions.
+CATX accepts checked SUBSTR items under a padding-insensitive inference, tested
+against raw and padded R models, with its existing 200-byte/capacity limits.
+Width-sensitive temporaries such as REVERSE(SUBSTR), SUBSTR concatenation operands
+and SUBSTR delimiters still require assigning the substring to a variable first.
+No SUBSTR temporary width or SAS error-state behavior is claimed.
+`examples/verify_substr_compositions.py` and `saschi.test_substr_compositions`
+provide complete runtime/R agreement, local refusal and atomic failure checks.
+Repository/base-R evidence for maintainer review, no live SAS claim.
 
 DS-030 repairs three-argument SUBSTR assignment widths: a new destination gets
 the first argument width; an earlier target keeps its own width. Checked execution
@@ -310,5 +315,5 @@ and COUNT with a constant space-free needle are bounded padding-insensitive
 consumer inferences tested with raw and padded R models; temporary widths remain
 unclaimed. The original raw SUBSTR fixture remains extraction-only evidence.
 `examples/verify_substr.py` and `saschi.test_substr` cover destination descriptors,
-independent R cases, WHERE input widths, atomic refusals and retained quarantine.
+independent R cases, WHERE input widths, atomic refusals and local temporary-consumer checks.
 Repository/base-R evidence for maintainer review, no live SAS claim.

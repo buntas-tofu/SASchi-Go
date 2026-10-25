@@ -146,8 +146,8 @@ class ConcatCatxTests(unittest.TestCase):
             self.assertEqual(job.code, 0)
             self.assertEqual(len(job.result['datasets']['d']['rows']), len(rows))
 
-    def test_new_strings_quarantine_actual_substr_calls_program_wide(self):
-        for source in (
+    def test_substr_global_quarantine_is_replaced_by_local_context_checks(self):
+        sources = (
                 "data prior; x=substr('abcd',2,1); run; data d; c='a'||'b'; run;",
                 "data d; c=catx(' ','a'); run; data later; x=substr('abcd',2,1); run;",
                 "data d; if 0 then x=substr('abcd',2,1); c='a'||'b'; run;",
@@ -155,25 +155,38 @@ class ConcatCatxTests(unittest.TestCase):
                 "data d; x=substr('abcd',2,1); y=x; c=catx(' ',y); run;",
                 "data d; c=substr('abc',2,5)||'Z'; run;",
                 "data d; c=substr('a!!b',1,4)||'x'; run;",
-                "data d; c=length(substr('abc',2,1)||'x'); run;"):
+                "data d; c=length(substr('abc',2,1)||'x'); run;")
+        inputs={'raw':{'schema':{'a':{'type':'character','length':4}},'rows':[{'a':'AB'}]}}
+        pins=[('prior','x','b   '),('d','c','a'.ljust(200)),('d','x',' '*4),
+              ('d','c','ab'),('d','c','b'.ljust(200))]
+        for index,source in enumerate(sources):
             with self.subTest(source=source):
-                job = build_job(source)
-                self.assertEqual(job.code, 2)
-                self.assertIsNone(job.result)
-                self.assertIn('quarantined', str(job.receipt['tickets']))
+                plan=compile_plan(source)
+                if index < len(pins):
+                    self.assertFalse(plan.blocked,plan.tickets)
+                    result=run_plan(plan.to_dict(),inputs)
+                    dataset,column,value=pins[index]
+                    self.assertEqual(result['datasets'][dataset]['rows'][0][column],value)
+                else:
+                    self.assertTrue(plan.blocked)
+                    self.assertIn('SUBSTR temporary',str(plan.tickets))
+                    with self.assertRaisesRegex(ValueError,'SUBSTR temporary'):
+                        run_plan(plan.to_dict(),inputs,allow_partial=True)
         result,_ = execute('''data d; c='a'||'b'; note="substr('abc',2,5)"; run;''')
         self.assertEqual(result['datasets']['d']['rows'][0]['c'], 'ab')
-        # The separate repair has not changed the pre-existing function path.
+        # The original standalone path retains its corrected DS-030 descriptor.
         self.assertFalse(compile_plan("data d; x=substr('abcd',2,1); run;").blocked)
 
-    def test_handwritten_plan_cannot_bypass_substr_quarantine(self):
+    def test_handwritten_plan_checks_actual_substr_consumers(self):
         plan = compile_plan("data d; x=substr('abc',2,1); run;").to_dict()
         plan['matched'] = []
         plan['steps'][0]['operations'].append({'kind': 'assign', 'line': 1, 'args': {
             'name': 'c', 'value': {'kind': 'concat', 'args': [
                 {'kind': 'character', 'value': 'a'}, {'kind': 'character', 'value': 'b'}]}}})
-        with self.assertRaisesRegex(ValueError, 'quarantined'):
-            run_plan(plan)
+        self.assertEqual(run_plan(plan)['datasets']['d']['rows'],[{'x':'b  ','c':'ab'}])
+        plan['steps'][0]['operations'][-1]['args']['value']['args'][0] = plan['steps'][0]['operations'][0]['args']['value']
+        with self.assertRaisesRegex(ValueError, 'SUBSTR temporary'):
+            run_plan(plan,allow_partial=True)
 
     def test_where_uses_input_width_before_pdv_length_changes(self):
         for width in (1, 4):
