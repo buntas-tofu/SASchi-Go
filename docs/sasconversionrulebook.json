@@ -1792,7 +1792,7 @@
         "The extraction length does not determine the default destination width. Old raw extraction-only fixtures do not prove PDV widths or SAS diagnostics.",
         "Overrun, zero/negative and fractional bounds cannot silently become error-free slices."
       ],
-      "validation_test": "examples/verify_substr.py and saschi.test_substr: original pins, generated independent R cases, source-order descriptors, skipped validation, input-side WHERE, atomic refusal and retained quarantine. examples/verify_substr_compositions.py and saschi.test_substr_compositions: complete runtime/R compositions, local refusal, source/PDV widths, skipped validation and atomic failures.",
+      "validation_test": "examples/verify_substr.py and saschi.test_substr: original pins, generated independent R cases, source-order descriptors, skipped validation, input-side WHERE, atomic refusal and local temporary-consumer checks. examples/verify_substr_compositions.py and saschi.test_substr_compositions: complete runtime/R compositions, local refusal, source/PDV widths, skipped validation and atomic failures.",
       "confidence": "bounded repository/base-R evidence, no live SAS",
       "sources": [
         "https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/n0n08xougp40i5n1xw7njpcy0a2b.htm",

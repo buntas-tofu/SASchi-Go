@@ -1,4 +1,4 @@
-# Stateful execution and typed comparison, 0.3.0
+# Stateful execution and typed comparison, 0.4.0
 
 Status: executable development contracts, original pins, and Python/base-R
 witnesses. No live SAS capture. Maintainers may use these results to review the
@@ -362,16 +362,13 @@ is included. The primary references are the [Base SAS LENGTH statement](https://
 and [REVERSE function](https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/n0r87nwd0lt2rzn1h348larywe0r.htm).
 
 
-The principal selected a bounded quarantine for the pre-existing SUBSTR width
-conflict. Programs containing an actual SUBSTR call anywhere are refused when
-they also use REVERSE or a new multi-name LENGTH group. The scan covers prior
-steps, unused values, skipped bodies and WHERE expressions, and ignores text
-inside string literals. A distinct `length-list` matched marker records group
-provenance; ordinary declare operations cannot recover that grammar fact.
-Runtime refusal remains in force when partial execution is requested. Existing
-single-name/standalone SUBSTR paths and their old gates remain unchanged as
-repository compatibility evidence pending a separate repair. Those old width
-pins are not promoted into new SAS equivalence claims here.
+DS-030 repairs SUBSTR destination descriptors and replaces the earlier global
+quarantine with local consumer checks. Multi-name LENGTH and REVERSE over stored
+SUBSTR variables are accepted. The temporary expression REVERSE(SUBSTR(...))
+still requires storing the substring first; its temporary width is unclaimed.
+The `length-list` matched marker records declaration grammar provenance without
+adding a program-wide SUBSTR restriction. Local checks also apply to handwritten
+plans and partial execution.
 
 ## Bounded character concatenation and CATX
 
@@ -384,8 +381,8 @@ in total. Arithmetic mixed into a chain is deferred rather than given guessed
 precedence. Quoted operator text and operators inside function arguments remain
 lexically separate from top-level chains.
 
-CATX uses the existing call form with1..32 literal/variable character items and
-a character delimiter. It trims ASCII spaces from item edges, skips blank items,
+CATX uses the existing call form with1..32 literal/variable character items or
+direct checked SUBSTR items, and a literal/variable character delimiter. It trims ASCII spaces from item edges, skips blank items,
 and preserves the delimiter. A new target is200 bytes. This slice admits direct
 assignment RHS calls, including IF THEN assignments, with at most200 result
 bytes. Actual target overflow is refused before assignment, preserving atomic
@@ -407,20 +404,58 @@ is shipped. Primary documentary sources: [SAS operators](https://support.sas.com
 and [CATX](https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/n0p7wxtk0hvn83n1pveisbcp2ae9.htm).
 
 
-Principal quarantine: any program using new DS-029 concatenation/CATX together
-with an actual SUBSTR call is refused across all steps and expression contexts,
-including prior, unreachable, WHERE and intermediate-value dependencies. Literal
-SUBSTR text does not trigger it. The legacy SUBSTR width contract will be repaired
-separately; its existing gates and programs are unchanged by this feature lane.
+## Checked SUBSTR destinations and sources
 
+Status: DS-030 repository/base-R evidence for maintainer review, no live SAS.
+Three-argument SUBSTR accepts a nonempty printable ASCII character literal,
+known character variable, or fixed-width REVERSE/concatenation source expression.
+A new target inherits the first argument descriptor width. An existing target
+keeps its own width and ordinary assignment truncation/padding. For example,
+`x=substr('ABCDE',2,3)` stores `BCD` followed by two spaces in a five-byte target.
+Raw extraction and destination storage are distinct contracts.
+
+Position and length are finite positive integral numeric values, within the
+source width and the implementation bound32767. Literal invalid bounds and
+wrong expression types are refused even on empty/filtered input and skipped
+bodies; dynamic bounds are checked when evaluated. WHERE validates against the
+driving input descriptors before output PDV overrides. Invalid/error-state
+behavior, implicit coercion, two-argument calls, Unicode/control values and
+unproven temporary sources remain refused. The raw `sas_substr` helper and its
+old fixture pins are extraction-only evidence, without destination/error-state
+coverage; executable translation uses `sas_substr_checked`.
+
+Evidence: `examples/verify_substr.py`, `examples/substr.R` and
+`saschi.test_substr`. The semantics source and plain-text mirror stay identical.
+The existing unmodified substring program retains source/stdout/complete-result
+hashes, shared-job execution and its independent R program witness. Primary
+reference: [Base SAS SUBSTR](https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/n0n08xougp40i5n1xw7njpcy0a2b.htm).
 
 ## String-feature composition
 
-Repository and independent R evidence for maintainer review, not live SAS:
-`saschi.test_string_composition` verifies descriptor-based REVERSE/concatenation
-composition, first-target width retained across direct CATX, DO/OUTPUT state,
-input-side WHERE widths and atomic later capacity failure. Programs mixing any
-new string entry point with actual SUBSTR remain quarantined by the principal's
-scope ruling; literal text is ignored and the legacy-only path is retained for
-separate repair. The two new external program proofs and three earlier proofs
-remain registered, without copying external source or output text into the tree.
+Status: repository and independent R evidence for maintainer review, no live SAS.
+The earlier program-wide SUBSTR quarantine is removed. Stored SUBSTR variables
+compose with grouped LENGTH, REVERSE, concatenation and CATX, including copied
+variables, input descriptors and cross-step SET. SUBSTR can extract from the
+fixed-width REVERSE/concatenation source expressions described above.
+
+CATX accepts direct checked SUBSTR items because trimming either a raw extraction
+or its source-width-padded model gives the same item. This is a bounded
+padding-insensitive inference, checked independently in R, not a claim about
+SUBSTR temporary storage width. CATX retains direct-assignment syntax,
+literal/variable delimiters and all result/destination-capacity limits.
+
+Width-sensitive temporary consumers remain local refusals: REVERSE(SUBSTR),
+SUBSTR concatenation operands or CATX delimiters, nested SUBSTR sources and
+LENGTHC(SUBSTR). Store the substring in a variable before those consumers.
+Existing padding-insensitive LENGTH/LENGTHN, direct comparisons and COUNT with
+a constant nonempty space-free needle retain their bounded contracts. Source
+macro/ASCII guards, C++ limits and atomic error-state refusals remain in force.
+No ticket-metadata removal or partial-plan mode bypasses the local checks.
+
+Evidence: `examples/verify_substr_compositions.py`, its original base-R twin
+`examples/substr_compositions.R`, and `saschi.test_substr_compositions`, alongside
+`saschi.test_string_composition`. The tests cover exact stored widths/values,
+CATX raw/padded agreement, input-side WHERE, empty/filtered input, skipped bodies,
+local refusals and late failures that publish no earlier records. All five
+unmodified external whole-program proofs remain registered, without copying
+external source or derived output text into this repository.

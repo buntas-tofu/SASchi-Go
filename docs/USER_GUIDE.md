@@ -29,7 +29,7 @@ evidence; the gate suite is the proof; nothing is verified by assertion.
   a Python verifier (`verify_*.py`), an R twin (`*.R`), and in most cases
   fixture data embedded in the verifier.
 - `docs/sasconversionrulebook.json` : the machine-consumable translation
-  rulebook. 59 rules across data-step (DS), PROC SQL (SQL), statistical
+  rulebook. 65 rules across data-step (DS), PROC SQL (SQL), statistical
   procs (ST), survey procs (SV), the macro layer (MC), and the IML
   matrix surface (MX), each with an
   equivalence class (EXACT, EQUIVALENT-WITH-SETTINGS, APPROXIMATE,
@@ -52,14 +52,17 @@ evidence; the gate suite is the proof; nothing is verified by assertion.
 - `saschi/` : the program-level translator package (Track A). `parser.py`
   is the fence-robust statement splitter, `rules.py` loads the rulebook
   and routes SAS statements and function calls to rule families, and
-  `emit_py.py` emits Python for the data-step subset (slice one: the
-  rounding fixture). Tests in `saschi/test_parser.py`,
-  `saschi/test_rules.py`, and `saschi/test_emit_py.py`.
+  the shared plan drives bounded typed DATA-step execution in Python and the
+  C++ scalar pilot. Tests include `saschi/test_parser.py`,
+  `saschi/test_rules.py`, `saschi/test_emit_py.py`, and the registered operation
+  and composition suites.
 - `verify_all.py` : runs every fixture gate, emits a checksummed receipt JSON.
   This includes the offline installed-wheel gate and bounded PUT _ALL_ records.
   With the pinned Roku corpus present, the translator suite also executes
-  `string_length.sas` and `substring.sas` against pinned result hashes and an
-  independent base-R witness. See the [stateful contract](STATEFUL_EXECUTION.md).
+  `string_length.sas`, `substring.sas`,
+  `loops_for_with_a_specified_step.sas`, `reverse_a_string.sas`, and
+  `string_concatenation.sas` against source/stdout/complete-result hashes, shared
+  job execution and independent base-R witnesses. See the [stateful contract](STATEFUL_EXECUTION.md).
   One command, the whole proof.
 - `telemetry/` : run artifacts (receipts, run records). Gitignored;
   rerun `verify_all.py` to regenerate.
@@ -67,8 +70,11 @@ evidence; the gate suite is the proof; nothing is verified by assertion.
 ## Operational additions
 
 [Operations](OPERATIONS.md) is the current installation and execution guide for
-version 0.2. It specifies the shared plan, Python numeric dataset workflow, C++
-scalar pilot, and schema-version-2 verification receipts. The historical fixture
+version 0.4.0. It specifies the shared plan, Python typed DATA-step workflow,
+C++ scalar pilot, isolated installed-wheel smoke check and schema-version-2
+verification receipts. The [stateful contract](STATEFUL_EXECUTION.md) describes
+checked SUBSTR descriptors and supported string compositions, including the
+remaining local temporary-width refusals. The historical fixture
 reference below describes the original interfaces.
 
 ## Requirements
