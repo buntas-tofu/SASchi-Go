@@ -3,7 +3,7 @@ from __future__ import annotations
 import math
 from collections import Counter
 from copy import deepcopy
-from sas_semantics import sas_round, sas_merge_by
+from sas_semantics import sas_round, sas_merge_by, sas_put_literals
 from .functions import apply as apply_function, assign_spec
 from .values import normalize_catalog, column_type, coerce, missing, order
 
@@ -194,6 +194,8 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                 schema.setdefault(args['name'], spec)
                 for value in expressions(args):
                     add_reference(value)
+            elif kind == 'put_literal':
+                sas_put_literals(args['literals'])
             elif kind == 'put':
                 for name in args['names']:
                     if name != '_n_':
@@ -255,6 +257,8 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                     return condition(args['condition'], row)
                 elif kind == 'output':
                     snapshot()
+                elif kind == 'put_literal':
+                    logs.append(sas_put_literals(args['literals']))
                 elif kind == 'put':
                     def render(v):
                         if v is None: return '.'

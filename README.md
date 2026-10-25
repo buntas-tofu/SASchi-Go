@@ -38,7 +38,7 @@ fixed expected output and base-R evidence. Special missings retain their tags.
   sibling plus a fixture verifier (`verify_*.py`). Run any verifier directly,
   or all of them through `verify_all.py`.
 - `docs/sasconversionrulebook.json` : the machine-consumable translation
-  rulebook. 57 rules with equivalence classes (EXACT,
+  rulebook. 58 rules with equivalence classes (EXACT,
   EQUIVALENT-WITH-SETTINGS, APPROXIMATE, NO-DIRECT-EQUIVALENT), required
   settings, forbidden patterns, and validation tests.
 - `docs/capability-manifest.json` : the coverage manifest. Every entry of the
@@ -107,6 +107,13 @@ The R interpreter is found via `ROSETTA_RSCRIPT`, then `Rscript` on PATH.
 
 ## Known landmines (why the gate exists)
 
+- Quoted-literal PUT inserts no separating blank. Spaces inside literals remain
+  significant; doubled quotes decode once, and a bare quote pair writes one
+  quote. Each statement produces one logical log record. The gated slice is
+  printable ASCII up to 64 columns, without FILE, pointer controls, mixed
+  variable items, or double-quoted macro triggers. Python execution and a base-R
+  witness are covered, not a live-SAS log capture (`examples/verify_put.py`,
+  `saschi.test_put`, DS-023).
 - COUNT preserves trailing blanks by default. I ignores case, T trims both
   arguments, and overlapping matches are undefined in SAS. The bounded ASCII
   Python/R slice rejects overlap, empty needles, zero-length input strings,

@@ -77,17 +77,18 @@
   "measured_at": {
    "stmt": "b6d4579",
    "dso": "e5ca315"
-  }
+  },
+  "put_update": "DS-023 and the put-literal/suite-put gates update PUT and PUT List; other entries retain their recorded assessment."
  },
  "rollup": {
   "stmt": {
    "universe": 108,
-   "assessed": 31,
-   "gated": 21,
-   "rule": 7,
+   "assessed": 32,
+   "gated": 23,
+   "rule": 6,
    "human_review": 1,
    "out_of_scope": 2,
-   "unassessed": 77
+   "unassessed": 76
   },
   "dso": {
    "universe": 40,
@@ -1100,13 +1101,16 @@
    "category": "CAS",
    "type": "Executable",
    "valid_in": "DATA step",
-   "disposition": "RULE",
+   "disposition": "GATED",
    "rule_ids": [
-    "DS-015"
+    "DS-023"
    ],
-   "gates": [],
+   "gates": [
+    "put-literal",
+    "suite-put"
+   ],
    "reference_page": 265,
-   "note": "emitter handles the named-list form; other forms not assessed"
+   "note": "Bounded quoted-literal log records only: printable ASCII, at most 64 columns, spacing and quote decoding. Other list forms, FILE, pointers, macros, and C++ require review. Named-list output has a separate entry."
   },
   {
    "entry": "PUT Statement: Column",
@@ -1136,10 +1140,16 @@
    "category": "CAS",
    "type": "Executable",
    "valid_in": "DATA step",
-   "disposition": "UNASSESSED",
-   "rule_ids": [],
-   "gates": [],
-   "reference_page": 296
+   "disposition": "GATED",
+   "rule_ids": [
+    "DS-023"
+   ],
+   "gates": [
+    "put-literal",
+    "suite-put"
+   ],
+   "reference_page": 296,
+   "note": "Bounded quoted-literal log records only: printable ASCII, at most 64 columns, spacing and quote decoding. Other list forms, FILE, pointers, macros, and C++ require review. Named-list output has a separate entry."
   },
   {
    "entry": "PUT Statement: Named",
