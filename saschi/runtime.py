@@ -5,29 +5,36 @@ import re
 from collections import Counter
 from copy import deepcopy
 from sas_semantics import sas_round, sas_merge_by, sas_put_literals, sas_put_character_list, sas_put_numeric_list, sas_put_all, sas_do_counted
-from .functions import apply as apply_function, assign_spec
+from .functions import apply as apply_function, assign_spec, character_width, validate_reverse_calls, function_call_lines
 from .operations import walk_operations as operations
 from .values import normalize_catalog, column_type, coerce, missing, order
 
 
-def evaluate(expr, row):
-    """Value of one wired function call."""
-    return apply_function(expr['name'], [argument(arg, row) for arg in expr['args']])
+def evaluate(expr, row, schema=None):
+    """Value of one wired function call with optional static descriptors."""
+    values = [argument(arg, row, schema) for arg in expr['args']]
+    if expr['name'] == 'reverse':
+        width = character_width(expr['args'][0], schema)
+        if isinstance(values[0], str):
+            if len(values[0]) > width:
+                raise ValueError('REVERSE argument exceeds its declared width')
+            values[0] = values[0].ljust(width)
+    return apply_function(expr['name'], values)
 
 
-def argument(expr, row):
+def argument(expr, row, schema=None):
     """One call argument: a format token passes through, everything else is a value."""
-    return expr if expr['kind'] == 'format' else number(expr, row)
+    return expr if expr['kind'] == 'format' else number(expr, row, schema)
 
 
-def number(expr, row):
+def number(expr, row, schema=None):
     kind = expr['kind']
     if kind in ('variable', 'automatic'):
         return row.get(expr['value'])
     if kind == 'call':
-        return evaluate(expr, row)
+        return evaluate(expr, row, schema)
     if kind == 'arithmetic':
-        left, right = number(expr['left'], row), number(expr['right'], row)
+        left, right = number(expr['left'], row, schema), number(expr['right'], row, schema)
         if isinstance(left, str) or isinstance(right, str):
             raise ValueError('implicit character to numeric conversion is unsupported')
         if missing(left) or missing(right):
@@ -49,14 +56,14 @@ def round_value(value, unit):
         return None
 
 
-def condition(expr, row):
-    left = number(expr['left'], row)
+def condition(expr, row, schema=None):
+    left = number(expr['left'], row, schema)
     op = expr['op']
     if op == 'truth':
         if isinstance(left, str):
             raise ValueError('numeric truth predicate required')
         return not missing(left) and left != 0
-    right = number(expr['right'], row)
+    right = number(expr['right'], row, schema)
     if isinstance(left, str) != isinstance(right, str):
         raise ValueError('implicit comparison conversion is unsupported')
     if isinstance(left, str):
@@ -114,6 +121,10 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
         raise ValueError('unsupported plan version')
     if plan['tickets'] and not allow_partial:
         raise RuntimeError('saschi: blocked translation. Nothing from this program was executed.')
+    new_length_group = any(isinstance(item, (list, tuple)) and item and item[0] == 'length-list'
+                           for item in plan.get('matched', []))
+    if function_call_lines(plan, 'substr') and (function_call_lines(plan, 'reverse') or new_length_group):
+        raise ValueError('DS-028 SUBSTR composition is quarantined pending separate legacy width repair')
     tables, logs = normalize_catalog({} if catalog is None else catalog), []
     for step in plan['steps']:
         inputs, keys, ops = step['inputs'], step['by'], step['operations']
@@ -181,7 +192,9 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                 raise ValueError('WHERE requires one driving SET')
             if any(e['kind'] == 'automatic' or e['value'] not in tables[inputs[0]]['schema'] for e in expressions(where)):
                 raise ValueError('WHERE can reference only driving input columns')
-            rows = [r for r in rows if condition(where, r)]
+            where_schema = tables[inputs[0]]['schema']
+            validate_reverse_calls(where, where_schema)
+            rows = [r for r in rows if condition(where, r, where_schema)]
         if keys and any(key(a) > key(b) for a, b in zip(rows, rows[1:])):
             raise ValueError('SET BY requires ascending sorted rows after WHERE')
         retained = step.get('retained', {})
@@ -228,7 +241,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                     origin = schema.get(expr['value'], 'number')
                     spec = {'type': 'character', 'length': origin['length']} if column_type(origin) == 'character' else 'number'
                 else:
-                    spec = (assign_spec(expr) if kind == 'assign' else None) or 'number'
+                    spec = (assign_spec(expr, schema) if kind == 'assign' else None) or 'number'
                 if args['name'] in schema and column_type(schema[args['name']]) != column_type(spec):
                     raise ValueError('implicit assignment type conversion is unsupported')
                 schema.setdefault(args['name'], spec)
@@ -288,6 +301,8 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                     raise ValueError('OUTPUT target must be the declared DATA destination')
             else:
                 raise ValueError(f'unsupported operation: {kind}')
+        for op in flat:
+            validate_reverse_calls(op['args'], schema)
         # Descriptors must be checked even for empty SET inputs or filtered
         # rows. Formats change PUT output and cannot silently be discarded.
         for op in flat:
@@ -358,10 +373,10 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
             def perform(op):
                 args, kind = op['args'], op['kind']
                 if kind == 'assign':
-                    value = put_all_value(args['value'], row) if put_all else number(args['value'], row)
+                    value = put_all_value(args['value'], row) if put_all else number(args['value'], row, schema)
                     row[args['name']] = coerce(value, schema[args['name']], encoding)
                 elif kind == 'round':
-                    row[args['name']] = round_value(number(args['value'], row), number(args['unit'], row))
+                    row[args['name']] = round_value(number(args['value'], row, schema), number(args['unit'], row, schema))
                 elif kind == 'do_counted':
                     values, final = sas_do_counted(args['start'], args['stop'], args['by'])
                     for value in values:
@@ -370,10 +385,10 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                             perform(child)
                     row[args['index']] = float(final)
                 elif kind == 'if':
-                    if condition(args['condition'], row):
+                    if condition(args['condition'], row, schema):
                         return perform(args['operation'])
                 elif kind == 'subset':
-                    return condition(args['condition'], row)
+                    return condition(args['condition'], row, schema)
                 elif kind == 'output':
                     snapshot()
                 elif kind == 'put_literal':

@@ -330,3 +330,45 @@ and all operation allowlists remain separate from this read-only analysis.
 `saschi.test_plan` pins traversal order, payload preservation, malformed-body
 refusal, and skipped-body output-target diagnostics. Existing DO/PUT suites and
 whole-program witnesses retain the execution contract.
+
+
+## Character LENGTH lists and REVERSE
+
+Status: DS-028 bounded repository and independent base-R evidence for maintainer
+review, not live SAS. A single character LENGTH name group emits ordinary
+`declare` operations in source order. Names must be unique ordinary ASCII
+identifiers, width 1..32767, before SET and computations. Multiple width groups,
+numeric lengths, variable ranges and declarations inside DO remain deferred.
+
+`REVERSE` reverses all bytes of a nonempty printable ASCII value, including
+leading and trailing blanks. Its new destination has the argument descriptor
+width; an earlier destination keeps its own fixed width and assignment rules.
+WHERE calls use the driving input descriptor before DATA-step LENGTH overrides
+and PDV coercion. Static discovery uses `character_width(expr, schema=None)` and
+`assign_spec(expr, schema=None)`, retaining existing one-argument call support.
+Literal, copied and input character descriptors and supported REVERSE/PUT calls
+provide widths before row execution. Recursive REVERSE-call validation also
+runs for already-sized targets, nested numeric expressions, empty/filtered
+input and zero-trip bodies. Numeric/unresolved widths and unsupported source
+or value encodings fail atomically. Existing PUT refusals and C++ bounds stay
+in place.
+
+Original pins, generated cases and the raw-byte R witness are in
+`examples/verify_length_reverse.py` and `examples/length_reverse.R`.
+`saschi.test_length_reverse` reads the unmodified external reversal program in
+place and checks source, stdout and complete-result hashes, the shared job path
+and an independently parsed R program. No corpus source or derived output text
+is included. The primary references are the [Base SAS LENGTH statement](https://support.sas.com/documentation/cdl/en/lestmtsref/63323/HTML/default/p1hgqgmxm3dpqcn1d4w5za5qbz0d.htm)
+and [REVERSE function](https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/n0r87nwd0lt2rzn1h348larywe0r.htm).
+
+
+The principal selected a bounded quarantine for the pre-existing SUBSTR width
+conflict. Programs containing an actual SUBSTR call anywhere are refused when
+they also use REVERSE or a new multi-name LENGTH group. The scan covers prior
+steps, unused values, skipped bodies and WHERE expressions, and ignores text
+inside string literals. A distinct `length-list` matched marker records group
+provenance; ordinary declare operations cannot recover that grammar fact.
+Runtime refusal remains in force when partial execution is requested. Existing
+single-name/standalone SUBSTR paths and their old gates remain unchanged as
+repository compatibility evidence pending a separate repair. Those old width
+pins are not promoted into new SAS equivalence claims here.

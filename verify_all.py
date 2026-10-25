@@ -70,6 +70,7 @@ VERIFIERS = [
     ("put-all", HERE / "examples" / "verify_put_all.py"),
     ("do-counted", HERE / "examples" / "verify_do_counted.py"),
     ("put-numeric-list", HERE / "examples" / "verify_put_numeric.py"),
+    ("length-reverse", HERE / "examples" / "verify_length_reverse.py"),
 ]
 
 # The translator suites, run as unittest modules. They carry the same weight as
@@ -98,6 +99,7 @@ SUITES = [
     ("suite-do-counted", "saschi.test_do_counted"),
     ("suite-put-numeric", "saschi.test_put_numeric"),
     ("suite-do-put", "saschi.test_do_put"),
+    ("suite-length-reverse", "saschi.test_length_reverse"),
 ]
 
 

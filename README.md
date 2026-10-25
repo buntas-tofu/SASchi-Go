@@ -38,7 +38,7 @@ fixed expected output and base-R evidence. Special missings retain their tags.
   sibling plus a fixture verifier (`verify_*.py`). Run any verifier directly,
   or all of them through `verify_all.py`.
 - `docs/sasconversionrulebook.json` : the machine-consumable translation
-  rulebook. 62 rules with equivalence classes (EXACT,
+  rulebook. 63 rules with equivalence classes (EXACT,
   EQUIVALENT-WITH-SETTINGS, APPROXIMATE, NO-DIRECT-EQUIVALENT), required
   settings, forbidden patterns, and validation tests.
 - `docs/capability-manifest.json` : the coverage manifest. Every entry of the
@@ -271,3 +271,16 @@ index writes, declarations or input operations inside the body, MERGE,
 DATA _NULL_ explicit OUTPUT, PUT _ALL_ combinations, and C++ are deferred.
 `examples/verify_do_counted.py` and `saschi.test_do_counted` provide original
 repository pins and an independent base-R witness, with no live SAS claim.
+
+
+Bounded character LENGTH name groups and REVERSE are gated under DS-028.
+REVERSE preserves fixed-width blanks and inherits its character argument width;
+nonempty printable ASCII up to 32767 bytes is the supported slice. Numeric
+coercion, zero-length source literals, Unicode and control characters remain
+review cases. Programs combining actual SUBSTR calls with REVERSE or new
+multi-name LENGTH declarations are quarantined pending separate legacy width
+repair. Function-shaped string text and legacy single-name programs retain their
+existing paths. The external reversal program passes source/stdout/complete-result
+hash pins, shared-job execution and an independent base-R program witness
+(`examples/verify_length_reverse.py`, `saschi.test_length_reverse`). Repository
+and cross-language evidence, no live SAS verification.

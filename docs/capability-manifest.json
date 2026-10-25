@@ -80,7 +80,8 @@
   },
   "put_update": "DS-023/DS-024 and the put-literal/put-character-list/suite-put/suite-put-list gates update PUT and PUT List; other entries retain their recorded assessment.",
   "counted_do_update": "DS-026 adds bounded single-level counted DO and its END closure; do-counted and suite-do-counted gates. Existing broader array evidence remains recorded separately.",
-  "numeric_put_update": "DS-027 and put-numeric-list/suite-put-numeric add bounded source-order known numeric variable list output to PUT and PUT List. Existing numeric descriptor-only SET refusals remain."
+  "numeric_put_update": "DS-027 and put-numeric-list/suite-put-numeric add bounded source-order known numeric variable list output to PUT and PUT List. Existing numeric descriptor-only SET refusals remain.",
+  "length_reverse_update": "DS-028 adds bounded character LENGTH name groups and REVERSE; length-reverse and suite-length-reverse gates. The function slice does not add to this statement/procedure document universe. Programs with actual SUBSTR and either REVERSE or new multi-name LENGTH are quarantined pending separate legacy width repair."
  },
  "rollup": {
   "stmt": {
@@ -880,12 +881,16 @@
    "type": "Declarative",
    "valid_in": "DATA step",
    "disposition": "GATED",
-   "rule_ids": [],
+   "rule_ids": [
+    "DS-028"
+   ],
    "gates": [
-    "typed-metadata"
+    "typed-metadata",
+    "length-reverse",
+    "suite-length-reverse"
    ],
    "reference_page": 215,
-   "note": "character byte widths pinned in the typed-metadata family"
+   "note": "character byte widths pinned in the typed-metadata family DS-028 admits a single group of unique ordinary names before computations/input, width 1..32767, with ordered declaration operations; numeric lengths, grouped widths, ranges, duplicate/automatic names and body declarations remain deferred."
   },
   {
    "entry": "LIBNAME Statement",
