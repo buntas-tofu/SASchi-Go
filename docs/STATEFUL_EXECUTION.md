@@ -200,7 +200,7 @@ preservation; those use the typed catalog witnesses.
 
 ## Remaining boundaries
 
-Multiple DATA destinations, general conditional SET, DO/ELSE loops, sum
+Multiple DATA destinations, general conditional SET, nested/grouped DO, sum
 statements, LAG translation, macro execution, raw INPUT, format rendering, and
 linguistic sort orders still require review. Character BY key width changes are
 refused. MERGE retains its ordinary numeric, sorted, at-most-one-repeating-side
@@ -241,13 +241,14 @@ leaves the index at its first value past stop. A zero-trip loop leaves start.
 The index is an ordinary output column, while `_N_` counts DATA iterations.
 
 Direct assignments and existing direct PUT/OUTPUT operations compose inside
-the body. SET, WHERE, IF, and retention keep their existing outside-body paths.
+the body. DS-031 additionally admits bounded IF/ELSE simple actions there;
+SET, WHERE and retention keep their existing outside-body paths.
 SET may drive several DATA iterations; each counted loop reinitializes its
 index for that DATA iteration. Explicit OUTPUT anywhere in the step suppresses
 bottom-of-step output, including a skipped zero-trip body.
 
-Deferred cases include nested DO, WHILE/UNTIL, LEAVE/CONTINUE, conditional body
-statements, variable or computed controls, writes to the index inside the body,
+Deferred cases include nested/grouped DO, WHILE/UNTIL, LEAVE/CONTINUE, subsetting
+IF, variable or computed controls, writes to the index inside the body,
 declarations or input operations inside the body, MERGE with DO, explicit
 OUTPUT in DATA _NULL_ counted-DO steps, PUT _ALL_ combinations, and C++. These
 are translator boundaries, not a claim that SAS rejects those programs.
@@ -280,7 +281,7 @@ records are at most 64 columns.
 Source-order type knowledge is a conservative compiler boundary. Descriptor-only
 numeric SET variables, unknown variables, automatic variables, mixed numeric and
 literal/character items, numeric literals, formats, FILE, pointer controls,
-conditional PUT, fractions, nonfinite/nonnumeric values, and special missing
+fractions, nonfinite/nonnumeric values, and special missing
 output remain refused. Numeric declarations provide the shared interface for the
 separately gated counted-DO index. Source-order discovery includes body operations.
 
@@ -459,3 +460,25 @@ CATX raw/padded agreement, input-side WHERE, empty/filtered input, skipped bodie
 local refusals and late failures that publish no earlier records. All five
 unmodified external whole-program proofs remain registered, without copying
 external source or derived output text into this repository.
+
+## Bounded conditional actions
+
+Status: DS-031 repository/base-R evidence for maintainer review, no live SAS.
+IF THEN can dispatch a simple assignment, existing PUT or OUTPUT. An immediately
+following ELSE or ELSE IF becomes an optional `otherwise` child on the existing
+`if` operation. The first true branch executes; later conditions/actions are not
+evaluated. Chains are bounded to32 conditions. Existing numeric truth treats
+zero/missing as false. Conditional ROUND operations remain deferred.
+
+These actions are also permitted inside the existing literal counted DO. Both
+branches are traversed statically in source order for schema, source guards and
+OUTPUT suppression, including zero-trip or empty-input cases. Counted-body
+validation recursively refuses index writes even in unreachable branches.
+Nested/grouped DO, subsetting IF, input/declarations, PUT_ALL and unsupported
+actions remain review cases, and the C++ pilot refuses this new surface.
+
+`examples/verify_do_if.py`, its original base-R twin and `saschi.test_do_if`
+verify scheduling, branch descriptors, source guards, atomic failure and the
+unmodified external FizzBuzz program through source/stdout/complete-result
+hashes, shared-job execution and independent R parsing. No external source or
+derived output text is shipped.

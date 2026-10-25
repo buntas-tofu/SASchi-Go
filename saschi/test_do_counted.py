@@ -163,12 +163,18 @@ class CountedDoTests(unittest.TestCase):
                 self.assertIsNone(job.result)
 
     def test_unsupported_bodies_refuse(self):
-        for body in ('I=5','i=round(3,1)','if 1 then i=3','if 1 then x=3','if 1',
+        for body in ('I=5','i=round(3,1)','if 1 then i=3','if 1',
                      'do j=1 to 2; x=1; end','do while(1); end','leave','continue',
                      'length x $3','retain x 0','set a','merge a b','where x=1','put _all_',
                      'output other','file log','input x'):
             with self.subTest(body=body):
                 self.assertTrue(compile_plan('data d; do i=1 to 2; '+body+'; end; run;').blocked)
+
+    def test_formerly_refused_conditional_body_is_now_verified(self):
+        # Preserve the exact old source as a value assertion under DS-031.
+        result,printed=execute('data d; do i=1 to 2; if 1 then x=3; end; run;')
+        self.assertEqual(result['datasets']['d']['rows'],[{'i':3.,'x':3.}])
+        self.assertEqual(printed,'')
 
     def test_unbalanced_groups_refuse(self):
         for tail in ('run;','quit;','data e; x=1; run;','proc sort data=a; by x; run;','proc print; run;',''):

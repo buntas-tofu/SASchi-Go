@@ -29,7 +29,7 @@ evidence; the gate suite is the proof; nothing is verified by assertion.
   a Python verifier (`verify_*.py`), an R twin (`*.R`), and in most cases
   fixture data embedded in the verifier.
 - `docs/sasconversionrulebook.json` : the machine-consumable translation
-  rulebook. 65 rules across data-step (DS), PROC SQL (SQL), statistical
+  rulebook. 66 rules across data-step (DS), PROC SQL (SQL), statistical
   procs (ST), survey procs (SV), the macro layer (MC), and the IML
   matrix surface (MX), each with an
   equivalence class (EXACT, EQUIVALENT-WITH-SETTINGS, APPROXIMATE,
@@ -60,8 +60,8 @@ evidence; the gate suite is the proof; nothing is verified by assertion.
   This includes the offline installed-wheel gate and bounded PUT _ALL_ records.
   With the pinned Roku corpus present, the translator suite also executes
   `string_length.sas`, `substring.sas`,
-  `loops_for_with_a_specified_step.sas`, `reverse_a_string.sas`, and
-  `string_concatenation.sas` against source/stdout/complete-result hashes, shared
+  `loops_for_with_a_specified_step.sas`, `reverse_a_string.sas`,
+  `string_concatenation.sas`, and `fizzbuzz.sas` against source/stdout/complete-result hashes, shared
   job execution and independent base-R witnesses. See the [stateful contract](STATEFUL_EXECUTION.md).
   One command, the whole proof.
 - `telemetry/` : run artifacts (receipts, run records). Gitignored;

@@ -166,12 +166,18 @@ class NumericListPutTests(unittest.TestCase):
     def test_file_formats_controls_literals_and_conditional_put_refuse(self):
         for statement in ('put n best12.', 'put n : best12.', 'put n ~ best12.', 'put n @',
                           'put n @@', 'put @4 n', 'put n /', 'put n +2', 'put (n)',
-                          'put n 7', 'put 7', 'put n*2', 'if 1 then put n', 'file log; put n'):
+                          'put n 7', 'put 7', 'put n*2', 'file log; put n'):
             job = build_job('data _null_; n=7; ' + statement + '; run;')
             self.assertEqual(job.code, 2, statement)
             self.assertIsNone(job.result)
         for name in ('_n_', '_error_', '_infile_', '_file_', '_ods_', '_page_', '_blankpage_', '_all_', '_numeric_', '_character_'):
             self.assertEqual(build_job('data _null_; ' + name + '=7; put ' + name + '; run;').code, 2)
+
+    def test_former_conditional_numeric_put_refusal_is_now_gated(self):
+        job=build_job('data _null_; n=7; if 1 then put n; run;')
+        self.assertEqual(job.code,0)
+        self.assertEqual(job.result['log'],['7 '])
+        self.assertEqual(job.result['datasets'],{})
 
     def test_forged_plan_arguments_are_validated_without_rows(self):
         for args in ({'names': None}, {'names': []}, {'names': 'n'}, {'names': [1]},
