@@ -47,6 +47,7 @@ class Step:
     where: dict | None = None
     retained: dict = field(default_factory=dict)
     lengths: dict = field(default_factory=dict)
+    display_names: dict = field(default_factory=dict)
 
 
 @dataclass
@@ -229,6 +230,12 @@ def compile_plan(source: str) -> Plan:
         plan.tickets.append(Ticket(st.line, st.text, construct, reason))
 
     def finish():
+        if step and any(o.kind == 'put_all' for o in step.operations):
+            if (step.kind != 'data' or step.inputs or step.by or step.retained or step.where or
+                    (step.name == '_null_' and any(o.kind == 'output' for o in step.operations)) or
+                    any(o.kind not in ('declare', 'assign', 'put_all', 'output') for o in step.operations)):
+                plan.tickets.append(Ticket(step.line, step.name, 'put-all',
+                    'PUT _ALL_ supports scalar declarations, safe assignments, and named-destination OUTPUT only; SET, BY, conditions, DATA _NULL_ OUTPUT, and other operations require review'))
         if step:
             def check(ops):
                 for op in ops:
@@ -254,7 +261,7 @@ def compile_plan(source: str) -> Plan:
         text = st.text
         # Quoted words are data, including names that resemble variable lists.
         unquoted = re.sub(r"'(?:[^']|'')*'|\"(?:[^\"]|\"\")*\"", ' ', text)
-        if re.search(r"\b(?:_ERROR_|_ALL_|_NUMERIC_|_CHARACTER_)\b", unquoted, re.I):
+        if re.search(r"\b(?:_ERROR_|_ALL_|_NUMERIC_|_CHARACTER_)\b", unquoted, re.I) and not re.fullmatch(r'put\s+_all_', text, re.I):
             reject(st, "automatic-variable", "automatic variables and variable lists are outside this slice")
             continue
         if not st.terminated:
@@ -324,6 +331,16 @@ def compile_plan(source: str) -> Plan:
         if context != "data":
             reject(st, construct, "unsupported procedure clause")
             continue
+        # Only variable occurrences establish spelling; skip statement heads
+        # and function names. PUT _ALL_ uses these names without normalizing case.
+        spelling_text = unquoted
+        if not re.match(NAME + r'\s*=', spelling_text):
+            spelling_text = re.sub(r'^\s*' + NAME, '', spelling_text, count=1)
+        spelling_text = re.sub(r'(?<![\w.])(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?(?!\w)', ' ', spelling_text)
+        spelling_text = re.sub(r'\.[A-Za-z_]\b', ' ', spelling_text)
+        for word in re.finditer(NAME, spelling_text):
+            if not spelling_text[word.end():].lstrip().startswith('('):
+                step.display_names.setdefault(word[0].lower(), word[0])
         if re.match(r'^where\b', text, re.I):
             condition = predicate(re.sub(r'^where\s*', '', text, flags=re.I))
             if not condition or step.where or step.kind == 'merge':
@@ -398,6 +415,10 @@ def compile_plan(source: str) -> Plan:
             reject(st, family if family != "unknown" else "assignment", "unsupported expression")
             continue
         if re.match(r"^put\b", text, re.I):
+            if re.fullmatch(r'put\s+_all_', text, re.I):
+                step.operations.append(Operation('put_all', st.line, {}))
+                plan.matched.append(('put-all', 'DS-025', st.line))
+                continue
             items = st.tokens[1:]
             if items and all(item.kind == Kind.STRING for item in items):
                 literals = [item.text for item in items]
@@ -458,11 +479,15 @@ def compile_plan(source: str) -> Plan:
         family, _ = route_function(text)
         reject(st, family if family != "unknown" else construct, "no operation for this statement")
     finish()
-    if any(op.kind == 'put_character_list' for compiled in plan.steps for op in compiled.operations):
+    if any(op.kind in ('put_character_list', 'put_all') for compiled in plan.steps for op in compiled.operations):
         # Macros resolve before DATA execution. Without taint tracking, even
         # unused or prior-step literals can affect this output contract.
         for st in statements:
             if any(token.kind == Kind.STRING and token.text.startswith('"') and
                    any(char in token.text for char in '&%') for token in st.tokens):
-                reject(st, 'put', 'character-list PUT requires macro-free source: double-quoted & or % anywhere in the program requires macro review')
+                reject(st, 'put', 'bounded PUT requires macro-free source: double-quoted & or % anywhere in the program requires macro review')
+    if any(op.kind == 'put_all' for compiled in plan.steps for op in compiled.operations):
+        for st in statements:
+            if any(token.kind == Kind.STRING and any(not 32 <= ord(c) <= 126 for c in token.text) for token in st.tokens):
+                reject(st, 'put-all', 'PUT _ALL_ requires printable ASCII source character values')
     return plan

@@ -65,6 +65,10 @@ class CharacterFunctionTests(unittest.TestCase):
                   "e=lengthc('abc  '); run;")
         self.assertEqual((row["a"], row["b"], row["c"], row["e"]), (3.0, 1.0, 0.0, 5.0))
 
+    def test_numeric_length_family_uses_right_justified_best12(self):
+        row = one('data d; a=length(uninitialized); b=lengthn(.A); c=lengthc(3.125); run;')
+        self.assertEqual(row, {'a': 12., 'uninitialized': None, 'b': 12., 'c': 12.})
+
     def test_put_numeric_format_is_gate_backed(self):
         row = one("data d; x=put(1.5,8.2); run;")
         self.assertEqual(row["x"], "1.50".rjust(8))

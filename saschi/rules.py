@@ -152,6 +152,7 @@ CONSTRUCT_MAP: dict[str, str] = {
     "count": "DS-022",
     "put-literal": "DS-023",
     "put-character-list": "DS-024",
+    "put-all": "DS-025",
     "arrays": "DS-016",
     "formats": "DS-010",
     "by-group": "DS-006",
@@ -275,6 +276,8 @@ def route_statement(statement: str, context: str | None = None) -> tuple[str, st
             return "sql-into", CONSTRUCT_MAP["sql-into"]
         return "sql-general", CONSTRUCT_MAP["sql-general"]
     if re.match(r'^\s*put\b', statement, re.I):
+        if re.fullmatch(r'\s*put\s+_all_\s*;?\s*', statement, re.I):
+            return 'put-all', CONSTRUCT_MAP['put-all']
         try:
             items = tokenize(statement.strip().removesuffix(';'))[1:]
         except ParseError:

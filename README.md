@@ -38,7 +38,7 @@ fixed expected output and base-R evidence. Special missings retain their tags.
   sibling plus a fixture verifier (`verify_*.py`). Run any verifier directly,
   or all of them through `verify_all.py`.
 - `docs/sasconversionrulebook.json` : the machine-consumable translation
-  rulebook. 59 rules with equivalence classes (EXACT,
+  rulebook. 60 rules with equivalence classes (EXACT,
   EQUIVALENT-WITH-SETTINGS, APPROXIMATE, NO-DIRECT-EQUIVALENT), required
   settings, forbidden patterns, and validation tests.
 - `docs/capability-manifest.json` : the coverage manifest. Every entry of the
@@ -109,6 +109,15 @@ The R interpreter is found via `ROSETTA_RSCRIPT`, then `Rscript` on PATH.
 `verify_all.py` writes its receipts under `telemetry/` (gitignored).
 
 ## Known landmines (why the gate exists)
+
+- PUT _ALL_ writes the complete ordered PDV, including uninitialized numeric
+  references and the automatic variables. DS-025 gates a bounded scalar slice
+  with original pins, independent base-R records, and execution of two
+  hash-pinned external Roku programs. Numeric LENGTH-family arguments return
+  12 through SAS's right-justified BEST12 conversion. Source and result hashes
+  are checked without copying corpus code. See the [stateful contract](docs/STATEFUL_EXECUTION.md)
+  for the 64-column, numeric-format, expression, and diagnostic-log boundaries
+  (`examples/verify_put_all.py`, `saschi.test_put_all`).
 
 - MOD takes its nonzero result's sign from the dividend. Python `%` and R `%%`
   take the divisor's sign instead. DS-013 now gates exact integer MOD within

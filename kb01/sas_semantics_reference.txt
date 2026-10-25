@@ -178,6 +178,26 @@ def sas_lengthc(x):
     return len(str(x))
 
 
+def sas_numeric_length(x):
+    """Typed numeric LENGTH/LENGTHN/LENGTHC: right-justified BEST12 gives 12.
+
+    Character missing remains the older functions' None convention. The typed
+    executor uses this entry for numeric missing, including uninitialized PDV
+    references. SAS diagnostic notes are outside the logical PUT record.
+    """
+    if x is None or (isinstance(x, dict) and set(x) == {'missing'} and
+                     isinstance(x['missing'], str) and x['missing'] in ('_', *'ABCDEFGHIJKLMNOPQRSTUVWXYZ')):
+        return 12
+    if isinstance(x, bool) or not isinstance(x, (int, float)):
+        raise ValueError('numeric LENGTH requires a numeric or missing value')
+    try:
+        if math.isfinite(x):
+            return 12
+    except OverflowError:
+        pass
+    raise ValueError('numeric LENGTH requires a finite binary64 value')
+
+
 # ---------------------------------------------------------------------------
 # SUBSTR is 1-based. SAS SUBSTR(s, pos, len) starts at position pos where 1 is
 # the first character, and returns len characters (or to the end if len is
@@ -268,6 +288,50 @@ def sas_put_character_list(items):
     record = ''.join(parts)
     if len(record) > 64:
         raise ValueError('PUT character list: output beyond 64 columns requires LINESIZE review')
+    return record
+
+
+def sas_put_all(fields):
+    """DS-025 scalar named PDV output, followed by _ERROR_=0 and _N_=1.
+
+    Fields carry original names in compile order. Ordinary numeric missing is
+    a period. Whole numbers whose signed decimal fits BEST12 are supported;
+    fractions, special missings, formats, and blank character fields are not.
+    The final separator is retained, as in DS-024. No physical SAS log claim.
+    """
+    if not isinstance(fields, (list, tuple)):
+        raise ValueError('PUT _ALL_: ordered fields required')
+    parts, names = [], set()
+    for item in fields:
+        if not isinstance(item, dict) or set(item) != {'name', 'kind', 'value'}:
+            raise ValueError('PUT _ALL_: name, kind, and value required')
+        name, kind, value = item['name'], item['kind'], item['value']
+        if (not isinstance(name, str) or not re.fullmatch(r'[A-Za-z_][A-Za-z0-9_]{0,31}', name)
+                or name.lower() in names or name.lower() in
+                ('_n_', '_error_', '_all_', '_numeric_', '_character_', '_infile_', '_file_', '_ods_', '_page_', '_blankpage_')):
+            raise ValueError('PUT _ALL_: unique ordinary V7 names required')
+        names.add(name.lower())
+        if kind == 'character':
+            if not isinstance(value, str) or any(not 32 <= ord(c) <= 126 for c in value):
+                raise ValueError('PUT _ALL_: printable ASCII character values required')
+            text = value.strip(' ')
+            if not text:
+                raise ValueError('PUT _ALL_: blank character fields require review')
+        elif kind == 'number':
+            if value is None:
+                text = '.'
+            else:
+                if isinstance(value, bool) or not isinstance(value, (int, float)):
+                    raise ValueError('PUT _ALL_: ordinary numeric values required')
+                if abs(value) > 99999999999 or not math.isfinite(value) or value != int(value):
+                    raise ValueError('PUT _ALL_: whole numbers within the signed BEST12 slice required')
+                text = str(int(value))
+        else:
+            raise ValueError('PUT _ALL_: unsupported field kind')
+        parts.append(name + '=' + text + ' ')
+    record = ''.join(parts) + '_ERROR_=0 _N_=1 '
+    if len(record) > 64:
+        raise ValueError('PUT _ALL_: output beyond 64 columns requires LINESIZE review')
     return record
 
 

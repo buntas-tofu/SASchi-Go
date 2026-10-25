@@ -56,6 +56,10 @@ evidence; the gate suite is the proof; nothing is verified by assertion.
   rounding fixture). Tests in `saschi/test_parser.py`,
   `saschi/test_rules.py`, and `saschi/test_emit_py.py`.
 - `verify_all.py` : runs every fixture gate, emits a checksummed receipt JSON.
+  This includes the offline installed-wheel gate and bounded PUT _ALL_ records.
+  With the pinned Roku corpus present, the translator suite also executes
+  `string_length.sas` and `substring.sas` against pinned result hashes and an
+  independent base-R witness. See the [stateful contract](STATEFUL_EXECUTION.md).
   One command, the whole proof.
 - `telemetry/` : run artifacts (receipts, run records). Gitignored;
   rerun `verify_all.py` to regenerate.
