@@ -224,3 +224,42 @@ the separate session.
 - [SAS PUT and _ALL_](https://support.sas.com/documentation/cdl/en/lestmtsref/63323/HTML/default/n1spe7nmkmi7ywn175002rof97fv.htm)
 - [SAS named PUT](https://support.sas.com/documentation/cdl/en/lestmtsref/63323/HTML/default/n177esg96c9hkgn10bforsq2886s.htm)
 - [SAS numeric LENGTH conversion](https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/n0f6jve4kdxnh1n1m7c82fhosgih.htm)
+
+## Bounded counted DO
+
+DS-026 admits a single-level `DO index=start TO stop [BY step];` group in a
+DATA step. Controls are signed ASCII integer literals, with magnitude at most
+2**31-1, and a nonzero step that defaults to one. The loop is rejected before
+execution when its trip count exceeds 10000. These limits bound the runtime;
+they do not state SAS language limits.
+
+The plan emits an ordinary numeric declaration immediately before a
+`do_counted` operation. Its arguments are `index`, `start`, `stop`, `by`, and a
+serialized `body` operation list. Static schema discovery and OUTPUT detection
+recurse into the body even when its trip count is zero. Normal completion
+leaves the index at its first value past stop. A zero-trip loop leaves start.
+The index is an ordinary output column, while `_N_` counts DATA iterations.
+
+Direct assignments and existing direct PUT/OUTPUT operations compose inside
+the body. SET, WHERE, IF, and retention keep their existing outside-body paths.
+SET may drive several DATA iterations; each counted loop reinitializes its
+index for that DATA iteration. Explicit OUTPUT anywhere in the step suppresses
+bottom-of-step output, including a skipped zero-trip body.
+
+Deferred cases include nested DO, WHILE/UNTIL, LEAVE/CONTINUE, conditional body
+statements, variable or computed controls, writes to the index inside the body,
+declarations or input operations inside the body, MERGE with DO, explicit
+OUTPUT in DATA _NULL_ counted-DO steps, PUT _ALL_ combinations, and C++. These
+are translator boundaries, not a claim that SAS rejects those programs.
+
+Evidence: `examples/verify_do_counted.py`, original `examples/do_counted.R`, and
+`saschi.test_do_counted` pin controls, final index, PDV order, zero-trip schema,
+OUTPUT suppression, `_N_`, and SET composition. This is repository and
+cross-language evidence for maintainer review, without live SAS verification.
+The documented control rules come from the primary
+[Base SAS iterative DO statement](https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000201276.htm),
+[SAS OnlineTutor](https://www2.sas.com/onlinetutor/linklib/doloop.htm), and
+[Base SAS DATA-step execution](https://support.sas.com/documentation/cdl/en/lrcon/65287/HTML/default/n0fjj14wij8q3jn1qpsq5770xhs2.htm).
+Inference: the zero-trip and final-index pins follow from initializing the
+index to start and checking the control after each increment. The R witness
+models that control explicitly rather than relying on R for-loop final state.

@@ -1,9 +1,10 @@
 """Execute bounded DATA events with typed catalogs; version 1 plans remain readable."""
 from __future__ import annotations
 import math
+import re
 from collections import Counter
 from copy import deepcopy
-from sas_semantics import sas_round, sas_merge_by, sas_put_literals, sas_put_character_list, sas_put_all
+from sas_semantics import sas_round, sas_merge_by, sas_put_literals, sas_put_character_list, sas_put_all, sas_do_counted
 from .functions import apply as apply_function, assign_spec
 from .values import normalize_catalog, column_type, coerce, missing, order
 
@@ -86,6 +87,11 @@ def operations(ops):
         yield op
         if op['kind'] == 'if':
             yield from operations([op['args']['operation']])
+        elif op['kind'] == 'do_counted':
+            body = op['args'].get('body')
+            if not isinstance(body, list):
+                raise ValueError('counted DO body must be a list')
+            yield from operations(body)
 
 
 def put_all_value(expr, row):
@@ -123,6 +129,9 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
     for step in plan['steps']:
         inputs, keys, ops = step['inputs'], step['by'], step['operations']
         flat = list(operations(ops))
+        if (step['name'] == '_null_' and any(op['kind'] == 'do_counted' for op in flat)
+                and any(op['kind'] == 'output' for op in flat)):
+            raise ValueError('explicit OUTPUT in DATA _NULL_ counted DO steps is deferred')
         put_all = any(op['kind'] == 'put_all' for op in flat)
         if put_all and (step['kind'] != 'data' or inputs or keys or step.get('retained') or step.get('where') or
                         (step['name'] == '_null_' and any(op['kind'] == 'output' for op in flat)) or
@@ -232,6 +241,24 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                 schema.setdefault(args['name'], spec)
                 for value in expressions(args):
                     add_reference(value)
+            elif kind == 'do_counted':
+                if set(args) != {'index', 'start', 'stop', 'by', 'body'}:
+                    raise ValueError('counted DO has unexpected plan arguments')
+                name = args['index']
+                if (not isinstance(name, str) or not re.fullmatch(r'[a-z_][a-z0-9_]{0,31}', name)
+                        or name in ('_n_', '_error_', '_infile_', '_file_', '_ods_', '_page_', '_blankpage_')
+                        or step['kind'] != 'data'):
+                    raise ValueError('counted DO requires a numeric DATA-step index')
+                sas_do_counted(args['start'], args['stop'], args['by'])
+                if name not in schema or column_type(schema[name]) != 'number':
+                    raise ValueError('counted DO index requires a preceding numeric declaration')
+                allowed = {'assign', 'round', 'put', 'put_literal', 'put_character_list', 'output'}
+                for child in args['body']:
+                    if (child['kind'] not in allowed or
+                            child['kind'] in ('assign', 'round') and child['args']['name'] == name):
+                        raise ValueError('counted DO body operation is outside the bounded contract')
+                    if child['kind'] == 'output' and step['name'] == '_null_':
+                        raise ValueError('explicit OUTPUT in DATA _NULL_ counted DO is deferred')
             elif kind == 'put_literal':
                 sas_put_literals(args['literals'])
             elif kind == 'put_all':
@@ -327,6 +354,13 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                     row[args['name']] = coerce(value, schema[args['name']], encoding)
                 elif kind == 'round':
                     row[args['name']] = round_value(number(args['value'], row), number(args['unit'], row))
+                elif kind == 'do_counted':
+                    values, final = sas_do_counted(args['start'], args['stop'], args['by'])
+                    for value in values:
+                        row[args['index']] = float(value)
+                        for child in args['body']:
+                            perform(child)
+                    row[args['index']] = float(final)
                 elif kind == 'if':
                     if condition(args['condition'], row):
                         return perform(args['operation'])

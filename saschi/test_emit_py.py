@@ -91,7 +91,7 @@ class BlockedProgramTests(unittest.TestCase):
 
     UNSUPPORTED = {
         "if/do": "data _null_; x=1; if 0 then do; x=2; end; put x=; run;",
-        "loop": "data _null_; do i=1 to 3; x=i; end; run;",
+        "loop": "data _null_; do i=1 to stop; x=i; end; run;",
         "macro definition": "%macro m; %mend;",
         "input declaration": "data d; infile 'x'; input a b; run;",
     }
