@@ -78,7 +78,11 @@ program_records <- function(path) {
     if (!length(m)) stop('statement outside independent corpus witness')
     expr <- parse(m[3])
     kind <- if (expr$kind == 'character' || (expr$kind == 'call' && expr$name == 'substr')) 'character' else 'number'
-    width <- if (expr$kind == 'character') max(1L, nchar(expr$value)) else if (kind == 'character') expr$width else 0L
+    width <- if (expr$kind == 'character') max(1L, nchar(expr$value)) else if (kind == 'character') {
+      if (expr$arg$kind == 'character') nchar(expr$arg$value, type='bytes')
+      else if (expr$arg$kind == 'variable' && types[[tolower(expr$arg$value)]] == 'character') widths[[tolower(expr$arg$value)]]
+      else stop('SUBSTR requires an established character source descriptor')
+    } else 0L
     register(m[2], kind, width)
     ref <- if (expr$kind == 'call') expr$arg else expr
     if (ref$kind == 'variable') register(ref$value, 'number')

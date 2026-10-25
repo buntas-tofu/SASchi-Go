@@ -31,6 +31,7 @@ LEN_PINS = [("abc", 3, 3, 3), ("abc  ", 3, 3, 5), ("   ", 1, 0, 3),
 # MAX/MIN hand-pins: (values, MAX, MIN)
 AGG_PINS = [((3, 7, 2), 7, 2), ((3, None, 7), 7, 3), ((None, None), None, None),
             ((5,), 5, 5), ((-1, None, -9), -1, -9)]
+# Raw extraction-only pins, not destination-width or error-state evidence.
 # SUBSTR hand-pins: (string, pos, length, expected)  -- SAS is 1-based
 SUB_PINS = [("abcde", 1, 3, "abc"), ("abcde", 2, 3, "bcd"), ("abcde", 3, None, "cde"),
             ("abcde", 4, 10, "de"), ("hello world", 7, 5, "world")]

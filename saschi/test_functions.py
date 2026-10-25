@@ -47,18 +47,18 @@ class RegistryProvenanceTests(unittest.TestCase):
 class CharacterFunctionTests(unittest.TestCase):
     def test_substr_is_one_based(self):
         row = one("data d; x=substr('abcde',2,3); run;")
-        self.assertEqual(row["x"], "bcd")
+        self.assertEqual(row["x"], "bcd  ")
 
-    def test_substr_past_the_end_returns_what_exists(self):
-        # SAS fixes the result width at the third argument and pads, so the
-        # stored value carries the blanks and LENGTH() still reports 2.
-        row = one("data d; x=substr('abcde',4,10); n=length(x); run;")
-        self.assertEqual(row["x"], "de".ljust(10))
+    def test_substr_past_the_end_refuses_unmodeled_error_flag(self):
+        with self.assertRaisesRegex(ValueError, 'SUBSTR'):
+            one("data d; x=substr('abcde',4,10); n=length(x); run;")
+        row = one("data d; x=substr('abcde',4,2); n=length(x); run;")
+        self.assertEqual(row["x"], "de   ")
         self.assertEqual(row["n"], 2.0)
 
-    def test_substr_declares_the_declared_width_not_the_source(self):
+    def test_substr_declares_the_first_argument_width(self):
         plan = compile_plan("data d; x=substr('abcde',2,3); run;")
-        self.assertEqual(character_width(plan.steps[0].operations[0].args["value"]), 3)
+        self.assertEqual(character_width(plan.steps[0].operations[0].args["value"]), 5)
 
     def test_length_excludes_trailing_blanks_and_floors_at_one(self):
         row = one("data d; a=length('abc  '); b=length('   '); c=lengthn('   '); "
@@ -295,10 +295,10 @@ class NumericFunctionTests(unittest.TestCase):
         row = one("data d; x=1; if length('ab  ')=2 then x=9; run;")
         self.assertEqual(row["x"], 9.0)
 
-    def test_substr_without_a_length_literal_stays_a_ticket(self):
+    def test_substr_without_an_explicit_length_stays_a_ticket(self):
         plan = compile_plan("data d; x=substr('abcdef',2); run;")
         self.assertTrue(plan.blocked)
-        self.assertIn(plan.tickets[0].construct, {"assignment", "char-funcs"})
+        self.assertIn(plan.tickets[0].construct, {"assignment", "char-funcs", "substr"})
 
     def test_format_outside_the_gated_set_stays_a_ticket(self):
         plan = compile_plan("data d; x=put(1.5,best12.); run;")
