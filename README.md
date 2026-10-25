@@ -38,7 +38,7 @@ fixed expected output and base-R evidence. Special missings retain their tags.
   sibling plus a fixture verifier (`verify_*.py`). Run any verifier directly,
   or all of them through `verify_all.py`.
 - `docs/sasconversionrulebook.json` : the machine-consumable translation
-  rulebook. 64 rules with equivalence classes (EXACT,
+  rulebook. 65 rules with equivalence classes (EXACT,
   EQUIVALENT-WITH-SETTINGS, APPROXIMATE, NO-DIRECT-EQUIVALENT), required
   settings, forbidden patterns, and validation tests.
 - `docs/capability-manifest.json` : the coverage manifest. Every entry of the
@@ -278,8 +278,7 @@ REVERSE preserves fixed-width blanks and inherits its character argument width;
 nonempty printable ASCII up to 32767 bytes is the supported slice. Numeric
 coercion, zero-length source literals, Unicode and control characters remain
 review cases. Programs combining actual SUBSTR calls with REVERSE or new
-multi-name LENGTH declarations are quarantined pending separate legacy width
-repair. Function-shaped string text and legacy single-name programs retain their
+multi-name LENGTH declarations are quarantined pending separate temporary-width and composition evidence. Function-shaped string text and legacy single-name programs retain their
 existing paths. The external reversal program passes source/stdout/complete-result
 hash pins, shared-job execution and an independent base-R program witness
 (`examples/verify_length_reverse.py`, `saschi.test_length_reverse`). Repository
@@ -298,5 +297,18 @@ an unmodified external whole-program hash proof (`examples/verify_concat_catx.py
 Principal quarantine: any program using new DS-029 concatenation/CATX together
 with an actual SUBSTR call is refused across all steps and expression contexts,
 including prior, unreachable, WHERE and intermediate-value dependencies. Literal
-SUBSTR text does not trigger it. The legacy SUBSTR width contract will be repaired
-separately; its existing gates and programs are unchanged by this feature lane.
+SUBSTR text does not trigger it. DS-030 repairs direct SUBSTR destination widths separately; the quarantine remains
+until temporary-width and composition behavior has its own evidence.
+
+DS-030 repairs three-argument SUBSTR assignment widths: a new destination gets
+the first argument width; an earlier target keeps its own width. Checked execution
+accepts nonempty printable ASCII literals or known character variables, with
+positive integral numeric bounds inside the source. Invalid bounds, coercion,
+error-state behavior and unproven temporary consumers are refused. Static checks
+also cover empty input and skipped bodies. LENGTH/LENGTHN, direct comparisons
+and COUNT with a constant space-free needle are bounded padding-insensitive
+consumer inferences tested with raw and padded R models; temporary widths remain
+unclaimed. The original raw SUBSTR fixture remains extraction-only evidence.
+`examples/verify_substr.py` and `saschi.test_substr` cover destination descriptors,
+independent R cases, WHERE input widths, atomic refusals and retained quarantine.
+Repository/base-R evidence for maintainer review, no live SAS claim.

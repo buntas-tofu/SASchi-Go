@@ -5,7 +5,7 @@ import re
 from collections import Counter
 from copy import deepcopy
 from sas_semantics import sas_round, sas_merge_by, sas_put_literals, sas_put_character_list, sas_put_numeric_list, sas_put_all, sas_do_counted, sas_concat
-from .functions import apply as apply_function, assign_spec, character_width, validate_reverse_calls, validate_string_expressions, expression_nodes, function_call_lines
+from .functions import apply as apply_function, assign_spec, character_width, validate_reverse_calls, validate_string_expressions, expression_nodes, function_call_lines, validate_substr_calls, substr_context_errors
 from .operations import walk_operations as operations
 from .values import normalize_catalog, column_type, coerce, missing, order
 
@@ -136,7 +136,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                       node.get('kind') == 'call' and node.get('name') in ('catx', 'reverse')
                       for node, _ in expression_nodes(plan))
     if function_call_lines(plan, 'substr') and (new_strings or new_length_group):
-        raise ValueError('new string features are quarantined from actual SUBSTR calls pending separate legacy width repair')
+        raise ValueError('new string features are quarantined from actual SUBSTR calls pending separate temporary-width and composition evidence')
     tables, logs = normalize_catalog({} if catalog is None else catalog), []
     for step in plan['steps']:
         inputs, keys, ops = step['inputs'], step['by'], step['operations']
@@ -208,6 +208,10 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
             if any(e['kind'] == 'automatic' or e['value'] not in tables[inputs[0]]['schema'] for e in expressions(where)):
                 raise ValueError('WHERE can reference only driving input columns')
             validate_reverse_calls(where, where_schema)
+            context_error = next(substr_context_errors(where), None)
+            if context_error:
+                raise ValueError(context_error)
+            validate_substr_calls(where, where_schema)
             rows = [r for r in rows if condition(where, r, where_schema)]
         if keys and any(key(a) > key(b) for a, b in zip(rows, rows[1:])):
             raise ValueError('SET BY requires ascending sorted rows after WHERE')
@@ -236,6 +240,13 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
 
         for op in flat:
             args, kind = op['args'], op['kind']
+            payloads = [(args.get('value'), 'assignment')] if kind == 'assign' else [
+                (value, 'other') for key, value in args.items() if key not in ('body', 'operation')]
+            for payload, context in payloads:
+                context_error = next(substr_context_errors(payload, context), None)
+                if context_error:
+                    raise ValueError(context_error)
+                validate_substr_calls(payload, schema)
             if kind == 'declare':
                 name, spec = args['name'], args['spec']
                 if name in schema and column_type(schema[name]) != column_type(spec):

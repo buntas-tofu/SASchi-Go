@@ -9,7 +9,7 @@ import math
 import re
 from dataclasses import asdict, dataclass, field
 from sas_semantics import sas_put_literals, sas_put_character_list, sas_put_numeric_list, sas_do_counted
-from .functions import FUNCTIONS, format_token, FORMATS, function_call_lines
+from .functions import FUNCTIONS, format_token, FORMATS, function_call_lines, substr_context_errors
 from .parser import Kind, ParseError, split_statements
 from .operations import walk_operations as _walk_operations
 from .rules import route_function, route_statement
@@ -653,11 +653,31 @@ def compile_plan(source: str) -> Plan:
         family, _ = route_function(text)
         reject(st, family if family != "unknown" else construct, "no operation for this statement")
     finish()
+    for compiled in plan.steps:
+        for op in walk_operations(compiled.operations):
+            payloads = [(op.args.get('value'), 'assignment')] if op.kind == 'assign' else [
+                (value, 'other') for key, value in op.args.items() if key not in ('body', 'operation')]
+            for payload, context in payloads:
+                for message in substr_context_errors(payload, context):
+                    plan.tickets.append(Ticket(op.line, 'SUBSTR', 'substr', message))
+        for message in substr_context_errors(compiled.where):
+            plan.tickets.append(Ticket(compiled.line, 'SUBSTR', 'substr', message))
+    checked_substr_lines = function_call_lines(plan.to_dict(), 'substr')
+    if checked_substr_lines:
+        plan.matched.extend(('substr', 'DS-030', line or 1) for line in checked_substr_lines)
+        for st in statements:
+            for token in st.tokens:
+                if token.kind != Kind.STRING:
+                    continue
+                if token.text.startswith('"') and any(char in token.text for char in '&%'):
+                    reject(st, 'substr', 'checked SUBSTR requires macro-free source character values')
+                if any(not 32 <= ord(char) <= 126 for char in token.text):
+                    reject(st, 'substr', 'checked SUBSTR requires printable ASCII source character values')
     has_strings = any(item[0] == 'concat-catx' for item in plan.matched)
     if has_strings:
         for line in sorted(set(function_call_lines(plan.to_dict(), 'substr'))):
             plan.tickets.append(Ticket(line, 'SUBSTR', 'substr-quarantine',
-                'new character features are quarantined from actual SUBSTR calls until the legacy SUBSTR width contract is repaired separately'))
+                'new character features are quarantined from actual SUBSTR calls pending separate temporary-width and composition evidence'))
     if has_strings or any(contains_put(compiled.operations, {'put_character_list', 'put_numeric_list', 'put_all'}) for compiled in plan.steps):
         # Macros resolve before DATA execution. Without taint tracking, even
         # unused or prior-step literals can affect this output contract.
@@ -689,5 +709,5 @@ def compile_plan(source: str) -> Plan:
                                 any(construct == 'length-list' for construct, _, _ in plan.matched))
     if substr_lines and uses_new_character_slice:
         plan.tickets.append(Ticket(min(line or 1 for line in substr_lines), 'SUBSTR', 'length-reverse',
-            'DS-028 quarantines programs containing SUBSTR with REVERSE or multi-name LENGTH until the legacy SUBSTR width contract is repaired separately'))
+            'DS-028 quarantines programs containing SUBSTR with REVERSE or multi-name LENGTH pending separate temporary-width and composition evidence'))
     return plan

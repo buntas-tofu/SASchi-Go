@@ -203,7 +203,9 @@ def sas_numeric_length(x):
 # the first character, and returns len characters (or to the end if len is
 # omitted). Python string slicing is 0-based, so a naive s[pos:pos+len] shifts
 # every extracted field by one. R's substr is 1-based like SAS. When the request
-# runs past the end, SAS returns the characters that exist.
+# runs past the end, SAS returns the characters that exist but may set an
+# error flag. This extraction-only helper does not model PDV widths or flags;
+# executable translation uses the separately gated checked helper below.
 # ---------------------------------------------------------------------------
 
 
@@ -1837,3 +1839,29 @@ def sas_catx(delimiter, *items):
     if len(result) > 200:
         raise ValueError('CATX result exceeds bounded 200-byte policy; buffer/error-flag review required')
     return result
+
+
+# DS-030 checked executable SUBSTR. Raw extraction and destination descriptors
+# are distinct: the runtime assigns the first argument width to a new target.
+def _sas_substr_text(value):
+    if (not isinstance(value, str) or not 1 <= len(value) <= 32767 or
+            any(not 32 <= ord(char) <= 126 for char in value)):
+        raise ValueError('SUBSTR requires nonempty printable ASCII character input, at most 32767 bytes')
+    return value
+
+
+def sas_substr_bound(value):
+    """A bounded positive integral position or length; no implicit coercion."""
+    if (isinstance(value, bool) or not isinstance(value, (int, float)) or
+            not 1 <= value <= 32767 or not math.isfinite(value) or value != int(value)):
+        raise ValueError('SUBSTR bounds require finite positive integers, at most 32767')
+    return int(value)
+
+
+def sas_substr_checked(value, position, length):
+    """Raw in-bounds extraction; refuse unmodeled SAS diagnostics/error flags."""
+    text = _sas_substr_text(value)
+    position, length = sas_substr_bound(position), sas_substr_bound(length)
+    if position + length - 1 > len(text):
+        raise ValueError('SUBSTR bounds exceed the source width; error-flag review required')
+    return text[position - 1:position - 1 + length]

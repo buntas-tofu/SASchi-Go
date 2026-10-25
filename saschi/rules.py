@@ -159,6 +159,7 @@ CONSTRUCT_MAP: dict[str, str] = {
     "length-list": "DS-028",
 
     "concat-catx": "DS-029",
+    "substr": "DS-030",
     "arrays": "DS-016",
     "formats": "DS-010",
     "by-group": "DS-006",
@@ -257,7 +258,8 @@ FUNCTION_ROUTER: list[tuple[re.Pattern, str]] = [
     (re.compile(r"\bINTCK\s*\(|\bINTNX\s*\(", re.I), "date"),
     (re.compile(r"\bLAG\s*\(|\bDIF\s*\(", re.I), "lag-dif"),
     (re.compile(r"\bREVERSE\s*\(", re.I), "length-reverse"),
-    (re.compile(r"\bSCAN\s*\(|\bCATX\s*\(|\bSUBSTR\s*\(|\bINDEX\s*\(", re.I), "char-funcs"),
+    (re.compile(r"\bSUBSTR\s*\(", re.I), "substr"),
+    (re.compile(r"\bSCAN\s*\(|\bCATX\s*\(|\bINDEX\s*\(", re.I), "char-funcs"),
     (re.compile(r"\bTRANWRD\s*\(|\bCOMPRESS\s*\(|\bPUT\s*\(|\bINPUT\s*\(", re.I), "char-funcs"),
     (re.compile(r"\bSUM\s*\(", re.I), "sum-func"),
 ]

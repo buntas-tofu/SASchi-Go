@@ -8,7 +8,7 @@ human-review ticket instead of becoming silently generated code.
 Gate provenance, function by function:
 
 - `examples/verify_funcs.py`  MAX, MIN (ignore missing), the LENGTH family
-  (trailing blanks excluded, floored at 1), SUBSTR (1-based), character to
+  (trailing blanks excluded, floored at 1), raw SUBSTR extraction, character to
   numeric coercion (blank or invalid reads as missing). Typed numeric LENGTH
   arguments use the documented right-justified BEST12 conversion and return 12.
 - `examples/verify_missarith.py`  SUM (ignores missing, where the `+` operator
@@ -21,6 +21,8 @@ Gate provenance, function by function:
 - `examples/verify_length_reverse.py`  REVERSE, fixed-width printable ASCII
   character reversal with descriptor-derived return length.
 - `examples/verify_concat_catx.py`  bounded character CATX and operator concatenation.
+- `examples/verify_substr.py`  checked ASCII SUBSTR bounds and source-derived
+  DATA-step destination widths; the raw extraction fixture above is unchanged.
 - `examples/verify_mod.py`  MOD, dividend-signed remainder for bounded exact
   binary64 integers; fractional, missing, and zero-divisor inputs require review.
 """
@@ -32,7 +34,8 @@ import math
 from sas_semantics import (is_sas_missing, sas_charnum, sas_count, sas_input_yymmdd8,
                            sas_length, sas_lengthc, sas_lengthn, sas_max,
                            sas_min, sas_mod, sas_numeric_length, sas_put_date9, sas_putn, sas_round,
-                           sas_substr, sas_sum, sas_reverse, sas_catx, _sas_concat_text)
+                           sas_sum, sas_reverse, sas_catx, _sas_concat_text,
+                           sas_substr_checked, sas_substr_bound, _sas_substr_text)
 
 GATE_FUNCS = "examples/verify_funcs.py"
 GATE_MISSARITH = "examples/verify_missarith.py"
@@ -42,6 +45,7 @@ GATE_COUNT = "examples/verify_count.py"
 GATE_MOD = "examples/verify_mod.py"
 GATE_LENGTH_REVERSE = "examples/verify_length_reverse.py"
 GATE_CONCAT = "examples/verify_concat_catx.py"
+GATE_SUBSTR = "examples/verify_substr.py"
 
 DATE9_WIDTH = 9
 
@@ -70,7 +74,7 @@ FUNCTIONS: dict[str, FunctionSpec] = {
         FunctionSpec("length", "number", GATE_FUNCS, 1, 1),
         FunctionSpec("lengthn", "number", GATE_FUNCS, 1, 1),
         FunctionSpec("lengthc", "number", GATE_FUNCS, 1, 1),
-        FunctionSpec("substr", "character", GATE_FUNCS, 3, 3),
+        FunctionSpec("substr", "character", GATE_SUBSTR, 3, 3),
         FunctionSpec("reverse", "character", GATE_LENGTH_REVERSE, 1, 1),
         FunctionSpec("catx", "character", GATE_CONCAT, 2, 33),
         FunctionSpec("count", "number", GATE_COUNT, 2, 3),
@@ -136,10 +140,7 @@ def apply(name: str, values: list):
         function = {"length": sas_length, "lengthn": sas_lengthn, "lengthc": sas_lengthc}[name]
         return function(values[0]) if isinstance(values[0], str) else sas_numeric_length(values[0])
     if name == "substr":
-        text, position, length = _text(name, values[0]), values[1], values[2]
-        if is_sas_missing(position) or is_sas_missing(length):
-            return ""
-        return sas_substr(text, int(position), int(length))
+        return sas_substr_checked(*values)
     if name == "sum":
         return sas_sum(*_numeric(name, values))
     if name == "round":
@@ -181,8 +182,8 @@ def character_width(expr, schema=None) -> int | None:
     """Declared width of a character-returning call, or None when not derivable.
 
     Widths come from static descriptors rather than current row values. The
-    legacy SUBSTR branch retains its extraction-length rule pending separate
-    repair; new string-feature programs containing SUBSTR are quarantined.
+    SUBSTR branch derives new destination width from its first argument.
+    Temporary widths remain unclaimed; new string compositions stay quarantined.
     """
     kind = expr.get('kind')
     if kind == 'character':
@@ -219,8 +220,15 @@ def character_width(expr, schema=None) -> int | None:
             raise ValueError('CATX requires statically known character arguments')
         return 200
     if name == "substr":
-        length = expr["args"][2]
-        return int(length["value"]) if length.get("kind") == "number" else None
+        args = _substr_arguments(expr)
+        source = args[0]
+        if source['kind'] == 'character':
+            return len(_sas_substr_text(source['value']))
+        if source['kind'] == 'variable':
+            spec = (schema or {}).get(source['value'])
+            if isinstance(spec, dict) and spec.get('type') == 'character':
+                return spec['length']
+        raise ValueError('SUBSTR source requires a known character literal or variable width')
     if name == "put":
         fmt = expr["args"][1]
         if not isinstance(fmt, dict) or fmt.get("kind") != "format":
@@ -285,3 +293,79 @@ def function_call_lines(value, name, line=None):
     """Find actual calls in AST dictionaries, ignoring function-shaped text."""
     return [source_line for node, source_line in expression_nodes(value, line)
             if node.get('kind') == 'call' and node.get('name') == name]
+
+
+
+def _substr_arguments(expr):
+    args = expr.get('args')
+    if not isinstance(args, list) or len(args) != 3 or any(not isinstance(arg, dict) for arg in args):
+        raise ValueError('SUBSTR requires three expression arguments')
+    return args
+
+
+def _substr_numeric(expr, schema):
+    kind = expr.get('kind')
+    if kind in ('number', 'missing', 'tagged_missing', 'automatic'):
+        return True
+    if kind == 'variable':
+        spec = schema.get(expr['value'], 'number')
+        return (spec if isinstance(spec, str) else spec.get('type')) == 'number'
+    if kind == 'call':
+        spec = FUNCTIONS.get(expr.get('name'))
+        return spec is not None and spec.returns == 'number'
+    if kind == 'arithmetic':
+        return _substr_numeric(expr['left'], schema) and _substr_numeric(expr['right'], schema)
+    return False
+
+
+def validate_substr_calls(value, schema):
+    """Check descriptors/literal bounds even for empty or skipped DATA input."""
+    for node, _ in expression_nodes(value):
+        if node.get('kind') != 'call' or node.get('name') != 'substr':
+            continue
+        args = _substr_arguments(node)
+        width = character_width(node, schema)
+        literals = []
+        for arg in args[1:]:
+            if not _substr_numeric(arg, schema):
+                raise ValueError('SUBSTR bounds require numeric expressions')
+            if arg.get('kind') in ('number', 'missing', 'tagged_missing'):
+                literals.append(sas_substr_bound(arg.get('value')))
+            else:
+                literals.append(None)
+        position, length = literals
+        if (position is not None and position > width or length is not None and length > width or
+                position is not None and length is not None and position + length - 1 > width):
+            raise ValueError('SUBSTR literal bounds exceed the source width; error-flag review required')
+
+
+def substr_context_errors(value, context='other'):
+    """Admit only consumers proven insensitive to an unclaimed temporary width."""
+    if isinstance(value, dict):
+        if value.get('kind') == 'call':
+            name, args = value.get('name'), value.get('args', [])
+            if not isinstance(args, list):
+                if name == 'substr':
+                    yield 'SUBSTR requires three expression arguments'
+                return
+            if name == 'substr' and context not in ('assignment', 'padding-insensitive'):
+                yield 'SUBSTR temporary consumer requires width review; store the result in a variable first'
+            for index, arg in enumerate(args):
+                safe = name in ('length', 'lengthn')
+                if name == 'count' and index == 0 and len(args) >= 2:
+                    needle = args[1]
+                    safe = (needle.get('kind') == 'character' and bool(needle.get('value')) and
+                            ' ' not in needle['value'])
+                yield from substr_context_errors(arg, 'padding-insensitive' if safe else 'other')
+        elif 'op' in value and 'left' in value:
+            comparisons = ('=', 'eq', '^=', '~=', '<>', 'ne', '<', 'lt', '>', 'gt', '<=', 'le', '>=', 'ge')
+            child_context = 'padding-insensitive' if value['op'] in comparisons else 'other'
+            for key in ('left', 'right'):
+                if key in value:
+                    yield from substr_context_errors(value[key], child_context)
+        else:
+            for child in value.values():
+                yield from substr_context_errors(child)
+    elif isinstance(value, (list, tuple)):
+        for child in value:
+            yield from substr_context_errors(child, context)
