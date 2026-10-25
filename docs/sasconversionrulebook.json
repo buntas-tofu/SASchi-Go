@@ -1669,6 +1669,40 @@
         "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000201276.htm",
         "https://www2.sas.com/onlinetutor/linklib/doloop.htm"
       ]
+    },
+    {
+      "rule_id": "DS-027",
+      "sas_pattern": "PUT numeric-variable <numeric-variable>; simple unformatted numeric lists",
+      "scope": "data-step",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "stdlib",
+        "pattern": "sas_semantics.sas_put_numeric_list over source-order known numeric variables"
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "independent typed-field renderer in examples/put_numeric.R"
+      },
+      "required_settings": [
+        "Known numeric variables only, established by preceding numeric declarations or statically numeric assignments. Catalog-only numeric SET variables retain their existing refusal. The declared counted-DO index uses this interface, including source-order traversal of body operations.",
+        "Ordinary missing writes a period. Support finite integer-valued numbers with magnitude at most 99999999999, the conservative signed BEST12 slice. Negative zero writes zero. These bounds are implementation policy, not the complete SAS format domain.",
+        "Each value has one following blank, including the final value. Complete logical records are at most 64 columns. No physical SAS log typography or diagnostic-note equivalence is claimed.",
+        "Validate actual numeric types and attached formats before executing rows, even for empty or WHERE-filtered SET input. A plain assigned copy gets a numeric type without inheriting the source format.",
+        "Refuse fractions, special missing output, nonfinite or nonnumeric values, attached formats, mixed numeric/character/literal lists, numeric literals, automatic variables, FILE, pointers, line holds, and conditional PUT. Existing character/literal/named-list paths remain separate.",
+        "Refuse original double-quoted source macro triggers and non-ASCII/control source literals anywhere in the program. Runtime values must satisfy the numeric renderer. Python execution and independent base-R records are gated; C++ refuses this operation."
+      ],
+      "forbidden_patterns": [
+        "Using general Python str or .17g formatting as SAS BEST12, rounding unsupported fractions, or treating special missing as ordinary missing",
+        "Trimming the final separator or silently dropping attached formats on empty or filtered input",
+        "Inferring a variable type from an external dataset name or claiming the implementation bounds are SAS language restrictions"
+      ],
+      "validation_test": "examples/verify_put_numeric.py: original pins, generated integer/missing records, independent base-R witness, shared refusals and naive-error detectors; saschi.test_put_numeric: source-order typing, metadata checks, atomic failures, 64-column boundaries, job path, legacy paths and C++ refusal",
+      "confidence": "high within the bounded slice; repository evidence, no live SAS",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/lestmtsref/63323/HTML/default/p0jcwhe1ofmb49n1xf1q2kc44b0v.htm",
+        "https://support.sas.com/documentation/cdl/en/leforinforref/63324/HTML/default/p1fum54c93f8r0n1wrs5mrb05nzi.htm",
+        "https://support.sas.com/documentation/cdl/en/lestmtsref/63323/HTML/default/n1spe7nmkmi7ywn175002rof97fv.htm"
+      ]
     }
   ],
   "runtime_capabilities": {

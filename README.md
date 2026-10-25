@@ -38,7 +38,7 @@ fixed expected output and base-R evidence. Special missings retain their tags.
   sibling plus a fixture verifier (`verify_*.py`). Run any verifier directly,
   or all of them through `verify_all.py`.
 - `docs/sasconversionrulebook.json` : the machine-consumable translation
-  rulebook. 61 rules with equivalence classes (EXACT,
+  rulebook. 62 rules with equivalence classes (EXACT,
   EQUIVALENT-WITH-SETTINGS, APPROXIMATE, NO-DIRECT-EQUIVALENT), required
   settings, forbidden patterns, and validation tests.
 - `docs/capability-manifest.json` : the coverage manifest. Every entry of the
@@ -143,6 +143,18 @@ The R interpreter is found via `ROSETTA_RSCRIPT`, then `Rscript` on PATH.
   These are logical-record contracts,
   not physical SAS log equivalence (`examples/verify_put_list.py`,
   `saschi.test_put_list`).
+- Numeric-variable list PUT has its own DS-027 slice. Preceding numeric
+  declarations or statically numeric assignments enable simple lists such as
+  `n=7; m=.; put n m;`, with logical record `7 . `. Ordinary missing and finite
+  integers with magnitude at most 99999999999 are gated. Each field retains
+  one following separator, including the final field, within 64 columns.
+  Fractions, special missing output, mixed numeric/literal/character lists,
+  attached formats, and descriptor-only numeric SET variables require review.
+  Descriptor checks also run on empty or filtered inputs. These are bounded
+  repository and independent base-R records, without a live SAS log capture
+  (`examples/verify_put_numeric.py`, `saschi.test_put_numeric`). The composed
+  counted-DO program also passes source/stdout/complete-result hash pins and an
+  independent R program witness (`saschi.test_do_put`).
 - COUNT preserves trailing blanks by default. I ignores case, T trims both
   arguments, and overlapping matches are undefined in SAS. The bounded ASCII
   Python/R slice rejects overlap, empty needles, zero-length input strings,

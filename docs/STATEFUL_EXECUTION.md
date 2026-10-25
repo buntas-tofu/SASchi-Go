@@ -263,3 +263,55 @@ The documented control rules come from the primary
 Inference: the zero-trip and final-index pins follow from initializing the
 index to start and checking the control after each increment. The R witness
 models that control explicitly rather than relying on R for-loop final state.
+
+## Numeric-variable list output
+
+Status: DS-027 repository evidence for maintainer review, not a live SAS log
+capture or a general BEST12 implementation.
+
+Simple `PUT n m;` uses `put_numeric_list` with normalized variable names when
+preceding declarations or assignments establish every item as numeric. The
+operation reads current PDV values. Ordinary missing prints as a period, and
+finite integer-valued numbers with magnitude at most 99999999999 print decimal
+digits without fractional places. Negative zero prints zero. Each field
+advances one following blank, including the final field. Complete logical
+records are at most 64 columns.
+
+Source-order type knowledge is a conservative compiler boundary. Descriptor-only
+numeric SET variables, unknown variables, automatic variables, mixed numeric and
+literal/character items, numeric literals, formats, FILE, pointer controls,
+conditional PUT, fractions, nonfinite/nonnumeric values, and special missing
+output remain refused. Numeric declarations provide the shared interface for the
+separately gated counted-DO index. Source-order discovery includes body operations.
+
+Runtime descriptor validation precedes row execution, including empty and
+WHERE-filtered SET input. Attached numeric formats are refused; a plain numeric
+copy does not inherit a format. Programs using this operation conservatively
+refuse double-quoted source macro triggers and non-ASCII/control source literals
+anywhere, including unused or prior-step values. Character-list, quoted-literal,
+and named-list output retain their own paths. C++ refuses the new operation.
+
+Original numeric pins, generated records, shared refusals, and an independent
+base-R renderer live in `examples/verify_put_numeric.py` and
+`examples/put_numeric.R`. `saschi.test_put_numeric` checks execution, descriptors,
+source-order routing, final separators, whole-job failure, and target refusal.
+The documentary sources are [Base SAS PUT List](https://support.sas.com/documentation/cdl/en/lestmtsref/63323/HTML/default/p0jcwhe1ofmb49n1xf1q2kc44b0v.htm)
+and [BESTw. Format](https://support.sas.com/documentation/cdl/en/leforinforref/63324/HTML/default/p1fum54c93f8r0n1wrs5mrb05nzi.htm).
+
+
+## Counted DO and numeric PUT composition
+
+Status: bounded repository and independent base-R evidence for maintainer review,
+without live SAS verification. DS-026 and DS-027 compose through the ordinary
+numeric loop-index declaration and source-order traversal of body operations.
+Numeric PUT inside the body uses current PDV values. Static type discovery,
+format validation, source guards, and OUTPUT detection also inspect zero-trip
+bodies. Unsupported later output fails the complete job without publishing
+earlier records or a partial result.
+
+`saschi.test_do_put` and the independent `examples/do_put_program.R` witness
+verify the unmodified external `loops_for_with_a_specified_step.sas` using source,
+stdout, and complete-result hash pins. The witness reads that program in place;
+no corpus source or derived output text is shipped. The two earlier complete
+program proofs in `saschi.test_put_all` remain registered. Passing these three
+programs does not establish equivalence for other corpus programs.
