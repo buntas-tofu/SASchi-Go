@@ -15,13 +15,15 @@ Gate provenance, function by function:
 - `examples/verify_numfmt.py`  PUT with a numeric w.d format, PUT DATE9, and the
   YYMMDD8 informat read by INPUT.
 - `examples/verify_rounding.py`  ROUND, ties away from zero.
+- `examples/verify_count.py`  COUNT, bounded ASCII substring matching with I/T
+  modifiers, preserved blanks, and refusal of undefined overlapping matches.
 """
 from __future__ import annotations
 
 from dataclasses import dataclass
 import math
 
-from sas_semantics import (is_sas_missing, sas_charnum, sas_input_yymmdd8,
+from sas_semantics import (is_sas_missing, sas_charnum, sas_count, sas_input_yymmdd8,
                            sas_length, sas_lengthc, sas_lengthn, sas_max,
                            sas_min, sas_put_date9, sas_putn, sas_round,
                            sas_substr, sas_sum)
@@ -30,6 +32,7 @@ GATE_FUNCS = "examples/verify_funcs.py"
 GATE_MISSARITH = "examples/verify_missarith.py"
 GATE_NUMFMT = "examples/verify_numfmt.py"
 GATE_ROUNDING = "examples/verify_rounding.py"
+GATE_COUNT = "examples/verify_count.py"
 
 DATE9_WIDTH = 9
 
@@ -59,6 +62,7 @@ FUNCTIONS: dict[str, FunctionSpec] = {
         FunctionSpec("lengthn", "number", GATE_FUNCS, 1, 1),
         FunctionSpec("lengthc", "number", GATE_FUNCS, 1, 1),
         FunctionSpec("substr", "character", GATE_FUNCS, 3, 3),
+        FunctionSpec("count", "number", GATE_COUNT, 2, 3),
         FunctionSpec("sum", "number", GATE_MISSARITH, 1, -1),
         FunctionSpec("round", "number", GATE_ROUNDING, 2, 2),
         FunctionSpec("put", "character", GATE_NUMFMT, 2, 2, (1,)),
@@ -106,6 +110,8 @@ def _width_decimals(fmt) -> tuple[int, int]:
 
 def apply(name: str, values: list):
     """Evaluate one wired function over already-evaluated argument values."""
+    if name == "count":
+        return sas_count(*values)
     if name in ("max", "min"):
         return (sas_max if name == "max" else sas_min)(*_numeric(name, values))
     if name in ("length", "lengthn", "lengthc"):

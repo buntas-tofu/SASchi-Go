@@ -148,6 +148,7 @@ CONSTRUCT_MAP: dict[str, str] = {
     "merge-many-to-many": "DS-003",
     "sort": "DS-008",
     "char-funcs": "DS-015",
+    "count": "DS-022",
     "arrays": "DS-016",
     "formats": "DS-010",
     "by-group": "DS-006",
@@ -238,6 +239,7 @@ STATEMENT_ROUTER: list[tuple[re.Pattern, str]] = [
 
 # Function-level routing: function call regex -> construct name.
 FUNCTION_ROUTER: list[tuple[re.Pattern, str]] = [
+    (re.compile(r"\bCOUNT\s*\(", re.I), "count"),
     (re.compile(r"\bROUND\s*\(", re.I), "round"),
     (re.compile(r"\bMOD\s*\(|\bINT\s*\(", re.I), "mod-int"),
     (re.compile(r"\bINTCK\s*\(|\bINTNX\s*\(", re.I), "date"),

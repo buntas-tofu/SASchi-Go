@@ -38,7 +38,7 @@ fixed expected output and base-R evidence. Special missings retain their tags.
   sibling plus a fixture verifier (`verify_*.py`). Run any verifier directly,
   or all of them through `verify_all.py`.
 - `docs/sasconversionrulebook.json` : the machine-consumable translation
-  rulebook. 56 rules with equivalence classes (EXACT,
+  rulebook. 57 rules with equivalence classes (EXACT,
   EQUIVALENT-WITH-SETTINGS, APPROXIMATE, NO-DIRECT-EQUIVALENT), required
   settings, forbidden patterns, and validation tests.
 - `docs/capability-manifest.json` : the coverage manifest. Every entry of the
@@ -107,6 +107,11 @@ The R interpreter is found via `ROSETTA_RSCRIPT`, then `Rscript` on PATH.
 
 ## Known landmines (why the gate exists)
 
+- COUNT preserves trailing blanks by default. I ignores case, T trims both
+  arguments, and overlapping matches are undefined in SAS. The bounded ASCII
+  Python/R slice rejects overlap, empty needles, zero-length input strings,
+  non-ASCII/NUL text, implicit conversions, and modifiers outside I/T rather
+  than inheriting Python's defaults (`examples/verify_count.py`, DS-022).
 - Ordinary equality can accept true as 1, and string conversion can accept text
   "1.0" as numeric 1.0. Typed comparisons reject both; row/schema order and metadata
   matter too (`saschi/test_compare.py`).

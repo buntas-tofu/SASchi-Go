@@ -165,6 +165,46 @@ def sas_substr(s, pos, length=None):
 
 
 # ---------------------------------------------------------------------------
+# COUNT counts literal substrings, with optional I (ignore case) and T (trim
+# trailing ASCII blanks from both arguments). SAS documents overlapping
+# occurrences as undefined; Python str.count silently chooses non-overlap.
+# Source: SAS Functions and CALL Routines, COUNT, linked in rule DS-022.
+# Bounded support policy, not additional SAS semantics: refuse non-ASCII,
+# NUL, implicit conversions, zero-length input strings, empty needles (also
+# after T), and modifiers other than I/T. Character blanks retain their width.
+# ---------------------------------------------------------------------------
+
+
+def sas_count(string, substring, modifiers=""):
+    """Documented COUNT slice; undefined or ungated inputs require review."""
+    if not all(isinstance(value, str) for value in (string, substring, modifiers)):
+        raise ValueError("COUNT: character arguments required; no implicit conversion")
+    if not all(value.isascii() and "\x00" not in value
+               for value in (string, substring, modifiers)):
+        raise ValueError("COUNT: non-ASCII or NUL text requires encoding review")
+    modifiers = modifiers.lower()
+    if any(modifier not in "it" for modifier in modifiers):
+        raise ValueError("COUNT: unsupported modifier; only I and T are gated")
+    if not string:
+        raise ValueError("COUNT: zero-length string requires review")
+    if "t" in modifiers:
+        string, substring = string.rstrip(" "), substring.rstrip(" ")
+    if not substring:
+        raise ValueError("COUNT: empty substring requires review")
+    if "i" in modifiers:
+        string, substring = string.lower(), substring.lower()
+    count, previous = 0, -len(substring)
+    position = string.find(substring)
+    while position >= 0:
+        if position < previous + len(substring):
+            raise ValueError("COUNT: overlapping matches are undefined in SAS; human review required")
+        count += 1
+        previous = position
+        position = string.find(substring, position + 1)
+    return count
+
+
+# ---------------------------------------------------------------------------
 # Macro arithmetic. %EVAL does INTEGER arithmetic: division keeps only the
 # integer portion, truncating toward zero, so %eval(7/2) is 3 and %eval(-7/2)
 # is -3. A naive translation to floating division returns 3.5 and silently

@@ -58,6 +58,10 @@ def build_job(source: str, inputs: "Path | None" = None, expect: "Path | None" =
               target: str = "python") -> Job:
     """Run one program through the full treatment and return every artifact."""
     plan = compile_plan(source)
+    translation = (python_translate if target == 'python' else cpp_translate)(source)
+    # Target-specific refusals must block execution and appear in the receipt,
+    # just like source-plan tickets. A Python-supported call can exceed C++.
+    plan.tickets = list(translation.tickets)
     receipt = {'schema_version': 1, 'package_version': __version__,
                'ts_utc': datetime.now(timezone.utc).isoformat(), 'target': target,
                'source_sha256': hashlib.sha256(source.encode('utf-8')).hexdigest(), 'environment': environment(),
@@ -66,7 +70,6 @@ def build_job(source: str, inputs: "Path | None" = None, expect: "Path | None" =
                'plan_sha256': hashlib.sha256(json.dumps(plan.to_dict(), sort_keys=True).encode()).hexdigest(),
                'tickets': [vars(t) for t in plan.tickets], 'accepted': False,
                'comparison': 'not requested', 'comparison_contract': 'typed-exact-values-ordered-rows-and-columns-metadata-v1'}
-    translation = (python_translate if target == 'python' else cpp_translate)(source)
     receipt['completeness'] = _completeness_record(source, plan, target, receipt['ts_utc'])
     result, code = None, 2 if plan.blocked else 1
     try:
