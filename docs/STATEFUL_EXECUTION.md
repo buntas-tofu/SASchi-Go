@@ -201,7 +201,7 @@ preservation; those use the typed catalog witnesses.
 ## Remaining boundaries
 
 Multiple DATA destinations, general conditional SET, nested/grouped DO, sum
-statements, LAG translation, macro execution, raw INPUT, format rendering, and
+statements, unproven LAG contexts, macro execution, raw INPUT, format rendering, and
 linguistic sort orders still require review. Character BY key width changes are
 refused. MERGE retains its ordinary numeric, sorted, at-most-one-repeating-side
 scope; tagged/character inputs, filters, explicit retention, and assignments to
@@ -503,3 +503,35 @@ a separate future capability; function identity does not change output limits.
 Evidence: `examples/verify_bitwise.py`, original `examples/bitwise.R` bit-vector
 model and in-place corpus parser, and `saschi.test_bitwise`. Existing fixtures
 and raw semantic helpers retain their prior contracts.
+
+## Numeric LAG/DIF source queues
+
+Status: DS-007 repository/base-R source-execution evidence for maintainer review,
+no live SAS. Canonical LAG/DIF and LAG1..LAG100/DIF1..DIF100 are admitted as direct
+assignment right-hand sides, including selected IF/ELSE leaves and counted-DO
+bodies. One argument is a finite numeric/ordinary-missing literal, a numeric
+variable or _N_. Argument expressions, character/tagged/nonfinite values and
+other reserved automatic references remain deferred.
+
+Each structural source occurrence owns a queue initialized with missing values.
+A call advances only when that occurrence executes. Identical calls and aliased
+handwritten operations at different source paths remain independent; DATA row
+and loop iteration are absent from the key. Queues persist across rows and loop
+iterations in one DATA step, and reset for each step/run. BY boundaries do not
+flush them, and OUTPUT does not itself invoke a queue. DIF returns the current
+argument minus that occurrence's nth lag, with ordinary missing propagated.
+
+WHERE filtering and subsetting IF retain their established timing around calls.
+A conditional invocation differs from an unconditional call whose result is used
+conditionally. Static validation sees skipped branches/bodies and empty/filtered
+input; dynamic invalid values and nonfinite DIF results fail atomically without
+publishing earlier records. Invalid helper calls do not change their queue.
+Nested/temporary consumers, predicates/WHERE queue calls, arrays, PUT_ALL and
+C++ remain refused; no SAS error-state handling or inferred intent correction
+is claimed.
+
+`examples/verify_lag_execution.py`, original `examples/lag_execution.R` and
+`saschi.test_lag_execution` compare source execution against independent prior-
+invoked-index models and pin occurrence identity, missing pushes, depth bounds,
+branch/loop timing, reset boundaries and local/atomic refusals. The original
+`examples/verify_lag.py` raw reference/R queue fixture remains unchanged.

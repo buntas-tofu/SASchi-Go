@@ -260,7 +260,7 @@ FUNCTION_ROUTER: list[tuple[re.Pattern, str]] = [
     (re.compile(r"\bROUND\s*\(", re.I), "round"),
     (re.compile(r"\bMOD\s*\(|\bINT\s*\(", re.I), "mod-int"),
     (re.compile(r"\bINTCK\s*\(|\bINTNX\s*\(", re.I), "date"),
-    (re.compile(r"\bLAG\s*\(|\bDIF\s*\(", re.I), "lag-dif"),
+    (re.compile(r"\b(?:LAG|DIF)[0-9]*\s*\(", re.I), "lag-dif"),
     (re.compile(r"\bREVERSE\s*\(", re.I), "length-reverse"),
     (re.compile(r"\bSUBSTR\s*\(", re.I), "substr"),
     (re.compile(r"\bSCAN\s*\(|\bCATX\s*\(|\bINDEX\s*\(", re.I), "char-funcs"),

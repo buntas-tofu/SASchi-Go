@@ -10,6 +10,7 @@ boundaries, which in disclosure rounding is precisely where the rule lives.
 """
 
 import ast
+from collections import deque
 import datetime
 import decimal
 import math
@@ -1923,3 +1924,42 @@ def sas_blshift(value, count):
 
 def sas_brshift(value, count):
     return sas_bitwise('brshift', value, count)
+
+
+# DS-007 executable finite-numeric queues. Existing raw LAG/DIF fixtures above
+# remain unchanged; this helper validates before changing occurrence state.
+def sas_lag_numeric(value):
+    """Finite binary64 or ordinary missing only, with no implicit conversion."""
+    if value is None:
+        return None
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ValueError('LAG/DIF requires finite numeric or ordinary missing values')
+    try:
+        result = float(value)
+    except (OverflowError, ValueError) as exc:
+        raise ValueError('LAG/DIF requires finite binary64 values') from exc
+    if not math.isfinite(result):
+        raise ValueError('LAG/DIF requires finite binary64 values')
+    return result
+
+
+class SasNumericLagQueue:
+    """One syntactic occurrence; the caller owns its DATA-step lifetime."""
+    def __init__(self, depth):
+        if isinstance(depth, bool) or not isinstance(depth, int) or not 1 <= depth <= 100:
+            raise ValueError('LAG/DIF depth requires a canonical integer in1..100')
+        self._history = deque([None] * depth, maxlen=depth)
+
+    def invoke(self, value, *, difference=False):
+        if not isinstance(difference, bool):
+            raise ValueError('LAG/DIF difference mode must be boolean')
+        value = sas_lag_numeric(value)
+        previous = self._history[0]
+        result = previous
+        if difference:
+            result = None if value is None or previous is None else value - previous
+            if result is not None and not math.isfinite(result):
+                raise ValueError('DIF overflow requires numeric error-state review')
+        # Only a successful checked invocation advances the queue, including None.
+        self._history.append(value)
+        return result

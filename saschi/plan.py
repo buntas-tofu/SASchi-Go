@@ -9,7 +9,7 @@ import math
 import re
 from dataclasses import asdict, dataclass, field
 from sas_semantics import sas_put_literals, sas_put_character_list, sas_put_numeric_list, sas_do_counted, SAS_BITWISE_ARITY
-from .functions import FUNCTIONS, format_token, FORMATS, function_call_lines, substr_context_errors, catx_arguments_allowed
+from .functions import FUNCTIONS, format_token, FORMATS, function_call_lines, substr_context_errors, catx_arguments_allowed, LAG_FUNCTIONS, validate_lag_calls, expression_nodes
 from .parser import Kind, ParseError, Statement, split_statements, tokenize
 from .operations import walk_operations as _walk_operations
 from .rules import route_function, route_statement
@@ -732,8 +732,21 @@ def compile_plan(source: str) -> Plan:
             payloads = [(op.args.get('value'), 'assignment')] if op.kind == 'assign' else [
                 (value, 'other') for key, value in op.args.items() if key not in ('body', 'operation', 'otherwise')]
             for payload, context in payloads:
+                try:
+                    validate_lag_calls(payload, direct=context == 'assignment')
+                except ValueError as exc:
+                    plan.tickets.append(Ticket(op.line, 'LAG/DIF', 'lag-dif', str(exc)))
                 for message in substr_context_errors(payload, context):
                     plan.tickets.append(Ticket(op.line, 'SUBSTR', 'substr', message))
+        try:
+            validate_lag_calls(compiled.where)
+        except ValueError as exc:
+            plan.tickets.append(Ticket(compiled.line, 'LAG/DIF', 'lag-dif', str(exc)))
+        lag_nodes = [(node, line) for node, line in expression_nodes(asdict(compiled))
+                     if node.get('kind') == 'call' and node.get('name') in LAG_FUNCTIONS]
+        plan.matched.extend(('lag-dif', 'DS-007', line or compiled.line) for _, line in lag_nodes)
+        if lag_nodes and any(op.kind == 'put_all' for op in walk_operations(compiled.operations)):
+            plan.tickets.append(Ticket(compiled.line, 'LAG/DIF', 'lag-dif', 'LAG/DIF with PUT _ALL_ requires error-state review'))
         for message in substr_context_errors(compiled.where):
             plan.tickets.append(Ticket(compiled.line, 'SUBSTR', 'substr', message))
     checked_substr_lines = function_call_lines(plan.to_dict(), 'substr')

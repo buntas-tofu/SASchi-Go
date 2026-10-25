@@ -4,8 +4,8 @@ import math
 import re
 from collections import Counter
 from copy import deepcopy
-from sas_semantics import sas_round, sas_merge_by, sas_put_literals, sas_put_character_list, sas_put_numeric_list, sas_put_all, sas_do_counted, sas_concat
-from .functions import apply as apply_function, assign_spec, character_width, validate_reverse_calls, validate_string_expressions, expression_nodes, validate_substr_calls, substr_context_errors, validate_bitwise_calls, SAS_BITWISE_ARITY
+from sas_semantics import sas_round, sas_merge_by, sas_put_literals, sas_put_character_list, sas_put_numeric_list, sas_put_all, sas_do_counted, sas_concat, SasNumericLagQueue
+from .functions import apply as apply_function, assign_spec, character_width, validate_reverse_calls, validate_string_expressions, expression_nodes, validate_substr_calls, substr_context_errors, validate_bitwise_calls, SAS_BITWISE_ARITY, LAG_FUNCTIONS, validate_lag_calls
 from .operations import walk_operations as operations
 from .values import normalize_catalog, column_type, coerce, missing, order
 
@@ -133,11 +133,18 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
     tables, logs = normalize_catalog({} if catalog is None else catalog), []
     for step in plan['steps']:
         inputs, keys, ops = step['inputs'], step['by'], step['operations']
+        lag_queues = {}  # Per-step/run state, keyed by structural execution position.
+        lag_present = any(node.get('kind') == 'call' and node.get('name') in LAG_FUNCTIONS
+                          for node, _ in expression_nodes(step))
+        if lag_present and step['kind'] not in ('data', 'merge'):
+            raise ValueError('LAG/DIF requires a DATA-step execution scope')
         flat = list(operations(ops))
         if (step['name'] == '_null_' and any(op['kind'] == 'do_counted' for op in flat)
                 and any(op['kind'] == 'output' for op in flat)):
             raise ValueError('explicit OUTPUT in DATA _NULL_ counted DO steps is deferred')
         put_all = any(op['kind'] == 'put_all' for op in flat)
+        if put_all and lag_present:
+            raise ValueError('LAG/DIF with PUT _ALL_ requires error-state review')
         if put_all and (step['kind'] != 'data' or inputs or keys or step.get('retained') or step.get('where') or
                         (step['name'] == '_null_' and any(op['kind'] == 'output' for op in flat)) or
                         any(op['kind'] not in ('declare', 'assign', 'put_all', 'output') for op in flat)):
@@ -206,6 +213,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                 raise ValueError(context_error)
             validate_substr_calls(where, where_schema)
             validate_bitwise_calls(where, where_schema)
+            validate_lag_calls(where, where_schema)
             rows = [r for r in rows if condition(where, r, where_schema)]
         if keys and any(key(a) > key(b) for a, b in zip(rows, rows[1:])):
             raise ValueError('SET BY requires ascending sorted rows after WHERE')
@@ -242,6 +250,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                     raise ValueError(context_error)
                 validate_substr_calls(payload, schema)
                 validate_bitwise_calls(payload, schema)
+                validate_lag_calls(payload, schema, direct=context == 'assignment')
             if kind == 'declare':
                 name, spec = args['name'], args['spec']
                 if name in schema and column_type(schema[name]) != column_type(spec):
@@ -409,10 +418,19 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
             def snapshot():
                 output.append({n: deepcopy(row[n]) for n in schema})
 
-            def perform(op):
+            def perform(op, path):
                 args, kind = op['args'], op['kind']
                 if kind == 'assign':
-                    value = put_all_value(args['value'], row) if put_all else number(args['value'], row, schema)
+                    expression = args['value']
+                    name = expression.get('name') if expression.get('kind') == 'call' else None
+                    if name in LAG_FUNCTIONS:
+                        family, depth = LAG_FUNCTIONS[name]
+                        if path not in lag_queues:
+                            lag_queues[path] = SasNumericLagQueue(depth)
+                        queue = lag_queues[path]
+                        value = queue.invoke(number(expression['args'][0], row, schema), difference=family == 'dif')
+                    else:
+                        value = put_all_value(expression, row) if put_all else number(expression, row, schema)
                     if args['value'].get('kind') == 'call' and args['value'].get('name') == 'catx':
                         if len(value) > schema[args['name']]['length']:
                             raise ValueError('CATX destination is too short; buffer/error-flag review required')
@@ -423,14 +441,14 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                     values, final = sas_do_counted(args['start'], args['stop'], args['by'])
                     for value in values:
                         row[args['index']] = float(value)
-                        for child in args['body']:
-                            perform(child)
+                        for child_index, child in enumerate(args['body']):
+                            perform(child, path + ('body', child_index))
                     row[args['index']] = float(final)
                 elif kind == 'if':
                     if condition(args['condition'], row, schema):
-                        return perform(args['operation'])
+                        return perform(args['operation'], path + ('operation',))
                     if 'otherwise' in args:
-                        return perform(args['otherwise'])
+                        return perform(args['otherwise'], path + ('otherwise',))
                 elif kind == 'subset':
                     return condition(args['condition'], row, schema)
                 elif kind == 'output':
@@ -464,7 +482,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                     raise ValueError(f'unsupported operation: {kind}')
                 return True
 
-            completed = all(perform(op) for op in ops)
+            completed = all(perform(op, (position,)) for position, op in enumerate(ops))
             retained_values = {n: deepcopy(row[n]) for n in input_vars | set(retained)}
             if completed and not explicit:
                 snapshot()

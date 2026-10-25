@@ -267,19 +267,22 @@
     },
     {
       "rule_id": "DS-007",
-      "sas_pattern": "LAG()/DIF() inside conditional logic",
+      "sas_pattern": "LAG/DIF invocation queues, including bounded direct assignment in conditional actions",
       "scope": "data-step",
       "python_target": {
-        "package": "pandas",
-        "pattern": "two cases, and the difference is the whole rule. Unconditional LAG with conditional USE of its result: shift the full column first (g[c].shift(1)), then apply the condition. LAG called INSIDE the condition: the queue advances only where the call executes, so a column shift is wrong. Model the occurrence's queue directly: read the slot, then push the current value, and only on rows where the call runs."
+        "package": "saschi",
+        "pattern": "two cases preserve different invocation schedules. An unconditional CALL SITE with conditional use of its result advances on every row. A call INSIDE conditional logic advances only when that branch runs, so a row shift is wrong. The runtime uses per-DATA-step numeric occurrence queues keyed by structural source-operation path, advancing only on direct RHS execution. Existing raw reference fixtures remain separate evidence."
       },
       "r_target": {
-        "package": "dplyr",
-        "pattern": "unconditional queue with conditional use: mutate(l = lag(x)) then conditional logic on l. conditional CALL: an explicit queue, because dplyr::lag is row-based and cannot express invocation-driven history"
+        "package": "base",
+        "pattern": "Original raw queue fixtures plus lag_execution.R prior-invoked-index execution model; no row-shift replacement of conditional calls."
       },
       "required_settings": [
-        "decide first whether the CALL SITE is conditional. A conditional use of an unconditional queue is a shift. A conditional call is a queue, and is not",
-        "route a conditional call to review even when the queue is modelled explicitly: the queue is modellable, but the intent behind conditional LAG usually is not, and the human crosswalk classes it NO-DIRECT-EQUIVALENT for that reason"
+        "Canonical LAG/DIF and LAG1..LAG100/DIF1..DIF100, one argument, direct assignment RHS only. Selected IF/ELSE and counted-DO leaves are admitted under their existing contracts. Preserve source behavior without guessing or repairing the author intent. Other conditional/stateful contexts remain review cases.",
+        "Preserve whether the CALL SITE itself is conditional, rather than only its result use. Each source occurrence owns its own queue, initially missing. Structural path keys distinguish identical or aliased operations; row/loop iteration is not part of the key. State lasts for one DATA step and resets for each new step/run. BY boundaries and repeated OUTPUT do not reset/advance queues.",
+        "Argument is a finite numeric or ordinary-missing literal, numeric variable or _N_. Ordinary missing is enqueued. Character, tagged-missing and nonfinite values, other reserved automatic references and argument expressions remain refused.",
+        "Validate literal/type/descriptor policy even on empty/filtered input and skipped branches/bodies. Dynamic invalid values and nonfinite DIF results refuse atomically; helper queue state is not changed by an invalid call. No SAS error-state/diagnostic equivalence claimed.",
+        "Nested calls, arithmetic/function consumers, predicates/WHERE, arrays, PUT_ALL and C++ queue execution are deferred. A conditional use of an unconditional result differs from conditional invocation; do not transform between them."
       ],
       "forbidden_patterns": [
         "translating a conditional LAG call as a column shift (returns the previous ROW where SAS returns the previous EXECUTION)"
@@ -293,10 +296,12 @@
         "a missing argument is still an execution: it returns the front and stores missing, which is why a skipped call and a call with a missing argument leave different histories",
         "DIF differences against the same occurrence's queue, so it inherits the invocation history rather than the row order"
       ],
-      "validation_test": "values 10,20,30,40 with the occurrence executed only on rows two and four: SAS returns missing then 20, where a full-column shift returns 10 and 30. Executed two ways: the pattern's counterpart in saschi/test_rulebook.py, and the byte-equal Python/R gate examples/verify_lag.py, which also pins LAGn depth, the independent occurrence queues, DIF, and the missing-argument push",
-      "confidence": "high",
+      "validation_test": "values 10,20,30,40 with the occurrence executed only on rows two and four: SAS returns missing then 20, where a full-column shift returns 10 and 30. Executed two ways: the pattern's counterpart in saschi/test_rulebook.py, and the byte-equal Python/R gate examples/verify_lag.py, which also pins LAGn depth, the independent occurrence queues, DIF, and the missing-argument push Preserve examples/verify_lag.py unchanged. examples/verify_lag_execution.py, original examples/lag_execution.R and saschi.test_lag_execution add complete source-runtime prior-invocation comparisons, distinct occurrence identities, branch/loop scheduling, filter/BY/output timing, reset boundaries and atomic/local refusals.",
+      "confidence": "bounded repository/base-R evidence; no live SAS",
       "sources": [
-        "S-01"
+        "S-01",
+        "https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/n0l66p5oqex1f2n1quuopdvtcjqb.htm",
+        "https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/n10t6w4op574ttn11yk68dottp7f.htm"
       ]
     },
     {
@@ -1954,6 +1959,15 @@
       "r_witness": "examples/bitwise.R",
       "boundary_tests": "saschi.test_bitwise",
       "evidence": "original repository/base-R comparisons and explicit external-program width refusal, no live SAS"
+    },
+    "lag_execution": {
+      "rule_id": "DS-007",
+      "target": "saschi.runtime.run_plan",
+      "scope": "numeric direct-RHS occurrence queues, conditional/loop invocation and per-step/run state",
+      "validation_test": "examples/verify_lag_execution.py",
+      "r_witness": "examples/lag_execution.R",
+      "boundary_tests": "saschi.test_lag_execution",
+      "evidence": "original source-runtime/base-R prior-invocation comparisons, no live SAS"
     }
   }
 }

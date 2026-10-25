@@ -77,6 +77,7 @@ VERIFIERS = [
     ("substr-compositions", HERE / "examples" / "verify_substr_compositions.py"),
     ("do-if", HERE / "examples" / "verify_do_if.py"),
     ("bitwise", HERE / "examples" / "verify_bitwise.py"),
+    ("lag-execution", HERE / "examples" / "verify_lag_execution.py"),
 ]
 
 # The translator suites, run as unittest modules. They carry the same weight as
@@ -113,6 +114,7 @@ SUITES = [
     ("suite-substr-compositions", "saschi.test_substr_compositions"),
     ("suite-do-if", "saschi.test_do_if"),
     ("suite-bitwise", "saschi.test_bitwise"),
+    ("suite-lag-execution", "saschi.test_lag_execution"),
 ]
 
 

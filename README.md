@@ -338,3 +338,15 @@ refusal after its scalar PDV agrees with independent R. That refusal is evidence
 of the current boundary, not a successful whole-program execution proof.
 `examples/verify_bitwise.py` and `saschi.test_bitwise` provide repository/base-R
 evidence for maintainer review, without live SAS or C++ bitwise claims.
+
+DS-007 source execution now supports canonical LAG/DIF and depths1..100 as numeric
+direct assignment RHS calls, including selected IF/ELSE and counted-DO leaves.
+Each structural source occurrence has its own queue, advancing only on invocation
+and persisting across DATA rows/loop iterations. Ordinary missing advances it;
+BY boundaries and OUTPUT do not reset or call it. State resets for each step/run.
+Static type/context checks also cover skipped/empty input; invalid dynamic values
+and DIF overflow fail atomically. Unproven argument expressions, temporary/WHERE
+consumers, character/tagged values, PUT_ALL and C++ remain refused. The original
+raw gate is unchanged; `examples/verify_lag_execution.py` and
+`saschi.test_lag_execution` add independent base-R prior-invocation evidence for
+maintainer review, no live SAS claim.
