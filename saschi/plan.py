@@ -9,7 +9,7 @@ import math
 import re
 from dataclasses import asdict, dataclass, field
 from sas_semantics import sas_put_literals, sas_put_character_list, sas_put_numeric_list, sas_do_counted
-from .functions import FUNCTIONS, format_token, FORMATS, function_call_lines, substr_context_errors
+from .functions import FUNCTIONS, format_token, FORMATS, function_call_lines, substr_context_errors, catx_arguments_allowed
 from .parser import Kind, ParseError, split_statements
 from .operations import walk_operations as _walk_operations
 from .rules import route_function, route_statement
@@ -347,9 +347,9 @@ def compile_plan(source: str) -> Plan:
                 cats = [node for node in nodes if node['kind'] == 'call']
                 if cats and not (op.kind == 'assign' and payload.get('kind') == 'call' and
                                  payload.get('name') == 'catx' and len(cats) == 1 and
-                                 all(arg['kind'] in ('character', 'variable') for arg in payload['args'])):
+                                 catx_arguments_allowed(payload)):
                     plan.tickets.append(Ticket(op.line, 'CATX', 'concat-catx',
-                        'CATX is gated only as a direct assignment RHS with literal/variable character arguments; temporary contexts require review'))
+                        'CATX is gated only as a direct assignment RHS with literal/variable delimiter and literal/variable or checked SUBSTR items; other temporary contexts require review'))
             where_nodes = list(_string_nodes(step.where))
             if where_nodes:
                 plan.matched.append(('concat-catx', 'DS-029', step.line))
@@ -674,10 +674,6 @@ def compile_plan(source: str) -> Plan:
                 if any(not 32 <= ord(char) <= 126 for char in token.text):
                     reject(st, 'substr', 'checked SUBSTR requires printable ASCII source character values')
     has_strings = any(item[0] == 'concat-catx' for item in plan.matched)
-    if has_strings:
-        for line in sorted(set(function_call_lines(plan.to_dict(), 'substr'))):
-            plan.tickets.append(Ticket(line, 'SUBSTR', 'substr-quarantine',
-                'new character features are quarantined from actual SUBSTR calls pending separate temporary-width and composition evidence'))
     if has_strings or any(contains_put(compiled.operations, {'put_character_list', 'put_numeric_list', 'put_all'}) for compiled in plan.steps):
         # Macros resolve before DATA execution. Without taint tracking, even
         # unused or prior-step literals can affect this output contract.
@@ -703,11 +699,4 @@ def compile_plan(source: str) -> Plan:
                     reject(st, 'length-reverse', 'REVERSE requires macro-free source character values')
                 if any(not 32 <= ord(char) <= 126 for char in token.text):
                     reject(st, 'length-reverse', 'REVERSE requires printable ASCII source character values')
-    serialized = plan.to_dict()
-    substr_lines = function_call_lines(serialized, 'substr')
-    uses_new_character_slice = (function_call_lines(serialized, 'reverse') or
-                                any(construct == 'length-list' for construct, _, _ in plan.matched))
-    if substr_lines and uses_new_character_slice:
-        plan.tickets.append(Ticket(min(line or 1 for line in substr_lines), 'SUBSTR', 'length-reverse',
-            'DS-028 quarantines programs containing SUBSTR with REVERSE or multi-name LENGTH pending separate temporary-width and composition evidence'))
     return plan

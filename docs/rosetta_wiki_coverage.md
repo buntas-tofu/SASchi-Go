@@ -26,7 +26,7 @@ Status vocabulary:
 | C.4 Matrix math (transpose, multiply, invert) | MX-001; matrix family | Gated |
 | C.5 Merge datasets | DS-002, DS-003; merge family | Gated |
 | C.6 Convert numeric to character | DS-015 | Rule |
-| C.7 Concatenate character strings with a comma | DS-015 | Rule |
+| C.7 Concatenate character strings with a comma | DS-029; concat-catx family | Gated (bounded printable ASCII character items; numeric coercion deferred) |
 | C.8 Concatenate numbers with a space | DS-015 | Rule |
 | C.9 Round numbers | DS-012; rounding_n family | Gated |
 | C.10 Format numbers to four significant digits | DS-020; sigfig family | Gated |
@@ -43,9 +43,12 @@ Notes:
   2x2 inverse) is pinned and gated in MX-001; the rest of PROC IML
   (general inversions, subscripting, missing handling) still routes to
   human review under GP-09.
-- Every Gated row names a family that runs under `verify_all.py`; the
-  newest receipt under `telemetry/verify/` is the evidence, cited by
-  timestamp.
+- Every Gated row names a family that runs under `verify_all.py`; its
+  source-bound receipt under `telemetry/` is the execution evidence. Custom
+  run directories may be selected with `ROSETTA_TELEMETRY`.
+- C.7 covers the character-only CATX/operator slice in
+  `examples/verify_concat_catx.py`. C.8 numeric concatenation remains a rule
+  frontier; the character gate does not prove implicit numeric conversion.
 - Where the 2018 material pinned a comparable expected result, this
   repository's gates reproduce it: the Fisher worked example's two-sided
   p-value of 0.1238 is pinned byte-for-byte in the fisher gate.

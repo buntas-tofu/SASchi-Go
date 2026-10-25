@@ -84,7 +84,7 @@ class LengthReverseTests(unittest.TestCase):
         expression = compile_plan("data d; x=reverse('abc'); run;").steps[0].operations[0].args['value']
         self.assertEqual(character_width(expression),3)
 
-    def test_actual_substr_is_quarantined_across_steps_and_control(self):
+    def test_substr_compositions_use_local_context_and_corrected_descriptors(self):
         sources = [
             "data d; a=reverse(substr('abcde',2,3)); run;",
             "data prior; a=substr('abcde',2,3); run; data d; b=reverse('xy'); run;",
@@ -96,20 +96,28 @@ class LengthReverseTests(unittest.TestCase):
             "data d; length a b $4; c=substr('abcde',2,3); run;",
             "data prior; c=substr('abcde',2,3); run; data d; length a b $4; run;",
         ]
-        for source in sources:
+        expected=[None,('d','b','yx'),('d','a','yx'),('d','unused',' '*5),
+                  ('d','unused',' '*5),('d','b','   Yx'),('d','b','  dcb'),
+                  ('d','c','bcd  '),('prior','c','bcd  ')]
+        inputs={'raw':{'schema':{'a':{'type':'character','length':5}},'rows':[{'a':'xY'}]}}
+        for source,pin in zip(sources,expected):
             with self.subTest(source=source):
-                job=build_job(source)
-                self.assertEqual(job.code,2)
-                self.assertIsNone(job.result)
-                self.assertIn('quarantin',str(job.receipt['tickets']).lower())
-                with self.assertRaisesRegex(ValueError,'quarantin'):
-                    run_plan(job.plan.to_dict(),allow_partial=True)
+                plan=compile_plan(source)
+                if pin is None:
+                    self.assertTrue(plan.blocked)
+                    with self.assertRaisesRegex(ValueError,'SUBSTR temporary'):
+                        run_plan(plan.to_dict(),inputs,allow_partial=True)
+                else:
+                    self.assertFalse(plan.blocked,plan.tickets)
+                    dataset,column,value=pin
+                    result=run_plan(plan.to_dict(),inputs)
+                    self.assertEqual(result['datasets'][dataset]['rows'][0][column],value)
 
-    def test_quarantine_ignores_literals_and_legacy_single_declarations(self):
+    def test_function_text_and_single_declarations_retain_behavior(self):
         source="data d; length a b $16; a='substr(x,2,3)'; b=reverse(a); run;"
         self.assertFalse(compile_plan(source).blocked)
         self.assertTrue(build_job(source).receipt['accepted'])
-        # Compatibility checks retain the old slice, without endorsing its width claim.
+        # DS-030 corrected descriptors also apply to the original single-name paths.
         for source in ("data d; x=substr('abcde',2,3); run;",
                        "data d; length a $5; a='abcde'; b=substr(a,2,3); run;",
                        "data d; length a $5; length b $3; a='abcde'; b=substr(a,2,3); run;"):

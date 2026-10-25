@@ -74,6 +74,7 @@ VERIFIERS = [
 
     ("concat-catx", HERE / "examples" / "verify_concat_catx.py"),
     ("substr", HERE / "examples" / "verify_substr.py"),
+    ("substr-compositions", HERE / "examples" / "verify_substr_compositions.py"),
 ]
 
 # The translator suites, run as unittest modules. They carry the same weight as
@@ -107,6 +108,7 @@ SUITES = [
     ("suite-concat-catx", "saschi.test_concat_catx"),
     ("suite-string-composition", "saschi.test_string_composition"),
     ("suite-substr", "saschi.test_substr"),
+    ("suite-substr-compositions", "saschi.test_substr_compositions"),
 ]
 
 

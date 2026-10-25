@@ -130,11 +130,18 @@ class SubstrTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError,'SUBSTR'):
                 run_plan(job.plan.to_dict(),allow_partial=True)
 
-    def test_global_quarantine_remains(self):
+    def test_global_cooccurrence_uses_local_width_contracts(self):
         for tail in ("r=reverse(x);", "length a b $3;", "r='a'!!'b';", "r=catx('|','a','b');"):
             source="data first; x=substr('abcde',2,3); run; data d; "+tail+' run;'
-            job=build_job(source);self.assertEqual(job.code,2)
-            with self.assertRaisesRegex(ValueError,'quarantin'):run_plan(job.plan.to_dict(),allow_partial=True)
+            job=build_job(source)
+            if tail == 'r=reverse(x);':
+                # A new step does not inherit x without SET; preserve that refusal.
+                self.assertEqual(job.code,1)
+                self.assertIn('REVERSE',job.receipt['error'])
+                self.assertIsNone(job.result)
+            else:
+                self.assertEqual(job.code,0,job.receipt.get('error'))
+                self.assertEqual(job.result['datasets']['first']['rows'],[{'x':'bcd  '}])
         self.assertFalse(compile_plan("data d; x='substr(a,1,2)'; r=reverse(x); run;").blocked)
 
     def test_source_wide_guards_and_cpp_refusal(self):

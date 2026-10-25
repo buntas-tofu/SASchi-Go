@@ -1723,7 +1723,7 @@
         "A new target inherits argument descriptor width. Earlier target widths retain existing assignment truncation/padding. Copied/input variables, supported nested REVERSE/PUT calls and zero-trip body schema are analyzed without row values.",
         "Validate REVERSE descriptors even for sized targets, nested numeric-returning expressions, empty/filtered inputs and zero-trip bodies. Refuse unresolved/numeric argument widths before row execution.",
         "Conservatively refuse double-quoted macro triggers and non-ASCII/control source literals anywhere in a REVERSE program. Existing PUT blank-field/format/width boundaries and scalar PUT _ALL_ function allowlist stay intact. C++ refuses character operations.",
-        "Principal-selected quarantine: any actual SUBSTR call anywhere in a program with REVERSE or a new multi-name LENGTH group blocks the complete program, including prior/unused/skipped/WHERE calls. Literal text is ignored. DS-030 repairs direct assignment descriptors; temporary composition widths remain deferred and old extraction-only pins are not destination-width evidence."
+        "DS-030 composition evidence replaces program-wide SUBSTR quarantine with local consumer checks. Multi-name LENGTH and REVERSE over stored SUBSTR variables are accepted; REVERSE(SUBSTR(...)) still requires storing first because temporary width is unclaimed."
       ],
       "silent_difference_checks": [
         "Trimming the argument before reversing loses leading result blanks.",
@@ -1751,11 +1751,11 @@
       },
       "required_settings": [
         "Only nonempty printable ASCII character operands, individual widths at most32767. Operator chains have2..32 operands and sum-of-widths at most32767. Preserve every operand blank; earlier target widths retain ordinary assignment truncation/padding. Numeric implicit conversions remain deferred.",
-        "CATX has1..32 literal/variable character items and a literal/variable character delimiter. It strips item edge spaces, omits blank items, preserves delimiter spaces, and gives a previously untyped DATA-step target width200.",
+        "CATX has1..32 literal/variable character items or direct checked SUBSTR items and a literal/variable character delimiter. It strips item edge spaces, omits blank items, preserves delimiter spaces, and gives a previously untyped DATA-step target width200.",
         "CATX is a direct assignment RHS only, including directly guarded IF THEN assignments. Nested calls, concat operands, function arguments, predicates and WHERE are refused because temporary capacities depend on context. This slice caps result bytes at200 even when an earlier target is wider.",
         "Refuse actual CATX destination-capacity overflow atomically before coerce. No approximation of SAS blanking, warnings or _ERROR_ state. Static operand descriptors are validated even on empty/filtered input and zero-trip bodies; unsupported values are refused when executed.",
         "Refuse source double-quoted macro triggers and non-ASCII/control character literals anywhere when these new constructs occur, even without PUT. Existing PUT record/blank-field limits, PUT _ALL_ new-expression refusals and C++ refusals remain. These are bounded implementation policies, not SAS language limits.",
-        "Principal-directed quarantine: refuse any program combining this new slice with an actual SUBSTR call anywhere in the complete AST, including prior steps, unreachable branches, WHERE and intermediate assignments. Literal SUBSTR text is not a call. DS-030 repairs direct assignment descriptors separately; temporary composition widths and error-state combinations remain deferred."
+        "DS-030 composition evidence permits stored SUBSTR operands and checked SUBSTR CATX items. CATX strips item padding, verified with raw/padded independent R models. Delimiters remain literal/variable. SUBSTR inside concatenation operands retains a local temporary-width refusal; no global cooccurrence quarantine."
       ],
       "silent_difference_checks": [
         "Python trimming would erase operator blanks; generic join would emit delimiters for blank CATX items.",
@@ -1782,20 +1782,22 @@
         "pattern": "examples/substr.R byte selection, explicit storage and padding-insensitive consumer models"
       },
       "required_settings": [
-        "Nonempty printable ASCII literal or known character variable source, widths1..32767. Finite positive integral numeric position and length, both within source. Three arguments only. These are implementation policies, not SAS language limits.",
+        "Nonempty printable ASCII literal, known character variable or fixed REVERSE/concatenation source expression, widths1..32767. Finite positive integral numeric position and length, both within source. Three arguments only. These are implementation policies, not SAS language limits.",
         "New destination width is the first argument descriptor, not the extraction count. Existing destination width still truncates or pads assignments. WHERE validates against driving input descriptors before output LENGTH overrides.",
         "Check literal bounds and expression types even on empty/filtered input and skipped bodies; dynamic bounds are checked when executed. Refuse invalid/error-flag cases atomically without output.",
-        "Temporary widths remain unclaimed. Allow direct assignment, LENGTH/LENGTHN, direct comparisons and COUNT first argument only with a constant nonempty space-free needle. Padding-insensitive consumers are a bounded inference checked against raw and padded R models. Store before LENGTHC or other consumers.",
-        "Keep the principal quarantine against REVERSE, multi-name LENGTH and concatenation/CATX across the complete program. Refuse implicit coercion, nested sources, macro triggers, Unicode/control literals and C++ execution."
+        "Temporary widths remain unclaimed. Allow direct assignment, LENGTH/LENGTHN, direct comparisons and COUNT first argument only with a constant nonempty space-free needle. Padding-insensitive consumers are a bounded inference checked against raw and padded R models. Store before LENGTHC or other consumers. Direct checked SUBSTR CATX items are also padding-insensitive; CATX remains direct-assignment-only with its existing capacity refusals.",
+        "Global string-feature quarantine is replaced by local checks. Stored SUBSTR values compose with LENGTH groups, REVERSE, concatenation and CATX. SUBSTR may extract from fixed REVERSE/concat sources. Refuse REVERSE(SUBSTR), SUBSTR concat operands/delimiters, nested SUBSTR sources and other unproven temporary consumers; store first. Implicit coercion, macro triggers, Unicode/control literals and C++ remain refused."
       ],
       "silent_difference_checks": [
         "The extraction length does not determine the default destination width. Old raw extraction-only fixtures do not prove PDV widths or SAS diagnostics.",
         "Overrun, zero/negative and fractional bounds cannot silently become error-free slices."
       ],
-      "validation_test": "examples/verify_substr.py and saschi.test_substr: original pins, generated independent R cases, source-order descriptors, skipped validation, input-side WHERE, atomic refusal and retained quarantine.",
+      "validation_test": "examples/verify_substr.py and saschi.test_substr: original pins, generated independent R cases, source-order descriptors, skipped validation, input-side WHERE, atomic refusal and local temporary-consumer checks. examples/verify_substr_compositions.py and saschi.test_substr_compositions: complete runtime/R compositions, local refusal, source/PDV widths, skipped validation and atomic failures.",
       "confidence": "bounded repository/base-R evidence, no live SAS",
       "sources": [
-        "https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/n0n08xougp40i5n1xw7njpcy0a2b.htm"
+        "https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/n0n08xougp40i5n1xw7njpcy0a2b.htm",
+        "https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/n0p7wxtk0hvn83n1pveisbcp2ae9.htm",
+        "https://blogs.sas.com/content/sgf/2021/02/22/deleting-a-substring-from-a-sas-string/"
       ]
     }
   ],
@@ -1857,12 +1859,20 @@
     },
     "substr": {
       "rule_id": "DS-030",
-      "scope": "checked ASCII three-argument extraction and source-width DATA-step destination; composition quarantine retained",
+      "scope": "checked ASCII SUBSTR extraction, source-width destinations and locally proven stored/fixed-source/CATX-item compositions",
       "target": "saschi.runtime.run_plan",
       "validation_test": "examples/verify_substr.py",
       "r_witness": "examples/substr.R",
       "boundary_tests": "saschi.test_substr",
       "evidence": "original repository/base-R evidence; no live SAS"
+    },
+    "substr_compositions": {
+      "rule_id": "DS-030",
+      "validation_test": "examples/verify_substr_compositions.py",
+      "r_witness": "examples/substr_compositions.R",
+      "boundary_tests": "saschi.test_substr_compositions",
+      "scope": "stored values with new character features, fixed-width expression sources, padding-insensitive CATX items; unproven temporary widths refused",
+      "evidence": "original repository and independent base-R comparisons; no live SAS"
     }
   }
 }
