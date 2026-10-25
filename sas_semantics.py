@@ -291,6 +291,30 @@ def sas_put_character_list(items):
     return record
 
 
+# DS-027 simple numeric list output: one blank after each value, ordinary
+# missing as a period, and the conservative signed BEST12 integer subset.
+# These are logical records, not a claim about physical SAS log typography.
+def sas_put_numeric_list(values):
+    """Render unformatted numeric fields for the bounded DS-027 slice."""
+    if not isinstance(values, (list, tuple)) or not values:
+        raise ValueError('PUT numeric list: a nonempty value list is required')
+    parts = []
+    for value in values:
+        if value is None:
+            text = '.'
+        else:
+            if isinstance(value, bool) or not isinstance(value, (int, float)):
+                raise ValueError('PUT numeric list: ordinary numeric values required')
+            if abs(value) > 99999999999 or not math.isfinite(value) or value != int(value):
+                raise ValueError('PUT numeric list: whole numbers within the signed BEST12 slice required')
+            text = str(int(value))
+        parts.append(text + ' ')
+    record = ''.join(parts)
+    if len(record) > 64:
+        raise ValueError('PUT numeric list: output beyond 64 columns requires LINESIZE review')
+    return record
+
+
 def sas_put_all(fields):
     """DS-025 scalar named PDV output, followed by _ERROR_=0 and _N_=1.
 

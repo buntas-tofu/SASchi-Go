@@ -4,7 +4,7 @@ import math
 import re
 from collections import Counter
 from copy import deepcopy
-from sas_semantics import sas_round, sas_merge_by, sas_put_literals, sas_put_character_list, sas_put_all, sas_do_counted
+from sas_semantics import sas_round, sas_merge_by, sas_put_literals, sas_put_character_list, sas_put_numeric_list, sas_put_all, sas_do_counted
 from .functions import apply as apply_function, assign_spec
 from .values import normalize_catalog, column_type, coerce, missing, order
 
@@ -163,7 +163,9 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                     raise ValueError('incompatible input column types')
                 schema.setdefault(col, deepcopy(spec))
                 if isinstance(spec, dict) and spec.get('format'):
-                    if isinstance(schema[col], dict) and not schema[col].get('format'):
+                    if not isinstance(schema[col], dict):
+                        schema[col] = {'type': schema[col]}
+                    if not schema[col].get('format'):
                         schema[col]['format'] = spec['format']
         if not set(keys) <= set(schema):
             raise ValueError('BY column missing from schema')
@@ -204,7 +206,9 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                 schema.setdefault(col, deepcopy(spec))
                 # LENGTH sets width without removing an inherited format.
                 if isinstance(spec, dict) and spec.get('format'):
-                    if isinstance(schema[col], dict) and not schema[col].get('format'):
+                    if not isinstance(schema[col], dict):
+                        schema[col] = {'type': schema[col]}
+                    if not schema[col].get('format'):
                         schema[col]['format'] = spec['format']
 
         def add_reference(expr):
@@ -252,7 +256,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                 sas_do_counted(args['start'], args['stop'], args['by'])
                 if name not in schema or column_type(schema[name]) != 'number':
                     raise ValueError('counted DO index requires a preceding numeric declaration')
-                allowed = {'assign', 'round', 'put', 'put_literal', 'put_character_list', 'output'}
+                allowed = {'assign', 'round', 'put', 'put_literal', 'put_character_list', 'put_numeric_list', 'output'}
                 for child in args['body']:
                     if (child['kind'] not in allowed or
                             child['kind'] in ('assign', 'round') and child['args']['name'] == name):
@@ -264,6 +268,15 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
             elif kind == 'put_all':
                 if args:
                     raise ValueError('PUT _ALL_: unexpected plan arguments')
+            elif kind == 'put_numeric_list':
+                names = args.get('names')
+                if (set(args) != {'names'} or not isinstance(names, list) or not names or
+                        any(not isinstance(name, str) or not re.fullmatch(r'[a-z_][a-z0-9_]{0,31}', name)
+                            or name in ('_n_', '_error_', '_all_', '_numeric_', '_character_', '_infile_', '_file_', '_ods_', '_page_', '_blankpage_')
+                            for name in names)):
+                    raise ValueError('PUT numeric list: nonempty normalized ordinary variable names required')
+                if any(name not in schema for name in names):
+                    raise ValueError('PUT numeric list: variables must be known before PUT')
             elif kind == 'put_character_list':
                 if not isinstance(args.get('items'), list) or not args['items']:
                     raise ValueError('PUT character list: nonempty plan items required')
@@ -300,6 +313,12 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                             raise ValueError(f"SAS line {op['line']}: PUT character list requires unformatted character variables")
                         resolved.append({'kind': 'character', 'value': 'x'})
                 sas_put_character_list(resolved)
+            elif op['kind'] == 'put_numeric_list':
+                for name in op['args']['names']:
+                    spec = schema[name]
+                    if column_type(spec) != 'number' or isinstance(spec, dict) and spec.get('format'):
+                        raise ValueError(f"SAS line {op['line']}: PUT numeric list requires unformatted numeric variables")
+                sas_put_numeric_list([None] * len(op['args']['names']))
         for name in retained:
             schema.setdefault(name, 'number')
             if column_type(schema[name]) != 'number':
@@ -373,6 +392,11 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                 elif kind == 'put_all':
                     logs.append(sas_put_all([{'name': display.get(n, n), 'kind': column_type(s), 'value': row[n]}
                                              for n, s in schema.items()]))
+                elif kind == 'put_numeric_list':
+                    try:
+                        logs.append(sas_put_numeric_list([row[name] for name in args['names']]))
+                    except ValueError as exc:
+                        raise ValueError(f"SAS line {op['line']}: {exc}") from exc
                 elif kind == 'put_character_list':
                     resolved = [item if item['kind'] == 'literal' else
                                 {'kind': 'character', 'value': row[item['value']]}

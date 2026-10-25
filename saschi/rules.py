@@ -154,6 +154,7 @@ CONSTRUCT_MAP: dict[str, str] = {
     "put-character-list": "DS-024",
     "put-all": "DS-025",
     "do-counted": "DS-026",
+    "put-numeric-list": "DS-027",
     "arrays": "DS-016",
     "formats": "DS-010",
     "by-group": "DS-006",

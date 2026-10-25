@@ -8,7 +8,7 @@ from __future__ import annotations
 import math
 import re
 from dataclasses import asdict, dataclass, field
-from sas_semantics import sas_put_literals, sas_put_character_list, sas_do_counted
+from sas_semantics import sas_put_literals, sas_put_character_list, sas_put_numeric_list, sas_do_counted
 from .functions import FUNCTIONS, format_token, FORMATS
 from .parser import Kind, ParseError, split_statements
 from .rules import route_function, route_statement
@@ -231,6 +231,51 @@ def walk_operations(ops):
             yield from walk_operations([Operation(**op.args['operation'])])
         elif op.kind == 'do_counted':
             yield from walk_operations([Operation(**body) for body in op.args['body']])
+
+
+def put_known_types(ops):
+    """Source-order types for PUT routing, with no descriptor-only guesses."""
+    known = {}
+
+    def expression_type(expr):
+        kind = expr['kind']
+        if kind in ('number', 'missing', 'tagged_missing', 'automatic'):
+            return 'number'
+        if kind == 'character':
+            return 'character'
+        if kind == 'variable':
+            return known.get(expr['value'])
+        if kind == 'call':
+            return FUNCTIONS[expr['name']].returns
+        if kind == 'arithmetic' and all(expression_type(expr[key]) == 'number' for key in ('left', 'right')):
+            return 'number'
+        return None
+
+    for previous in ops:
+        previous = asdict(previous) if isinstance(previous, Operation) else previous
+        while previous['kind'] == 'if':
+            previous = previous['args']['operation']
+        args, kind = previous['args'], previous['kind']
+        if kind == 'declare':
+            spec = args['spec']
+            known.setdefault(args['name'], spec if isinstance(spec, str) else spec['type'])
+        elif kind in ('assign', 'round'):
+            known.setdefault(args['name'], 'number' if kind == 'round' else expression_type(args['value']))
+    return known
+
+
+def contains_put(ops, kinds):
+    """Inspect serialized nested operations for program-wide PUT guards."""
+    for op in ops:
+        op = asdict(op) if isinstance(op, Operation) else op
+        if op['kind'] in kinds:
+            return True
+        args = op['args']
+        if 'operation' in args and contains_put([args['operation']], kinds):
+            return True
+        if 'body' in args and contains_put(args['body'], kinds):
+            return True
+    return False
 
 
 def compile_plan(source: str) -> Plan:
@@ -506,6 +551,19 @@ def compile_plan(source: str) -> Plan:
                     reject(st, 'put', 'literal-to-variable PUT requires source whitespace; typed literals and comment-only separation need review')
                     continue
                 names = [item.text.lower() for item in items if item.kind == Kind.WORD]
+                types = put_known_types(walk_operations(step.operations))
+                if all(item.kind == Kind.WORD for item in items) and all(types.get(name) == 'number' for name in names):
+                    if any(name in ('_n_', '_infile_', '_file_', '_ods_', '_page_', '_blankpage_') for name in names):
+                        reject(st, 'put', 'PUT automatic variables and special controls require review')
+                        continue
+                    try:
+                        sas_put_numeric_list([None] * len(names))
+                    except ValueError as exc:
+                        reject(st, 'put', str(exc))
+                    else:
+                        append_operation(Operation('put_numeric_list', st.line, {'names': names}))
+                        plan.matched.append(('put-numeric-list', 'DS-027', st.line))
+                    continue
                 known = set(step.lengths)
                 for previous in walk_operations(step.operations):
                     previous = asdict(previous)
@@ -544,15 +602,17 @@ def compile_plan(source: str) -> Plan:
         family, _ = route_function(text)
         reject(st, family if family != "unknown" else construct, "no operation for this statement")
     finish()
-    if any(op.kind in ('put_character_list', 'put_all') for compiled in plan.steps for op in walk_operations(compiled.operations)):
+    if any(contains_put(compiled.operations, {'put_character_list', 'put_numeric_list', 'put_all'}) for compiled in plan.steps):
         # Macros resolve before DATA execution. Without taint tracking, even
         # unused or prior-step literals can affect this output contract.
         for st in statements:
             if any(token.kind == Kind.STRING and token.text.startswith('"') and
                    any(char in token.text for char in '&%') for token in st.tokens):
                 reject(st, 'put', 'bounded PUT requires macro-free source: double-quoted & or % anywhere in the program requires macro review')
-    if any(op.kind == 'put_all' for compiled in plan.steps for op in walk_operations(compiled.operations)):
+    has_all_put = any(contains_put(compiled.operations, {'put_all'}) for compiled in plan.steps)
+    if has_all_put or any(contains_put(compiled.operations, {'put_numeric_list'}) for compiled in plan.steps):
         for st in statements:
             if any(token.kind == Kind.STRING and any(not 32 <= ord(c) <= 126 for c in token.text) for token in st.tokens):
-                reject(st, 'put-all', 'PUT _ALL_ requires printable ASCII source character values')
+                reject(st, 'put-all' if has_all_put else 'put',
+                       ('PUT _ALL_' if has_all_put else 'PUT numeric list') + ' requires printable ASCII source character values')
     return plan
