@@ -7,7 +7,7 @@ consumers, and an unclosed lexical fence raises ParseError with its start line.
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 
 
@@ -24,6 +24,8 @@ class Token:
     kind: Kind
     text: str
     line: int
+    start: int | None = field(default=None, compare=False, repr=False)
+    end: int | None = field(default=None, compare=False, repr=False)
 
 
 @dataclass(frozen=True)
@@ -31,6 +33,7 @@ class Statement:
     text: str
     line: int
     terminated: bool = True
+    tokens: tuple[Token, ...] = field(default=(), compare=False, repr=False)
 
 
 class ParseError(ValueError):
@@ -102,7 +105,7 @@ def tokenize(source: str) -> list[Token]:
                 i += 1
             else:
                 raise ParseError("unterminated string", start_line)
-            tokens.append(Token(Kind.STRING, source[start:i], start_line))
+            tokens.append(Token(Kind.STRING, source[start:i], start_line, start, i))
             continue
         if ch == ";":
             text = " ".join(t.text for t in tokens[statement_start:]).strip()
@@ -128,7 +131,7 @@ def tokenize(source: str) -> list[Token]:
             i += 1
         text = source[start:i]
         tokens.append(Token(Kind.WORD if text[0].isalpha() or text[0] == "_" else Kind.OTHER,
-                            text, start_line))
+                            text, start_line, start, i))
     return tokens
 
 
@@ -141,10 +144,10 @@ def split_statements(source: str) -> list[Statement]:
                 # Prefix inline records so a record resembling code cannot emit.
                 text = ("<inline-data> " + buf[0].text if buf[0].kind is Kind.DATA else
                         " ".join(t.text for t in buf))
-                statements.append(Statement(text, buf[0].line))
+                statements.append(Statement(text, buf[0].line, tokens=tuple(buf)))
             buf = []
         else:
             buf.append(token)
     if buf:
-        statements.append(Statement(" ".join(t.text for t in buf), buf[0].line, False))
+        statements.append(Statement(" ".join(t.text for t in buf), buf[0].line, False, tuple(buf)))
     return statements

@@ -230,6 +230,48 @@ def sas_put_literals(literals):
 
 
 # ---------------------------------------------------------------------------
+# Simple PUT character-variable lists remove leading and trailing ASCII blanks
+# from nonblank values, then add one blank after each variable. Literal items
+# retain DS-023 spacing. The terminal separator is retained in this logical
+# buffer contract; physical SAS log records are not asserted. Sources: PUT List
+# and FORMAT references in DS-024. Bounded policy: printable ASCII, <=64 columns,
+# no numeric values or attached formats. Blank character fields require a
+# separate missing-field width contract and are explicitly refused.
+# ---------------------------------------------------------------------------
+
+
+def sas_put_character_list(items):
+    """Render resolved literal/character items for the bounded DS-024 slice."""
+    if not isinstance(items, (list, tuple)) or not items:
+        raise ValueError('PUT character list: a nonempty item list is required')
+    parts, characters = [], 0
+    for item in items:
+        if not isinstance(item, dict) or set(item) != {'kind', 'value'}:
+            raise ValueError('PUT character list: each item needs kind and value')
+        kind, value = item['kind'], item['value']
+        if kind == 'literal':
+            parts.append(sas_put_literals([value]))
+        elif kind == 'character':
+            characters += 1
+            if not isinstance(value, str):
+                raise ValueError('PUT character list: character values required; no implicit conversion')
+            if any(not 32 <= ord(char) <= 126 for char in value):
+                raise ValueError('PUT character list: only printable ASCII values are gated')
+            value = value.strip(' ')
+            if not value:
+                raise ValueError('PUT character list: blank character values require missing-field review')
+            parts.append(value + ' ')
+        else:
+            raise ValueError('PUT character list: unsupported item kind')
+    if not characters:
+        raise ValueError('PUT character list: at least one character variable is required')
+    record = ''.join(parts)
+    if len(record) > 64:
+        raise ValueError('PUT character list: output beyond 64 columns requires LINESIZE review')
+    return record
+
+
+# ---------------------------------------------------------------------------
 # COUNT counts literal substrings, with optional I (ignore case) and T (trim
 # trailing ASCII blanks from both arguments). SAS documents overlapping
 # occurrences as undefined; Python str.count silently chooses non-overlap.

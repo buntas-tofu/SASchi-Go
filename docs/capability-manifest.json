@@ -78,7 +78,7 @@
    "stmt": "b6d4579",
    "dso": "e5ca315"
   },
-  "put_update": "DS-023 and the put-literal/suite-put gates update PUT and PUT List; other entries retain their recorded assessment."
+  "put_update": "DS-023/DS-024 and the put-literal/put-character-list/suite-put/suite-put-list gates update PUT and PUT List; other entries retain their recorded assessment."
  },
  "rollup": {
   "stmt": {
@@ -1103,14 +1103,17 @@
    "valid_in": "DATA step",
    "disposition": "GATED",
    "rule_ids": [
-    "DS-023"
+    "DS-023",
+    "DS-024"
    ],
    "gates": [
     "put-literal",
-    "suite-put"
+    "suite-put",
+    "put-character-list",
+    "suite-put-list"
    ],
    "reference_page": 265,
-   "note": "Bounded quoted-literal log records only: printable ASCII, at most 64 columns, spacing and quote decoding. Other list forms, FILE, pointers, macros, and C++ require review. Named-list output has a separate entry."
+   "note": "Bounded logical records of quoted literals and ordinary unformatted nonblank character variables: printable ASCII, at most 64 columns including variable separators, documented spacing and quote decoding. Blank fields, numeric output, attached formats, special controls, literal adjacency/comment-only separation, FILE, pointers, macros, and C++ require review. Named-list output has a separate entry."
   },
   {
    "entry": "PUT Statement: Column",
@@ -1142,14 +1145,17 @@
    "valid_in": "DATA step",
    "disposition": "GATED",
    "rule_ids": [
-    "DS-023"
+    "DS-023",
+    "DS-024"
    ],
    "gates": [
     "put-literal",
-    "suite-put"
+    "suite-put",
+    "put-character-list",
+    "suite-put-list"
    ],
    "reference_page": 296,
-   "note": "Bounded quoted-literal log records only: printable ASCII, at most 64 columns, spacing and quote decoding. Other list forms, FILE, pointers, macros, and C++ require review. Named-list output has a separate entry."
+   "note": "Bounded logical records of quoted literals and ordinary unformatted nonblank character variables: printable ASCII, at most 64 columns including variable separators, documented spacing and quote decoding. Blank fields, numeric output, attached formats, special controls, literal adjacency/comment-only separation, FILE, pointers, macros, and C++ require review. Named-list output has a separate entry."
   },
   {
    "entry": "PUT Statement: Named",
