@@ -696,6 +696,41 @@
       ]
     },
     {
+      "rule_id": "DS-023",
+      "sas_pattern": "PUT quoted-literal <quoted-literal ...>;",
+      "scope": "data-step",
+      "python_target": {
+        "package": "stdlib",
+        "pattern": "sas_semantics.sas_put_literals: concatenate decoded quoted tokens into one logical log record"
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "examples/put.R: scan each quoted token and join decoded characters without separators"
+      },
+      "required_settings": [
+        "Quoted literals advance to the immediately following column, without an automatic blank. Preserve spaces inside literals; syntax whitespace does not print",
+        "Decode doubled delimiters once. In the PUT-specific quote-pair form, two delimiters alone output one delimiter, as documented by PUT Statement: List",
+        "Without FILE or a line-hold specifier, each PUT writes a separate log record. This contract stores logical records without newline characters, source echoes, or SAS diagnostic framing",
+        "Bounded support policy: only printable ASCII and a total record width at most 64, the minimum documented LINESIZE. Longer records require a wrapping contract",
+        "Double-quoted & and % require macro review; single-quoted text remains literal. No implicit conversions, variables mixed with literals, repeats, formatted items, FILE destinations, pointers, line holds, or conditional PUT in this slice",
+        "Python translation and a base-R reference are gated. The C++ scalar pilot refuses this operation. Existing named-list PUT remains a separate operation"
+      ],
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "forbidden_patterns": [
+        "print(*values) or paste(values) with a default blank separator",
+        "Trimming literal blanks, applying Python backslash escapes, or treating doubled SAS quotes as two output characters",
+        "Dropping an unsupported PUT suffix, expanding macros implicitly, or presenting logical records as a captured physical SAS log"
+      ],
+      "validation_test": "examples/verify_put.py: original spacing/quoting pins, generated literal round trips, independent R witness, boundary refusals, and naive-error detectors; saschi.test_put: emitted output, iteration order, source lines, whole-job refusals, target refusal, and unchanged Roku Hello World",
+      "confidence": "high within the bounded slice; repository evidence, no live SAS",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/lestmtsref/63323/HTML/default/n1spe7nmkmi7ywn175002rof97fv.htm",
+        "https://support.sas.com/documentation/cdl/en/lestmtsref/63323/HTML/default/p0jcwhe1ofmb49n1xf1q2kc44b0v.htm",
+        "https://support.sas.com/documentation/cdl/en/lrcon/62955/HTML/default/a000780334.htm",
+        "https://support.sas.com/documentation/cdl/en/lesysoptsref/64892/HTML/default/n1quv1ypgn8bojn1q4s7nfagkfwu.htm"
+      ]
+    },
+    {
       "rule_id": "SQL-001",
       "sas_pattern": "PROC SQL general queries",
       "scope": "proc-sql",

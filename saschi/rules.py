@@ -149,6 +149,7 @@ CONSTRUCT_MAP: dict[str, str] = {
     "sort": "DS-008",
     "char-funcs": "DS-015",
     "count": "DS-022",
+    "put-literal": "DS-023",
     "arrays": "DS-016",
     "formats": "DS-010",
     "by-group": "DS-006",
@@ -204,6 +205,7 @@ CONSTRUCT_MAP: dict[str, str] = {
 # Statement-level routing: statement-start regex -> construct name.
 # Order matters: longest/most specific first.
 STATEMENT_ROUTER: list[tuple[re.Pattern, str]] = [
+    (re.compile(r"^\s*PUT\s*['\"]", re.I), "put-literal"),
     (re.compile(r"^\s*PROC\s+SORT\b", re.I), "sort"),
     (re.compile(r"^\s*PROC\s+TRANSPOSE\b", re.I), "transpose"),
     (re.compile(r"^\s*PROC\s+FORMAT\b", re.I), "formats"),

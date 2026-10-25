@@ -19,6 +19,21 @@ expected values and an independent base-R implementation gate the result.
 
 ## Plan version 2
 
+Quoted-literal `PUT` statements emit one logical log record each. For example,
+`put 'left' 'right';` emits `leftright`, while `put 'left ' 'right';` emits
+`left right`. Syntax whitespace is not output. Blanks inside literals remain
+significant. Doubled delimiters decode once, and the PUT-specific bare quote
+pair emits one delimiter. No Python backslash escaping is applied.
+
+DS-023 gates printable ASCII records of at most 64 columns, which fit the
+documented minimum SAS LINESIZE. Double-quoted ampersands and percent signs
+require macro review. FILE destinations, pointer controls, line holds, repeats,
+formatted or variable items mixed with literals, conditional PUT, and longer
+records remain tickets. Named-list `put x=;` remains supported separately.
+Python execution and the independent base-R witness are checked by
+`examples/verify_put.py` and `saschi.test_put`; C++ refuses literal PUT. These
+are logical records, not physical log captures with SAS notes and source echoes.
+
 A single simple DATA destination is supported. `OUTPUT;` and `OUTPUT name;`
 snapshot the current PDV immediately. Any explicit OUTPUT in the step disables
 implicit end-of-iteration output, including an OUTPUT in a false IF branch.

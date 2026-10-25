@@ -8,8 +8,9 @@ from __future__ import annotations
 import math
 import re
 from dataclasses import asdict, dataclass, field
+from sas_semantics import sas_put_literals
 from .functions import FUNCTIONS, format_token, FORMATS
-from .parser import ParseError, split_statements
+from .parser import Kind, ParseError, split_statements, tokenize
 from .rules import route_function, route_statement
 
 NAME = r"[A-Za-z_][A-Za-z0-9_]{0,31}"
@@ -251,7 +252,9 @@ def compile_plan(source: str) -> Plan:
         return plan
     for st in statements:
         text = st.text
-        if re.search(r"\b(?:_ERROR_|_ALL_|_NUMERIC_|_CHARACTER_)\b", text, re.I):
+        # Quoted words are data, including names that resemble variable lists.
+        unquoted = re.sub(r"'(?:[^']|'')*'|\"(?:[^\"]|\"\")*\"", ' ', text)
+        if re.search(r"\b(?:_ERROR_|_ALL_|_NUMERIC_|_CHARACTER_)\b", unquoted, re.I):
             reject(st, "automatic-variable", "automatic variables and variable lists are outside this slice")
             continue
         if not st.terminated:
@@ -395,6 +398,17 @@ def compile_plan(source: str) -> Plan:
             reject(st, family if family != "unknown" else "assignment", "unsupported expression")
             continue
         if re.match(r"^put\b", text, re.I):
+            items = tokenize(text)[1:]
+            if items and all(item.kind == Kind.STRING for item in items):
+                literals = [item.text for item in items]
+                try:
+                    sas_put_literals(literals)
+                except ValueError as exc:
+                    reject(st, "put", str(exc))
+                else:
+                    step.operations.append(Operation("put_literal", st.line, {"literals": literals}))
+                    plan.matched.append(("put-literal", "DS-023", st.line))
+                continue
             rest, names = re.sub(r"^put\s*", "", text, flags=re.I), []
             while match := re.match(r"\s*(" + NAME + r")\s*=", rest):
                 names.append(match[1].lower())

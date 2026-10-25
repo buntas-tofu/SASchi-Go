@@ -165,6 +165,40 @@ def sas_substr(s, pos, length=None):
 
 
 # ---------------------------------------------------------------------------
+# PUT quoted literals advance to the next column without an inserted blank.
+# Doubled delimiters inside a literal become one delimiter. The PUT-specific
+# quote-pair form (two delimiters only) writes one delimiter, per the PUT List
+# reference. Each call returns one logical log record, without its newline.
+# Sources: SAS PUT, PUT List, character constants, and LINESIZE, in DS-023.
+# Bounded policy: printable ASCII, at most 64 columns (the minimum LINESIZE),
+# no double-quoted macro triggers. FILE, pointer controls, and mixed variable
+# output require separate gates. This is not a physical SAS log transcript.
+# ---------------------------------------------------------------------------
+
+
+def sas_put_literals(literals):
+    """Render one bounded PUT record from complete, still-quoted SAS tokens."""
+    if not isinstance(literals, (list, tuple)) or not literals:
+        raise ValueError("PUT: one or more quoted literals required")
+    values = []
+    for literal in literals:
+        if not isinstance(literal, str) or not re.fullmatch(
+                r"'(?:[^']|'')*'|\"(?:[^\"]|\"\")*\"", literal):
+            raise ValueError("PUT: complete quoted literals required")
+        quote, body = literal[0], literal[1:-1]
+        if quote == '"' and any(char in body for char in '&%'):
+            raise ValueError("PUT: double-quoted & or % requires macro review")
+        value = body.replace(quote * 2, quote) if body else quote
+        if any(not 32 <= ord(char) <= 126 for char in value):
+            raise ValueError("PUT: only printable ASCII literals are gated")
+        values.append(value)
+    record = ''.join(values)
+    if len(record) > 64:
+        raise ValueError("PUT: output beyond 64 columns requires LINESIZE review")
+    return record
+
+
+# ---------------------------------------------------------------------------
 # COUNT counts literal substrings, with optional I (ignore case) and T (trim
 # trailing ASCII blanks from both arguments). SAS documents overlapping
 # occurrences as undefined; Python str.count silently chooses non-overlap.

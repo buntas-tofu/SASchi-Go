@@ -18,6 +18,7 @@ from .compare import table_equal
 from .emit_cpp import translate as cpp_translate
 from .emit_py import Translation, translate as python_translate
 from .plan import Plan, compile_plan
+from .parser import ParseError
 from .provenance import environment, implementation_hashes
 from .runtime import run_plan
 
@@ -46,8 +47,13 @@ def _completeness_record(source: str, plan, target: str, ts_utc: str) -> dict:
     except ImportError as exc:
         return {'status': 'unavailable',
                 'reason': f'catalog requires duckdb (verify extra): {exc}'}
-    cat, completeness = record_pass(source, plan, file='<job>', target=target,
-                                    ts_utc=ts_utc)
+    try:
+        cat, completeness = record_pass(source, plan, file='<job>', target=target,
+                                        ts_utc=ts_utc)
+    except ParseError as exc:
+        # The compiler already carries the lexical ticket. Accounting cannot
+        # split malformed source, but must not prevent its blocked receipt.
+        return {'status': 'unavailable', 'reason': f'source parsing failed: {exc}'}
     try:
         return completeness.as_record()
     finally:
