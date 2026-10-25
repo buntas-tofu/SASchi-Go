@@ -725,7 +725,7 @@
         "Decode doubled delimiters once. In the PUT-specific quote-pair form, two delimiters alone output one delimiter, as documented by PUT Statement: List",
         "Without FILE or a line-hold specifier, each PUT writes a separate log record. This contract stores logical records without newline characters, source echoes, or SAS diagnostic framing",
         "Bounded support policy: only printable ASCII and a total record width at most 64, the minimum documented LINESIZE. Longer records require a wrapping contract",
-        "Double-quoted & and % require macro review; single-quoted text remains literal. No implicit conversions, variables mixed with literals, repeats, formatted items, FILE destinations, pointers, line holds, or conditional PUT in this slice",
+        "Double-quoted & and % require macro review; single-quoted text remains literal. No implicit conversions, repeats, formatted items, FILE destinations, pointers, line holds, or conditional PUT in this slice. DS-024 separately gates mixed literals and ordinary character variables",
         "Python translation and a base-R reference are gated. The C++ scalar pilot refuses this operation. Existing named-list PUT remains a separate operation"
       ],
       "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
@@ -739,6 +739,44 @@
       "sources": [
         "https://support.sas.com/documentation/cdl/en/lestmtsref/63323/HTML/default/n1spe7nmkmi7ywn175002rof97fv.htm",
         "https://support.sas.com/documentation/cdl/en/lestmtsref/63323/HTML/default/p0jcwhe1ofmb49n1xf1q2kc44b0v.htm",
+        "https://support.sas.com/documentation/cdl/en/lrcon/62955/HTML/default/a000780334.htm",
+        "https://support.sas.com/documentation/cdl/en/lesysoptsref/64892/HTML/default/n1quv1ypgn8bojn1q4s7nfagkfwu.htm"
+      ]
+    },
+    {
+      "rule_id": "DS-024",
+      "sas_pattern": "PUT character-variable <character-variable | quoted-literal ...>; with literals also permitted before the first variable",
+      "scope": "data-step",
+      "python_target": {
+        "package": "stdlib",
+        "pattern": "sas_semantics.sas_put_character_list: preserve decoded literal text, trim character-variable edge blanks and advance one blank after each value"
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "examples/put_list.R: scan quoted tokens independently and find the first/last occupied character positions"
+      },
+      "required_settings": [
+        "Unformatted character variables lose leading and trailing ASCII blanks and receive one following blank; embedded blanks remain. Quoted literals keep their own spaces and add no separator, using DS-023 decoding",
+        "The returned logical record includes the final variable separator. This models documented output pointer spacing, not physical SAS log framing or trailing-blank retention by a log destination",
+        "Bounded support policy: printable ASCII, at most 64 columns including literal text and every variable separator. Blank and zero-length character values require a separate missing-field contract and are refused; this refusal is not a claim about SAS missing-value behavior",
+        "At least one ordinary character variable is required. Reject numeric, uninitialized, tagged-missing, automatic, special PUT control, and formatted variables. Validate descriptor formats even with zero rows, WHERE filtering, or a preceding LENGTH; a newly assigned character copy does not inherit a format",
+        "Require original source whitespace immediately after a closing literal delimiter before a variable. Adjacent suffixes and comment-only separation are deferred, even if comment-separated source would be valid SAS. Optional parser spans preserve this distinction without changing normalized text or equality",
+        "No numeric/BEST formatting, variable lists, _ALL_, FILE, repeats, pointers, line holds, conditional PUT, macro expansion, or implicit conversions. A program using DS-024 conservatively refuses any original double-quoted source token containing & or %, including unused, future, conditional, and prior-step expressions. Single-quoted source and external catalog values remain data",
+        "Python execution and independent base-R logical records are gated; C++ refuses the operation. Named-list output and DS-023 pure literals remain separate operations"
+      ],
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "forbidden_patterns": [
+        "Using rstrip alone, inserting a blank before each literal, omitting the variable separator, or trimming the finished logical record",
+        "Dropping attached formats or interpreting a typed constant as a literal followed by a variable after whitespace normalization",
+        "Treating blank-value support policy or repository pins as observed live-SAS results"
+      ],
+      "validation_test": "examples/verify_put_list.py: original spacing/quoting pins, generated records, independent base-R witness, refusal pins, and naive-error detectors; saschi.test_put_list: source spans, suffix/control refusals, metadata including empty inputs, iteration, atomic failures, record boundaries, legacy paths, and C++ refusal",
+      "confidence": "high within the bounded slice; repository evidence, no live SAS",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/lestmtsref/63323/HTML/default/p0jcwhe1ofmb49n1xf1q2kc44b0v.htm",
+        "https://support.sas.com/documentation/cdl/en/lestmtsref/63323/HTML/default/n1spe7nmkmi7ywn175002rof97fv.htm",
+        "https://support.sas.com/documentation/cdl/en/lestmtsref/63323/HTML/default/n0d5oq7e0oia0wn13nsins0x8nmh.htm",
+        "https://support.sas.com/documentation/cdl/en/mcrolref/61885/HTML/default/a001071889.htm",
         "https://support.sas.com/documentation/cdl/en/lrcon/62955/HTML/default/a000780334.htm",
         "https://support.sas.com/documentation/cdl/en/lesysoptsref/64892/HTML/default/n1quv1ypgn8bojn1q4s7nfagkfwu.htm"
       ]

@@ -8,9 +8,9 @@ from __future__ import annotations
 import math
 import re
 from dataclasses import asdict, dataclass, field
-from sas_semantics import sas_put_literals
+from sas_semantics import sas_put_literals, sas_put_character_list
 from .functions import FUNCTIONS, format_token, FORMATS
-from .parser import Kind, ParseError, split_statements, tokenize
+from .parser import Kind, ParseError, split_statements
 from .rules import route_function, route_statement
 
 NAME = r"[A-Za-z_][A-Za-z0-9_]{0,31}"
@@ -398,7 +398,7 @@ def compile_plan(source: str) -> Plan:
             reject(st, family if family != "unknown" else "assignment", "unsupported expression")
             continue
         if re.match(r"^put\b", text, re.I):
-            items = tokenize(text)[1:]
+            items = st.tokens[1:]
             if items and all(item.kind == Kind.STRING for item in items):
                 literals = [item.text for item in items]
                 try:
@@ -408,6 +408,43 @@ def compile_plan(source: str) -> Plan:
                 else:
                     step.operations.append(Operation("put_literal", st.line, {"literals": literals}))
                     plan.matched.append(("put-literal", "DS-023", st.line))
+                continue
+            if items and all(item.kind == Kind.STRING or
+                             item.kind == Kind.WORD and re.fullmatch(NAME, item.text)
+                             for item in items):
+                # Normalized statement text cannot distinguish '41'x from
+                # '41' x. Require actual source whitespace before a variable.
+                if any(left.kind == Kind.STRING and right.kind == Kind.WORD and
+                       (left.end is None or not source[left.end:left.end + 1].isspace())
+                       for left, right in zip(items, items[1:])):
+                    reject(st, 'put', 'literal-to-variable PUT requires source whitespace; typed literals and comment-only separation need review')
+                    continue
+                names = [item.text.lower() for item in items if item.kind == Kind.WORD]
+                known = set(step.lengths)
+                for previous in step.operations:
+                    previous = asdict(previous)
+                    while previous['kind'] == 'if':
+                        previous = previous['args']['operation']
+                    if previous['kind'] in ('assign', 'round', 'declare'):
+                        known.add(previous['args']['name'])
+                if any(name in ('_n_', '_infile_', '_file_', '_ods_', '_page_', '_blankpage_') for name in names) or (
+                        not step.inputs and not any(o.kind == 'lookup' for o in step.operations)
+                        and any(name not in known for name in names)):
+                    reject(st, 'put', 'character-list PUT requires declared character variables; automatic or uninitialized numeric variables need review')
+                    continue
+                resolved = [{'kind': 'literal', 'value': item.text} if item.kind == Kind.STRING
+                            else {'kind': 'character', 'value': 'x'} for item in items]
+                try:
+                    # Minimum-width validation catches literal hazards now;
+                    # runtime checks the actual descriptors and values.
+                    sas_put_character_list(resolved)
+                except ValueError as exc:
+                    reject(st, 'put', str(exc))
+                else:
+                    step.operations.append(Operation('put_character_list', st.line, {'items': [
+                        {'kind': 'literal', 'value': item.text} if item.kind == Kind.STRING
+                        else {'kind': 'variable', 'value': item.text.lower()} for item in items]}))
+                    plan.matched.append(('put-character-list', 'DS-024', st.line))
                 continue
             rest, names = re.sub(r"^put\s*", "", text, flags=re.I), []
             while match := re.match(r"\s*(" + NAME + r")\s*=", rest):
@@ -421,4 +458,11 @@ def compile_plan(source: str) -> Plan:
         family, _ = route_function(text)
         reject(st, family if family != "unknown" else construct, "no operation for this statement")
     finish()
+    if any(op.kind == 'put_character_list' for compiled in plan.steps for op in compiled.operations):
+        # Macros resolve before DATA execution. Without taint tracking, even
+        # unused or prior-step literals can affect this output contract.
+        for st in statements:
+            if any(token.kind == Kind.STRING and token.text.startswith('"') and
+                   any(char in token.text for char in '&%') for token in st.tokens):
+                reject(st, 'put', 'character-list PUT requires macro-free source: double-quoted & or % anywhere in the program requires macro review')
     return plan

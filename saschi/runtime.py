@@ -3,7 +3,7 @@ from __future__ import annotations
 import math
 from collections import Counter
 from copy import deepcopy
-from sas_semantics import sas_round, sas_merge_by, sas_put_literals
+from sas_semantics import sas_round, sas_merge_by, sas_put_literals, sas_put_character_list
 from .functions import apply as apply_function, assign_spec
 from .values import normalize_catalog, column_type, coerce, missing, order
 
@@ -122,6 +122,9 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                 if col in schema and column_type(schema[col]) != column_type(spec):
                     raise ValueError('incompatible input column types')
                 schema.setdefault(col, deepcopy(spec))
+                if isinstance(spec, dict) and spec.get('format'):
+                    if isinstance(schema[col], dict) and not schema[col].get('format'):
+                        schema[col]['format'] = spec['format']
         if not set(keys) <= set(schema):
             raise ValueError('BY column missing from schema')
         if step['kind'] == 'merge':
@@ -159,6 +162,10 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                 if col in schema and column_type(schema[col]) != column_type(spec):
                     raise ValueError('incompatible input column types')
                 schema.setdefault(col, deepcopy(spec))
+                # LENGTH sets width without removing an inherited format.
+                if isinstance(spec, dict) and spec.get('format'):
+                    if isinstance(schema[col], dict) and not schema[col].get('format'):
+                        schema[col]['format'] = spec['format']
 
         def add_reference(expr):
             if expr['kind'] == 'automatic':
@@ -196,6 +203,16 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                     add_reference(value)
             elif kind == 'put_literal':
                 sas_put_literals(args['literals'])
+            elif kind == 'put_character_list':
+                if not isinstance(args.get('items'), list) or not args['items']:
+                    raise ValueError('PUT character list: nonempty plan items required')
+                for item in args['items']:
+                    if not isinstance(item, dict) or set(item) != {'kind', 'value'} or not isinstance(item['value'], str):
+                        raise ValueError('PUT character list: invalid plan item')
+                    if item['kind'] == 'variable':
+                        schema.setdefault(item['value'], 'number')
+                    elif item['kind'] != 'literal':
+                        raise ValueError('PUT character list: unsupported plan item')
             elif kind == 'put':
                 for name in args['names']:
                     if name != '_n_':
@@ -208,6 +225,20 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                     raise ValueError('OUTPUT target must be the declared DATA destination')
             else:
                 raise ValueError(f'unsupported operation: {kind}')
+        # Descriptors must be checked even for empty SET inputs or filtered
+        # rows. Formats change PUT output and cannot silently be discarded.
+        for op in flat:
+            if op['kind'] == 'put_character_list':
+                resolved = []
+                for item in op['args']['items']:
+                    if item['kind'] == 'literal':
+                        resolved.append(item)
+                    else:
+                        spec = schema[item['value']]
+                        if column_type(spec) != 'character' or spec.get('format'):
+                            raise ValueError(f"SAS line {op['line']}: PUT character list requires unformatted character variables")
+                        resolved.append({'kind': 'character', 'value': 'x'})
+                sas_put_character_list(resolved)
         for name in retained:
             schema.setdefault(name, 'number')
             if column_type(schema[name]) != 'number':
@@ -259,6 +290,14 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                     snapshot()
                 elif kind == 'put_literal':
                     logs.append(sas_put_literals(args['literals']))
+                elif kind == 'put_character_list':
+                    resolved = [item if item['kind'] == 'literal' else
+                                {'kind': 'character', 'value': row[item['value']]}
+                                for item in args['items']]
+                    try:
+                        logs.append(sas_put_character_list(resolved))
+                    except ValueError as exc:
+                        raise ValueError(f"SAS line {op['line']}: {exc}") from exc
                 elif kind == 'put':
                     def render(v):
                         if v is None: return '.'

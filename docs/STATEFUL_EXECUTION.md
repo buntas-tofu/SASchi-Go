@@ -28,11 +28,38 @@ pair emits one delimiter. No Python backslash escaping is applied.
 DS-023 gates printable ASCII records of at most 64 columns, which fit the
 documented minimum SAS LINESIZE. Double-quoted ampersands and percent signs
 require macro review. FILE destinations, pointer controls, line holds, repeats,
-formatted or variable items mixed with literals, conditional PUT, and longer
+formatted items, conditional PUT, and longer
 records remain tickets. Named-list `put x=;` remains supported separately.
 Python execution and the independent base-R witness are checked by
 `examples/verify_put.py` and `saschi.test_put`; C++ refuses literal PUT. These
 are logical records, not physical log captures with SAS notes and source echoes.
+
+DS-024 adds ordinary unformatted character-variable list PUT, optionally mixed
+with quoted literals. With `c='  A  '`, `put '[' c ']';` records `[A ]`:
+variable edge blanks are removed and one blank follows the value, while
+literals keep their own spaces and add none. A final variable separator is
+retained in the logical record as a pointer-spacing contract, without a claim
+about physical SAS log trailing blanks. The complete record, including every
+separator, must fit 64 printable ASCII columns. Zero-length and all-blank
+values are refused pending a missing-field contract; this is a support policy,
+not a claim that SAS refuses them. Numeric and tagged-missing values, attached
+formats, special PUT controls, and implicit conversions require review.
+
+Original token spans distinguish `put '41'x;` from `put '41' x;`. A literal
+followed by a variable requires whitespace immediately after its closing
+delimiter. Comment-only separation such as `'41'/*c*/x` is conservatively
+refused; `'41' /*c*/x` is accepted. The guard applies to suffix prefixes as well
+as exact suffix names. Descriptors are validated even on empty or filtered
+inputs, and LENGTH preserves inherited formats. Assigning `copy=source;`
+creates an unformatted copy with the source type and width. Literal-only and
+named-list PUT keep their existing paths. A program using DS-024 conservatively
+refuses double-quoted source tokens containing `&` or `%` anywhere, including
+unused expressions, later assignments, and earlier DATA steps. This prevents
+unexpanded source macros from becoming apparently valid character output.
+Single-quoted source and external catalog values still treat these characters
+as data. `examples/verify_put_list.py` and
+`saschi.test_put_list` gate Python and independent base-R logical records;
+C++ refuses this operation. No live SAS was used.
 
 A single simple DATA destination is supported. `OUTPUT;` and `OUTPUT name;`
 snapshot the current PDV immediately. Any explicit OUTPUT in the step disables

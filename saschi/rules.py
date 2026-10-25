@@ -17,6 +17,7 @@ import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Optional
+from .parser import Kind, ParseError, tokenize
 
 RULEBOOK_DEFAULT = Path(__file__).resolve().parent.parent / "docs" / "sasconversionrulebook.json"
 if not RULEBOOK_DEFAULT.is_file():
@@ -150,6 +151,7 @@ CONSTRUCT_MAP: dict[str, str] = {
     "char-funcs": "DS-015",
     "count": "DS-022",
     "put-literal": "DS-023",
+    "put-character-list": "DS-024",
     "arrays": "DS-016",
     "formats": "DS-010",
     "by-group": "DS-006",
@@ -205,7 +207,6 @@ CONSTRUCT_MAP: dict[str, str] = {
 # Statement-level routing: statement-start regex -> construct name.
 # Order matters: longest/most specific first.
 STATEMENT_ROUTER: list[tuple[re.Pattern, str]] = [
-    (re.compile(r"^\s*PUT\s*['\"]", re.I), "put-literal"),
     (re.compile(r"^\s*PROC\s+SORT\b", re.I), "sort"),
     (re.compile(r"^\s*PROC\s+TRANSPOSE\b", re.I), "transpose"),
     (re.compile(r"^\s*PROC\s+FORMAT\b", re.I), "formats"),
@@ -273,6 +274,16 @@ def route_statement(statement: str, context: str | None = None) -> tuple[str, st
         if INTO_MACRO_HINT.search(statement):
             return "sql-into", CONSTRUCT_MAP["sql-into"]
         return "sql-general", CONSTRUCT_MAP["sql-general"]
+    if re.match(r'^\s*put\b', statement, re.I):
+        try:
+            items = tokenize(statement.strip().removesuffix(';'))[1:]
+        except ParseError:
+            items = []
+        if items and all(item.kind == Kind.STRING for item in items):
+            return 'put-literal', CONSTRUCT_MAP['put-literal']
+        if items and all(item.kind == Kind.STRING or item.kind == Kind.WORD and
+                         re.fullmatch(r'[A-Za-z_][A-Za-z0-9_]{0,31}', item.text) for item in items):
+            return 'put-character-list', CONSTRUCT_MAP['put-character-list']
     for rx, construct in STATEMENT_ROUTER:
         if rx.search(statement):
             if construct == "sql-general":
