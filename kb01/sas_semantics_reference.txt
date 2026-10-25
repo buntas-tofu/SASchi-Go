@@ -1756,3 +1756,21 @@ def sas_lag_occurrences(occurrences, n: int = 1):
     histories stay independent even when they read the same variable."""
     return [sas_lag_conditional(values, invoked, n)
             for values, invoked in occurrences]
+
+
+# Bounded Base SAS DATA-step iterative DO control, DS-026. Repository evidence.
+def sas_do_counted(start, stop, by=1):
+    """Return admitted index values and the value left after normal completion.
+
+    Signed integer literal controls are limited to 2**31-1 in magnitude and
+    10000 trips. These are implementation bounds, not SAS language limits.
+    """
+    controls = (start, stop, by)
+    if any(type(value) is not int or abs(value) > 2**31 - 1 for value in controls):
+        raise ValueError('counted DO requires signed integer controls within 2**31-1')
+    if by == 0:
+        raise ValueError('counted DO BY must be nonzero')
+    count = max(0, (stop - start) // by + 1) if (stop - start) * by >= 0 else 0
+    if count > 10000:
+        raise ValueError('counted DO exceeds 10000 iterations')
+    return [start + trip * by for trip in range(count)], start + count * by

@@ -78,7 +78,8 @@
    "stmt": "b6d4579",
    "dso": "e5ca315"
   },
-  "put_update": "DS-023/DS-024 and the put-literal/put-character-list/suite-put/suite-put-list gates update PUT and PUT List; other entries retain their recorded assessment."
+  "put_update": "DS-023/DS-024 and the put-literal/put-character-list/suite-put/suite-put-list gates update PUT and PUT List; other entries retain their recorded assessment.",
+  "counted_do_update": "DS-026 adds bounded single-level counted DO and its END closure; do-counted and suite-do-counted gates. Existing broader array evidence remains recorded separately."
  },
  "rollup": {
   "stmt": {
@@ -373,12 +374,16 @@
    "valid_in": "DATA step",
    "disposition": "GATED",
    "rule_ids": [
-    "DS-016"
+    "DS-016",
+    "DS-026"
    ],
    "gates": [
-    "arrays"
+    "arrays",
+    "do-counted",
+    "suite-do-counted"
    ],
-   "reference_page": 72
+   "reference_page": 72,
+   "note": "DS-026 executable slice: single-level DATA-step index=start TO stop [BY step] with signed integer literal controls, magnitudes at most 2**31-1, nonzero step, at most 10000 trips; direct assignments/PUT/OUTPUT in body. Nested, conditional, computed/variable controls, index writes, declarations/input operations in body, DATA _NULL_ explicit OUTPUT, PUT _ALL_, MERGE and C++ are deferred. Existing DS-016 arrays evidence does not widen this translator slice."
   },
   {
    "entry": "DO UNTIL Statement",
@@ -429,12 +434,16 @@
    "valid_in": "DATA step",
    "disposition": "GATED",
    "rule_ids": [
-    "DS-016"
+    "DS-016",
+    "DS-026"
    ],
    "gates": [
-    "arrays"
+    "arrays",
+    "do-counted",
+    "suite-do-counted"
    ],
-   "reference_page": 81
+   "reference_page": 81,
+   "note": "DS-026 executable slice: single-level DATA-step index=start TO stop [BY step] with signed integer literal controls, magnitudes at most 2**31-1, nonzero step, at most 10000 trips; direct assignments/PUT/OUTPUT in body. Nested, conditional, computed/variable controls, index writes, declarations/input operations in body, DATA _NULL_ explicit OUTPUT, PUT _ALL_, MERGE and C++ are deferred. Existing DS-016 arrays evidence does not widen this translator slice."
   },
   {
    "entry": "ENDSAS Statement",

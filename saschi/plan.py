@@ -8,7 +8,7 @@ from __future__ import annotations
 import math
 import re
 from dataclasses import asdict, dataclass, field
-from sas_semantics import sas_put_literals, sas_put_character_list
+from sas_semantics import sas_put_literals, sas_put_character_list, sas_do_counted
 from .functions import FUNCTIONS, format_token, FORMATS
 from .parser import Kind, ParseError, split_statements
 from .rules import route_function, route_statement
@@ -223,24 +223,50 @@ def action(text, line):
     return None
 
 
+def walk_operations(ops):
+    """Walk source-order operations, including statically present loop bodies."""
+    for op in ops:
+        yield op
+        if op.kind == 'if':
+            yield from walk_operations([Operation(**op.args['operation'])])
+        elif op.kind == 'do_counted':
+            yield from walk_operations([Operation(**body) for body in op.args['body']])
+
+
 def compile_plan(source: str) -> Plan:
-    plan, step, context = Plan(), None, None
+    plan, step, context, active_do = Plan(), None, None, None
+
+    def append_operation(op):
+        if active_do is None:
+            step.operations.append(op)
+        else:
+            active_do.args['body'].append(asdict(op))
 
     def reject(st, construct, reason):
         plan.tickets.append(Ticket(st.line, st.text, construct, reason))
 
     def finish():
-        if step and any(o.kind == 'put_all' for o in step.operations):
+        nonlocal active_do
+        if active_do is not None:
+            plan.tickets.append(Ticket(active_do.line, 'DO', 'do-counted', 'counted DO requires a closing END before the step ends'))
+            active_do = None
+        if step and any(o.kind == 'put_all' for o in walk_operations(step.operations)):
             if (step.kind != 'data' or step.inputs or step.by or step.retained or step.where or
                     (step.name == '_null_' and any(o.kind == 'output' for o in step.operations)) or
                     any(o.kind not in ('declare', 'assign', 'put_all', 'output') for o in step.operations)):
                 plan.tickets.append(Ticket(step.line, step.name, 'put-all',
                     'PUT _ALL_ supports scalar declarations, safe assignments, and named-destination OUTPUT only; SET, BY, conditions, DATA _NULL_ OUTPUT, and other operations require review'))
         if step:
+            flat = list(walk_operations(step.operations))
+            if (step.name == '_null_' and any(o.kind == 'do_counted' for o in flat)
+                    and any(o.kind == 'output' for o in flat)):
+                plan.tickets.append(Ticket(step.line, 'OUTPUT', 'do-counted', 'explicit OUTPUT in DATA _NULL_ counted DO steps is deferred'))
             def check(ops):
                 for op in ops:
                     if op.kind == 'output' and op.args['target'] not in (None, step.name):
                         plan.tickets.append(Ticket(op.line, str(op.args['target']), 'output', 'OUTPUT target must be the declared DATA destination'))
+                    if op.kind == 'do_counted':
+                        check([Operation(**child) for child in op.args['body']])
                     if op.kind == 'if':
                         nested = op.args['operation']
                         check([Operation(**nested)])
@@ -306,6 +332,45 @@ def compile_plan(source: str) -> Plan:
         if step is None:
             reject(st, construct, "statement is outside a supported step")
             continue
+        if re.match(r'^do\b(?!\s*=)', text, re.I):
+            match = re.fullmatch(r'do\s+(' + NAME + r')\s*=\s*([+-]?[0-9]+)\s+to\s+([+-]?[0-9]+)(?:\s+by\s+([+-]?[0-9]+))?', text, re.I | re.ASCII)
+            if active_do is not None:
+                reject(st, 'do-counted', 'nested DO is deferred')
+            elif context != 'data' or step.kind != 'data' or not match:
+                reject(st, 'do-counted', 'supported DO controls: index=start TO stop [BY step], signed integer literals only')
+            elif match[1].lower() in ('_n_', '_error_', '_infile_', '_file_', '_ods_', '_page_', '_blankpage_'):
+                reject(st, 'do-counted', 'automatic variables cannot be counted DO indices')
+            else:
+                try:
+                    start, stop, by = int(match[2]), int(match[3]), int(match[4] or '1')
+                    sas_do_counted(start, stop, by)
+                except ValueError as exc:
+                    reject(st, 'do-counted', str(exc))
+                else:
+                    name = match[1].lower()
+                    step.display_names.setdefault(name, match[1])
+                    append_operation(Operation('declare', st.line, {'name': name, 'spec': 'number'}))
+                    active_do = Operation('do_counted', st.line, {'index': name, 'start': start, 'stop': stop, 'by': by, 'body': []})
+                    step.operations.append(active_do)
+                    plan.matched.append(('do-counted', 'DS-026', st.line))
+            continue
+        if re.match(r'^end\b(?!\s*=)', text, re.I):
+            if text.lower() != 'end' or active_do is None:
+                reject(st, 'do-counted', 'END requires one open counted DO')
+            else:
+                active_do = None
+            continue
+        if active_do is not None:
+            target = re.match(r'(' + NAME + r')\s*=', text)
+            if target and target[1].lower() == active_do.args['index']:
+                reject(st, 'do-counted', 'assignment to the counted DO index inside its body is deferred')
+                continue
+            if not target and not re.match(r'^(?:put|output)\b', text, re.I):
+                reject(st, 'do-counted', 'counted DO body supports direct assignments, PUT, and OUTPUT only')
+                continue
+            if re.fullmatch(r'put\s+_all_', text, re.I):
+                reject(st, 'do-counted', 'PUT _ALL_ error-flag contract excludes counted DO')
+                continue
         if re.match(r"^by\b", text, re.I):
             words = text.split()[1:]
             if (step.kind not in ("sort", "merge") and not step.inputs) or step.by or not words or any(
@@ -323,7 +388,7 @@ def compile_plan(source: str) -> Plan:
                 reject(st, construct, "one SET input or two MERGE inputs must precede computations")
             else:
                 step.inputs = [v.lower() for v in (m[2], m[3]) if v]
-                step.operations.append(Operation("read", st.line, {"datasets": step.inputs}))
+                append_operation(Operation("read", st.line, {"datasets": step.inputs}))
                 if m[1].lower() == "merge":
                     step.kind = "merge"
                 plan.matched.append((m[1].lower(), "DS-001" if m[1].lower() == "set" else "DS-002", st.line))
@@ -353,7 +418,7 @@ def compile_plan(source: str) -> Plan:
             value = atom(declaration[2]) if declaration[2] else None
             if value is not None and value['kind'] in ('number', 'missing') and declaration[1].lower() != '_n_':
                 step.retained[declaration[1].lower()] = value
-                step.operations.append(Operation('declare', st.line, {'name': declaration[1].lower(), 'spec': 'number'}))
+                append_operation(Operation('declare', st.line, {'name': declaration[1].lower(), 'spec': 'number'}))
             else:
                 reject(st, 'retain', 'RETAIN requires one variable and a numeric or missing initializer')
             continue
@@ -364,33 +429,33 @@ def compile_plan(source: str) -> Plan:
                 reject(st, 'length', 'character LENGTH must precede SET and computations; width 1..32767')
             else:
                 step.lengths[name] = width
-                step.operations.append(Operation('declare', st.line, {'name': name, 'spec': {'type': 'character', 'length': width}}))
+                append_operation(Operation('declare', st.line, {'name': name, 'spec': {'type': 'character', 'length': width}}))
             continue
         lookup = re.fullmatch(r'if\s+_n_\s*=\s*1\s+then\s+set\s+(' + NAME + r')', text, re.I)
         if lookup:
             if step.inputs or any(o.kind != 'declare' for o in step.operations):
                 reject(st, 'lookup', 'one initial lookup SET must precede the driving SET')
             else:
-                step.operations.append(Operation('lookup', st.line, {'dataset': lookup[1].lower()}))
+                append_operation(Operation('lookup', st.line, {'dataset': lookup[1].lower()}))
             continue
         conditional = re.fullmatch(r'if\s+(.+?)\s+then\s+(.+)', text, re.I)
         if conditional:
             condition, nested = predicate(conditional[1]), action(conditional[2], st.line)
             if condition and nested:
-                step.operations.append(Operation('if', st.line, {'condition': condition, 'operation': asdict(nested)}))
+                append_operation(Operation('if', st.line, {'condition': condition, 'operation': asdict(nested)}))
             else:
                 reject(st, 'if', 'simple IF THEN assignment or OUTPUT only')
             continue
         if re.match(r'^if\b', text, re.I):
             condition = predicate(re.sub(r'^if\s*', '', text, flags=re.I))
             if condition:
-                step.operations.append(Operation('subset', st.line, {'condition': condition}))
+                append_operation(Operation('subset', st.line, {'condition': condition}))
             else:
                 reject(st, 'if', 'unsupported subsetting predicate')
             continue
         simple = action(text, st.line)
         if simple:
-            step.operations.append(simple)
+            append_operation(simple)
             continue
         assignment = re.fullmatch(r"(" + NAME + r")\s*=\s*(.+)", text)
         if assignment and assignment[1].lower() == "_n_":
@@ -399,7 +464,7 @@ def compile_plan(source: str) -> Plan:
         if assignment:
             rounded = re.fullmatch(r"round\s*\(([^,]+),([^,]+)\)", assignment[2], re.I)
             if rounded and atom(rounded[1]) is not None and atom(rounded[2]) is not None:
-                step.operations.append(Operation("round", st.line, {"name": assignment[1].lower(),
+                append_operation(Operation("round", st.line, {"name": assignment[1].lower(),
                                                                     "value": atom(rounded[1]),
                                                                     "unit": atom(rounded[2])}))
                 plan.matched.append(("round", "DS-012", st.line))
@@ -408,7 +473,7 @@ def compile_plan(source: str) -> Plan:
             if value is not None:
                 if value['kind'] == 'call' and value['name'] == 'round':
                     plan.matched.append(("round", "DS-012", st.line))
-                step.operations.append(Operation("assign", st.line, {"name": assignment[1].lower(),
+                append_operation(Operation("assign", st.line, {"name": assignment[1].lower(),
                                                                      "value": value}))
                 continue
             family, _ = route_function(assignment[2])
@@ -416,7 +481,7 @@ def compile_plan(source: str) -> Plan:
             continue
         if re.match(r"^put\b", text, re.I):
             if re.fullmatch(r'put\s+_all_', text, re.I):
-                step.operations.append(Operation('put_all', st.line, {}))
+                append_operation(Operation('put_all', st.line, {}))
                 plan.matched.append(('put-all', 'DS-025', st.line))
                 continue
             items = st.tokens[1:]
@@ -427,7 +492,7 @@ def compile_plan(source: str) -> Plan:
                 except ValueError as exc:
                     reject(st, "put", str(exc))
                 else:
-                    step.operations.append(Operation("put_literal", st.line, {"literals": literals}))
+                    append_operation(Operation("put_literal", st.line, {"literals": literals}))
                     plan.matched.append(("put-literal", "DS-023", st.line))
                 continue
             if items and all(item.kind == Kind.STRING or
@@ -442,7 +507,7 @@ def compile_plan(source: str) -> Plan:
                     continue
                 names = [item.text.lower() for item in items if item.kind == Kind.WORD]
                 known = set(step.lengths)
-                for previous in step.operations:
+                for previous in walk_operations(step.operations):
                     previous = asdict(previous)
                     while previous['kind'] == 'if':
                         previous = previous['args']['operation']
@@ -462,7 +527,7 @@ def compile_plan(source: str) -> Plan:
                 except ValueError as exc:
                     reject(st, 'put', str(exc))
                 else:
-                    step.operations.append(Operation('put_character_list', st.line, {'items': [
+                    append_operation(Operation('put_character_list', st.line, {'items': [
                         {'kind': 'literal', 'value': item.text} if item.kind == Kind.STRING
                         else {'kind': 'variable', 'value': item.text.lower()} for item in items]}))
                     plan.matched.append(('put-character-list', 'DS-024', st.line))
@@ -474,19 +539,19 @@ def compile_plan(source: str) -> Plan:
             if not names or rest.strip():
                 reject(st, "put", "unaccounted for text in named-list PUT")
             else:
-                step.operations.append(Operation("put", st.line, {"names": names}))
+                append_operation(Operation("put", st.line, {"names": names}))
             continue
         family, _ = route_function(text)
         reject(st, family if family != "unknown" else construct, "no operation for this statement")
     finish()
-    if any(op.kind in ('put_character_list', 'put_all') for compiled in plan.steps for op in compiled.operations):
+    if any(op.kind in ('put_character_list', 'put_all') for compiled in plan.steps for op in walk_operations(compiled.operations)):
         # Macros resolve before DATA execution. Without taint tracking, even
         # unused or prior-step literals can affect this output contract.
         for st in statements:
             if any(token.kind == Kind.STRING and token.text.startswith('"') and
                    any(char in token.text for char in '&%') for token in st.tokens):
                 reject(st, 'put', 'bounded PUT requires macro-free source: double-quoted & or % anywhere in the program requires macro review')
-    if any(op.kind == 'put_all' for compiled in plan.steps for op in compiled.operations):
+    if any(op.kind == 'put_all' for compiled in plan.steps for op in walk_operations(compiled.operations)):
         for st in statements:
             if any(token.kind == Kind.STRING and any(not 32 <= ord(c) <= 126 for c in token.text) for token in st.tokens):
                 reject(st, 'put-all', 'PUT _ALL_ requires printable ASCII source character values')

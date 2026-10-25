@@ -68,6 +68,7 @@ VERIFIERS = [
     ("put-character-list", HERE / "examples" / "verify_put_list.py"),
     ("wheel-install", HERE / "tools" / "verify_wheel.py"),
     ("put-all", HERE / "examples" / "verify_put_all.py"),
+    ("do-counted", HERE / "examples" / "verify_do_counted.py"),
 ]
 
 # The translator suites, run as unittest modules. They carry the same weight as
@@ -93,6 +94,7 @@ SUITES = [
     ("suite-put", "saschi.test_put"),
     ("suite-put-list", "saschi.test_put_list"),
     ("suite-put-all", "saschi.test_put_all"),
+    ("suite-do-counted", "saschi.test_do_counted"),
 ]
 
 

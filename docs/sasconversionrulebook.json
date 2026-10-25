@@ -1638,10 +1638,41 @@
         "S-15",
         "SAS-DOC"
       ]
+    },
+    {
+      "rule_id": "DS-026",
+      "sas_pattern": "Single-level DATA-step DO index=start TO stop [BY step]; direct body; END;",
+      "scope": "data-step",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "sas_semantics.sas_do_counted validates literal controls; saschi.runtime executes do_counted with an ordinary numeric index declaration"
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "examples/do_counted.R: independent while control with explicit post-body increment and output snapshots"
+      },
+      "required_settings": [
+        "Only signed ASCII integer literal controls with magnitude at most 2**31-1; BY defaults to 1 and must be nonzero. At most 10000 trips, rejected before execution. These are implementation bounds, not SAS limits.",
+        "Single-level body: direct assignment, existing direct PUT, and named-destination OUTPUT. No nesting, WHILE/UNTIL, LEAVE/CONTINUE, conditions, index writes, declarations, SET, or other input operations inside the body. MERGE with counted DO is deferred.",
+        "Declare the numeric index immediately before do_counted. Compile body schema and detect explicit OUTPUT even for zero-trip loops. OUTPUT suppresses implicit output across the entire DATA step; DATA _NULL_ explicit OUTPUT and PUT _ALL_ combinations are deferred.",
+        "Leave the index at its first value past stop after normal completion; zero-trip loops leave start. _N_ counts DATA iterations. Existing SET can drive DATA iterations outside the loop. C++ refuses this operation."
+      ],
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "silent_difference_checks": [
+        "A Python range or R for-loop final index is not the SAS post-increment state.",
+        "Zero-trip body assignments still establish PDV descriptors, and zero-trip OUTPUT still suppresses implicit output."
+      ],
+      "validation_test": "examples/verify_do_counted.py and saschi.test_do_counted: original control pins, independent base-R witness, implicit and explicit output, recursive PDV schema, _N_, SET composition, bounds, atomic refusal, and C++ refusal",
+      "confidence": "high within bounded repository/R evidence; zero-trip initialization inferred from documented entry and termination rules; no live SAS",
+      "sources": [
+        "SAS-DOC",
+        "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000201276.htm",
+        "https://www2.sas.com/onlinetutor/linklib/doloop.htm"
+      ]
     }
   ],
   "runtime_capabilities": {
-    "note": "Executable subset evidence, separate from the general 56-rule routing catalog.",
+    "note": "Executable subset evidence, separate from the general routing catalog.",
     "plan_version": 2,
     "evidence": "original repository pins and base-R witnesses; no live SAS",
     "comparison": {
@@ -1677,6 +1708,15 @@
       "scope": "scalar numeric DATA _NULL_ only",
       "validation_test": "saschi.test_cpp",
       "new_operation_rejection": "saschi.test_events"
+    },
+    "counted_do": {
+      "rule_id": "DS-026",
+      "target": "saschi.runtime.run_plan",
+      "scope": "bounded signed literal single-level DATA-step counted DO, scalar or outside-body SET",
+      "validation_test": "examples/verify_do_counted.py",
+      "r_witness": "examples/do_counted.R",
+      "boundary_tests": "saschi.test_do_counted",
+      "evidence": "original repository fixtures and independent base-R control; no live SAS"
     }
   }
 }

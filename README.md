@@ -38,7 +38,7 @@ fixed expected output and base-R evidence. Special missings retain their tags.
   sibling plus a fixture verifier (`verify_*.py`). Run any verifier directly,
   or all of them through `verify_all.py`.
 - `docs/sasconversionrulebook.json` : the machine-consumable translation
-  rulebook. 60 rules with equivalence classes (EXACT,
+  rulebook. 61 rules with equivalence classes (EXACT,
   EQUIVALENT-WITH-SETTINGS, APPROXIMATE, NO-DIRECT-EQUIVALENT), required
   settings, forbidden patterns, and validation tests.
 - `docs/capability-manifest.json` : the coverage manifest. Every entry of the
@@ -248,3 +248,14 @@ dashes and no ellipses in artifacts.
 ## License
 
 MIT. See [LICENSE](LICENSE).
+
+DS-026 gates one counted DO level in a DATA step: `do i=1 to 5 by 2;`
+with signed integer literal controls, each magnitude at most 2**31-1, nonzero
+step, and at most 10000 iterations. These are implementation bounds. Direct
+assignments, existing PUT, and OUTPUT may occur in the body; schema and OUTPUT
+suppression still apply at zero trips. The final index passes the stop, and
+`_N_` counts DATA iterations. Nested or conditional loops, computed controls,
+index writes, declarations or input operations inside the body, MERGE,
+DATA _NULL_ explicit OUTPUT, PUT _ALL_ combinations, and C++ are deferred.
+`examples/verify_do_counted.py` and `saschi.test_do_counted` provide original
+repository pins and an independent base-R witness, with no live SAS claim.
