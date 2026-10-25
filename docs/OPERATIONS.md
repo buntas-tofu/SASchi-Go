@@ -19,6 +19,15 @@ python3 -m venv .venv
 ```
 
 `doctor` describes missing verification dependencies. It does not install them.
+The verification profile also includes pinned setuptools and wheel build tools.
+The `wheel-install` gate snapshots the current source into a temporary directory,
+builds a wheel without network access, and runs it with site packages disabled.
+It checks the packaged rulebook and web assets, console entry point, and emitted
+MOD-to-PUT execution away from the checkout. No package is installed globally.
+Both CI workflows run for PRs targeting any branch, including stacked feature
+bases. PR edits, including retargeting, rerun the actual checks. Jobs are not
+skipped on metadata edits, because GitHub treats skipped required jobs as
+successful checks.
 `ROSETTA_RSCRIPT` selects an R executable. `CXX` selects a C++ executable, not
 a shell command with flags. Verification receipts record executable paths and
 versions. They are checksummed, not cryptographically signed.

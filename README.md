@@ -96,6 +96,9 @@ fixed expected output and base-R evidence. Special missings retain their tags.
 ## Running the gates
 
 Requires Python 3.11+ and R (for the R halves of the gold pairs).
+The complete verification profile, including the compiler and wheel-build
+tools, is described in [Operations](docs/OPERATIONS.md). The unified command
+also builds and executes the installed wheel away from the source checkout.
 
 ```sh
 python verify_all.py
