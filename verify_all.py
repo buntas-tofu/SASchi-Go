@@ -64,6 +64,7 @@ VERIFIERS = [
     ("capability-manifest", HERE / "examples" / "verify_capability.py"),
     ("count", HERE / "examples" / "verify_count.py"),
     ("put-literal", HERE / "examples" / "verify_put.py"),
+    ("mod", HERE / "examples" / "verify_mod.py"),
 ]
 
 # The translator suites, run as unittest modules. They carry the same weight as

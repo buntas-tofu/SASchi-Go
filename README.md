@@ -107,6 +107,11 @@ The R interpreter is found via `ROSETTA_RSCRIPT`, then `Rscript` on PATH.
 
 ## Known landmines (why the gate exists)
 
+- MOD takes its nonzero result's sign from the dividend. Python `%` and R `%%`
+  take the divisor's sign instead. DS-013 now gates exact integer MOD within
+  binary64 magnitudes of 2**53; missing, nonfinite, fractional, oversized, and
+  zero-divisor inputs require review. Fractional SAS fuzzing and log diagnostics
+  remain unmodeled, and INT remains unwired (`examples/verify_mod.py`).
 - Quoted-literal PUT inserts no separating blank. Spaces inside literals remain
   significant; doubled quotes decode once, and a bare quote pair writes one
   quote. Each statement produces one logical log record. The gated slice is

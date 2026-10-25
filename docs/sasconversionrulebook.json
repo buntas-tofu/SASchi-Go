@@ -449,25 +449,38 @@
     },
     {
       "rule_id": "DS-013",
-      "sas_pattern": "MOD(a,b) / INT(x)",
+      "sas_pattern": "MOD(a,b), bounded exact integers; INT(x) remains unwired",
       "scope": "data-step",
       "python_target": {
-        "package": "numpy",
-        "pattern": "np.fmod(a,b)  # dividend sign; np.trunc(x)"
+        "package": "sas_semantics",
+        "pattern": "sas_semantics.sas_mod(a,b)"
       },
       "r_target": {
         "package": "base",
-        "pattern": "a - b*trunc(a/b); trunc(x)"
+        "pattern": "sas_mod(a,b) from examples/mod.R; exact binary long division"
       },
+      "required_settings": [
+        "Exactly two numeric operands, each finite and integer-valued with magnitude <= 2**53, the binary64 exact-integer limit; the divisor must be nonzero.",
+        "The supported domain applies to evaluated binary64 operands after the existing literal/catalog normalization. The Python reference also rejects oversized Python integers before conversion.",
+        "Nonzero results follow the dividend sign, regardless of divisor sign; exact divisions return zero.",
+        "Missing and tagged missing, nonnumeric, nonfinite, fractional, oversized, and zero-divisor inputs require review. These are implementation refusals, not a claim that SAS refuses each of those inputs.",
+        "SAS floating-point fuzzing near zero or the divisor and insufficient-precision missing/log behavior are not implemented. INT and MODZ remain unwired; C++ refuses MOD calls."
+      ],
       "forbidden_patterns": [
-        "Python % or R %% for SAS MOD parity (divisor sign: -7%3=2, SAS=-1)",
-        "floor() for INT (INT(-2.7)=-2, floor=-3)"
+        "raw signed-operand Python % or R %% for SAS MOD parity (divisor sign: -7%3=2, SAS=-1); the reference instead takes magnitude remainder then applies the dividend sign",
+        "unbounded fmod or a-b*trunc(a/b) as complete SAS MOD parity (fuzzing and quotient cancellation differ)",
+        "claiming INT parity from this MOD gate"
       ],
       "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
-      "validation_test": "MOD(-7,3)==-1; INT(-2.7)==-2",
+      "silent_difference_checks": [
+        "SAS documents exactness within the host exact-integer range and fuzzes general floating remainders. This gate bounds both operand magnitudes by 2**53 and does not substitute fmod for fractional MOD.",
+        "Repository pins, constructive arithmetic cases, Python fmod on the integer domain, and independent base-R binary long division are implementation evidence; no live SAS output is claimed."
+      ],
+      "validation_test": "examples/verify_mod.py: dividend/divisor sign combinations, zero, exact division, 2**53 boundaries, constructive cases and refusal boundaries; saschi.test_functions.ModFunctionTests: routing, emitted runtime, typed catalogs, expressions, arity and C++ refusal",
       "confidence": "high",
       "sources": [
-        "S-01"
+        "https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/p0ebxby8k7049en12wrfx28vyx4t.htm",
+        "https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/p0l7s11dwvzfq5n1wnw997dye8fx.htm"
       ]
     },
     {

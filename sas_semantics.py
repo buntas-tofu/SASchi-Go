@@ -27,6 +27,37 @@ def sas_round(x: float, unit: float = 1.0) -> float:
     return math.copysign(r * unit, x)
 
 
+# ---------------------------------------------------------------------------
+# MOD follows the dividend's sign and ignores the divisor's sign. SAS promises
+# exactness for integer operands within the host's exact-integer range. This
+# binary64 slice bounds both magnitudes by 2**53 and computes in integer space.
+# SAS also fuzzes noninteger results near zero or the divisor, and can return
+# missing with a log error when precision is inadequate. Those behaviors are
+# not modeled here. Missing, fractional, nonfinite, zero-divisor, and oversized
+# inputs are explicit review refusals, not substitute SAS numeric results.
+# Source: SAS MOD Function, linked in DS-013. INT remains unwired.
+# ---------------------------------------------------------------------------
+
+
+def sas_mod(dividend, divisor):
+    """Dividend-signed MOD for finite exact integers with magnitudes <= 2**53."""
+    for value in (dividend, divisor):
+        if value is None or isinstance(value, dict):
+            raise ValueError("MOD: missing or structured arguments require review")
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise ValueError("MOD: numeric arguments required; no implicit conversion")
+        if isinstance(value, float) and not math.isfinite(value):
+            raise ValueError("MOD: nonfinite arguments require review")
+        if abs(value) > 2**53:
+            raise ValueError("MOD: magnitude beyond binary64 exact-integer bound requires review")
+        if value != int(value):
+            raise ValueError("MOD: fractional arguments require SAS fuzzing review")
+    if divisor == 0:
+        raise ValueError("MOD: zero divisor requires SAS error-behavior review")
+    remainder = abs(int(dividend)) % abs(int(divisor))
+    return float(-remainder if dividend < 0 else remainder)
+
+
 def round_count(x: float) -> float:
     """The small-count rounding ladder used in disclosure control.
 

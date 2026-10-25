@@ -60,7 +60,7 @@ class LoaderTests(unittest.TestCase):
 
     def test_gated_families_present(self):
         # Families with live fixture gates (Track A routes through them).
-        for rule_id in ("DS-012", "DS-020", "DS-021", "DS-022", "DS-023", "ST-014", "ST-015", "ST-016", "MX-001"):
+        for rule_id in ("DS-012", "DS-013", "DS-020", "DS-021", "DS-022", "DS-023", "ST-014", "ST-015", "ST-016", "MX-001"):
             self.assertIn(rule_id, self.rules)
 
     def test_missing_file_raises(self):
