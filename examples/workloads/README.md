@@ -47,6 +47,10 @@ CLI's JSON writer for its artifacts; the independent behavior witness is base R.
 Timings include startup and file I/O; they are single observations without a
 performance threshold. Row counts are bounded to 100000 and processes have an
 explicit timeout.
+On POSIX systems, timeouts stop the timing wrapper and its worker process group,
+then drain/reap the process before finalizing logs. The tested verification
+profile is Linux. Missing base R writes a failed `report.json` before returning
+exit status 1; no workload case runs without its witness.
 
 Boundary probes preserve the unsupported source forms: mixed-width LENGTH groups,
 grouped conditional DO, and sum statements. Runtime probes cover many-to-many

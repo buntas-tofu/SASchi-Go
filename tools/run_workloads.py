@@ -14,6 +14,7 @@ import json
 import os
 from pathlib import Path
 import random
+import signal
 import shutil
 import subprocess
 import sys
@@ -117,16 +118,26 @@ def invoke(directory, name, command, timeout):
     metrics = directory / (name + '.rss-kib.txt')
     measured = ['/usr/bin/time', '-f', '%M', '-o', str(metrics), *map(str, command)]
     start = time.perf_counter()
-    try:
-        run = subprocess.run(measured if Path('/usr/bin/time').exists() else command,
-                             cwd=ROOT, text=True, capture_output=True, timeout=timeout,
-                             env={**os.environ, 'PYTHONDONTWRITEBYTECODE': '1', 'PYTHONPATH': str(ROOT)})
-        code, stdout, stderr = run.returncode, run.stdout, run.stderr
-    except subprocess.TimeoutExpired as exc:
-        code, stdout, stderr = 124, exc.stdout or '', exc.stderr or ''
-        stdout = stdout.decode(errors='replace') if isinstance(stdout, bytes) else stdout
-        stderr = stderr.decode(errors='replace') if isinstance(stderr, bytes) else stderr
-        stderr += '\nworkload process timed out'
+    with subprocess.Popen(measured if Path('/usr/bin/time').exists() else command,
+                          cwd=ROOT, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                          start_new_session=os.name == 'posix',
+                          env={**os.environ, 'PYTHONDONTWRITEBYTECODE': '1', 'PYTHONPATH': str(ROOT)}) as process:
+        try:
+            stdout, stderr = process.communicate(timeout=timeout)
+            code = process.returncode
+        except subprocess.TimeoutExpired:
+            if os.name == 'posix':
+                # The timing wrapper and every worker inherit this new group.
+                # Reap/drain them before writing immutable run artifacts.
+                try:
+                    os.killpg(process.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+            else:
+                process.kill()
+            stdout, stderr = process.communicate()
+            code = 124
+            stderr += '\nworkload process timed out'
     elapsed = time.perf_counter() - start
     (directory / (name + '.stdout.log')).write_text(stdout)
     (directory / (name + '.stderr.log')).write_text(stderr)
@@ -271,9 +282,6 @@ def main():
         parser.error('sizes must be 1..100000 and timeout must be positive')
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=False)
-    rscript = os.environ.get('ROSETTA_RSCRIPT') or shutil.which('Rscript')
-    if not rscript:
-        raise RuntimeError('base R is required; no workload case may skip its witness')
     before = source_state(ROOT)
     report = {'status': 'Exploratory repository/base-R workload evidence for maintainer review; no live SAS or production throughput claim.',
               'ts_utc': datetime.datetime.now(datetime.timezone.utc).isoformat(), 'source': before,
@@ -281,6 +289,14 @@ def main():
               'comparison': 'typed exact values, ordered rows and columns, descriptors and table metadata; five generated tables',
               'measurement': 'one fresh process per path per case, startup and file I/O included; peak RSS in KiB on Linux',
               'source_program_sha256': digest(FIXTURE / 'job.sas'), 'r_witness_sha256': digest(FIXTURE / 'reference.R')}
+    rscript = os.environ.get('ROSETTA_RSCRIPT') or shutil.which('Rscript')
+    if not rscript:
+        report.update({'all_passed': False, 'error': 'base R is required; no workload case may skip its witness',
+                       'source_stable': before['source_sha256'] == source_state(ROOT)['source_sha256'],
+                       'cases': [], 'refusals': [], 'comparator_controls': []})
+        write_json(output / 'report.json', report)
+        print(f"WORKLOAD ENVIRONMENT FAILED -> {output / 'report.json'}", flush=True)
+        return 1
     translation = invoke(output, 'translate', [sys.executable, '-m', 'saschi', 'translate', FIXTURE / 'job.sas',
                                                '--target', 'python', '--output', output / 'emitted.py'], args.timeout)
     report['translation'] = translation

@@ -3,7 +3,9 @@ import contextlib
 import io
 import json
 import os
+import sys
 import tempfile
+import time
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -13,6 +15,52 @@ import synth
 
 
 class OperationsTests(unittest.TestCase):
+    def test_workload_timeout_stops_workers_before_artifacts_are_final(self):
+        from tools import run_workloads
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            for wrapped in (True, False):
+                with self.subTest(timing_wrapper=wrapped):
+                    marker = root / ('late-worker-' + str(wrapped))
+                    child = ('from pathlib import Path; import time; time.sleep(2); '
+                             f'Path({str(marker)!r}).write_text("late")')
+                    parent = ('import subprocess, sys, time; '
+                              f'subprocess.Popen([sys.executable, "-c", {child!r}]); '
+                              'print("worker started", flush=True); time.sleep(10)')
+                    with contextlib.ExitStack() as stack:
+                        if not wrapped:
+                            paths = stack.enter_context(patch.object(run_workloads, 'Path'))
+                            paths.return_value.exists.return_value = False
+                        result = run_workloads.invoke(root, str(wrapped), [sys.executable, '-c', parent], 0.5)
+                    self.assertEqual(result['returncode'], 124)
+                    self.assertIn('timed out', (root / (str(wrapped) + '.stderr.log')).read_text())
+                    self.assertIn('worker started', (root / (str(wrapped) + '.stdout.log')).read_text())
+                    before = {p.name: p.read_bytes() for p in root.iterdir()}
+                    time.sleep(2)
+                    self.assertFalse(marker.exists(), 'a timed-out descendant kept running')
+                    self.assertEqual({p.name: p.read_bytes() for p in root.iterdir()}, before)
+
+    def test_workload_missing_r_writes_a_failed_report(self):
+        from tools import run_workloads
+        with tempfile.TemporaryDirectory() as td:
+            output = Path(td) / 'missing-r'
+            with patch.dict(os.environ, {'ROSETTA_RSCRIPT': ''}), \
+                 patch.object(run_workloads.shutil, 'which', return_value=None), \
+                 patch.object(run_workloads, 'invoke') as invoke, \
+                 patch.object(sys, 'argv', ['run_workloads.py', '--output', str(output), '--sizes', '1']), \
+                 contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(run_workloads.main(), 1)
+            invoke.assert_not_called()
+            report = json.loads((output / 'report.json').read_text())
+            self.assertFalse(report['all_passed'])
+            self.assertTrue(report['source_stable'])
+            self.assertIn('base R is required', report['error'])
+            self.assertEqual(report['cases'], [])
+            self.assertEqual(report['refusals'], [])
+            self.assertEqual(report['comparator_controls'], [])
+            self.assertIn('environment', report)
+            self.assertIn('source_sha256', report['source'])
+
     def test_run_receipt_and_no_clobber(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td); source = root/'job.sas'; expected = root/'expected.json'; output = root/'out'
