@@ -22,6 +22,7 @@ import time
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 from saschi.compare import equal, table_equal
+from saschi.cli import write_json
 from saschi.provenance import digest, environment, source_state
 
 FIXTURE = ROOT / 'examples/workloads/monthly_ledger'
@@ -38,10 +39,6 @@ FINAL_SCHEMA = {'band': {'type': 'character', 'length': 4},
                 'change': 'number', 'adjusted': 'number'}
 SCHEMAS = {'rounded': RAW_SCHEMA, 'ordered': RAW_SCHEMA, 'keys': LOOKUP_SCHEMA,
            'joined': JOINED_SCHEMA, 'snapshots': FINAL_SCHEMA}
-
-
-def write_json(path, value):
-    path.write_text(json.dumps(value, indent=2, allow_nan=False) + '\n')
 
 
 def catalog(raw, lookup):

@@ -46,6 +46,14 @@ instead of `result.json`. Unsupported source produces tickets and a failed
 receipt without executing the plan. Exit codes are 0 for success, 1 for an
 execution/comparison/environment error, and 2 for unsupported translation.
 
+Job JSON keeps its existing indentation, key order, ASCII escaping and final
+newline, so result hashes still identify the same bytes. The writer validates
+serializability before opening its destination, then streams the document instead
+of building one complete encoded string. Plan, result/observed output and receipt
+files remain in the private staging directory until the completed job directory
+is published by rename. A write failure cleans the staging directory and leaves
+no published job directory.
+
 The example rounds numeric amounts, sorts two datasets, and performs a
 one-to-many match merge. Its output is pinned and compared with base R in the
 unified gates. The external catalog explicitly declares each column as

@@ -42,6 +42,8 @@ usage, duplicate periods, shuffled rows, missing values, and increasing row
 counts. Sequence numbers provide deterministic order within duplicate periods.
 Seed and row counts are recorded. One fresh R, CLI, and emitted-Python process
 per case supplies elapsed time and, on Linux with `/usr/bin/time`, peak RSS.
+The CLI and emitted Python share the execution engine. The runner also uses the
+CLI's JSON writer for its artifacts; the independent behavior witness is base R.
 Timings include startup and file I/O; they are single observations without a
 performance threshold. Row counts are bounded to 100000 and processes have an
 explicit timeout.
