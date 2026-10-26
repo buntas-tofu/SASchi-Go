@@ -17,7 +17,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from . import cli
-from .job import build_job
+from .job import _read_expected, build_job
 from .provenance import digest
 
 REPO = Path(__file__).resolve().parent.parent
@@ -61,6 +61,89 @@ class BuildJobTests(unittest.TestCase):
         self.assertFalse(job.receipt['accepted'])
         self.assertEqual(job.code, 1)
         self.assertEqual(job.receipt['comparison'], 'failed')
+
+
+class ExpectedOutputTests(unittest.TestCase):
+    def test_byte_json_values_and_errors_match_standard_loader(self):
+        import codecs
+        import hashlib
+        documents = ['{"text":"caf\u00e9 \U0001f600", "rows":[1,1.0,-0.0,null,true]}',
+                     ' {"duplicate":1,"duplicate":2} ',
+                     '[NaN,Infinity,-Infinity,1e309,"\\ud800"]',
+                     '', '{', '{} trailing', '\ufeff{}']
+        payloads = [document.encode(encoding)
+                    for document in documents
+                    for encoding in ('utf-8', 'utf-8-sig', 'utf-16', 'utf-16-le',
+                                     'utf-16-be', 'utf-32', 'utf-32-le', 'utf-32-be')]
+        payloads += [b'\xff', b'\x00', b'"\xed\xa0\x80"',
+                     codecs.BOM_UTF8 + codecs.BOM_UTF8 + b'{}',
+                     codecs.BOM_UTF16_LE + b'\x00']
+        with tempfile.TemporaryDirectory() as td:
+            path = Path(td) / 'expected.json'
+            for payload in payloads:
+                with self.subTest(payload=repr(payload)):
+                    path.write_bytes(payload)
+                    try:
+                        expected = json.loads(payload)
+                    except (ValueError, UnicodeError) as old:
+                        with self.assertRaises(type(old)) as new:
+                            _read_expected(path)
+                        self.assertEqual(str(new.exception), str(old))
+                    else:
+                        actual, checksum = _read_expected(path)
+                        self.assertEqual(json.dumps(actual), json.dumps(expected))
+                        self.assertEqual(checksum, hashlib.sha256(payload).hexdigest())
+
+    def test_expected_failures_preserve_receipt_hash_boundary(self):
+        import hashlib
+        cases = [(b'{', False, 'not requested'),
+                 (b'\xff', False, 'not requested'),
+                 (b'{}', True, 'not requested'),
+                 (b'[]', True, 'not requested'),
+                 (b'null', True, 'not requested'),
+                 (b'{"out":{"schema":{"x":"number"},"rows":[{"x":9}]}}', True, 'failed')]
+        with tempfile.TemporaryDirectory() as td:
+            path = Path(td) / 'expected.json'
+            for payload, has_hash, comparison in cases:
+                with self.subTest(payload=payload):
+                    path.write_bytes(payload)
+                    job = build_job('data out; x=1; run;', expect=path)
+                    self.assertEqual(job.code, 1)
+                    self.assertFalse(job.receipt['accepted'])
+                    self.assertIsNotNone(job.result)
+                    self.assertEqual(job.receipt['comparison'], comparison)
+                    self.assertEqual('expected_sha256' in job.receipt, has_hash)
+                    if has_hash:
+                        self.assertEqual(job.receipt['expected_sha256'], hashlib.sha256(payload).hexdigest())
+            path.unlink()
+            missing = build_job('data out; x=1; run;', expect=path)
+            self.assertEqual(missing.code, 1)
+            self.assertNotIn('expected_sha256', missing.receipt)
+
+    def test_expected_loading_allocations_stay_bounded(self):
+        program = '''
+import hashlib, json, tempfile, tracemalloc
+from pathlib import Path
+from saschi.job import _read_expected
+with tempfile.TemporaryDirectory() as td:
+    path = Path(td) / 'expected.json'
+    path.write_text(json.dumps(['x' * 524288] * 40))
+    tracemalloc.start()
+    value, checksum = _read_expected(path)
+    _, peak = tracemalloc.get_traced_memory()
+    tracemalloc.stop()
+    with path.open('rb') as handle:
+        assert checksum == hashlib.file_digest(handle, 'sha256').hexdigest()
+    assert len(value) == 40 and all(v == 'x' * 524288 for v in value)
+    print(json.dumps({'peak_bytes': peak, 'file_bytes': path.stat().st_size}))
+'''
+        run = subprocess.run([sys.executable, '-c', program], cwd=REPO,
+                             env={**os.environ, 'PYTHONDONTWRITEBYTECODE': '1', 'PYTHONPATH': str(REPO)},
+                             capture_output=True, text=True, timeout=60)
+        self.assertEqual(run.returncode, 0, run.stderr)
+        observation = json.loads(run.stdout)
+        self.assertGreater(observation['file_bytes'], 20_000_000)
+        self.assertLess(observation['peak_bytes'], 2.25 * observation['file_bytes'])
 
 
 def legacy_write_json(path, value):
