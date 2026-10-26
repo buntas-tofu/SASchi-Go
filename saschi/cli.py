@@ -13,7 +13,14 @@ from .provenance import digest, environment
 
 
 def write_json(path, value):
-    path.write_text(json.dumps(value, indent=2, allow_nan=False) + '\n')
+    # Preserve validation before opening the destination, without retaining
+    # the complete encoded string. Job files still publish together by rename.
+    encoder = json.JSONEncoder(indent=2, allow_nan=False)
+    for chunk in encoder.iterencode(value):
+        del chunk
+    with path.open('w') as handle:
+        json.dump(value, handle, indent=2, allow_nan=False)
+        handle.write('\n')
 
 
 def doctor():
