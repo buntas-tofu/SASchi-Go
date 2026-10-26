@@ -60,6 +60,16 @@ def _completeness_record(source: str, plan, target: str, ts_utc: str) -> dict:
         cat.close()
 
 
+def _read_expected(path: Path) -> tuple[object, str]:
+    raw = path.read_bytes()
+    checksum = hashlib.sha256(raw).hexdigest()
+    text = raw.decode(json.detect_encoding(raw), 'surrogatepass')
+    del raw
+    # Match json.loads(bytes), including encoding detection and BOM errors,
+    # while releasing raw bytes before allocating the parsed table graph.
+    return json.JSONDecoder().decode(text), checksum
+
+
 def build_job(source: str, inputs: "Path | None" = None, expect: "Path | None" = None,
               target: str = "python") -> Job:
     """Run one program through the full treatment and return every artifact."""
@@ -85,10 +95,10 @@ def build_job(source: str, inputs: "Path | None" = None, expect: "Path | None" =
         catalog = json.loads(input_bytes) if input_bytes is not None else {}
         receipt['input_sha256'] = hashlib.sha256(input_bytes).hexdigest() if input_bytes is not None else None
         result = run_plan(plan.to_dict(), catalog)
+        del input_bytes, catalog
         if expect:
-            expected_bytes = expect.read_bytes()
-            expected = json.loads(expected_bytes)
-            receipt['expected_sha256'] = hashlib.sha256(expected_bytes).hexdigest()
+            expected, expected_sha256 = _read_expected(expect)
+            receipt['expected_sha256'] = expected_sha256
             if not isinstance(expected, dict) or not expected:
                 raise ValueError('expected output must name at least one dataset')
             for name, table in expected.items():
