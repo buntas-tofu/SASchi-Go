@@ -8,6 +8,7 @@ from sas_semantics import sas_round, sas_merge_by, sas_put_literals, sas_put_cha
 from .functions import apply as apply_function, assign_spec, character_width, validate_reverse_calls, validate_string_expressions, expression_nodes, validate_substr_calls, substr_context_errors, validate_bitwise_calls, SAS_BITWISE_ARITY, LAG_FUNCTIONS, validate_lag_calls
 from .operations import walk_operations as operations
 from .values import normalize_catalog, column_type, coerce, missing, order
+from .functions import validate_calendar_calls
 
 
 def evaluate(expr, row, schema=None):
@@ -213,6 +214,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                 raise ValueError(context_error)
             validate_substr_calls(where, where_schema)
             validate_bitwise_calls(where, where_schema)
+            validate_calendar_calls(where, where_schema)
             validate_lag_calls(where, where_schema)
             rows = [r for r in rows if condition(where, r, where_schema)]
         if keys and any(key(a) > key(b) for a, b in zip(rows, rows[1:])):
@@ -351,6 +353,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                 raise ValueError(f'unsupported operation: {kind}')
         for op in flat:
             validate_reverse_calls(op['args'], schema)
+            validate_calendar_calls(op['args'], schema)
         # Descriptors must be checked even for empty SET inputs or filtered
         # rows. Formats change PUT output and cannot silently be discarded.
         for op in flat:
