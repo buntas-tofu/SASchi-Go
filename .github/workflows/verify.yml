@@ -32,10 +32,31 @@ jobs:
         run: |
           saschi doctor
           python verify_all.py
+      - name: Check monthly ledger against independent R (1k)
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          set -e -o pipefail
+          mkdir -p telemetry/workloads
+          python tools/run_workloads.py --output telemetry/workloads/ci-ledger --sizes 1000 2>&1 | tee telemetry/workloads/ci-ledger.log
+      - name: Check grouped text against independent R (1k)
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          set -e -o pipefail
+          mkdir -p telemetry/workloads
+          python tools/run_text_workloads.py --output telemetry/workloads/ci-text --sizes 1000 2>&1 | tee telemetry/workloads/ci-text.log
       - name: Keep receipts and diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: verify-receipt
           path: telemetry/verify/receipt_*.json
+          if-no-files-found: warn
+      - name: Keep workload receipts and diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: workload-diagnostics
+          path: telemetry/workloads/
           if-no-files-found: warn

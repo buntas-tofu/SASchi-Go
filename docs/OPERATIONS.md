@@ -28,6 +28,16 @@ Both CI workflows run for PRs targeting any branch, including stacked feature
 bases. PR edits, including retargeting, rerun the actual checks. Jobs are not
 skipped on metadata edits, because GitHub treats skipped required jobs as
 successful checks.
+
+The existing Verification job also requires both independent-R workload runners
+at 1000 generated rows, including hand pins and refusal/comparator controls.
+These steps follow the unchanged golden command and each runs unless cancelled,
+even after an earlier step fails. Runner failures remain job failures through
+the transcript pipeline. The always-run `workload-diagnostics` artifact retains
+all workload reports, case data, receipts, logs, observed outputs and informational
+RSS/timing metrics; the existing `verify-receipt` artifact is unchanged. Larger
+workload scales remain standalone. See [workload testing](../examples/workloads/README.md).
+
 `ROSETTA_RSCRIPT` selects an R executable. `CXX` selects a C++ executable, not
 a shell command with flags. Verification receipts record executable paths and
 versions. They are checksummed, not cryptographically signed.

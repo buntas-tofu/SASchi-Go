@@ -39,10 +39,11 @@ option. Algorithm redesign must preserve a stated behavior contract.
 
 [Workload testing](examples/workloads/README.md) adds two original composed
 programs with independent base-R witnesses: a numeric monthly ledger and
-character-heavy events with many short groups. Standalone runners retain exact
-comparison receipts, refusal controls, timings and memory observations through
-100000 input rows. These synthetic workloads do not add external-program or
-live-SAS validation claims.
+character-heavy events with many short groups. CI runs both at 1000 input rows,
+including hand pins and refusal/comparator controls, and retains failure
+diagnostics. Standalone runners support scale tests through 100000 rows. Exact
+comparisons and receipt behavior decide acceptance; RSS/timing remain informational.
+These synthetic workloads do not add external-program or live-SAS validation claims.
 
 
 The [stateful execution contract](docs/STATEFUL_EXECUTION.md) adds typed expected
