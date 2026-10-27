@@ -72,6 +72,13 @@ namespace = {}
 exec(loop.code, namespace)
 assert namespace['result'] == {'datasets': {'d': {
     'schema': {'n': 'number'}, 'rows': [{'n': 0.}]}}, 'log': []}
+array = translate('data d; array a[0:1] x y; a[0]=3; y=4; t=sum(of a[*]); run;')
+assert not array.blocked, array.tickets
+namespace = {}
+exec(array.code, namespace)
+assert namespace['result'] == {'datasets': {'d': {
+    'schema': {'x': 'number', 'y': 'number', 't': 'number'},
+    'rows': [{'x': 3., 'y': 4., 't': 7.}]}}, 'log': []}
 assert main(['inspect', sys.argv[4]]) == 0
 print('VERIFIED: isolated installed wheel, canonical rulebook, all web assets, CLI entry point, MOD-to-PUT output, calendar, sum/UNTIL and division/INT/WHILE')
 '''

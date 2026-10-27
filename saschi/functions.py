@@ -358,7 +358,7 @@ def _substr_arguments(expr):
 
 def _numeric_expression(expr, schema):
     kind = expr.get('kind')
-    if kind in ('number', 'missing', 'tagged_missing', 'automatic'):
+    if kind in ('number', 'missing', 'tagged_missing', 'automatic', 'array_get', 'array_sum'):
         return True
     if kind == 'variable':
         spec = schema.get(expr['value'], 'number')

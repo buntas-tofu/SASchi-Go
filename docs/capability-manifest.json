@@ -96,7 +96,8 @@
    "method": "Inspection of registered fixtures/suites and direct original compiler probes. Dispositions and scopes remain analyst judgments; no live SAS.",
    "report": "docs/COVERAGE_BACKLOG.md",
    "qualification": "Reference fixtures, descriptor transport and source execution are separate. GATED means evidence for the stated slice, never every form of a language entry. Historical measured_at anchors remain the original enumeration/disposition baseline."
-  }
+  },
+  "numeric_arrays_update": "DS-039 adds bounded source ARRAY/indexed reads and writes/SUM OF with numeric-arrays and suite-numeric-arrays plus independent R. ARRAY/Array Reference gain source evidence without disposition, rollup or universe changes. No DO OVER or new complete-program proof; no live SAS."
  },
  "rollup": {
   "stmt": {
@@ -138,20 +139,31 @@
    "valid_in": "DATA step",
    "disposition": "GATED",
    "rule_ids": [
-    "DS-016"
+    "DS-016",
+    "DS-039"
    ],
    "gates": [
-    "arrays"
+    "arrays",
+    "numeric-arrays",
+    "suite-numeric-arrays"
    ],
    "reference_page": 21,
-   "note": "array plus DO loop family",
+   "note": "Reference DS-016 and bounded source DS-039 evidence are separately scoped. See docs/NUMERIC_ARRAYS.md.",
    "gate_evidence": [
     {
      "level": "reference-fixture",
      "gates": [
       "arrays"
      ],
-     "scope": "Helper-level aliasing, bounds, missing aggregation and temporary retention; ARRAY source declarations remain unwired."
+     "scope": "Helper-level array aliasing, bounds, missing aggregation and temporary retention; broader reference evidence remains distinct from the bounded source profile."
+    },
+    {
+     "level": "source-execution",
+     "gates": [
+      "numeric-arrays",
+      "suite-numeric-arrays"
+     ],
+     "scope": "DS-039 fixed one-dimensional numeric declarations, brace/bracket indexed alias reads/writes and SUM OF;1024-element step limit, finite bounded values/exact arithmetic and explicit profile refusals. No DO OVER, character/temporary arrays or new whole-file proof."
     }
    ]
   },
@@ -163,10 +175,13 @@
    "valid_in": "DATA step",
    "disposition": "GATED",
    "rule_ids": [
-    "DS-016"
+    "DS-016",
+    "DS-039"
    ],
    "gates": [
-    "arrays"
+    "arrays",
+    "numeric-arrays",
+    "suite-numeric-arrays"
    ],
    "reference_page": 27,
    "gate_evidence": [
@@ -175,9 +190,18 @@
      "gates": [
       "arrays"
      ],
-     "scope": "Helper-level indexed reads/writes and out-of-range refusal; no source indexed expression/assignment execution."
+     "scope": "Helper-level array aliasing, bounds, missing aggregation and temporary retention; broader reference evidence remains distinct from the bounded source profile."
+    },
+    {
+     "level": "source-execution",
+     "gates": [
+      "numeric-arrays",
+      "suite-numeric-arrays"
+     ],
+     "scope": "DS-039 fixed one-dimensional numeric declarations, brace/bracket indexed alias reads/writes and SUM OF;1024-element step limit, finite bounded values/exact arithmetic and explicit profile refusals. No DO OVER, character/temporary arrays or new whole-file proof."
     }
-   ]
+   ],
+   "note": "Reference DS-016 and bounded source DS-039 evidence are separately scoped. See docs/NUMERIC_ARRAYS.md."
   },
   {
    "entry": "Assignment Statement",

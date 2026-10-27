@@ -169,6 +169,7 @@ CONSTRUCT_MAP: dict[str, str] = {
     "concat-catx": "DS-029",
     "substr": "DS-030",
     "arrays": "DS-016",
+    "numeric-arrays": "DS-039",
     "formats": "DS-010",
     "by-group": "DS-006",
     # Rest of the data-step surface.

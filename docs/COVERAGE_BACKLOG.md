@@ -2,17 +2,18 @@
 
 Status: Repository/base-R planning evidence at main08eaa7b, reconciled2026-10-27.
 For principal/maintainer prioritization. Counts describe this checkout and the56
-pinned sibling corpus files, not all SAS or live-SAS equivalence. Rankings,
+pinned sibling corpus files, not all SAS or live-SAS equivalence. Updated for
+DS-039 numeric source arrays after the original reconciliation. Rankings,
 diagnostic categories and projected unlocks are explicitly analyst inferences.
 Implementation and publication are not authorized by this planning exercise.
 
 ## Inventory reconciled against actual evidence
 
-The golden command registers46 fixture runners,36 translator suites and1
-synthesis runner. The latest passing baseline contains608 tests, zero skips,
+The golden command registers47 fixture runners,37 translator suites and1
+synthesis runner. The latest passing baseline contains650 tests, zero skips,
 60 faithful synthesis checks and60 naive controls. The separate1k workload
 checks total39:18 ledger and21 text. These counts have different units. Neither
-73 rulebook rules nor83 golden-command runners is a SAS capability denominator.
+74 rulebook rules nor85 golden-command runners is a SAS capability denominator.
 
 [The capability manifest](capability-manifest.json) still enumerates108 statements
 and40 data-set options. The other7 declared reference areas remain unenumerated:
@@ -20,8 +21,10 @@ formats/informats, functions/CALL routines, system options, component objects,
 utilities, macros and procedures. Their null universes are not zero.
 
 The reconciled148 entries contain23 GATED,5 RULE,8 HUMAN-REVIEW,22 OUT-OF-SCOPE
-and90 UNASSESSED. Among GATED entries,20 have bounded source-execution evidence;
-3 have reference fixtures only: ARRAY, Array Reference and IN=. These are
+and90 UNASSESSED. Among GATED entries,22 have bounded source-execution evidence;
+1 has reference fixtures only: IN=. DS-039 adds source-array evidence without
+changing dispositions or reference universes. The original reconciliation below
+remains its historical assessment event. These are
 catalogue-entry counts, not counts of implemented features or supported forms.
 
 | Entry | Previous | Reconciled | Evidence and remaining boundary |
@@ -50,8 +53,8 @@ The5 RULE entries and8 HUMAN-REVIEW entries retain their review boundaries.
 
 ## Unknown blockers classified
 
-The current56-file compile census remains12 clean and44 blocked, with754 ticket
-occurrences across29 existing route labels. All491 occurrences previously routed
+The current56-file compile census remains12 clean and44 blocked, with737 ticket
+occurrences across27 current route labels. All483 occurrences previously routed
 as unknown receive a primary planning category, with file, line, ticket ordinal,
 statement hash and classification basis preserved. No compiler ticket is removed.
 
@@ -61,14 +64,14 @@ statement hash and classification basis preserved. No compiler ticket is removed
 | Macro body, invocation or unresolved reference |129|
 | Input records, INPUT/INFILE and opaque inline data |53|
 | Labels, GOTO/LINK/RETURN/STOP |35|
-| Arrays and indexed writes |24|
+| Arrays and indexed writes |16|
 | KEEP/DROP projection |8|
 | External file/engine output |4|
 | Descriptor/environment statements |4|
 | Corpus prose or printed output |2|
 | Rejected DATA header follow-on diagnostics |2|
 | CALL side effects |2|
-| Total |491|
+| Total |483|
 
 The procedure subtotal includes DS2:95, OPTMODEL:76, IML:31, PRINT:9, MEANS:4,
 FCMP:3, SQL:3, SGPLOT:2, TTEST:2 and one each SORT, MULTTEST and UNIVARIATE.
@@ -112,8 +115,9 @@ evidence-cost ranking, not a schedule or an estimate of business demand.
 | B4 | KEEP/DROP projection, followed by declarations/options | Separate input/output timing profiles | Broad composition value, no immediate full-file unlock claimed | Medium |
 | B5 | Fractional numeric rendering, wider arithmetic and elementary functions | Separate precision/error contracts | sum_of_a_series.sas and trigonometric_functions.sas require several additional slices | High, retain current exact-division and INT refusals until replaced by evidence |
 
-A1 should land as reviewable sub-slices: numeric array declaration/index/OF
-execution first, DO OVER scheduling second. A source parser recognizing ARRAY
+A1 has reviewable sub-slices: bounded numeric array declaration/index/OF
+execution is now implemented in DS-039; DO OVER scheduling remains next. See
+[the numeric-array profile](NUMERIC_ARRAYS.md) for the exact scope and receipts. A source parser recognizing ARRAY
 without those state and descriptor proofs is insufficient. A2 must state how
 start/stop/BY expressions are captured, bound nested work and prohibit unsupported
 index mutation. A3 must define how literal blanks, numeric fields and record

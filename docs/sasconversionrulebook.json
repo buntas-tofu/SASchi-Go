@@ -2047,6 +2047,38 @@
       "sources": [
         "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000201927.htm"
       ]
+    },
+    {
+      "rule_id": "DS-039",
+      "sas_pattern": "Bounded numeric ARRAY declarations, indexed reads/writes and SUM OF",
+      "scope": "data-step",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "array_declare binds ordered DATA-row variable names; array_get/array_set resolve the current row by checked integral index; array_sum uses the existing SUM-function missing contract with exact bounded ordered partial sums."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent environment-backed variable bindings, native numeric addition and sum; verify original pins, bounds, missing behavior and output snapshots."
+      },
+      "required_settings": [
+        "At most1024 declared elements per DATA step; fixed one-dimensional integer bounds within signed2147483647. Explicit names, unpadded ascending numbered ranges or generated names; inferred extent requires names.",
+        "Values and every new arithmetic/SUM OF partial result are finite binary64 within2147483647; exact representability required for +/-. Ordinary missing is admitted, tags/coercion/nonfinite/wider values refuse.",
+        "Array declarations are unconditional and precede indexed/OF uses. Braces/brackets reference elements; parenthetical element references remain deferred.",
+        "Existing scalar operations and output paths retain their profiles. Calls/division inside new array expressions, DO OVER, character/multidimensional/temporary/initializer-retained arrays, array members as retained/BY/loop-index variables, array WHERE/PUT_ALL and C++ execution remain deferred."
+      ],
+      "silent_difference_checks": [
+        "Array elements alias row variables in both directions; overlapping arrays share bindings without copying values.",
+        "Array names are not output variables. Discover numeric descriptors on empty/skipped/zero-trip paths; reset scratch cells per DATA row/run.",
+        "SUM OF ignores ordinary missing and returns missing if all elements are missing; it is not the retained sum statement.",
+        "Dynamic subscript failures are selected-path errors and publish no accepted partial result or buffered log; literal/declaration/descriptor errors remain eager."
+      ],
+      "validation_test": "examples/verify_numeric_arrays.py; saschi.test_numeric_arrays",
+      "confidence": "bounded repository/base-R evidence; no live SAS",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/lrcon/62955/HTML/default/a001022719.htm",
+        "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000203460.htm"
+      ]
     }
   ],
   "runtime_capabilities": {
@@ -2202,6 +2234,20 @@
       "r_witness": "examples/do_while.R",
       "boundary_tests": "saschi.test_do_while",
       "evidence": "original hand pins, independent base R and full unmodified loops_while.sas composition proof; no live SAS"
+    },
+    "numeric_arrays": {
+      "rule_id": "DS-039",
+      "target": "saschi.runtime.run_plan",
+      "scope": [
+        "At most1024 declared elements per DATA step; fixed one-dimensional integer bounds within signed2147483647. Explicit names, unpadded ascending numbered ranges or generated names; inferred extent requires names.",
+        "Values and every new arithmetic/SUM OF partial result are finite binary64 within2147483647; exact representability required for +/-. Ordinary missing is admitted, tags/coercion/nonfinite/wider values refuse.",
+        "Array declarations are unconditional and precede indexed/OF uses. Braces/brackets reference elements; parenthetical element references remain deferred.",
+        "Existing scalar operations and output paths retain their profiles. Calls/division inside new array expressions, DO OVER, character/multidimensional/temporary/initializer-retained arrays, array members as retained/BY/loop-index variables, array WHERE/PUT_ALL and C++ execution remain deferred."
+      ],
+      "validation_test": "examples/verify_numeric_arrays.py",
+      "r_witness": "examples/numeric_arrays.R",
+      "boundary_tests": "saschi.test_numeric_arrays",
+      "evidence": "Original pins and synthetic source compositions plus independent base R; no new complete external-program proof or live SAS."
     }
   }
 }
