@@ -26,8 +26,8 @@ class LoaderTests(unittest.TestCase):
     def setUp(self):
         self.rules = load_rulebook(REPO_ROOT / "docs" / "sasconversionrulebook.json")
 
-    def test_rule_count_is_70(self):
-        self.assertEqual(len(self.rules), 70)
+    def test_rule_count_is_73(self):
+        self.assertEqual(len(self.rules), 73)
         self.assertIn(f"rulebook. {len(self.rules)} rules", (REPO_ROOT / "README.md").read_text())
 
     def test_rule_ids_unique(self):
@@ -36,7 +36,7 @@ class LoaderTests(unittest.TestCase):
 
     def test_family_counts(self):
         counts = family_counts(self.rules)
-        self.assertEqual(counts["DS"], 35)
+        self.assertEqual(counts["DS"], 38)
         self.assertEqual(counts["SQL"], 3)
         self.assertEqual(counts["ST"], 16)
         self.assertEqual(counts["SV"], 6)
@@ -61,7 +61,7 @@ class LoaderTests(unittest.TestCase):
 
     def test_gated_families_present(self):
         # Families with live fixture gates (Track A routes through them).
-        for rule_id in ("DS-012", "DS-013", "DS-020", "DS-021", "DS-022", "DS-023", "DS-024", "DS-025", "DS-026", "DS-027", "DS-028", "DS-029", "DS-030", "DS-031", "DS-032", "DS-033", "DS-034", "DS-035", "ST-014", "ST-015", "ST-016", "MX-001"):
+        for rule_id in ("DS-012", "DS-013", "DS-020", "DS-021", "DS-022", "DS-023", "DS-024", "DS-025", "DS-026", "DS-027", "DS-028", "DS-029", "DS-030", "DS-031", "DS-032", "DS-033", "DS-034", "DS-035", "DS-036", "DS-037", "DS-038", "ST-014", "ST-015", "ST-016", "MX-001"):
             self.assertIn(rule_id, self.rules)
 
     def test_missing_file_raises(self):

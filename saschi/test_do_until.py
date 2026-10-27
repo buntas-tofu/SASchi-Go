@@ -79,8 +79,12 @@ class DoUntilTests(unittest.TestCase):
         for source in ('do until(1); do until(1); end; end;',
                        'do i=1 to 2; do until(1); end; end;',
                        'do until(1); do i=1 to 2; end; end;',
-                       'do until(1) while(1); end;', 'do while(1); end;'):
+                       'do until(1) while(1); end;'):
             self.assertTrue(compile_plan('data d; '+source+' run;').blocked)
+        # Preserve the old standalone WHILE source as a bounded runtime refusal.
+        job=build_job('data d; do while(1); end; run;')
+        self.assertEqual(job.code,1); self.assertIsNone(job.result)
+        self.assertIn('10000',job.receipt['error'])
 
     def test_body_declarations_control_and_null_output_refuse(self):
         for body in ('length c $2;','retain n 0;','set raw;','where 1;',

@@ -187,6 +187,64 @@ def sas_do_until(body, stop):
     raise ValueError('DO UNTIL exceeds the 10000-iteration tool budget')
 
 
+SAS_NUMERIC_LIMIT = 2147483647
+SAS_INT_GUARD = 2e-12
+SAS_DO_WHILE_LIMIT = 10000
+
+
+def sas_bounded_numeric(value):
+    """Finite binary64 within the DS-036/037 magnitude profile, no coercion."""
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ValueError('bounded numeric expression requires a finite number')
+    try:
+        numeric = float(value)
+    except (OverflowError, ValueError) as exc:
+        raise ValueError('bounded numeric expression requires finite binary64') from exc
+    if not math.isfinite(numeric) or abs(numeric) > SAS_NUMERIC_LIMIT:
+        raise ValueError('bounded numeric expression exceeds the finite magnitude profile')
+    return numeric
+
+
+def sas_divide(left, right):
+    """DS-036 exact binary64 quotients only; rounded division needs review."""
+    from fractions import Fraction
+    left, right = sas_bounded_numeric(left), sas_bounded_numeric(right)
+    if right == 0:
+        raise ValueError('division by zero requires error-state review')
+    exact = Fraction.from_float(left) / Fraction.from_float(right)
+    if abs(exact) > SAS_NUMERIC_LIMIT:
+        raise ValueError('division result exceeds the bounded magnitude profile')
+    result = left / right
+    if Fraction.from_float(result) != exact:
+        raise ValueError('division quotient is not exactly representable in binary64')
+    return result
+
+
+def sas_int(value):
+    """DS-037 safe truncation outside the conservative INT fuzz boundary."""
+    value = sas_bounded_numeric(value)
+    if not value.is_integer() and abs(value - round(value)) <= SAS_INT_GUARD:
+        raise ValueError('INT near-integer fuzz boundary requires review')
+    return math.trunc(value)
+
+
+def sas_do_while(body, test):
+    """DS-038 pre-test scheduling, zero trips and a fixed body budget."""
+    if not callable(body) or not callable(test):
+        raise ValueError('DO WHILE requires body and test callbacks')
+    count = 0
+    while True:
+        active = test()
+        if not isinstance(active, bool):
+            raise ValueError('DO WHILE test callback must return a boolean')
+        if not active:
+            return count
+        if count == SAS_DO_WHILE_LIMIT:
+            raise ValueError('DO WHILE exceeds the 10000-iteration tool budget')
+        body()
+        count += 1
+
+
 def sas_intck(interval: str, start: datetime.date, end: datetime.date) -> int:
     """SAS INTCK, discrete method: interval boundaries crossed from start to end.
 

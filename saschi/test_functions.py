@@ -244,10 +244,12 @@ class ModFunctionTests(unittest.TestCase):
                 self.assertEqual(job.code, 1)
 
     def test_wrong_arities_and_ungated_related_functions_remain_tickets(self):
-        for call in ('mod()', 'mod(7)', 'mod(7,3,2)', 'int(-2.7)', 'modz(7,3)'):
+        for call in ('mod()', 'mod(7)', 'mod(7,3,2)', 'modz(7,3)'):
             with self.subTest(call=call):
                 self.assertTrue(compile_plan(f'data d; x={call}; run;').blocked)
-        self.assertNotIn('int', FUNCTIONS)
+        # Preserve the formerly refused source as a value proof under DS-037.
+        self.assertEqual(one('data d; x=int(-2.7); run;')['x'], -2.)
+        self.assertEqual(FUNCTIONS['int'].gate, 'examples/verify_int.py')
         self.assertNotIn('modz', FUNCTIONS)
 
     def test_rule_and_gate_provenance_describe_only_bounded_mod(self):

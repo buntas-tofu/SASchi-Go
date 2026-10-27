@@ -1957,6 +1957,96 @@
       "sources": [
         "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000201924.htm"
       ]
+    },
+    {
+      "rule_id": "DS-036",
+      "sas_pattern": "division",
+      "scope": "data-step",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "sas_semantics helpers and saschi.runtime checked division"
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "examples/division.R independent native numeric/control witness"
+      },
+      "required_settings": [
+        "Finite numeric binary64 operands and result, magnitudes at most2147483647, nonzero denominator and exactly representable quotient. Fractional inputs allowed; rounded quotients such as1/3, missing/tagged, bool, character/structured values, overflow and underflow loss refuse.",
+        "Bounded grouping and plus/minus/division composition use standard precedence and left associativity; maximum32 recursive arithmetic/group levels and128 arithmetic/call nodes per step when new numeric operations occur. Existing plus/minus behavior remains.",
+        "Static descriptors and literal trees are checked on empty, filtered, skipped and zero-trip paths; dynamic operands execute lazily. Failure publishes no accepted partial result or buffered logs.",
+        "Nested/combined loops, WHILE LAG/DIF queue scheduling, body declarations/input, LEAVE/CONTINUE, DATA _NULL_ OUTPUT, PUT_ALL and C++ remain deferred. These bounds/refusals are tool policies, not SAS log/missing/_ERROR_ emulation."
+      ],
+      "silent_difference_checks": [
+        "Native integer division or floor on negative fractions is not truncation toward zero.",
+        "SAS INT fuzzing near integers requires an explicit boundary; plain truncation does not claim full INT parity.",
+        "Pre-test WHILE must not execute an initially false body; it differs from UNTIL."
+      ],
+      "validation_test": "examples/verify_division.py and saschi.test_division: hand pins, independent base R, generated cases, static/lazy checks, refusal/comparator controls and source execution",
+      "confidence": "bounded repository/base-R evidence, no live SAS",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/lrcon/65287/HTML/default/p00iah2thp63bmn1lt20esag14lh.htm"
+      ]
+    },
+    {
+      "rule_id": "DS-037",
+      "sas_pattern": "int",
+      "scope": "data-step",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "sas_semantics helpers and saschi.runtime checked int"
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "examples/int.R independent native numeric/control witness"
+      },
+      "required_settings": [
+        "Finite numeric magnitude at most2147483647. Exact integers or nonintegral values farther than2e-12 from every integer truncate toward zero. The conservative2e-12 band, including the documented1e-12 fuzz zone, refuses. Missing/tagged, bool, character/structured and nonfinite values refuse. No INTZ substitution or INT fuzz parity claim.",
+        "Bounded grouping and plus/minus/division composition use standard precedence and left associativity; maximum32 recursive arithmetic/group levels and128 arithmetic/call nodes per step when new numeric operations occur. Existing plus/minus behavior remains.",
+        "Static descriptors and literal trees are checked on empty, filtered, skipped and zero-trip paths; dynamic operands execute lazily. Failure publishes no accepted partial result or buffered logs.",
+        "Nested/combined loops, WHILE LAG/DIF queue scheduling, body declarations/input, LEAVE/CONTINUE, DATA _NULL_ OUTPUT, PUT_ALL and C++ remain deferred. These bounds/refusals are tool policies, not SAS log/missing/_ERROR_ emulation."
+      ],
+      "silent_difference_checks": [
+        "Native integer division or floor on negative fractions is not truncation toward zero.",
+        "SAS INT fuzzing near integers requires an explicit boundary; plain truncation does not claim full INT parity.",
+        "Pre-test WHILE must not execute an initially false body; it differs from UNTIL."
+      ],
+      "validation_test": "examples/verify_int.py and saschi.test_int: hand pins, independent base R, generated cases, static/lazy checks, refusal/comparator controls and source execution",
+      "confidence": "bounded repository/base-R evidence, no live SAS",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/p1b1zd0wuyufp0n1jbqlr27p4eay.htm"
+      ]
+    },
+    {
+      "rule_id": "DS-038",
+      "sas_pattern": "do-while",
+      "scope": "data-step",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "sas_semantics helpers and saschi.runtime checked do_while"
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "examples/do_while.R independent native numeric/control witness"
+      },
+      "required_settings": [
+        "Single-level DATA-step numeric pre-test. False/missing truth permits zero trips. Fixed10000-body budget per invocation; false after body10000 succeeds, true there refuses before body10001. _N_ advances per outer DATA row. Entire-step OUTPUT discovery suppresses implicit output even on skipped/zero-trip paths.",
+        "Bounded grouping and plus/minus/division composition use standard precedence and left associativity; maximum32 recursive arithmetic/group levels and128 arithmetic/call nodes per step when new numeric operations occur. Existing plus/minus behavior remains.",
+        "Static descriptors and literal trees are checked on empty, filtered, skipped and zero-trip paths; dynamic operands execute lazily. Failure publishes no accepted partial result or buffered logs.",
+        "Nested/combined loops, WHILE LAG/DIF queue scheduling, body declarations/input, LEAVE/CONTINUE, DATA _NULL_ OUTPUT, PUT_ALL and C++ remain deferred. These bounds/refusals are tool policies, not SAS log/missing/_ERROR_ emulation."
+      ],
+      "silent_difference_checks": [
+        "Native integer division or floor on negative fractions is not truncation toward zero.",
+        "SAS INT fuzzing near integers requires an explicit boundary; plain truncation does not claim full INT parity.",
+        "Pre-test WHILE must not execute an initially false body; it differs from UNTIL."
+      ],
+      "validation_test": "examples/verify_do_while.py and saschi.test_do_while: hand pins, independent base R, generated cases, static/lazy checks, refusal/comparator controls and source execution",
+      "confidence": "bounded repository/base-R evidence, no live SAS",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000201927.htm"
+      ]
     }
   ],
   "runtime_capabilities": {
@@ -2085,6 +2175,33 @@
       "r_witness": "examples/do_until.R",
       "boundary_tests": "saschi.test_do_until",
       "evidence": "original repository/base-R evidence; no live SAS"
+    },
+    "division": {
+      "rule_id": "DS-036",
+      "target": "saschi.runtime.run_plan",
+      "scope": "Finite numeric binary64 operands and result, magnitudes at most2147483647, nonzero denominator and exactly representable quotient. Fractional inputs allowed; rounded quotients such as1/3, missing/tagged, bool, character/structured values, overflow and underflow loss refuse.",
+      "validation_test": "examples/verify_division.py",
+      "r_witness": "examples/division.R",
+      "boundary_tests": "saschi.test_division",
+      "evidence": "original hand pins, independent base R and full unmodified loops_while.sas composition proof; no live SAS"
+    },
+    "int": {
+      "rule_id": "DS-037",
+      "target": "saschi.runtime.run_plan",
+      "scope": "Finite numeric magnitude at most2147483647. Exact integers or nonintegral values farther than2e-12 from every integer truncate toward zero. The conservative2e-12 band, including the documented1e-12 fuzz zone, refuses. Missing/tagged, bool, character/structured and nonfinite values refuse. No INTZ substitution or INT fuzz parity claim.",
+      "validation_test": "examples/verify_int.py",
+      "r_witness": "examples/int.R",
+      "boundary_tests": "saschi.test_int",
+      "evidence": "original hand pins, independent base R and full unmodified loops_while.sas composition proof; no live SAS"
+    },
+    "do_while": {
+      "rule_id": "DS-038",
+      "target": "saschi.runtime.run_plan",
+      "scope": "Single-level DATA-step numeric pre-test. False/missing truth permits zero trips. Fixed10000-body budget per invocation; false after body10000 succeeds, true there refuses before body10001. _N_ advances per outer DATA row. Entire-step OUTPUT discovery suppresses implicit output even on skipped/zero-trip paths.",
+      "validation_test": "examples/verify_do_while.py",
+      "r_witness": "examples/do_while.R",
+      "boundary_tests": "saschi.test_do_while",
+      "evidence": "original hand pins, independent base R and full unmodified loops_while.sas composition proof; no live SAS"
     }
   }
 }

@@ -66,8 +66,14 @@ namespace = {}
 exec(loop.code, namespace)
 assert namespace['result'] == {'datasets': {'d': {
     'schema': {'n': 'number'}, 'rows': [{'n': 3.}]}}, 'log': []}
+loop = translate('data d; n=8; do while(n>0); n=int(n/2); end; run;')
+assert not loop.blocked, loop.tickets
+namespace = {}
+exec(loop.code, namespace)
+assert namespace['result'] == {'datasets': {'d': {
+    'schema': {'n': 'number'}, 'rows': [{'n': 0.}]}}, 'log': []}
 assert main(['inspect', sys.argv[4]]) == 0
-print('VERIFIED: isolated installed wheel, canonical rulebook, all web assets, CLI entry point, MOD-to-PUT output, calendar and sum/UNTIL calls')
+print('VERIFIED: isolated installed wheel, canonical rulebook, all web assets, CLI entry point, MOD-to-PUT output, calendar, sum/UNTIL and division/INT/WHILE')
 '''
 
 

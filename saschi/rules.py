@@ -157,6 +157,9 @@ CONSTRUCT_MAP: dict[str, str] = {
     "do-if": "DS-031",
     "bitwise": "DS-032",
     "calendar": "DS-033",
+    "division": "DS-036",
+    "int": "DS-037",
+    "do-while": "DS-038",
     "sum-statement": "DS-034",
     "do-until": "DS-035",
     "put-numeric-list": "DS-027",
@@ -220,6 +223,7 @@ CONSTRUCT_MAP: dict[str, str] = {
 # Statement-level routing: statement-start regex -> construct name.
 # Order matters: longest/most specific first.
 STATEMENT_ROUTER: list[tuple[re.Pattern, str]] = [
+    (re.compile(r'^\s*DO\s+WHILE\b', re.I), 'do-while'),
     (re.compile(r'^\s*DO\s+UNTIL\b', re.I), 'do-until'),
     (re.compile(r'^\s*[A-Za-z_][A-Za-z0-9_]{0,31}\s*\+(?!=)', re.I), 'sum-statement'),
     (re.compile(r"^\s*PROC\s+SORT\b", re.I), "sort"),
@@ -260,6 +264,7 @@ STATEMENT_ROUTER: list[tuple[re.Pattern, str]] = [
 
 # Function-level routing: function call regex -> construct name.
 FUNCTION_ROUTER: list[tuple[re.Pattern, str]] = [
+    (re.compile(r'\bINT\s*\(', re.I), 'int'),
     (re.compile(r"\b(?:MDY|WEEKDAY)\s*\(", re.I), "calendar"),
     (re.compile(r"\b(?:BAND|BOR|BXOR|BNOT|BLSHIFT|BRSHIFT)\s*\(", re.I), "bitwise"),
     (re.compile(r"\bCOUNT\s*\(", re.I), "count"),
