@@ -102,6 +102,50 @@ def date_to_sas(d: datetime.date) -> int:
     return (d - SAS_EPOCH).days
 
 
+# DS-033 bounded modern-calendar construction and weekday extraction. The
+# 1753..3999 policy avoids historical calendar cutovers and extended-year
+# leap rules. Invalid/missing/error-state cases require explicit review.
+SAS_CALENDAR_ARITY = {'mdy': 3, 'weekday': 1}
+SAS_CALENDAR_MIN_YEAR = 1753
+SAS_CALENDAR_MAX_YEAR = 3999
+SAS_CALENDAR_MIN_DAY = (datetime.date(1753, 1, 1) - SAS_EPOCH).days
+SAS_CALENDAR_MAX_DAY = (datetime.date(3999, 12, 31) - SAS_EPOCH).days
+
+
+def sas_calendar_integer(value, lower, upper):
+    """Finite integral numeric input inside the explicit calendar profile."""
+    if (isinstance(value, bool) or not isinstance(value, (int, float)) or
+            not lower <= value <= upper or not math.isfinite(value) or value != int(value)):
+        raise ValueError(f'calendar requires finite integral numeric input in {lower}..{upper}; '
+                         'missing/error-state, coercion and wider dates require review')
+    return int(value)
+
+
+def sas_calendar(name, *values):
+    """Checked MDY/WEEKDAY calls; no YEARCUTOFF or diagnostic emulation."""
+    if not isinstance(name, str) or name not in SAS_CALENDAR_ARITY or len(values) != SAS_CALENDAR_ARITY[name]:
+        raise ValueError('calendar requires a supported name and exact argument count')
+    if name == 'weekday':
+        day = sas_calendar_integer(values[0], SAS_CALENDAR_MIN_DAY, SAS_CALENDAR_MAX_DAY)
+        return (SAS_EPOCH + datetime.timedelta(days=day)).isoweekday() % 7 + 1
+    month = sas_calendar_integer(values[0], 1, 12)
+    day = sas_calendar_integer(values[1], 1, 31)
+    year = sas_calendar_integer(values[2], SAS_CALENDAR_MIN_YEAR, SAS_CALENDAR_MAX_YEAR)
+    try:
+        date = datetime.date(year, month, day)
+    except ValueError as exc:
+        raise ValueError('calendar MDY requires a valid calendar date; diagnostics/error-state require review') from exc
+    return (date - SAS_EPOCH).days
+
+
+def sas_mdy(month, day, year):
+    return sas_calendar('mdy', month, day, year)
+
+
+def sas_weekday(day):
+    return sas_calendar('weekday', day)
+
+
 def sas_intck(interval: str, start: datetime.date, end: datetime.date) -> int:
     """SAS INTCK, discrete method: interval boundaries crossed from start to end.
 

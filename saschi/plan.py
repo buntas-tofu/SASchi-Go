@@ -789,4 +789,7 @@ def compile_plan(source: str) -> Plan:
     for name in SAS_BITWISE_ARITY:
         plan.matched.extend(('bitwise', 'DS-032', line or 1)
                             for line in function_call_lines(plan.to_dict(), name))
+    for name in ('mdy', 'weekday'):
+        plan.matched.extend(('calendar', 'DS-033', line or 1)
+                            for line in function_call_lines(plan.to_dict(), name))
     return plan

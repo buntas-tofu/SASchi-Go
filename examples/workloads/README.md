@@ -23,8 +23,8 @@ failures. RSS and elapsed time are recorded without performance thresholds;
 the existing worker timeout still bounds hung processes.
 
 Larger scales remain available through the standalone commands below. Workload
-checks strengthen the existing CI job without changing the 40 fixture gates,
-30 suites, synthesis or their execution order. `ALL VERIFIED` still refers to
+checks strengthen the existing CI job without changing the registered fixture
+gates, translator suites, synthesis or their execution order. `ALL VERIFIED` still refers to
 the registered golden-command checks; CI also requires both workload steps.
 
 ## Monthly usage ledger

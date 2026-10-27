@@ -535,3 +535,41 @@ is claimed.
 invoked-index models and pin occurrence identity, missing pushes, depth bounds,
 branch/loop timing, reset boundaries and local/atomic refusals. The original
 `examples/verify_lag.py` raw reference/R queue fixture remains unchanged.
+
+## Bounded calendar construction and weekdays
+
+Status: DS-033 repository/base-R evidence for maintainer review, no live SAS.
+MDY(month,day,year) returns an integral SAS day number relative to 1960-01-01.
+WEEKDAY(date) returns Sunday1 through Saturday7. Both require finite integral
+numeric arguments and a valid date from 1753-01-01 through 3999-12-31. This is
+an explicit implementation profile: the lower year avoids historical calendar
+cutovers, and the upper year avoids extended-year leap rules. It does not state
+the complete SAS date range. Four-digit years eliminate YEARCUTOFF dependence.
+
+Calls compose in assignments, nested numeric calls, predicates, WHERE and the
+existing IF/ELSE and counted-DO simple actions. Descriptor and literal checks
+also cover empty/filtered input, unselected branches and zero-trip bodies.
+Dynamic arguments are validated when invoked; an unselected dynamic call does
+not run. Invalid values refuse atomically without publishing earlier records.
+
+Ordinary/tagged missing, nonfinite/fractional values, implicit character
+conversion, invalid dates and dates outside the profile require review. Direct
+helper calls also reject booleans and structured values. No invalid-date SAS
+diagnostic, missing-result or _ERROR_ behavior is claimed. Other calendar calls,
+date literals, system-option changes, C++ and calendar PUT_ALL expressions retain
+their existing boundaries. The PUT_ALL function allowlist is unchanged.
+
+Evidence: `examples/verify_calendar.py`, original `examples/calendar.R` and
+`saschi.test_calendar`. The gate checks 26 pins, 4576 constructive/boundary cases,
+73 shared refusals and four naive discriminators against native base-R Date
+construction and weekday formatting. Python expected values use an independent
+integer Gregorian ordinal model. The full unmodified day_of_the_week.sas corpus
+file passes source/stdout/complete-result hash pins, emitted/runtime/shared-job
+checks and an independent R program witness. All 17 output records and their
+trailing separators are checked. This is the seventh external program proof.
+
+Primary specifications:
+- [SAS MDY](https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/p0bo5thbfrcab1n1menkqxq2suiv.htm)
+- [SAS WEEKDAY](https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000201173.htm)
+- [SAS date values and historical limits](https://support.sas.com/documentation/cdl/en/lrcon/65287/HTML/default/p1wj0wt2ebe2a0n1lv4lem9hdc0v.htm)
+- [Extended-year leap rule boundary](https://support.sas.com/documentation/cdl/en/acpcref/63184/HTML/default/a003352722.htm)

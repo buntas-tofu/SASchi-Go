@@ -16,14 +16,14 @@ policies. Receipts record what passed for the source and environment tested.
 ## Current verification
 
 Status: version 0.4.0 development evidence for maintainer review, checked on
-2026-10-26. With the pinned Roku corpus present, `python verify_all.py` passes
-40 fixture gates, 30 suites and 498 tests with zero skips. Synthesis adds 60/60
+2026-10-27. With the pinned Roku corpus present, `python verify_all.py` passes
+41 fixture gates, 31 suites and 518 tests with zero skips. Synthesis adds 60/60
 faithful passes and catches 60/60 naive variants. Receipts bind these results to
 the recorded source and environment; live-SAS validation remains outstanding.
 
-Six unmodified external programs pass complete-program checks, including
-FizzBuzz. The bitwise program remains an explicit 67-column output refusal under
-the unchanged 64-column profile. See the
+Seven unmodified external programs pass complete-program checks, including
+FizzBuzz and the day-of-the-week calendar program. The bitwise program remains
+an explicit 67-column output refusal under the unchanged 64-column profile. See the
 [stateful execution contract](docs/STATEFUL_EXECUTION.md) for the supported slices
 and their remaining boundaries.
 
@@ -60,7 +60,7 @@ fixed expected output and base-R evidence. Special missings retain their tags.
   sibling plus a fixture verifier (`verify_*.py`). Run any verifier directly,
   or all of them through [verify_all.py](verify_all.py).
 - [docs/sasconversionrulebook.json](docs/sasconversionrulebook.json) : the machine-consumable translation
-  rulebook. 67 rules with equivalence classes (EXACT,
+  rulebook. 68 rules with equivalence classes (EXACT,
   EQUIVALENT-WITH-SETTINGS, APPROXIMATE, NO-DIRECT-EQUIVALENT), required
   settings, forbidden patterns, and validation tests.
 - [docs/capability-manifest.json](docs/capability-manifest.json) : the coverage manifest. Enumerated entries of
@@ -131,6 +131,13 @@ The R interpreter is found via `ROSETTA_RSCRIPT`, then `Rscript` on PATH.
 [verify_all.py](verify_all.py) writes its receipts under `telemetry/` (gitignored).
 
 ## Known landmines (why the gate exists)
+
+- MDY/WEEKDAY use the SAS day epoch and Sunday-one weekday numbering. DS-033
+  gates valid dates from 1753 through 3999 with integral numeric arguments,
+  independent base-R comparisons and the unmodified external day-of-the-week
+  program. Two-digit years, invalid/missing inputs, fractional days and wider
+  calendars require review ([calendar gate](examples/verify_calendar.py),
+  [source execution suite](saschi/test_calendar.py)).
 
 - PUT _ALL_ writes the complete ordered PDV, including uninitialized numeric
   references and the automatic variables. DS-025 gates a bounded scalar slice

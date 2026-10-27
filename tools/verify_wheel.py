@@ -54,8 +54,14 @@ assert printed.getvalue() == '[minus ]\n'
 assert namespace['result'] == {
     'datasets': {'d': {'schema': {'c': {'type': 'character', 'length': 5}},
                       'rows': [{'c': 'minus'}]}}, 'log': ['[minus ]']}
+calendar = translate('data d; x=mdy(1,1,1960); w=weekday(x); run;')
+assert not calendar.blocked, calendar.tickets
+namespace = {}
+exec(calendar.code, namespace)
+assert namespace['result'] == {'datasets': {'d': {
+    'schema': {'x': 'number', 'w': 'number'}, 'rows': [{'x': 0., 'w': 6.}]}}, 'log': []}
 assert main(['inspect', sys.argv[4]]) == 0
-print('VERIFIED: isolated installed wheel, canonical rulebook, all web assets, CLI entry point, MOD-to-PUT output')
+print('VERIFIED: isolated installed wheel, canonical rulebook, all web assets, CLI entry point, MOD-to-PUT output and calendar calls')
 '''
 
 

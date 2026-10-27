@@ -31,6 +31,8 @@ Gate provenance, function by function:
   occurrence queues; selected IF/ELSE and counted DO scheduling, no stateless calls.
 - `examples/verify_mod.py`  MOD, dividend-signed remainder for bounded exact
   binary64 integers; fractional, missing, and zero-divisor inputs require review.
+- `examples/verify_calendar.py`  MDY/WEEKDAY for valid dates in1753..3999,
+  with integral numeric arguments and explicit missing/error-state refusals.
 """
 from __future__ import annotations
 
@@ -43,7 +45,9 @@ from sas_semantics import (is_sas_missing, sas_charnum, sas_count, sas_input_yym
                            sas_min, sas_mod, sas_numeric_length, sas_put_date9, sas_putn, sas_round,
                            sas_sum, sas_reverse, sas_catx, _sas_concat_text,
                            sas_substr_checked, sas_substr_bound, _sas_substr_text,
-                           SAS_BITWISE_ARITY, sas_bitwise, sas_bitwise_integer, sas_lag_numeric)
+                           SAS_BITWISE_ARITY, sas_bitwise, sas_bitwise_integer, sas_lag_numeric,
+                           SAS_CALENDAR_ARITY, SAS_CALENDAR_MIN_DAY, SAS_CALENDAR_MAX_DAY,
+                           SAS_CALENDAR_MIN_YEAR, SAS_CALENDAR_MAX_YEAR, sas_calendar, sas_calendar_integer)
 
 GATE_FUNCS = "examples/verify_funcs.py"
 GATE_MISSARITH = "examples/verify_missarith.py"
@@ -56,6 +60,7 @@ GATE_CONCAT = "examples/verify_concat_catx.py"
 GATE_SUBSTR = "examples/verify_substr.py"
 GATE_BITWISE = "examples/verify_bitwise.py"
 GATE_LAG_EXECUTION = "examples/verify_lag_execution.py"
+GATE_CALENDAR = "examples/verify_calendar.py"
 
 LAG_FUNCTIONS = {family + suffix: (family, depth)
                  for family in ("lag", "dif")
@@ -93,6 +98,8 @@ FUNCTIONS: dict[str, FunctionSpec] = {
         FunctionSpec("catx", "character", GATE_CONCAT, 2, 33),
         FunctionSpec("count", "number", GATE_COUNT, 2, 3),
         FunctionSpec("mod", "number", GATE_MOD, 2, 2),
+        *(FunctionSpec(name, "number", GATE_CALENDAR, arity, arity)
+          for name, arity in SAS_CALENDAR_ARITY.items()),
         *(FunctionSpec(name, "number", GATE_BITWISE, arity, arity)
           for name, arity in SAS_BITWISE_ARITY.items()),
         FunctionSpec("sum", "number", GATE_MISSARITH, 1, -1),
@@ -155,6 +162,8 @@ def apply(name: str, values: list):
         return sas_count(*values)
     if name == "mod":
         return sas_mod(*values)
+    if name in SAS_CALENDAR_ARITY:
+        return sas_calendar(name, *values)
     if name in ("max", "min"):
         return (sas_max if name == "max" else sas_min)(*_numeric(name, values))
     if name in ("length", "lengthn", "lengthc"):
@@ -405,6 +414,27 @@ def substr_context_errors(value, context='other'):
         for child in value:
             yield from substr_context_errors(child, context)
 
+
+
+def validate_calendar_calls(value, schema):
+    """Check descriptors and literal bounds even for skipped/empty execution."""
+    for node, _ in expression_nodes(value):
+        name = node.get('name')
+        if node.get('kind') != 'call' or name not in SAS_CALENDAR_ARITY:
+            continue
+        args = node.get('args')
+        if (not isinstance(args, list) or len(args) != SAS_CALENDAR_ARITY[name] or
+                any(not isinstance(arg, dict) for arg in args)):
+            raise ValueError('calendar requires exact expression argument count')
+        bounds = ([(1, 12), (1, 31), (SAS_CALENDAR_MIN_YEAR, SAS_CALENDAR_MAX_YEAR)] if name == 'mdy'
+                  else [(SAS_CALENDAR_MIN_DAY, SAS_CALENDAR_MAX_DAY)])
+        for arg, (lower, upper) in zip(args, bounds):
+            if not _numeric_expression(arg, schema):
+                raise ValueError('calendar requires numeric expressions without implicit coercion')
+            if arg.get('kind') in ('number', 'missing', 'tagged_missing'):
+                sas_calendar_integer(arg.get('value'), lower, upper)
+        if all(arg.get('kind') == 'number' for arg in args):
+            sas_calendar(name, *(arg['value'] for arg in args))
 
 
 def validate_bitwise_calls(value, schema):

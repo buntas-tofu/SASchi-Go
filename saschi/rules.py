@@ -156,6 +156,7 @@ CONSTRUCT_MAP: dict[str, str] = {
     "do-counted": "DS-026",
     "do-if": "DS-031",
     "bitwise": "DS-032",
+    "calendar": "DS-033",
     "put-numeric-list": "DS-027",
     "length-reverse": "DS-028",
     "length-list": "DS-028",
@@ -255,6 +256,7 @@ STATEMENT_ROUTER: list[tuple[re.Pattern, str]] = [
 
 # Function-level routing: function call regex -> construct name.
 FUNCTION_ROUTER: list[tuple[re.Pattern, str]] = [
+    (re.compile(r"\b(?:MDY|WEEKDAY)\s*\(", re.I), "calendar"),
     (re.compile(r"\b(?:BAND|BOR|BXOR|BNOT|BLSHIFT|BRSHIFT)\s*\(", re.I), "bitwise"),
     (re.compile(r"\bCOUNT\s*\(", re.I), "count"),
     (re.compile(r"\bROUND\s*\(", re.I), "round"),

@@ -1866,6 +1866,39 @@
         "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000245871.htm",
         "https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/PDF/default/lefunctionsref.pdf"
       ]
+    },
+    {
+      "rule_id": "DS-033",
+      "sas_pattern": "MDY(month,day,year) and WEEKDAY(date), bounded modern-calendar scalar calls",
+      "scope": "data-step",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "sas_calendar validates integral numeric arguments; datetime Gregorian construction and Sunday-one weekday for valid1753..3999 dates"
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "examples/calendar.R independent native Date parsing and %w formatting, complete corpus file parsed in place"
+      },
+      "required_settings": [
+        "Only valid dates from1753-01-01 through3999-12-31. MDY requires three finite integral numeric arguments, month1..12, day valid for month/year, year1753..3999; WEEKDAY requires one integral SAS day number in the matching closed interval.",
+        "SAS date epoch is1960-01-01; weekday numbering is Sunday1 through Saturday7. Four-digit years only; no YEARCUTOFF dependence, historical cutover or extended-year leap-rule claim.",
+        "Ordinary/tagged missing, booleans, text/structured inputs, nonfinite/fractional values, invalid dates and wider dates refuse. These are translator boundary policies; SAS diagnostic text, _ERROR_ and invalid-date/missing behavior are not emulated.",
+        "Calls compose in numeric assignments, predicates, WHERE and counted-DO/IF leaves. Check descriptors and literal bounds even on empty/filtered input or skipped branches. Dynamic arguments are checked only when invoked; runtime failure is atomic. C++ and calendar calls in PUT_ALL remain refused."
+      ],
+      "silent_difference_checks": [
+        "Host Unix date epochs and Monday-zero weekday numbering differ.",
+        "Leap years follow the Gregorian century/400-year rules within the admitted interval.",
+        "Scalar success and compile cleanliness are separate from complete-program comparison evidence."
+      ],
+      "validation_test": "examples/verify_calendar.py:26 pins,4576 constructive/boundary R cases,73 shared refusals and4 naive discriminators. saschi.test_calendar:source scheduling, empty/skipped validation, atomic refusal, comparator controls and full source/stdout/result-pinned day_of_the_week.sas proof.",
+      "confidence": "bounded repository/base-R evidence; no live SAS",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/p0bo5thbfrcab1n1menkqxq2suiv.htm",
+        "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000201173.htm",
+        "https://support.sas.com/documentation/cdl/en/lrcon/65287/HTML/default/p1wj0wt2ebe2a0n1lv4lem9hdc0v.htm",
+        "https://support.sas.com/documentation/cdl/en/acpcref/63184/HTML/default/a003352722.htm"
+      ]
     }
   ],
   "runtime_capabilities": {
@@ -1967,6 +2000,15 @@
       "r_witness": "examples/lag_execution.R",
       "boundary_tests": "saschi.test_lag_execution",
       "evidence": "original source-runtime/base-R prior-invocation comparisons, no live SAS"
+    },
+    "calendar": {
+      "rule_id": "DS-033",
+      "target": "saschi.runtime.run_plan",
+      "scope": "MDY/WEEKDAY, valid integral numeric dates in1753..3999; assignments, predicates and bounded source control composition",
+      "validation_test": "examples/verify_calendar.py",
+      "r_witness": "examples/calendar.R",
+      "boundary_tests": "saschi.test_calendar",
+      "evidence": "original pins, independent base-R Date comparisons and unmodified external day-of-week complete-program proof; no live SAS"
     }
   }
 }
