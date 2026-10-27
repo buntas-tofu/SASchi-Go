@@ -84,6 +84,7 @@ VERIFIERS = [
     ("division", HERE / "examples" / "verify_division.py"),
     ("int", HERE / "examples" / "verify_int.py"),
     ("do-while", HERE / "examples" / "verify_do_while.py"),
+    ("numeric-arrays", HERE / "examples" / "verify_numeric_arrays.py"),
 ]
 
 # The translator suites, run as unittest modules. They carry the same weight as
@@ -127,6 +128,7 @@ SUITES = [
     ("suite-division", "saschi.test_division"),
     ("suite-int", "saschi.test_int"),
     ("suite-do-while", "saschi.test_do_while"),
+    ("suite-numeric-arrays", "saschi.test_numeric_arrays"),
 ]
 
 

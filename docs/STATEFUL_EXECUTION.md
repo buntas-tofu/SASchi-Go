@@ -708,3 +708,15 @@ Primary specifications:
 - [SAS generated missing values](https://support.sas.com/documentation/cdl/en/lrcon/62955/HTML/default/a000989183.htm)
 - [SAS INT](https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/p1b1zd0wuyufp0n1jbqlr27p4eay.htm)
 - [SAS DO WHILE](https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000201927.htm)
+
+
+## Numeric source arrays
+
+Status: DS-039 original repository/base-R evidence for principal/maintainer
+review; no live SAS or additional complete external-program proof.
+
+Bounded numeric declarations, indexed alias reads/writes and SUM OF now execute
+through the shared plan. [The numeric-array profile](NUMERIC_ARRAYS.md) states
+the1024-element, finite numeric, exact arithmetic and eager/lazy refusal contracts.
+Existing output/receipt behavior remains; DO OVER and broader array forms remain
+deferred. The reference-only DS-016 witnesses are preserved separately.

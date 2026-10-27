@@ -1566,6 +1566,62 @@ def sas_temp_array(n, init=None, lo=1):
     return sas_array(store, list(store.keys()), lo)
 
 
+# DS-039 source-array profile. Existing general array helpers stay unchanged.
+SAS_NUMERIC_ARRAY_LIMIT = 1024
+SAS_NUMERIC_ARRAY_MAGNITUDE = 2147483647
+
+
+def sas_numeric_array_value(value):
+    """Finite bounded numeric/ordinary missing storage, with no coercion."""
+    if value is None:
+        return None
+    if (isinstance(value, bool) or not isinstance(value, (int, float)) or
+            not -SAS_NUMERIC_ARRAY_MAGNITUDE <= value <= SAS_NUMERIC_ARRAY_MAGNITUDE):
+        raise ValueError('numeric arrays require finite numeric/ordinary-missing values within2147483647')
+    return float(value)
+
+
+def sas_numeric_array_index(value, lower, size):
+    """Integral, in-range source subscripts; fractional/missing indices refuse."""
+    if (type(lower) is not int or type(size) is not int or
+            not 1 <= size <= SAS_NUMERIC_ARRAY_LIMIT or
+            not -SAS_NUMERIC_ARRAY_MAGNITUDE <= lower <= lower + size - 1 <= SAS_NUMERIC_ARRAY_MAGNITUDE):
+        raise ValueError('numeric array bounds require1..1024 elements within signed2147483647')
+    value = sas_numeric_array_value(value)
+    if value is None or not value.is_integer():
+        raise ValueError('numeric array subscript requires a finite integral numeric value')
+    offset = int(value) - lower
+    if not 0 <= offset < size:
+        raise ValueError('numeric array subscript out of declared bounds')
+    return offset
+
+
+def sas_numeric_array_add(left, right, subtract=False):
+    """Exact bounded binary64 addition/subtraction for new array expressions."""
+    from fractions import Fraction
+    left, right = sas_numeric_array_value(left), sas_numeric_array_value(right)
+    if left is None or right is None:
+        return None
+    if subtract:
+        right = -right
+    result = sas_numeric_array_value(left + right)
+    if Fraction(result) != Fraction(left) + Fraction(right):
+        raise ValueError('numeric array arithmetic requires an exactly representable result')
+    return result
+
+
+def sas_numeric_array_sum(values):
+    """SUM OF ignores ordinary missing; every ordered partial sum must be exact."""
+    if not isinstance(values, list) or not 1 <= len(values) <= SAS_NUMERIC_ARRAY_LIMIT:
+        raise ValueError('SUM OF requires1..1024 numeric array elements')
+    total = None
+    for value in values:
+        value = sas_numeric_array_value(value)
+        if value is not None:
+            total = value if total is None else sas_numeric_array_add(total, value)
+    return sas_sum(*values)
+
+
 # ---------------------------------------------------------------------------
 # Fisher exact, 2x2 (the 2018-corpus family). SAS PROC FREQ with an EXACT
 # FISHER statement reports three p-values: left-sided (XPL_FISH),

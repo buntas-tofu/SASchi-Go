@@ -13,6 +13,7 @@ from .functions import FUNCTIONS, format_token, FORMATS, function_call_lines, su
 from .parser import Kind, ParseError, Statement, split_statements, tokenize
 from .operations import walk_operations as _walk_operations
 from .rules import route_function, route_statement
+from .arrays import declaration as array_declaration, validate_step as validate_array_step
 
 NAME = r"[A-Za-z_][A-Za-z0-9_]{0,31}"
 NUMBER = re.compile(r"[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?\Z")
@@ -99,9 +100,9 @@ def _arithmetic_positions(text, operators='+-'):
         if char in "'\"":
             quote = char
             continue
-        if char == "(":
+        if char in "({[":
             depth += 1
-        elif char == ")":
+        elif char in ")}]":
             depth -= 1
         elif char in operators and depth == 0:
             before = text[:index].rstrip()
@@ -124,9 +125,9 @@ def _split_args(text):
             continue
         if char in "'\"":
             quote = char
-        elif char == "(":
+        elif char in "({[":
             depth += 1
-        elif char == ")":
+        elif char in ")}]":
             depth -= 1
             if depth < 0:
                 return None
@@ -187,10 +188,44 @@ def call(text):
     return {"kind": "call", "name": name, "args": values}
 
 
-def operand(text):
+def operand(text, _depth=0):
     """One expression operand: an atom or a wired call."""
     value = atom(text)
-    return value if value is not None else call(text)
+    if value is not None:
+        return value
+    summed = re.fullmatch(r'sum\s*\(\s*of\s+(' + NAME + r')\s*(?:\{\s*\*\s*\}|\[\s*\*\s*\]|\(\s*\*\s*\))\s*\)', text, re.I)
+    if summed:
+        return {'kind': 'array_sum', 'name': summed[1].lower()}
+    value = call(text)
+    if value is not None:
+        return value
+    indexed = re.match(r'(' + NAME + r')\s*([{\[])', text, re.I)
+    if indexed:
+        stack, quote, complete = [], '', False
+        for pos in range(indexed.end() - 1, len(text)):
+            char = text[pos]
+            if quote:
+                if char == quote:
+                    quote = ''
+                continue
+            if char in "'\"":
+                quote = char
+            elif char in '({[':
+                stack.append(char)
+                if len(stack) > 32:
+                    return None
+            elif char in ')}]':
+                if not stack or stack.pop() != {')': '(', '}': '{', ']': '['}[char]:
+                    return None
+                if not stack:
+                    complete = pos == len(text) - 1
+                    break
+        if not complete:
+            return None
+        index = expression(text[indexed.end():-1], _depth + 1)
+        if index is not None:
+            return {'kind': 'array_get', 'name': indexed[1].lower(), 'index': index}
+    return None
 
 
 def _concat_parts(text):
@@ -206,9 +241,9 @@ def _concat_parts(text):
                 quote = None
         elif char in "'\"":
             quote = char
-        elif char == '(':
+        elif char in '({[':
             depth += 1
-        elif char == ')':
+        elif char in ')}]':
             depth -= 1
             if depth < 0:
                 return []
@@ -248,7 +283,7 @@ def expression(text, _depth=0):
         if any(value is None for value in values):
             return None
         return {'kind': 'concat', 'args': values}
-    value = operand(text)
+    value = operand(text, _depth)
     if value is not None:
         return value
     if text.startswith('(') and text.endswith(')'):
@@ -264,11 +299,18 @@ def expression(text, _depth=0):
         if enclosed and depth == 0 and not quote:
             return expression(text[1:-1], _depth + 1)
     for operators in ('+-', '/'):
-        for position in reversed(_arithmetic_positions(text, operators)):
+        positions = _arithmetic_positions(text, operators)
+        # New array expressions use deterministic precedence instead of trying
+        # alternative binary splits after a depth/budget refusal.
+        if re.search(NAME + r'\s*[{\[]', text):
+            positions = positions[-1:]
+        for position in reversed(positions):
             left = expression(text[:position], _depth + 1)
             right = expression(text[position + 1:], _depth + 1)
             if left is not None and right is not None:
                 return {'kind': 'arithmetic', 'left': left, 'op': text[position], 'right': right}
+            if re.search(NAME + r'\s*[{\[]', text):
+                return None
     return None
 
 
@@ -292,6 +334,11 @@ def action(text, line):
     match = re.fullmatch(r'output(?:\s+(' + NAME + r'))?', text, re.I)
     if match:
         return Operation('output', line, {'target': match[1].lower() if match[1] else None})
+    indexed = re.fullmatch(r'(.+?)\s*=\s*(.+)', text)
+    if indexed:
+        target, value = operand(indexed[1].strip()), expression(indexed[2])
+        if target is not None and target['kind'] == 'array_get' and value is not None:
+            return Operation('array_set', line, {'name': target['name'], 'index': target['index'], 'value': value})
     match = re.fullmatch(r'(' + NAME + r')\s*=\s*(.+)', text)
     if match and match[1].lower() != '_n_':
         value = expression(match[2])
@@ -314,7 +361,7 @@ def put_known_types(ops):
 
     def expression_type(expr):
         kind = expr['kind']
-        if kind in ('number', 'missing', 'tagged_missing', 'automatic'):
+        if kind in ('number', 'missing', 'tagged_missing', 'automatic', 'array_get', 'array_sum'):
             return 'number'
         if kind in ('character', 'concat'):
             return 'character'
@@ -331,6 +378,9 @@ def put_known_types(ops):
         if kind == 'declare':
             spec = args['spec']
             known.setdefault(args['name'], spec if isinstance(spec, str) else spec['type'])
+        elif kind == 'array_declare':
+            for name in args['names']:
+                known.setdefault(name, 'number')
         elif kind in ('assign', 'round', 'sum_statement'):
             known.setdefault(args['name'], 'number' if kind in ('round', 'sum_statement') else expression_type(args['value']))
     return known
@@ -452,7 +502,7 @@ def compile_plan(source: str) -> Plan:
     def admit_loop_branch(op, st):
         if active_do is None:
             return True
-        allowed = {'assign', 'round', 'sum_statement', 'if', 'put', 'put_literal', 'put_character_list', 'put_numeric_list', 'output'}
+        allowed = {'assign', 'array_set', 'round', 'sum_statement', 'if', 'put', 'put_literal', 'put_character_list', 'put_numeric_list', 'output'}
         if any(child.kind not in allowed or
                active_do.kind == 'do_counted' and child.kind in ('assign', 'round', 'sum_statement') and child.args['name'] == active_do.args['index']
                for child in walk_operations([op])):
@@ -574,6 +624,16 @@ def compile_plan(source: str) -> Plan:
         if step is None:
             reject(st, construct, "statement is outside a supported step")
             continue
+        if re.match(r'^array\b(?!\s*=)', text, re.I):
+            try:
+                if active_do is not None:
+                    raise ValueError('numeric ARRAY declarations must be outside loop bodies')
+                args = array_declaration(text)
+                append_operation(Operation('array_declare', st.line, args))
+                plan.matched.append(('numeric-arrays', 'DS-039', st.line))
+            except ValueError as exc:
+                reject(st, 'numeric-arrays', str(exc))
+            continue
         if re.match(r'^do\b(?!\s*=)', text, re.I):
             until = re.fullmatch(r'do\s+(until|while)\s*\((.*)\)', text, re.I | re.S)
             if until and active_do is None and context == 'data' and step.kind == 'data':
@@ -616,7 +676,7 @@ def compile_plan(source: str) -> Plan:
         if active_do is not None:
             family = {'do_until': 'do-until', 'do_while': 'do-while'}.get(active_do.kind, 'do-counted')
             label = {'do-until': 'DO UNTIL', 'do-while': 'DO WHILE'}.get(family, 'counted DO')
-            target = re.match(r'(' + NAME + r')\s*(?:=|\+(?!=))', text)
+            target = re.match(r'(' + NAME + r')(?:\s*[({\[].*?[)}\]])?\s*(?:=|\+(?!=))', text)
             if target and active_do.kind == 'do_counted' and target[1].lower() == active_do.args['index']:
                 reject(st, 'do-counted', 'assignment to the counted DO index inside its body is deferred')
                 continue
@@ -638,7 +698,7 @@ def compile_plan(source: str) -> Plan:
             continue
         if re.match(r"^(set|merge)\b", text, re.I):
             m = re.fullmatch(r"(set|merge)\s+(" + NAME + r")(?:\s+(" + NAME + "))?", text, re.I)
-            if (not m or context != "data" or step.inputs or any(o.kind not in ("lookup", "declare") for o in step.operations) or
+            if (not m or context != "data" or step.inputs or any(o.kind not in ("lookup", "declare", "array_declare") for o in step.operations) or
                     (m[1].lower() == "set" and m[3]) or (m[1].lower() == "merge" and not m[3])):
                 reject(st, construct, "one SET input or two MERGE inputs must precede computations")
             else:
@@ -785,6 +845,13 @@ def compile_plan(source: str) -> Plan:
         reject(st, family if family != "unknown" else construct, "no operation for this statement")
     finish()
     for compiled in plan.steps:
+        try:
+            arrays = validate_array_step(asdict(compiled))
+            if arrays:
+                plan.matched.extend(('numeric-arrays', 'DS-039', op.line) for op in walk_operations(compiled.operations)
+                                    if op.kind == 'array_set' or any(node.get('kind') in ('array_get', 'array_sum') for node, _ in expression_nodes(op.args)))
+        except ValueError as exc:
+            plan.tickets.append(Ticket(compiled.line, 'ARRAY', 'numeric-arrays', str(exc)))
         for op in walk_operations(compiled.operations):
             payloads = [(op.args.get('value'), 'assignment')] if op.kind == 'assign' else [
                 (value, 'other') for key, value in op.args.items() if key not in ('body', 'operation', 'otherwise')]

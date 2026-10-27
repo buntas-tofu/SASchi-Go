@@ -17,7 +17,7 @@ policies. Receipts record what passed for the source and environment tested.
 
 Status: version 0.4.0 development evidence for maintainer review, checked on
 2026-10-27. With the pinned Roku corpus present, `python verify_all.py` passes
-46 fixture gates, 36 suites and 608 tests with zero skips. Synthesis adds 60/60
+47 fixture gates, 37 suites and 649 tests with zero skips. Synthesis adds 60/60
 faithful passes and catches 60/60 naive variants. Receipts bind these results to
 the recorded source and environment; live-SAS validation remains outstanding.
 
@@ -28,6 +28,12 @@ adds bounded division, safe INT and pre-test DO WHILE composition. The bitwise p
 an explicit 67-column output refusal under the unchanged 64-column profile. See the
 [stateful execution contract](docs/STATEFUL_EXECUTION.md) for the supported slices
 and their remaining boundaries.
+
+Bounded numeric ARRAY declarations, indexed reads/writes and SUM OF now execute
+with original source pins and independent base-R evidence. Arrays alias row
+variables, preserve descriptors and retain the existing output/receipt paths.
+See the [numeric-array profile](docs/NUMERIC_ARRAYS.md). DO OVER remains deferred;
+this slice adds no complete external-program proof.
 
 ## Operational workflow
 
@@ -62,7 +68,7 @@ fixed expected output and base-R evidence. Special missings retain their tags.
   sibling plus a fixture verifier (`verify_*.py`). Run any verifier directly,
   or all of them through [verify_all.py](verify_all.py).
 - [docs/sasconversionrulebook.json](docs/sasconversionrulebook.json) : the machine-consumable translation
-  rulebook. 73 rules with equivalence classes (EXACT,
+  rulebook. 74 rules with equivalence classes (EXACT,
   EQUIVALENT-WITH-SETTINGS, APPROXIMATE, NO-DIRECT-EQUIVALENT), required
   settings, forbidden patterns, and validation tests.
 - [docs/capability-manifest.json](docs/capability-manifest.json) : the coverage manifest. Enumerated entries of

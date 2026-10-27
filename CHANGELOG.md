@@ -3,6 +3,11 @@
 Status: development changes with original pins and Python/base-R evidence; no
 live SAS comparison. Branch synchronization is separate from a release.
 
+- Add bounded numeric source-array declarations, indexed alias reads/writes and
+  SUM OF, with independent base-R and original source/OUTPUT evidence. Preserve
+  existing output and receipt behavior. DO OVER and broader array profiles remain
+  deferred; no new complete external-program proof is claimed.
+
 - Add bounded counted DO and first-true IF/ELSE actions, including the unchanged
   external FizzBuzz complete-program proof. Preserve skipped-branch schema,
   OUTPUT suppression and recursive loop-index protection.
