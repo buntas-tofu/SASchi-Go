@@ -1899,6 +1899,64 @@
         "https://support.sas.com/documentation/cdl/en/lrcon/65287/HTML/default/p1wj0wt2ebe2a0n1lv4lem9hdc0v.htm",
         "https://support.sas.com/documentation/cdl/en/acpcref/63184/HTML/default/a003352722.htm"
       ]
+    },
+    {
+      "rule_id": "DS-034",
+      "sas_pattern": "sum-statement",
+      "scope": "data-step",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "saschi.runtime and sas_semantics execute sum_statement"
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "examples/sum_statement.R independent native R witness"
+      },
+      "required_settings": [
+        "finite binary64 numeric target + numeric expression; ordinary missing treated as zero; implicit retained zero initializer overridden by explicit RETAIN",
+        "Static numeric descriptors/literals are checked even for empty inputs and skipped branches. Dynamic inputs execute lazily. Invalid types, tagged missing, nonfinite values and arithmetic overflow refuse atomically. No SAS diagnostic or _ERROR_ parity claim.",
+        "BY-key writes, MERGE, PUT_ALL and C++ remain outside this slice. DO UNTIL permits simple assignment, sum, bounded IF/ELSE, PUT and OUTPUT actions; declarations/input, nested loops, LEAVE/CONTINUE and combined controls are deferred."
+      ],
+      "silent_difference_checks": [
+        "Sum initialization/retention differ from an ordinary assignment with plus.",
+        "DO UNTIL tests after the body, even if its predicate starts true.",
+        "Explicit OUTPUT anywhere suppresses bottom-of-step implicit output."
+      ],
+      "validation_test": "examples/verify_sum_statement.py and saschi.test_sum_statement: original pins, independent R, source scheduling, refusals and comparator controls",
+      "confidence": "bounded repository/base-R evidence; no live SAS",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/lestmtsref/63323/HTML/default/n1dfiqj146yi2cn1maeju9wo7ijs.htm"
+      ]
+    },
+    {
+      "rule_id": "DS-035",
+      "sas_pattern": "do-until",
+      "scope": "data-step",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "saschi.runtime and sas_semantics execute do_until"
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "examples/do_until.R independent native R witness"
+      },
+      "required_settings": [
+        "single-level body-first numeric predicate loop, at most10000 body executions per invocation; fixed tool budget, no nesting or LAG/DIF",
+        "Static numeric descriptors/literals are checked even for empty inputs and skipped branches. Dynamic inputs execute lazily. Invalid types, tagged missing, nonfinite values and arithmetic overflow refuse atomically. No SAS diagnostic or _ERROR_ parity claim.",
+        "BY-key writes, MERGE, PUT_ALL and C++ remain outside this slice. DO UNTIL permits simple assignment, sum, bounded IF/ELSE, PUT and OUTPUT actions; declarations/input, nested loops, LEAVE/CONTINUE and combined controls are deferred."
+      ],
+      "silent_difference_checks": [
+        "Sum initialization/retention differ from an ordinary assignment with plus.",
+        "DO UNTIL tests after the body, even if its predicate starts true.",
+        "Explicit OUTPUT anywhere suppresses bottom-of-step implicit output."
+      ],
+      "validation_test": "examples/verify_do_until.py and saschi.test_do_until: original pins, independent R, source scheduling, refusals and comparator controls",
+      "confidence": "bounded repository/base-R evidence; no live SAS",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000201924.htm"
+      ]
     }
   ],
   "runtime_capabilities": {
@@ -2009,6 +2067,24 @@
       "r_witness": "examples/calendar.R",
       "boundary_tests": "saschi.test_calendar",
       "evidence": "original pins, independent base-R Date comparisons and unmodified external day-of-week complete-program proof; no live SAS"
+    },
+    "sum_statement": {
+      "rule_id": "DS-034",
+      "target": "saschi.runtime.run_plan",
+      "scope": "finite binary64 numeric target + numeric expression; ordinary missing treated as zero; implicit retained zero initializer overridden by explicit RETAIN",
+      "validation_test": "examples/verify_sum_statement.py",
+      "r_witness": "examples/sum_statement.R",
+      "boundary_tests": "saschi.test_sum_statement",
+      "evidence": "original repository/base-R evidence; no live SAS"
+    },
+    "do_until": {
+      "rule_id": "DS-035",
+      "target": "saschi.runtime.run_plan",
+      "scope": "single-level body-first numeric predicate loop, at most10000 body executions per invocation; fixed tool budget, no nesting or LAG/DIF",
+      "validation_test": "examples/verify_do_until.py",
+      "r_witness": "examples/do_until.R",
+      "boundary_tests": "saschi.test_do_until",
+      "evidence": "original repository/base-R evidence; no live SAS"
     }
   }
 }

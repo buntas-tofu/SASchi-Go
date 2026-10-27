@@ -146,6 +146,47 @@ def sas_weekday(day):
     return sas_calendar('weekday', day)
 
 
+# DS-034 source sum statements have their own missing/retention contract;
+# the older stateless SUM fixture is not changed by this executable slice.
+def sas_sum_statement(current, increment):
+    """Add two finite binary64 values, treating ordinary missing as zero."""
+    values = []
+    for value in (current, increment):
+        if value is None:
+            values.append(0.0)
+            continue
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise ValueError('sum statement requires finite numeric or ordinary missing values')
+        try:
+            numeric = float(value)
+        except (OverflowError, ValueError) as exc:
+            raise ValueError('sum statement requires finite binary64 values') from exc
+        if not math.isfinite(numeric):
+            raise ValueError('sum statement requires finite binary64 values')
+        values.append(numeric)
+    result = values[0] + values[1]
+    if not math.isfinite(result):
+        raise ValueError('sum statement overflow requires error-state review')
+    return result
+
+
+SAS_DO_UNTIL_LIMIT = 10000
+
+
+def sas_do_until(body, stop):
+    """Run the body before each boolean stop test, with a fixed tool budget."""
+    if not callable(body) or not callable(stop):
+        raise ValueError('DO UNTIL requires body and stop callbacks')
+    for count in range(1, SAS_DO_UNTIL_LIMIT + 1):
+        body()
+        done = stop()
+        if not isinstance(done, bool):
+            raise ValueError('DO UNTIL stop callback must return a boolean')
+        if done:
+            return count
+    raise ValueError('DO UNTIL exceeds the 10000-iteration tool budget')
+
+
 def sas_intck(interval: str, start: datetime.date, end: datetime.date) -> int:
     """SAS INTCK, discrete method: interval boundaries crossed from start to end.
 

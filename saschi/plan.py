@@ -262,6 +262,12 @@ def predicate(text):
 
 
 def action(text, line):
+    match = re.fullmatch(r'(' + NAME + r')\s*\+\s*(.+)', text)
+    reserved = {'_n_', '_error_', '_all_', '_numeric_', '_character_', '_infile_', '_file_', '_ods_', '_page_', '_blankpage_'}
+    if match and match[1].lower() not in reserved:
+        value = expression(match[2])
+        if value is not None:
+            return Operation('sum_statement', line, {'name': match[1].lower(), 'value': value})
     match = re.fullmatch(r'output(?:\s+(' + NAME + r'))?', text, re.I)
     if match:
         return Operation('output', line, {'target': match[1].lower() if match[1] else None})
@@ -304,8 +310,8 @@ def put_known_types(ops):
         if kind == 'declare':
             spec = args['spec']
             known.setdefault(args['name'], spec if isinstance(spec, str) else spec['type'])
-        elif kind in ('assign', 'round'):
-            known.setdefault(args['name'], 'number' if kind == 'round' else expression_type(args['value']))
+        elif kind in ('assign', 'round', 'sum_statement'):
+            known.setdefault(args['name'], 'number' if kind in ('round', 'sum_statement') else expression_type(args['value']))
     return known
 
 
@@ -425,9 +431,9 @@ def compile_plan(source: str) -> Plan:
     def admit_loop_branch(op, st):
         if active_do is None:
             return True
-        allowed = {'assign', 'round', 'if', 'put', 'put_literal', 'put_character_list', 'put_numeric_list', 'output'}
+        allowed = {'assign', 'round', 'sum_statement', 'if', 'put', 'put_literal', 'put_character_list', 'put_numeric_list', 'output'}
         if any(child.kind not in allowed or
-               child.kind in ('assign', 'round') and child.args['name'] == active_do.args['index']
+               active_do.kind == 'do_counted' and child.kind in ('assign', 'round', 'sum_statement') and child.args['name'] == active_do.args['index']
                for child in walk_operations([op])):
             reject(st, 'do-counted', 'counted DO branches require simple actions and cannot write the loop index')
             return False
@@ -436,7 +442,9 @@ def compile_plan(source: str) -> Plan:
     def finish():
         nonlocal active_do
         if active_do is not None:
-            plan.tickets.append(Ticket(active_do.line, 'DO', 'do-counted', 'counted DO requires a closing END before the step ends'))
+            family = 'do-until' if active_do.kind == 'do_until' else 'do-counted'
+            label = 'DO UNTIL' if active_do.kind == 'do_until' else 'counted DO'
+            plan.tickets.append(Ticket(active_do.line, 'DO', family, label + ' requires a closing END before the step ends'))
             active_do = None
         if step and any(o.kind == 'put_all' for o in walk_operations(step.operations)):
             if (step.kind != 'data' or step.inputs or step.by or step.retained or step.where or
@@ -446,6 +454,16 @@ def compile_plan(source: str) -> Plan:
                     'PUT _ALL_ supports scalar declarations, safe assignments, and named-destination OUTPUT only; SET, BY, conditions, DATA _NULL_ OUTPUT, and other operations require review'))
         if step:
             flat = list(walk_operations(step.operations))
+            for op in flat:
+                if op.kind == 'sum_statement':
+                    if step.kind != 'data' or op.args['name'] in step.by:
+                        plan.tickets.append(Ticket(op.line, 'SUM', 'sum-statement', 'sum statements require DATA execution and cannot change BY keys'))
+                    step.retained.setdefault(op.args['name'], {'kind': 'number', 'value': 0.0})
+                    plan.matched.append(('sum-statement', 'DS-034', op.line))
+                if op.kind == 'do_until':
+                    if any(node.get('kind') == 'call' and node.get('name') in LAG_FUNCTIONS
+                           for node, _ in expression_nodes(op.args)):
+                        plan.tickets.append(Ticket(op.line, 'LAG/DIF', 'do-until', 'DO UNTIL queue scheduling requires review'))
             for op in flat:
                 payload = op.args.get('value') if op.kind == 'assign' else op.args.get('condition')
                 nodes = list(_string_nodes(payload))
@@ -462,9 +480,11 @@ def compile_plan(source: str) -> Plan:
                 plan.matched.append(('concat-catx', 'DS-029', step.line))
             if any(node.get('name') == 'catx' for node in where_nodes):
                 plan.tickets.append(Ticket(step.line, 'CATX', 'concat-catx', 'CATX in WHERE requires temporary-buffer review'))
-            if (step.name == '_null_' and any(o.kind == 'do_counted' for o in flat)
+            if (step.name == '_null_' and any(o.kind in ('do_counted', 'do_until') for o in flat)
                     and any(o.kind == 'output' for o in flat)):
-                plan.tickets.append(Ticket(step.line, 'OUTPUT', 'do-counted', 'explicit OUTPUT in DATA _NULL_ counted DO steps is deferred'))
+                family = 'do-until' if any(o.kind == 'do_until' for o in flat) else 'do-counted'
+                label = 'DO UNTIL' if family == 'do-until' else 'counted DO'
+                plan.tickets.append(Ticket(step.line, 'OUTPUT', family, 'explicit OUTPUT in DATA _NULL_ ' + label + ' steps is deferred'))
             for op in flat:
                 if op.kind == 'output' and op.args['target'] not in (None, step.name):
                     plan.tickets.append(Ticket(op.line, str(op.args['target']), 'output', 'OUTPUT target must be the declared DATA destination'))
@@ -533,6 +553,16 @@ def compile_plan(source: str) -> Plan:
             reject(st, construct, "statement is outside a supported step")
             continue
         if re.match(r'^do\b(?!\s*=)', text, re.I):
+            until = re.fullmatch(r'do\s+until\s*\((.*)\)', text, re.I | re.S)
+            if until and active_do is None and context == 'data' and step.kind == 'data':
+                test = predicate(until[1])
+                if test is None:
+                    reject(st, 'do-until', 'DO UNTIL requires a supported predicate')
+                else:
+                    active_do = Operation('do_until', st.line, {'condition': test, 'body': []})
+                    step.operations.append(active_do)
+                    plan.matched.append(('do-until', 'DS-035', st.line))
+                continue
             match = re.fullmatch(r'do\s+(' + NAME + r')\s*=\s*([+-]?[0-9]+)\s+to\s+([+-]?[0-9]+)(?:\s+by\s+([+-]?[0-9]+))?', text, re.I | re.ASCII)
             if active_do is not None:
                 reject(st, 'do-counted', 'nested DO is deferred')
@@ -561,15 +591,17 @@ def compile_plan(source: str) -> Plan:
                 active_do = None
             continue
         if active_do is not None:
-            target = re.match(r'(' + NAME + r')\s*=', text)
-            if target and target[1].lower() == active_do.args['index']:
+            family = 'do-until' if active_do.kind == 'do_until' else 'do-counted'
+            label = 'DO UNTIL' if family == 'do-until' else 'counted DO'
+            target = re.match(r'(' + NAME + r')\s*(?:=|\+(?!=))', text)
+            if target and active_do.kind == 'do_counted' and target[1].lower() == active_do.args['index']:
                 reject(st, 'do-counted', 'assignment to the counted DO index inside its body is deferred')
                 continue
             if not target and not re.match(r'^(?:put|output|if|else)\b', text, re.I):
-                reject(st, 'do-counted', 'counted DO body supports simple actions and bounded IF/ELSE branches only')
+                reject(st, family, label + ' body supports simple actions and bounded IF/ELSE branches only')
                 continue
             if re.fullmatch(r'put\s+_all_', text, re.I):
-                reject(st, 'do-counted', 'PUT _ALL_ error-flag contract excludes counted DO')
+                reject(st, family, 'PUT _ALL_ error-flag contract excludes ' + label)
                 continue
         if re.match(r"^by\b", text, re.I):
             words = text.split()[1:]
@@ -685,7 +717,9 @@ def compile_plan(source: str) -> Plan:
             continue
         if re.match(r'^if\b', text, re.I):
             if active_do is not None:
-                reject(st, 'do-counted', 'subsetting IF inside counted DO is deferred')
+                family = 'do-until' if active_do.kind == 'do_until' else 'do-counted'
+                label = 'DO UNTIL' if family == 'do-until' else 'counted DO'
+                reject(st, family, 'subsetting IF inside ' + label + ' is deferred')
                 continue
             condition = predicate(re.sub(r'^if\s*', '', text, flags=re.I))
             if condition:

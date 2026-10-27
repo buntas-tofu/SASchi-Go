@@ -29,9 +29,9 @@ def walk_operations(ops, *, all_containers=False, _if_depth=0):
             if not isinstance(child, Mapping) and not (hasattr(child, 'kind') and hasattr(child, 'args')):
                 raise ValueError('IF otherwise branch must be an operation')
             yield from walk_operations([child], all_containers=all_containers, _if_depth=_if_depth + 1)
-        if kind == 'do_counted' or (all_containers and 'body' in args):
+        if kind in ('do_counted', 'do_until') or (all_containers and 'body' in args):
             body = args.get('body')
             if not isinstance(body, list):
-                label = 'counted DO' if kind == 'do_counted' else 'operation'
+                label = 'counted DO' if kind == 'do_counted' else 'DO UNTIL' if kind == 'do_until' else 'operation'
                 raise ValueError(f'{label} body must be a list')
             yield from walk_operations(body, all_containers=all_containers, _if_depth=_if_depth)
