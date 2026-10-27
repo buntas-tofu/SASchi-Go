@@ -180,6 +180,14 @@ class NumericArrayTests(unittest.TestCase):
                      'array a[2147483647:2147483648] x y', 'array a[2] _n_ x'):
             with self.subTest(decl=decl): self.blocked(decl + ';')
 
+    def test_array_identifier_is_never_split_into_extra_elements(self):
+        name = 'q' * 32
+        t = self.run_source(f'array {name}[1] x; {name}[1]=7;')
+        self.assertEqual(t['rows'], [{'x': 7.}])
+        for size in (33, 34, 63):
+            with self.subTest(size=size):
+                self.blocked('array ' + 'q' * size + ' x;')
+
     def test_declarations_in_bodies_and_duplicate_arrays_refuse(self):
         for body in ('do i=1 to 2; array a[1] x; end;', 'if 0 then array a[1] x;',
                      'array a[1] x; array a[1] y;', 'array a[1] b; array b[1] x;'):

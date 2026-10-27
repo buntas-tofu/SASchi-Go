@@ -10,7 +10,7 @@ Implementation and publication are not authorized by this planning exercise.
 ## Inventory reconciled against actual evidence
 
 The golden command registers47 fixture runners,37 translator suites and1
-synthesis runner. The latest passing baseline contains649 tests, zero skips,
+synthesis runner. The latest passing baseline contains650 tests, zero skips,
 60 faithful synthesis checks and60 naive controls. The separate1k workload
 checks total39:18 ledger and21 text. These counts have different units. Neither
 74 rulebook rules nor85 golden-command runners is a SAS capability denominator.

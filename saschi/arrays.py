@@ -27,7 +27,7 @@ def ordinary(name):
 
 def declaration(text):
     """Parse only the documented bounded syntax; reject all leftover text."""
-    match = re.fullmatch(r'array\s+(' + NAME + r')\s*(.*)', text.lower(), re.S)
+    match = re.fullmatch(r'array\s+(' + NAME + r')(?=\s|[({\[]|$)\s*(.*)', text.lower(), re.S)
     if not match:
         raise ValueError('numeric ARRAY requires an ordinary name and fixed element list')
     name, rest = match.groups()
