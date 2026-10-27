@@ -15,6 +15,63 @@ import synth
 
 
 class OperationsTests(unittest.TestCase):
+    def test_text_workload_has_deterministic_short_character_groups(self):
+        from collections import Counter
+        from tools import run_text_workloads as workload
+        first = workload.generated_catalog(101, 7)
+        self.assertEqual(first, workload.generated_catalog(101, 7))
+        self.assertNotEqual(first, workload.generated_catalog(101, 8))
+        rows = first['raw']['rows']
+        self.assertEqual(len(rows), 101)
+        groups = Counter(row['team'] for row in rows)
+        self.assertGreater(len(groups), 45)
+        self.assertEqual(set(groups.values()), {1, 2, 3})
+        for row in rows:
+            for name in ('team', 'payload', 'tag', 'note'):
+                self.assertTrue(row[name].isascii())
+                self.assertLessEqual(len(row[name]), workload.RAW_SCHEMA[name]['length'])
+        self.assertTrue(any(row['payload'] == 'NA' for row in rows))
+        self.assertTrue(any(row['payload'] == '' for row in rows))
+        self.assertTrue(any(len(row['payload']) > 120 for row in rows))
+        self.assertLess(len({(row['team'], row['seq']) for row in rows}), len(rows))
+
+    def test_text_workload_hand_pin_preserves_padding_order_and_metadata(self):
+        from tools import run_text_workloads as workload
+        from .compare import table_equal
+        from .plan import compile_plan
+        from .runtime import run_plan
+        source = (workload.FIXTURE / 'job.sas').read_text()
+        plan = compile_plan(source)
+        self.assertFalse(plan.blocked, plan.tickets)
+        inputs = workload.tiny_catalog()
+        original = json.dumps(inputs)
+        result = run_plan(plan.to_dict(), inputs)
+        expected = {'label': workload.LABEL, 'encoding': 'ascii',
+                    'schema': workload.FINAL_SCHEMA, 'rows': workload.fixed_rows()}
+        self.assertTrue(table_equal(result['datasets']['snapshots'], expected))
+        self.assertEqual(json.dumps(inputs), original)
+        self.assertEqual(len(expected['rows']), 10)
+        self.assertEqual([r['note'].rstrip() for r in expected['rows']][2], 'NA')
+
+    def test_text_workload_missing_r_writes_a_failed_report(self):
+        from tools import run_text_workloads as workload
+        with tempfile.TemporaryDirectory() as td:
+            output = Path(td) / 'missing-r'
+            with patch.dict(os.environ, {'ROSETTA_RSCRIPT': ''}), \
+                 patch.object(workload.shutil, 'which', return_value=None), \
+                 patch.object(workload, 'invoke') as invoke, \
+                 patch.object(sys, 'argv', ['run_text_workloads.py', '--output', str(output), '--sizes', '1']), \
+                 contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(workload.main(), 1)
+            invoke.assert_not_called()
+            report = json.loads((output / 'report.json').read_text())
+            self.assertFalse(report['all_passed'])
+            self.assertTrue(report['source_stable'])
+            self.assertIn('base R is required', report['error'])
+            self.assertEqual(report['cases'], [])
+            self.assertEqual(report['refusals'], [])
+            self.assertEqual(report['comparator_controls'], [])
+
     def test_workload_timeout_stops_workers_before_artifacts_are_final(self):
         from tools import run_workloads
         with tempfile.TemporaryDirectory() as td:

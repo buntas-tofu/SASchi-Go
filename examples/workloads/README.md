@@ -66,3 +66,54 @@ calculation and independent expected values are unchanged; the original spelling
 remains a refusal probe. The runner does not add support for that spelling or
 alter the translator. Inspect `report.json`, per-case `case.json`, process logs,
 the CLI's own receipts, and retained CSV/JSON outputs for the measured results.
+
+## Character events with short groups
+
+[The second original program](grouped_text/job.sas) sorts fixed-width character
+group keys and sequence values, filters excluded rows, truncates a payload to
+eight bytes, combines trimmed values with CATX, measures stored/significant
+length, and reverses the full padded payload. A final DATA step resets numeric
+totals and row counts at group boundaries, then writes detail and closing
+snapshots. It uses character SET/BY, not character MERGE. The supported language
+profile is unchanged.
+
+[The independent base-R witness](grouped_text/reference.R) pads ASCII fields,
+orders rows with an explicit source ordinal for ties, and computes the text and
+group results without translator or semantics helpers. The R CSV boundary keeps
+all text as text, including literal `NA`, leading/trailing spaces, commas and
+double quotes. Only numeric columns interpret the missing-value marker. A
+hand-calculated ten-row snapshot pin checks the small case independently of
+both engines.
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 .venv/bin/python tools/run_text_workloads.py \
+  --output telemetry/workloads/my-text-run --sizes 1000 10000 50000 100000
+```
+
+The generated input has one to three rows per group before filtering, stable
+tied sort keys, a seeded shuffle, and 228 bytes of declared character storage
+per row. Payloads are up to 128 bytes. All text is printable ASCII; numeric
+values are bounded integers or ordinary missing. The empty, all-filtered,
+blank-value, singleton-group, tied-key and maximum-width cases are explicit.
+All four tables, the normalized input and three generated tables, compare
+against R through the public CLI and emitted Python. Values, row/column order,
+descriptors, padding and table metadata are exact. The CLI and emitted Python
+share the runtime; R is the independent behavior witness.
+
+With the four sizes above, the runner executes 11 positive cases, seven refusal
+probes and six comparator controls. Refusals cover oversized imported text,
+invalid numeric input, BY-key width changes, CATX overflow, unsorted BY input,
+non-ASCII REVERSE and grouped conditional DO. They require the expected failed
+receipt with no published result or observed table. Comparator controls change
+a value, width, row order, padding, schema order or table label; each must reject
+the job and retain its observed result. Missing/failed R is a failure, never a
+skip. The existing process-group timeout and no-clobber output policy are shared
+with the ledger runner.
+
+Per-case R, CLI and emitted processes retain exit codes, elapsed time and peak
+RSS where available. Measurements include startup/I/O and are single local
+observations without a performance threshold. Comparisons between workloads
+must account for their different text widths, output multiplicity and serialized
+sizes; equal input row counts do not imply equal work. This runner remains
+standalone. Small generator, Python hand-pin and missing-R regressions run in
+the existing operations suite; no new fixture gate or CI workflow was added.
