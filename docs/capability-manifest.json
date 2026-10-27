@@ -1,5 +1,5 @@
 {
- "manifest_version": "0.1.0",
+ "manifest_version": "0.2.0",
  "reference_frame": {
   "product": "SAS 9.4",
   "source": "SAS 9.4 DATA Step Statements: Reference (document 1 of the language reference set)",
@@ -89,26 +89,33 @@
   "lag_execution_update": "DS-007 source execution adds numeric direct-RHS LAG/DIF occurrence queues, selected conditional/loop invocation, static/context checks and per-step/run reset. Raw queue fixtures remain unchanged; lag-execution/suite-lag-execution add independent prior-invoked-index R evidence. No statement/procedure universe change or live-SAS claim.",
   "calendar_update": "DS-033 calendar/suite-calendar add bounded MDY/WEEKDAY source execution and a full unmodified day_of_the_week.sas proof. Only valid integral numeric dates in1753..3999; invalid/missing/error-state and wider dates remain review boundaries. Function reference universe remains unenumerated; no statement/procedure disposition or rollup changes. No live SAS.",
   "sum_until_update": "DS-034/DS-035 add source sum statements and bounded DO UNTIL, independent R and full unmodified loops_do_while.sas proof. Existing dispositions and rollups remain; no live SAS.",
-  "numeric_while_update": "DS-036/037/038 add bounded exact division, safe INT outside conservative near-integer refusals and pre-test DO WHILE, with independent R and the full unmodified loops_while.sas proof. Statement dispositions/rollups and unenumerated function universe remain unchanged; no live SAS."
+  "numeric_while_update": "DS-036/037/038 add bounded exact division, safe INT outside conservative near-integer refusals and pre-test DO WHILE, with independent R and the full unmodified loops_while.sas proof. Statement dispositions/rollups and unenumerated function universe remain unchanged; no live SAS.",
+  "coverage_reconciliation": {
+   "baseline": "08eaa7b723133b8cecfccd7dd095cd92b5bf7aa6",
+   "date": "2026-10-27",
+   "method": "Inspection of registered fixtures/suites and direct original compiler probes. Dispositions and scopes remain analyst judgments; no live SAS.",
+   "report": "docs/COVERAGE_BACKLOG.md",
+   "qualification": "Reference fixtures, descriptor transport and source execution are separate. GATED means evidence for the stated slice, never every form of a language entry. Historical measured_at anchors remain the original enumeration/disposition baseline."
+  }
  },
  "rollup": {
   "stmt": {
    "universe": 108,
-   "assessed": 32,
-   "gated": 23,
-   "rule": 6,
+   "assessed": 30,
+   "gated": 22,
+   "rule": 5,
    "human_review": 1,
    "out_of_scope": 2,
-   "unassessed": 76
+   "unassessed": 78
   },
   "dso": {
    "universe": 40,
-   "assessed": 29,
-   "gated": 2,
+   "assessed": 28,
+   "gated": 1,
    "rule": 0,
    "human_review": 7,
    "out_of_scope": 20,
-   "unassessed": 11
+   "unassessed": 12
   }
  },
  "entries": [
@@ -137,7 +144,16 @@
     "arrays"
    ],
    "reference_page": 21,
-   "note": "array plus DO loop family"
+   "note": "array plus DO loop family",
+   "gate_evidence": [
+    {
+     "level": "reference-fixture",
+     "gates": [
+      "arrays"
+     ],
+     "scope": "Helper-level aliasing, bounds, missing aggregation and temporary retention; ARRAY source declarations remain unwired."
+    }
+   ]
   },
   {
    "entry": "Array Reference Statement",
@@ -152,7 +168,16 @@
    "gates": [
     "arrays"
    ],
-   "reference_page": 27
+   "reference_page": 27,
+   "gate_evidence": [
+    {
+     "level": "reference-fixture",
+     "gates": [
+      "arrays"
+     ],
+     "scope": "Helper-level indexed reads/writes and out-of-range refusal; no source indexed expression/assignment execution."
+    }
+   ]
   },
   {
    "entry": "Assignment Statement",
@@ -170,7 +195,18 @@
     "suite-concat-catx"
    ],
    "reference_page": 32,
-   "note": "typed DATA-step execution, version 2 events DS-029 separately pins printable-ASCII character !!/|| chains and direct CATX RHS calls with static widths, guarded IF assignment, default200, empty-input checks and atomic overflow refusal. No general temporary CATX or numeric conversion claim."
+   "note": "typed DATA-step execution, version 2 events DS-029 separately pins printable-ASCII character !!/|| chains and direct CATX RHS calls with static widths, guarded IF assignment, default200, empty-input checks and atomic overflow refusal. No general temporary CATX or numeric conversion claim.",
+   "gate_evidence": [
+    {
+     "level": "source-execution",
+     "gates": [
+      "data-events",
+      "concat-catx",
+      "suite-concat-catx"
+     ],
+     "scope": "Scalar numeric/character assignments and bounded character expressions; expression/type profiles and refusals apply."
+    }
+   ]
   },
   {
    "entry": "ATTRIB Statement",
@@ -178,13 +214,17 @@
    "category": "CAS",
    "type": "Declarative",
    "valid_in": "DATA step or PROC step",
-   "disposition": "GATED",
+   "disposition": "UNASSESSED",
    "rule_ids": [],
-   "gates": [
-    "typed-metadata"
-   ],
+   "gates": [],
    "reference_page": 33,
-   "note": "character widths, labels, and format descriptors pinned in the typed-metadata family"
+   "note": "typed-metadata proves descriptor transport, not ATTRIB declaration parsing/execution. Prior assessment preserved in assessment_history; related evidence is not a gate for this entry.",
+   "related_evidence": {
+    "gates": [
+     "typed-metadata"
+    ],
+    "scope": "typed-metadata proves descriptor transport, not ATTRIB declaration parsing/execution."
+   }
   },
   {
    "entry": "BY Statement",
@@ -197,10 +237,27 @@
     "DS-006"
    ],
    "gates": [
-    "bygroup"
+    "bygroup",
+    "suite-events"
    ],
    "reference_page": 39,
-   "note": "BY-group processing and FIRST./LAST."
+   "note": "BY-group processing and FIRST./LAST.",
+   "gate_evidence": [
+    {
+     "level": "reference-fixture",
+     "gates": [
+      "bygroup"
+     ],
+     "scope": "Helper-level BY-group boundaries and retained accumulation."
+    },
+    {
+     "level": "source-execution",
+     "gates": [
+      "suite-events"
+     ],
+     "scope": "Ascending BY flags/group reset over supplied sorted input; no descending/NOTSORTED or general BY execution."
+    }
+   ]
   },
   {
    "entry": "CALL Statement",
@@ -295,7 +352,16 @@
     "data-events"
    ],
    "reference_page": 49,
-   "note": "the DATA step boundary and its options are the runtime's entry point"
+   "note": "the DATA step boundary and its options are the runtime's entry point",
+   "gate_evidence": [
+    {
+     "level": "source-execution",
+     "gates": [
+      "data-events"
+     ],
+     "scope": "One bare DATA destination per step with bounded event execution; options, multiple destinations and inline input remain refused."
+    }
+   ]
   },
   {
    "entry": "DATALINES Statement",
@@ -371,14 +437,19 @@
    "category": "CAS",
    "type": "Executable",
    "valid_in": "DATA step",
-   "disposition": "GATED",
+   "disposition": "UNASSESSED",
    "rule_ids": [
     "DS-016"
    ],
-   "gates": [
-    "arrays"
-   ],
-   "reference_page": 70
+   "gates": [],
+   "reference_page": 70,
+   "related_evidence": {
+    "gates": [
+     "arrays"
+    ],
+    "scope": "arrays proves array helpers; bare grouped DO source remains refused and has no independent grouped-control fixture."
+   },
+   "note": "arrays proves array helpers; bare grouped DO source remains refused and has no independent grouped-control fixture. Prior assessment preserved in assessment_history; related evidence is not a gate for this entry."
   },
   {
    "entry": "DO Statement: Iterative",
@@ -392,12 +463,27 @@
     "DS-026"
    ],
    "gates": [
-    "arrays",
     "do-counted",
     "suite-do-counted"
    ],
    "reference_page": 72,
-   "note": "DS-026 executable slice: single-level DATA-step index=start TO stop [BY step] with signed integer literal controls, magnitudes at most 2**31-1, nonzero step, at most 10000 trips; direct assignments/PUT/OUTPUT in body. Nested, conditional, computed/variable controls, index writes, declarations/input operations in body, DATA _NULL_ explicit OUTPUT, PUT _ALL_, MERGE and C++ are deferred. Existing DS-016 arrays evidence does not widen this translator slice."
+   "note": "DS-026 executable slice: single-level DATA-step index=start TO stop [BY step] with signed integer literal controls, magnitudes at most 2**31-1, nonzero step, at most 10000 trips; direct assignments/PUT/OUTPUT in body. Nested, conditional, computed/variable controls, index writes, declarations/input operations in body, DATA _NULL_ explicit OUTPUT, PUT _ALL_, MERGE and C++ are deferred. Existing DS-016 arrays evidence does not widen this translator slice.",
+   "gate_evidence": [
+    {
+     "level": "source-execution",
+     "gates": [
+      "do-counted",
+      "suite-do-counted"
+     ],
+     "scope": "Single-level signed-integer-literal index bounds/step; no computed, nested or DO OVER controls."
+    }
+   ],
+   "related_evidence": {
+    "gates": [
+     "arrays"
+    ],
+    "scope": "Historical adjacent helper evidence; not proof of this source statement."
+   }
   },
   {
    "entry": "DO UNTIL Statement",
@@ -411,12 +497,27 @@
     "DS-035"
    ],
    "gates": [
-    "arrays",
     "do-until",
     "suite-do-until"
    ],
    "reference_page": 76,
-   "note": "single-level body-first numeric predicate loop, at most10000 body executions per invocation; fixed tool budget, no nesting or LAG/DIF; repository/base-R evidence, no live SAS"
+   "note": "single-level body-first numeric predicate loop, at most10000 body executions per invocation; fixed tool budget, no nesting or LAG/DIF; repository/base-R evidence, no live SAS",
+   "gate_evidence": [
+    {
+     "level": "source-execution",
+     "gates": [
+      "do-until",
+      "suite-do-until"
+     ],
+     "scope": "Single-level body-first numeric predicate loop, simple actions and bounded IF/ELSE; fixed 10000-body policy."
+    }
+   ],
+   "related_evidence": {
+    "gates": [
+     "arrays"
+    ],
+    "scope": "Historical adjacent helper evidence; not proof of this source statement."
+   }
   },
   {
    "entry": "DO WHILE Statement",
@@ -430,12 +531,27 @@
     "DS-038"
    ],
    "gates": [
-    "arrays",
     "do-while",
     "suite-do-while"
    ],
    "reference_page": 78,
-   "note": "Single-level DATA-step numeric pre-test. False/missing truth permits zero trips. Fixed10000-body budget per invocation; false after body10000 succeeds, true there refuses before body10001. _N_ advances per outer DATA row. Entire-step OUTPUT discovery suppresses implicit output even on skipped/zero-trip paths. Nested/combined loop forms stay deferred; other recorded counted/UNTIL/array evidence remains separate."
+   "note": "Single-level DATA-step numeric pre-test. False/missing truth permits zero trips. Fixed10000-body budget per invocation; false after body10000 succeeds, true there refuses before body10001. _N_ advances per outer DATA row. Entire-step OUTPUT discovery suppresses implicit output even on skipped/zero-trip paths. Nested/combined loop forms stay deferred; other recorded counted/UNTIL/array evidence remains separate.",
+   "gate_evidence": [
+    {
+     "level": "source-execution",
+     "gates": [
+      "do-while",
+      "suite-do-while"
+     ],
+     "scope": "Single-level pre-test numeric predicate loop with zero trips; fixed 10000-body policy and queue/body restrictions."
+    }
+   ],
+   "related_evidence": {
+    "gates": [
+     "arrays"
+    ],
+    "scope": "Historical adjacent helper evidence; not proof of this source statement."
+   }
   },
   {
    "entry": "DROP Statement",
@@ -462,7 +578,6 @@
     "DS-038"
    ],
    "gates": [
-    "arrays",
     "do-counted",
     "suite-do-counted",
     "do-until",
@@ -471,7 +586,27 @@
     "suite-do-while"
    ],
    "reference_page": 81,
-   "note": "Single-level DATA-step numeric pre-test. False/missing truth permits zero trips. Fixed10000-body budget per invocation; false after body10000 succeeds, true there refuses before body10001. _N_ advances per outer DATA row. Entire-step OUTPUT discovery suppresses implicit output even on skipped/zero-trip paths. Nested/combined loop forms stay deferred; other recorded counted/UNTIL/array evidence remains separate."
+   "note": "Single-level DATA-step numeric pre-test. False/missing truth permits zero trips. Fixed10000-body budget per invocation; false after body10000 succeeds, true there refuses before body10001. _N_ advances per outer DATA row. Entire-step OUTPUT discovery suppresses implicit output even on skipped/zero-trip paths. Nested/combined loop forms stay deferred; other recorded counted/UNTIL/array evidence remains separate.",
+   "gate_evidence": [
+    {
+     "level": "source-execution",
+     "gates": [
+      "do-counted",
+      "suite-do-counted",
+      "do-until",
+      "suite-do-until",
+      "do-while",
+      "suite-do-while"
+     ],
+     "scope": "Closes one supported counted/UNTIL/WHILE loop; no grouped DO or nested control."
+    }
+   ],
+   "related_evidence": {
+    "gates": [
+     "arrays"
+    ],
+    "scope": "Historical adjacent helper evidence; not proof of this source statement."
+   }
   },
   {
    "entry": "ENDSAS Statement",
@@ -720,7 +855,7 @@
    ],
    "gates": [],
    "reference_page": 111,
-   "note": "format rendering; PROC FORMAT and significant digits are gated"
+   "note": "format rendering; PROC FORMAT and significant digits are gated Guidance only; no registered execution gate for this full named entry is claimed."
   },
   {
    "entry": "GOTO Statement",
@@ -745,7 +880,16 @@
     "data-events"
    ],
    "reference_page": 117,
-   "note": "WHERE and subsetting IF timing pinned in the events family"
+   "note": "WHERE and subsetting IF timing pinned in the events family",
+   "gate_evidence": [
+    {
+     "level": "source-execution",
+     "gates": [
+      "data-events"
+     ],
+     "scope": "Bounded subsetting predicate at the DATA-row stage; loop-body subsetting remains deferred."
+    }
+   ]
   },
   {
    "entry": "IF-THEN/ELSE Statement",
@@ -762,7 +906,23 @@
     "missarith",
     "do-if"
    ],
-   "reference_page": 120
+   "reference_page": 120,
+   "gate_evidence": [
+    {
+     "level": "reference-fixture",
+     "gates": [
+      "missarith"
+     ],
+     "scope": "Helper-level missing arithmetic/conditional truth behavior."
+    },
+    {
+     "level": "source-execution",
+     "gates": [
+      "do-if"
+     ],
+     "scope": "First-true simple-action IF/ELSE chains with static schema discovery; no THEN DO groups, labels or arbitrary actions."
+    }
+   ]
   },
   {
    "entry": "%INCLUDE Statement",
@@ -776,7 +936,7 @@
    ],
    "gates": [],
    "reference_page": 122,
-   "note": "pattern replacement"
+   "note": "pattern replacement Guidance only; no registered execution gate for this full named entry is claimed."
   },
   {
    "entry": "INFILE Statement",
@@ -872,13 +1032,17 @@
    "category": "CAS",
    "type": "Declarative",
    "valid_in": "DATA step or PROC step",
-   "disposition": "GATED",
+   "disposition": "UNASSESSED",
    "rule_ids": [],
-   "gates": [
-    "typed-metadata"
-   ],
+   "gates": [],
    "reference_page": 206,
-   "note": "labels pinned in the typed-metadata family"
+   "note": "typed-metadata proves label transport, not LABEL statement parsing/execution. Prior assessment preserved in assessment_history; related evidence is not a gate for this entry.",
+   "related_evidence": {
+    "gates": [
+     "typed-metadata"
+    ],
+    "scope": "typed-metadata proves label transport, not LABEL statement parsing/execution."
+   }
   },
   {
    "entry": "Label: Statement",
@@ -918,7 +1082,18 @@
     "suite-length-reverse"
    ],
    "reference_page": 215,
-   "note": "character byte widths pinned in the typed-metadata family DS-028 admits a single group of unique ordinary names before computations/input, width 1..32767, with ordered declaration operations; numeric lengths, grouped widths, ranges, duplicate/automatic names and body declarations remain deferred."
+   "note": "character byte widths pinned in the typed-metadata family DS-028 admits a single group of unique ordinary names before computations/input, width 1..32767, with ordered declaration operations; numeric lengths, grouped widths, ranges, duplicate/automatic names and body declarations remain deferred.",
+   "gate_evidence": [
+    {
+     "level": "source-execution",
+     "gates": [
+      "typed-metadata",
+      "length-reverse",
+      "suite-length-reverse"
+     ],
+     "scope": "Bounded character widths and name groups before first use; no general numeric length or ATTRIB syntax."
+    }
+   ]
   },
   {
    "entry": "LIBNAME Statement",
@@ -932,7 +1107,7 @@
    ],
    "gates": [],
    "reference_page": 221,
-   "note": "library access; sas7bdat and xpt reading"
+   "note": "library access; sas7bdat and xpt reading Guidance only; no registered execution gate for this full named entry is claimed."
   },
   {
    "entry": "LIBNAME Statement: CVP Engine",
@@ -1060,10 +1235,27 @@
     "DS-003"
    ],
    "gates": [
-    "merge"
+    "merge",
+    "suite-plan"
    ],
    "reference_page": 231,
-   "note": "1:1 and 1:many gated; many-to-many routes to human review"
+   "note": "1:1 and 1:many gated; many-to-many routes to human review",
+   "gate_evidence": [
+    {
+     "level": "reference-fixture",
+     "gates": [
+      "merge"
+     ],
+     "scope": "Helper-level match-merge including IN flags, not source IN= parsing."
+    },
+    {
+     "level": "source-execution",
+     "gates": [
+      "suite-plan"
+     ],
+     "scope": "Two sorted supplied tables with supported cardinality and BY keys; no source IN= options or many-to-many acceptance."
+    }
+   ]
   },
   {
    "entry": "MISSING Statement",
@@ -1077,7 +1269,7 @@
    ],
    "gates": [],
    "reference_page": 240,
-   "note": "special missing values .A-.Z and ._"
+   "note": "special missing values .A-.Z and ._ Guidance only; no registered execution gate for this full named entry is claimed."
   },
   {
    "entry": "MODIFY Statement",
@@ -1125,7 +1317,16 @@
     "data-events"
    ],
    "reference_page": 261,
-   "note": "explicit OUTPUT snapshots pinned in the events family"
+   "note": "explicit OUTPUT snapshots pinned in the events family",
+   "gate_evidence": [
+    {
+     "level": "source-execution",
+     "gates": [
+      "data-events"
+     ],
+     "scope": "Bare current-destination snapshots and implicit-output suppression, preserving complete descriptors."
+    }
+   ]
   },
   {
    "entry": "PAGE Statement",
@@ -1162,7 +1363,23 @@
     "suite-put-numeric"
    ],
    "reference_page": 265,
-   "note": "Bounded logical records of quoted literals and ordinary unformatted nonblank character variables: printable ASCII, at most 64 columns including variable separators, documented spacing and quote decoding. Blank fields, numeric output, attached formats, special controls, literal adjacency/comment-only separation, FILE, pointers, macros, and C++ require review. Named-list output has a separate entry. DS-025 adds bounded scalar PUT _ALL_: ordered named PDV fields, ordinary numeric missing and conservative BEST12 integers, _ERROR_=0 and _N_=1. No general error-flag or physical SAS log equivalence. DS-027 separately gates source-order known numeric variables: ordinary missing and finite integers with magnitude at most 99999999999, one following separator per field, at most 64 logical columns. Types and attached formats are validated even on empty or filtered SET input; mixed numeric items, unknown/descriptor-only variables, fractions, special missing output, formats, controls, and C++ retain refusals."
+   "note": "Bounded logical records of quoted literals and ordinary unformatted nonblank character variables: printable ASCII, at most 64 columns including variable separators, documented spacing and quote decoding. Blank fields, numeric output, attached formats, special controls, literal adjacency/comment-only separation, FILE, pointers, macros, and C++ require review. Named-list output has a separate entry. DS-025 adds bounded scalar PUT _ALL_: ordered named PDV fields, ordinary numeric missing and conservative BEST12 integers, _ERROR_=0 and _N_=1. No general error-flag or physical SAS log equivalence. DS-027 separately gates source-order known numeric variables: ordinary missing and finite integers with magnitude at most 99999999999, one following separator per field, at most 64 logical columns. Types and attached formats are validated even on empty or filtered SET input; mixed numeric items, unknown/descriptor-only variables, fractions, special missing output, formats, controls, and C++ retain refusals.",
+   "gate_evidence": [
+    {
+     "level": "source-execution",
+     "gates": [
+      "put-literal",
+      "suite-put",
+      "put-character-list",
+      "suite-put-list",
+      "put-all",
+      "suite-put-all",
+      "put-numeric-list",
+      "suite-put-numeric"
+     ],
+     "scope": "Separate bounded literal, character, numeric-name-list and PUT _ALL_ profiles; mixed literal/numeric, file output and wider lines remain boundaries."
+    }
+   ]
   },
   {
    "entry": "PUT Statement: Column",
@@ -1207,7 +1424,21 @@
     "suite-put-numeric"
    ],
    "reference_page": 296,
-   "note": "Bounded logical records of quoted literals and ordinary unformatted nonblank character variables: printable ASCII, at most 64 columns including variable separators, documented spacing and quote decoding. Blank fields, numeric output, attached formats, special controls, literal adjacency/comment-only separation, FILE, pointers, macros, and C++ require review. Named-list output has a separate entry. DS-027 separately gates source-order known numeric variables: ordinary missing and finite integers with magnitude at most 99999999999, one following separator per field, at most 64 logical columns. Types and attached formats are validated even on empty or filtered SET input; mixed numeric items, unknown/descriptor-only variables, fractions, special missing output, formats, controls, and C++ retain refusals."
+   "note": "Bounded logical records of quoted literals and ordinary unformatted nonblank character variables: printable ASCII, at most 64 columns including variable separators, documented spacing and quote decoding. Blank fields, numeric output, attached formats, special controls, literal adjacency/comment-only separation, FILE, pointers, macros, and C++ require review. Named-list output has a separate entry. DS-027 separately gates source-order known numeric variables: ordinary missing and finite integers with magnitude at most 99999999999, one following separator per field, at most 64 logical columns. Types and attached formats are validated even on empty or filtered SET input; mixed numeric items, unknown/descriptor-only variables, fractions, special missing output, formats, controls, and C++ retain refusals.",
+   "gate_evidence": [
+    {
+     "level": "source-execution",
+     "gates": [
+      "put-literal",
+      "suite-put",
+      "put-character-list",
+      "suite-put-list",
+      "put-numeric-list",
+      "suite-put-numeric"
+     ],
+     "scope": "Bounded literal/character and separately numeric variable-list output; not arbitrary SAS list output."
+    }
+   ]
   },
   {
    "entry": "PUT Statement: Named",
@@ -1225,7 +1456,18 @@
     "suite-put-all"
    ],
    "reference_page": 302,
-   "note": "the emitter consumes name= items one at a time and tickets the leftover text DS-025 adds bounded scalar PUT _ALL_: ordered named PDV fields, ordinary numeric missing and conservative BEST12 integers, _ERROR_=0 and _N_=1. No general error-flag or physical SAS log equivalence."
+   "note": "the emitter consumes name= items one at a time and tickets the leftover text DS-025 adds bounded scalar PUT _ALL_: ordered named PDV fields, ordinary numeric missing and conservative BEST12 integers, _ERROR_=0 and _N_=1. No general error-flag or physical SAS log equivalence.",
+   "gate_evidence": [
+    {
+     "level": "source-execution",
+     "gates": [
+      "suite-emitter",
+      "put-all",
+      "suite-put-all"
+     ],
+     "scope": "Numeric named-list assignments and bounded PUT _ALL_; not all named output types or widths."
+    }
+   ]
   },
   {
    "entry": "PUTLOG Statement",
@@ -1304,10 +1546,31 @@
     "DS-006"
    ],
    "gates": [
-    "bygroup"
+    "bygroup",
+    "suite-events",
+    "sum-statement",
+    "suite-sum-statement"
    ],
    "reference_page": 319,
-   "note": "numeric RETAIN pinned in the events and bygroup families"
+   "note": "numeric RETAIN pinned in the events and bygroup families",
+   "gate_evidence": [
+    {
+     "level": "reference-fixture",
+     "gates": [
+      "bygroup"
+     ],
+     "scope": "Helper-level retained BY-group accumulation."
+    },
+    {
+     "level": "source-execution",
+     "gates": [
+      "suite-events",
+      "sum-statement",
+      "suite-sum-statement"
+     ],
+     "scope": "One explicitly initialized numeric variable and implicit sum retention, per DATA step/run; bare/general RETAIN remains refused."
+    }
+   ]
   },
   {
    "entry": "RETURN Statement",
@@ -1326,10 +1589,23 @@
    "category": "",
    "type": "",
    "valid_in": "",
-   "disposition": "UNASSESSED",
+   "disposition": "GATED",
    "rule_ids": [],
-   "gates": [],
-   "reference_page": 326
+   "gates": [
+    "data-events",
+    "suite-plan"
+   ],
+   "reference_page": 326,
+   "gate_evidence": [
+    {
+     "level": "source-execution",
+     "gates": [
+      "data-events",
+      "suite-plan"
+     ],
+     "scope": "Bare RUN closes a supported DATA/SORT step; no interactive RUN group variants, CANCEL or external procedure execution."
+    }
+   ]
   },
   {
    "entry": "%RUN Statement",
@@ -1370,13 +1646,28 @@
    "category": "CAS",
    "type": "Executable",
    "valid_in": "DATA step",
-   "disposition": "RULE",
+   "disposition": "GATED",
    "rule_ids": [
     "DS-001"
    ],
-   "gates": [],
+   "gates": [
+    "data-events",
+    "typed-metadata",
+    "suite-events"
+   ],
    "reference_page": 331,
-   "note": "concatenation rule; no dedicated fixture"
+   "note": "concatenation rule; no dedicated fixture",
+   "gate_evidence": [
+    {
+     "level": "source-execution",
+     "gates": [
+      "data-events",
+      "typed-metadata",
+      "suite-events"
+     ],
+     "scope": "One supplied driving SET and bounded initial IF _N_=1 THEN SET lookup; descriptor/state/filter timing; no general options or concatenation."
+    }
+   ]
   },
   {
    "entry": "SKIP Statement",
@@ -1417,7 +1708,24 @@
     "suite-sum-statement"
    ],
    "reference_page": 348,
-   "note": "finite binary64 numeric target + numeric expression; ordinary missing treated as zero; implicit retained zero initializer overridden by explicit RETAIN; repository/base-R evidence, no live SAS"
+   "note": "finite binary64 numeric target + numeric expression; ordinary missing treated as zero; implicit retained zero initializer overridden by explicit RETAIN; repository/base-R evidence, no live SAS",
+   "gate_evidence": [
+    {
+     "level": "reference-fixture",
+     "gates": [
+      "bygroup"
+     ],
+     "scope": "Helper-level retained accumulation."
+    },
+    {
+     "level": "source-execution",
+     "gates": [
+      "sum-statement",
+      "suite-sum-statement"
+     ],
+     "scope": "Numeric sum initialization/retention, ordinary missing increments and selected simple/loop actions; finite profile and tagged/type refusals."
+    }
+   ]
   },
   {
    "entry": "SYSECHO Statement",
@@ -1453,7 +1761,7 @@
    ],
    "gates": [],
    "reference_page": 350,
-   "note": "equivalence class APPROXIMATE"
+   "note": "equivalence class APPROXIMATE Guidance only; no registered execution gate for this full named entry is claimed."
   },
   {
    "entry": "WHERE Statement",
@@ -1467,7 +1775,16 @@
     "data-events"
    ],
    "reference_page": 359,
-   "note": "WHERE runs before BY groups form; timing pinned"
+   "note": "WHERE runs before BY groups form; timing pinned",
+   "gate_evidence": [
+    {
+     "level": "source-execution",
+     "gates": [
+      "data-events"
+     ],
+     "scope": "One bounded WHERE predicate on SET before BY processing; not general WHERE expressions/options."
+    }
+   ]
   },
   {
    "entry": "WINDOW Statement",
@@ -1711,7 +2028,16 @@
     "merge"
    ],
    "reference_page": 44,
-   "note": "group-retained IN= flags pinned in the MERGE BY gate (fixture F6, in_l and in_r columns)"
+   "note": "group-retained IN= flags pinned in the MERGE BY gate (fixture F6, in_l and in_r columns)",
+   "gate_evidence": [
+    {
+     "level": "reference-fixture",
+     "gates": [
+      "merge"
+     ],
+     "scope": "Helper-level match-merge participation flags only; source IN= option remains refused."
+    }
+   ]
   },
   {
    "entry": "KEEP= Data Set Option",
@@ -1731,13 +2057,17 @@
    "category": "Data Set Control",
    "type": null,
    "valid_in": "DATA step and PROC steps",
-   "disposition": "GATED",
+   "disposition": "UNASSESSED",
    "rule_ids": [],
-   "gates": [
-    "typed-metadata"
-   ],
+   "gates": [],
    "reference_page": 47,
-   "note": "label handling pinned in the typed-metadata family, as for the LABEL statement"
+   "note": "typed-metadata proves data-set label transport, not LABEL= option parsing/execution. Prior assessment preserved in assessment_history; related evidence is not a gate for this entry.",
+   "related_evidence": {
+    "gates": [
+     "typed-metadata"
+    ],
+    "scope": "typed-metadata proves data-set label transport, not LABEL= option parsing/execution."
+   }
   },
   {
    "entry": "MAXTABLEMEM= Data Set Option",
@@ -1978,6 +2308,84 @@
    "gates": [],
    "reference_page": 98,
    "note": "write password; no open target equivalent, human rules on access control"
+  }
+ ],
+ "evidence_levels": {
+  "reference-fixture": "Original semantic helper/reference fixture comparisons. Does not prove SAS source lowering.",
+  "source-execution": "Bounded SAS source compilation and execution checks. Scope and refusals still apply."
+ },
+ "assessment_history": [
+  {
+   "date": "2026-10-27",
+   "baseline": "08eaa7b723133b8cecfccd7dd095cd92b5bf7aa6",
+   "changes": [
+    {
+     "document": "stmt",
+     "entry": "ATTRIB Statement",
+     "previous_disposition": "GATED",
+     "previous_gates": [
+      "typed-metadata"
+     ],
+     "previous_rule_ids": [],
+     "disposition": "UNASSESSED",
+     "reason": "typed-metadata proves descriptor transport, not ATTRIB declaration parsing/execution."
+    },
+    {
+     "document": "stmt",
+     "entry": "DO Statement",
+     "previous_disposition": "GATED",
+     "previous_gates": [
+      "arrays"
+     ],
+     "previous_rule_ids": [
+      "DS-016"
+     ],
+     "disposition": "UNASSESSED",
+     "reason": "arrays proves array helpers; bare grouped DO source remains refused and has no independent grouped-control fixture."
+    },
+    {
+     "document": "stmt",
+     "entry": "LABEL Statement",
+     "previous_disposition": "GATED",
+     "previous_gates": [
+      "typed-metadata"
+     ],
+     "previous_rule_ids": [],
+     "disposition": "UNASSESSED",
+     "reason": "typed-metadata proves label transport, not LABEL statement parsing/execution."
+    },
+    {
+     "document": "stmt",
+     "entry": "SET Statement",
+     "previous_disposition": "RULE",
+     "previous_gates": [],
+     "previous_rule_ids": [
+      "DS-001"
+     ],
+     "disposition": "GATED",
+     "reason": "Current data-events/typed-metadata/suite-events execute the bounded supplied-input SET slice."
+    },
+    {
+     "document": "dso",
+     "entry": "LABEL= Data Set Option",
+     "previous_disposition": "GATED",
+     "previous_gates": [
+      "typed-metadata"
+     ],
+     "previous_rule_ids": [],
+     "disposition": "UNASSESSED",
+     "reason": "typed-metadata proves data-set label transport, not LABEL= option parsing/execution."
+    },
+    {
+     "document": "stmt",
+     "entry": "RUN Statement",
+     "previous_disposition": "UNASSESSED",
+     "previous_gates": [],
+     "previous_rule_ids": [],
+     "disposition": "GATED",
+     "reason": "The bare RUN step terminator is compiled in data-events and suite-plan; no interactive RUN variants are claimed."
+    }
+   ]
   }
  ]
 }
