@@ -87,7 +87,8 @@
   "do_if_update": "DS-031 and do-if/suite-do-if add bounded first-true IF/ELSE simple actions, including counted DO bodies, preserving both-branch schema/source/OUTPUT discovery and recursive index-write refusal.",
   "bitwise_update": "DS-032 and bitwise/suite-bitwise add six bounded unsigned32 scalar functions; no statement/procedure universe change. Existing64-column PUT_ALL profile remains, and the67-column external program is recorded as an atomic refusal rather than a successful full-program proof.",
   "lag_execution_update": "DS-007 source execution adds numeric direct-RHS LAG/DIF occurrence queues, selected conditional/loop invocation, static/context checks and per-step/run reset. Raw queue fixtures remain unchanged; lag-execution/suite-lag-execution add independent prior-invoked-index R evidence. No statement/procedure universe change or live-SAS claim.",
-  "calendar_update": "DS-033 calendar/suite-calendar add bounded MDY/WEEKDAY source execution and a full unmodified day_of_the_week.sas proof. Only valid integral numeric dates in1753..3999; invalid/missing/error-state and wider dates remain review boundaries. Function reference universe remains unenumerated; no statement/procedure disposition or rollup changes. No live SAS."
+  "calendar_update": "DS-033 calendar/suite-calendar add bounded MDY/WEEKDAY source execution and a full unmodified day_of_the_week.sas proof. Only valid integral numeric dates in1753..3999; invalid/missing/error-state and wider dates remain review boundaries. Function reference universe remains unenumerated; no statement/procedure disposition or rollup changes. No live SAS.",
+  "sum_until_update": "DS-034/DS-035 add source sum statements and bounded DO UNTIL, independent R and full unmodified loops_do_while.sas proof. Existing dispositions and rollups remain; no live SAS."
  },
  "rollup": {
   "stmt": {
@@ -405,12 +406,16 @@
    "valid_in": "DATA step",
    "disposition": "GATED",
    "rule_ids": [
-    "DS-016"
+    "DS-016",
+    "DS-035"
    ],
    "gates": [
-    "arrays"
+    "arrays",
+    "do-until",
+    "suite-do-until"
    ],
-   "reference_page": 76
+   "reference_page": 76,
+   "note": "single-level body-first numeric predicate loop, at most10000 body executions per invocation; fixed tool budget, no nesting or LAG/DIF; repository/base-R evidence, no live SAS"
   },
   {
    "entry": "DO WHILE Statement",
@@ -447,15 +452,18 @@
    "disposition": "GATED",
    "rule_ids": [
     "DS-016",
-    "DS-026"
+    "DS-026",
+    "DS-035"
    ],
    "gates": [
     "arrays",
     "do-counted",
-    "suite-do-counted"
+    "suite-do-counted",
+    "do-until",
+    "suite-do-until"
    ],
    "reference_page": 81,
-   "note": "DS-026 executable slice: single-level DATA-step index=start TO stop [BY step] with signed integer literal controls, magnitudes at most 2**31-1, nonzero step, at most 10000 trips; direct assignments/PUT/OUTPUT in body. Nested, conditional, computed/variable controls, index writes, declarations/input operations in body, DATA _NULL_ explicit OUTPUT, PUT _ALL_, MERGE and C++ are deferred. Existing DS-016 arrays evidence does not widen this translator slice."
+   "note": "DS-026 counted DO and DS-035 body-first DO UNTIL closures are executable in their bounded single-level profiles. Nested/grouped/combined controls remain deferred."
   },
   {
    "entry": "ENDSAS Statement",
@@ -1392,12 +1400,16 @@
    "valid_in": "DATA step",
    "disposition": "GATED",
    "rule_ids": [
-    "DS-006"
+    "DS-006",
+    "DS-034"
    ],
    "gates": [
-    "bygroup"
+    "bygroup",
+    "sum-statement",
+    "suite-sum-statement"
    ],
-   "reference_page": 348
+   "reference_page": 348,
+   "note": "finite binary64 numeric target + numeric expression; ordinary missing treated as zero; implicit retained zero initializer overridden by explicit RETAIN; repository/base-R evidence, no live SAS"
   },
   {
    "entry": "SYSECHO Statement",

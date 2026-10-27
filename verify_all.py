@@ -79,6 +79,8 @@ VERIFIERS = [
     ("bitwise", HERE / "examples" / "verify_bitwise.py"),
     ("lag-execution", HERE / "examples" / "verify_lag_execution.py"),
     ("calendar", HERE / "examples" / "verify_calendar.py"),
+    ("sum-statement", HERE / "examples" / "verify_sum_statement.py"),
+    ("do-until", HERE / "examples" / "verify_do_until.py"),
 ]
 
 # The translator suites, run as unittest modules. They carry the same weight as
@@ -117,6 +119,8 @@ SUITES = [
     ("suite-bitwise", "saschi.test_bitwise"),
     ("suite-lag-execution", "saschi.test_lag_execution"),
     ("suite-calendar", "saschi.test_calendar"),
+    ("suite-sum-statement", "saschi.test_sum_statement"),
+    ("suite-do-until", "saschi.test_do_until"),
 ]
 
 

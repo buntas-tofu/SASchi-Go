@@ -362,6 +362,29 @@ def _numeric_expression(expr, schema):
     return False
 
 
+def validate_sum_expression(expr, schema):
+    """The new sum/UNTIL slice admits numeric trees without coercion or tags."""
+    from sas_semantics import sas_sum_statement
+    if not isinstance(expr, dict):
+        raise ValueError('sum/UNTIL requires a numeric expression')
+    for node, _ in expression_nodes(expr):
+        kind = node.get('kind')
+        if not _numeric_expression(node, schema) or kind == 'tagged_missing':
+            raise ValueError('sum/UNTIL requires ordinary numeric expressions')
+        if kind in ('number', 'missing'):
+            if kind == 'missing' and node.get('value') is not None:
+                raise ValueError('sum/UNTIL ordinary missing requires None')
+            sas_sum_statement(None, node.get('value'))
+        if kind == 'arithmetic' and node.get('op') not in ('+', '-'):
+            raise ValueError('sum/UNTIL supports plus/minus arithmetic only')
+        if kind == 'call':
+            spec = FUNCTIONS[node['name']]
+            args = node.get('args')
+            if (not isinstance(args, list) or len(args) < spec.min_args
+                    or spec.max_args >= 0 and len(args) > spec.max_args):
+                raise ValueError('sum/UNTIL requires exact supported call arity')
+
+
 def validate_substr_calls(value, schema):
     """Check descriptors/literal bounds even for empty or skipped DATA input."""
     for node, _ in expression_nodes(value):

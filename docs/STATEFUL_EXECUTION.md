@@ -573,3 +573,65 @@ Primary specifications:
 - [SAS WEEKDAY](https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000201173.htm)
 - [SAS date values and historical limits](https://support.sas.com/documentation/cdl/en/lrcon/65287/HTML/default/p1wj0wt2ebe2a0n1lv4lem9hdc0v.htm)
 - [Extended-year leap rule boundary](https://support.sas.com/documentation/cdl/en/acpcref/63184/HTML/default/a003352722.htm)
+
+## Retained sum statements and post-test DO UNTIL
+
+Status: DS-034/DS-035 repository/base-R evidence for principal and maintainer
+review. No live-SAS validation or production-performance acceptance claim.
+
+A source sum statement `total + expression;` creates a numeric target,
+initializes it to zero and retains it across DATA iterations. Explicit RETAIN
+initializers override that default regardless of their placement in the step.
+Ordinary missing current values and increments contribute zero. This is separate
+from the older stateless SUM fixture, whose established behavior is unchanged.
+Targets and RHS references enter the schema in source order, including skipped
+IF/ELSE leaves and loop bodies. SET values still overwrite their input variables
+on each row. BY groups do not reset an accumulator automatically; explicit
+FIRST-key assignments can reset it.
+
+The new expression profile uses finite binary64 numeric operands and ordinary
+missing, existing numeric calls and plus/minus arithmetic. Every operand in a
+sum expression is checked, so tagged missing cannot disappear inside arithmetic.
+Character coercion, tagged missing, booleans, nonfinite inputs and overflow in
+these new sum/predicate expression paths refuse. Static descriptor/literal checks
+run even when input is empty or a branch is skipped; dynamic calls run only when
+invoked. Character arguments inside otherwise numeric-returning functions remain
+outside this new profile. Sum targets cannot be automatic variables or BY keys.
+MERGE, PUT_ALL and C++ combinations remain deferred. Counted-loop bodies admit
+sum statements but still refuse writes to their own index, in either branch.
+
+`do_until` carries exactly `condition` and `body` in the operation plan. Each
+invocation runs its body before its numeric predicate, at least once for each
+executed DATA row. No body runs for empty or entirely filtered SET input. A fixed
+10000-execution tool budget applies per invocation. A true predicate after body
+execution10000 succeeds; a false predicate there refuses without execution10001.
+This budget is a translator policy, not a SAS language limit. Input rows drive
+outer DATA iterations, so `_N_` does not advance inside the loop. Every run and
+step owns its state. IF/ELSE simple actions, assignments, sums, bounded PUT and
+OUTPUT are admitted in one loop level. Explicit OUTPUT anywhere suppresses the
+step's implicit output and captures the complete statically discovered schema.
+
+Nested/combined loops, DO WHILE, LEAVE/CONTINUE, declarations or input statements
+inside the body and LAG/DIF queue scheduling inside UNTIL remain deferred. Numeric
+truth treats ordinary missing and zero as false; supported numeric comparisons
+use the existing missing ordering. DATA _NULL_ explicit OUTPUT remains deferred.
+Failures publish no accepted result or prior buffered records. The low-level
+callback helper does not roll back arbitrary caller side effects; atomic
+publication is enforced by the shared job/emitter path.
+
+Evidence: `examples/verify_sum_statement.py`, original `examples/sum_statement.R`
+and `saschi.test_sum_statement` cover8 hand pins,1000 generated dyadic R cases,
+21 shared refusals, native R cumulative sums, retention/reset, descriptors,
+source order, lazy/static checks, comparator controls and atomic failures.
+`examples/verify_do_until.py`, original `examples/do_until.R` and
+`saschi.test_do_until` cover4 schedule pins,218 independent R schedules including
+the10000/10001 boundary, post-body tests, OUTPUT and refusal/comparator controls.
+The two source suites add40 tests. The installed wheel executes both constructs
+with the standard library alone. No runtime dependency is added.
+
+The complete unmodified external `loops_do_while.sas` file is read in place from
+Roku and bound by source/stdout/complete-result hashes. Independent R parses every
+statement, runs native repeat/break control, and matches6 records with their
+trailing separators, final state6 and6 iterations. This is the eighth external
+complete-program proof. No external corpus source is copied into this repository.
+Division, INT and pre-test DO WHILE remain the next planned milestone.

@@ -156,20 +156,30 @@ def emitted_worker(source, inputs, output):
     write_json(Path(output), namespace['result'])
 
 
-def run_case(output, name, inputs, rscript, timeout, emitted):
+def run_case(output, name, inputs, rscript, timeout, emitted, *, source=None):
     directory = output / name
     directory.mkdir()
     dump_inputs(directory, inputs)
     record = {'name': name, 'input_rows': {n: len(t['rows']) for n, t in inputs.items()}, 'passed': False}
     try:
+        program = FIXTURE / 'job.sas'
+        if source is not None:
+            program = directory / 'job.sas'
+            program.write_text(source)
+            emitted = directory / 'emitted.py'
+            record['translation'] = invoke(directory, 'translate', [sys.executable, '-m', 'saschi', 'translate', program,
+                                             '--target', 'python', '--output', emitted], timeout)
+            if record['translation']['returncode']:
+                raise ValueError('variant translation failed; see translate.stderr.log')
+            record['source_program_sha256'] = digest(program)
         record['r'] = invoke(directory, 'r', [rscript, FIXTURE / 'reference.R', directory, directory / 'r'], timeout)
         if record['r']['returncode']:
             raise ValueError('R witness failed; see r.stderr.log')
         expected = r_expected(directory)
-        if name == 'hand-pinned' and not equal(expected['snapshots']['rows'], fixed_rows()):
+        if name in ('hand-pinned', 'sum-statement') and not equal(expected['snapshots']['rows'], fixed_rows()):
             raise ValueError('independent R disagrees with hand-calculated nine-row pin')
         write_json(directory / 'expected.json', expected)
-        record['cli'] = invoke(directory, 'cli', [sys.executable, '-m', 'saschi', 'run', FIXTURE / 'job.sas',
+        record['cli'] = invoke(directory, 'cli', [sys.executable, '-m', 'saschi', 'run', program,
                                  '--inputs', directory / 'inputs.json', '--expect', directory / 'expected.json',
                                  '--output', directory / 'cli'], timeout)
         receipt = json.loads((directory / 'cli/receipt.json').read_text())
@@ -216,7 +226,7 @@ def refusal_probes(output, timeout):
                                               '  length band $4 code $6 entry_kind $5;'), tiny, 2, 'unsupported'),
         ('grouped-do', source.replace("  if last.account then entry_kind='close';\n  if last.account then output;",
                                      "  if last.account then do;\n    entry_kind='close';\n    output;\n  end;"), tiny, 2, 'unsupported'),
-        ('sum-statement', source.replace('total=total+amount;', 'total+amount;'), tiny, 2, 'unsupported'),
+        ('sum-by-key', source.replace('total=total+amount;', 'account+amount;'), tiny, 2, 'unsupported'),
         ('many-to-many', source, many, 1, 'many-to-many MERGE'),
         ('character-merge', source, chars, 1, 'restricted to numeric'),
         ('catx-overflow', source.replace('code $6', 'code $5'), tiny, 1, 'CATX destination'),
@@ -319,6 +329,11 @@ def main():
     cases.extend((f'scale-{n}', generated_catalog(n, args.seed)) for n in dict.fromkeys(args.sizes))
     report['cases'] = [run_case(output, name, inputs, rscript, args.timeout, output / 'emitted.py')
                        for name, inputs in cases]
+    # Preserve the former refusal source byte-for-byte as a full positive R,
+    # hand-pin, CLI and emitted-Python check now that DS-034 executes it.
+    variant = (FIXTURE / 'job.sas').read_text().replace('total=total+amount;', 'total+amount;')
+    report['cases'].append(run_case(output, 'sum-statement', tiny, rscript, args.timeout,
+                                    output / 'emitted.py', source=variant))
     report['refusals'] = refusal_probes(output, args.timeout)
     pin = output / 'hand-pinned/expected.json'
     report['comparator_controls'] = comparator_probes(output, json.loads(pin.read_text()), args.timeout) if pin.exists() else []

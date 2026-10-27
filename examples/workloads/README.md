@@ -9,7 +9,7 @@ are written to ignored telemetry directories.
 
 The existing Verification job runs both runners with `--sizes 1000` after the
 unchanged `verify_all.py` command. Each keeps its hand pin, edge cases and all
-refusal/comparator controls: 17 ledger checks and 21 character-workload checks.
+refusal/comparator controls: 18 ledger checks and 21 character-workload checks.
 Both are mandatory steps. Each runs unless the workflow is cancelled, including
 after an earlier step fails, and any failed check fails the job. Bash pipefail
 preserves the runner's exit status while `tee` records its console transcript.
@@ -75,7 +75,11 @@ profile is Linux. Missing base R writes a failed `report.json` before returning
 exit status 1; no workload case runs without its witness.
 
 Boundary probes preserve the unsupported source forms: mixed-width LENGTH groups,
-grouped conditional DO, and sum statements. Runtime probes cover many-to-many
+grouped conditional DO, and sum writes to BY keys. The former sum-statement
+refusal source is preserved byte-for-byte as an additional positive case. It must
+match the same independent R witness, nine-row hand pin, CLI and emitted Python
+results. This promotes supported behavior while retaining eight refusal probes.
+Runtime probes cover many-to-many
 MERGE, character MERGE, unsorted MERGE input, CATX destination overflow, and an
 invalid numeric value. They require the expected failed exit, a refused receipt,
 and no published result or observed table. Two comparator controls change an
