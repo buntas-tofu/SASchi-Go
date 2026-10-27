@@ -5,6 +5,28 @@ SAS observation or production throughput claim. The existing fixture gates and
 their acceptance policies are unchanged. Run receipts, including failed attempts,
 are written to ignored telemetry directories.
 
+## Small checks in CI
+
+The existing Verification job runs both runners with `--sizes 1000` after the
+unchanged `verify_all.py` command. Each keeps its hand pin, edge cases and all
+refusal/comparator controls: 17 ledger checks and 21 character-workload checks.
+Both are mandatory steps. Each runs unless the workflow is cancelled, including
+after an earlier step fails, and any failed check fails the job. Bash pipefail
+preserves the runner's exit status while `tee` records its console transcript.
+
+The always-run `workload-diagnostics` artifact contains `telemetry/workloads/`,
+including reports, per-case receipts, CSV/JSON inputs and expected/observed data,
+process logs, metrics and the two console transcripts. The existing
+`verify-receipt` artifact is unchanged. Diagnostics are attempted even after
+failure or cancellation. Missing/failed R and comparison/refusal errors remain
+failures. RSS and elapsed time are recorded without performance thresholds;
+the existing worker timeout still bounds hung processes.
+
+Larger scales remain available through the standalone commands below. Workload
+checks strengthen the existing CI job without changing the 40 fixture gates,
+30 suites, synthesis or their execution order. `ALL VERIFIED` still refers to
+the registered golden-command checks; CI also requires both workload steps.
+
 ## Monthly usage ledger
 
 [The original program](monthly_ledger/job.sas) reads synthetic account readings,
@@ -114,6 +136,7 @@ Per-case R, CLI and emitted processes retain exit codes, elapsed time and peak
 RSS where available. Measurements include startup/I/O and are single local
 observations without a performance threshold. Comparisons between workloads
 must account for their different text widths, output multiplicity and serialized
-sizes; equal input row counts do not imply equal work. This runner remains
-standalone. Small generator, Python hand-pin and missing-R regressions run in
-the existing operations suite; no new fixture gate or CI workflow was added.
+sizes; equal input row counts do not imply equal work. The runner supports both
+the small CI profile and standalone scale tests. Small generator, Python hand-pin
+and missing-R regressions also run in the existing operations suite. No new
+fixture gate or CI workflow was added.
