@@ -81,6 +81,9 @@ VERIFIERS = [
     ("calendar", HERE / "examples" / "verify_calendar.py"),
     ("sum-statement", HERE / "examples" / "verify_sum_statement.py"),
     ("do-until", HERE / "examples" / "verify_do_until.py"),
+    ("division", HERE / "examples" / "verify_division.py"),
+    ("int", HERE / "examples" / "verify_int.py"),
+    ("do-while", HERE / "examples" / "verify_do_while.py"),
 ]
 
 # The translator suites, run as unittest modules. They carry the same weight as
@@ -121,6 +124,9 @@ SUITES = [
     ("suite-calendar", "saschi.test_calendar"),
     ("suite-sum-statement", "saschi.test_sum_statement"),
     ("suite-do-until", "saschi.test_do_until"),
+    ("suite-division", "saschi.test_division"),
+    ("suite-int", "saschi.test_int"),
+    ("suite-do-while", "saschi.test_do_while"),
 ]
 
 

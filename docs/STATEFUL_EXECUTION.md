@@ -611,7 +611,7 @@ step owns its state. IF/ELSE simple actions, assignments, sums, bounded PUT and
 OUTPUT are admitted in one loop level. Explicit OUTPUT anywhere suppresses the
 step's implicit output and captures the complete statically discovered schema.
 
-Nested/combined loops, DO WHILE, LEAVE/CONTINUE, declarations or input statements
+Nested/combined loops, LEAVE/CONTINUE, declarations or input statements
 inside the body and LAG/DIF queue scheduling inside UNTIL remain deferred. Numeric
 truth treats ordinary missing and zero as false; supported numeric comparisons
 use the existing missing ordering. DATA _NULL_ explicit OUTPUT remains deferred.
@@ -634,4 +634,77 @@ Roku and bound by source/stdout/complete-result hashes. Independent R parses eve
 statement, runs native repeat/break control, and matches6 records with their
 trailing separators, final state6 and6 iterations. This is the eighth external
 complete-program proof. No external corpus source is copied into this repository.
-Division, INT and pre-test DO WHILE remain the next planned milestone.
+Standalone DO WHILE and numeric composition are gated separately below.
+
+## Bounded division, safe INT and pre-test DO WHILE
+
+Status: DS-036/037/038 repository/base-R evidence for principal and maintainer
+review. No live-SAS validation or production-performance acceptance claim.
+
+Division admits finite binary64 numeric operands and results with magnitude at
+most2147483647, a nonzero denominator and an exactly representable quotient.
+Fractional operands and cancellation of odd factors are allowed:9/2 is4.5,
+.5/2 is.25 and6/3 is2. A rational reference checks the exactness of the native
+quotient. Rounded quotients such as1/3, missing/tagged, bool, character/structured
+values, nonfinite input, wider values and underflow loss refuse. These are tool
+profile boundaries. SAS missing propagation, division-by-zero notes and _ERROR_
+behavior are not emulated by this slice. The DIVIDE function remains unwired.
+
+INT admits finite numeric values with magnitude at most2147483647. Exact
+integers pass. Other values farther than2e-12 from every integer truncate toward
+zero:INT(-2.4) is-2. Nonintegral values within the conservative2e-12 band refuse,
+including the documented1e-12 fuzz zone. This keeps uncertain boundary behavior
+explicit; it does not substitute INTZ or claim full INT fuzz parity. Missing,
+tagged, bool, character/structured, nonfinite and wider inputs refuse.
+
+Numeric composition adds grouping, standard division precedence over binary
+plus/minus, signed numeric literals and left associativity. General unary
+operators and multiplication remain deferred. The source parser bounds arithmetic/grouping
+to32 levels. Steps using division/INT have a128-arithmetic/call-node policy in
+both compiler and runtime. Previously admitted plus/minus behavior stays intact.
+Static numeric descriptors and literal trees are checked even on empty/filtered
+input, skipped branches and zero-trip loops. Dynamic arguments remain lazy.
+Assignments, IF/WHERE predicates, numeric function arguments, sums and the
+existing counted/UNTIL loops can consume these checked numeric expressions.
+Character arguments inside numeric-returning calls remain outside this new
+numeric-tree profile. PUT_ALL and C++ retain their existing boundaries.
+
+DO WHILE tests its numeric predicate before the body. An initially false or
+ordinary-missing truth value executes zero bodies. Its plan carries exactly
+condition and body; no caller budget override is accepted. A fixed10000-body
+budget applies per invocation. The predicate is tested again after body10000:
+false succeeds, true refuses before body10001. _N_ advances per outer DATA row,
+not per loop body. Implicit retention and explicit resets follow the existing
+PDV rules. Both-branch/zero-trip schema and OUTPUT discovery remain static.
+Explicit OUTPUT anywhere suppresses the bottom-of-step implicit output.
+
+WHILE permits the same simple assignment, sum, IF/ELSE, bounded PUT and OUTPUT
+body actions as UNTIL. Nested/combined loops, LAG/DIF queue scheduling inside
+WHILE, declarations/input inside its body, LEAVE/CONTINUE and DATA _NULL_ explicit
+OUTPUT remain deferred. Budget/type/numeric failure publishes no accepted partial
+result or prior buffered log. Callback helpers do not roll back arbitrary caller
+side effects. Existing counted and UNTIL gates remain in place.
+
+Evidence: original division14 pins,1000 constructive R cases and31 shared
+refusals use native R division and exact hex-float decomposition, independent of
+Python Fraction arithmetic. INT15 pins,1000 constructive cases and21 refusals
+compare native R truncation outside the conservative band. WHILE4 pins and427
+independent R schedules cover zero trips, both directions and10000/10001 limits.
+The3 appended source suites add50 tests covering comparator/refusal controls,
+static/lazy validation, atomic failure and metadata. The existing wheel-install
+fixture separately verifies the installed composition.
+No runtime dependency was added. Older refused INT and standalone WHILE source
+examples are retained as positive value and bounded runtime-refusal checks.
+
+The entire unmodified external loops_while.sas file is read in place from Roku.
+Its source, stdout and complete result are hash-pinned. Independent R parses
+every statement and matches all11 records,1024 through1, their trailing spaces,
+final state0 and11 bodies. This is the ninth complete external-program proof.
+No external corpus source is copied into Go. Compile-only corpus counts remain
+separate from complete execution/comparison evidence.
+
+Primary specifications:
+- [SAS arithmetic operators](https://support.sas.com/documentation/cdl/en/lrcon/65287/HTML/default/p00iah2thp63bmn1lt20esag14lh.htm)
+- [SAS generated missing values](https://support.sas.com/documentation/cdl/en/lrcon/62955/HTML/default/a000989183.htm)
+- [SAS INT](https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/p1b1zd0wuyufp0n1jbqlr27p4eay.htm)
+- [SAS DO WHILE](https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000201927.htm)

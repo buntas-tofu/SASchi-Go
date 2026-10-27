@@ -33,10 +33,15 @@ Gate provenance, function by function:
   binary64 integers; fractional, missing, and zero-divisor inputs require review.
 - `examples/verify_calendar.py`  MDY/WEEKDAY for valid dates in1753..3999,
   with integral numeric arguments and explicit missing/error-state refusals.
+- `examples/verify_int.py`  bounded INT truncation outside a conservative
+  near-integer refusal band. Full SAS INT fuzz behavior is not claimed.
+- `examples/verify_division.py`  operator division with bounded numeric
+  operands and exact binary64 quotients; rounded/error-state cases refuse.
 """
 from __future__ import annotations
 
 from dataclasses import dataclass
+from sas_semantics import sas_divide, sas_int
 import math
 import re
 
@@ -61,6 +66,7 @@ GATE_SUBSTR = "examples/verify_substr.py"
 GATE_BITWISE = "examples/verify_bitwise.py"
 GATE_LAG_EXECUTION = "examples/verify_lag_execution.py"
 GATE_CALENDAR = "examples/verify_calendar.py"
+GATE_INT = "examples/verify_int.py"
 
 LAG_FUNCTIONS = {family + suffix: (family, depth)
                  for family in ("lag", "dif")
@@ -98,6 +104,7 @@ FUNCTIONS: dict[str, FunctionSpec] = {
         FunctionSpec("catx", "character", GATE_CONCAT, 2, 33),
         FunctionSpec("count", "number", GATE_COUNT, 2, 3),
         FunctionSpec("mod", "number", GATE_MOD, 2, 2),
+        FunctionSpec("int", "number", GATE_INT, 1, 1),
         *(FunctionSpec(name, "number", GATE_CALENDAR, arity, arity)
           for name, arity in SAS_CALENDAR_ARITY.items()),
         *(FunctionSpec(name, "number", GATE_BITWISE, arity, arity)
@@ -162,6 +169,8 @@ def apply(name: str, values: list):
         return sas_count(*values)
     if name == "mod":
         return sas_mod(*values)
+    if name == 'int':
+        return sas_int(*values)
     if name in SAS_CALENDAR_ARITY:
         return sas_calendar(name, *values)
     if name in ("max", "min"):
@@ -375,14 +384,58 @@ def validate_sum_expression(expr, schema):
             if kind == 'missing' and node.get('value') is not None:
                 raise ValueError('sum/UNTIL ordinary missing requires None')
             sas_sum_statement(None, node.get('value'))
-        if kind == 'arithmetic' and node.get('op') not in ('+', '-'):
-            raise ValueError('sum/UNTIL supports plus/minus arithmetic only')
+        if kind == 'arithmetic' and node.get('op') not in ('+', '-', '/'):
+            raise ValueError('sum/UNTIL supports gated arithmetic only')
         if kind == 'call':
             spec = FUNCTIONS[node['name']]
             args = node.get('args')
             if (not isinstance(args, list) or len(args) < spec.min_args
                     or spec.max_args >= 0 and len(args) > spec.max_args):
                 raise ValueError('sum/UNTIL requires exact supported call arity')
+
+
+def _constant_numeric(expr):
+    """Literal-only numeric trees; dynamic references remain lazy."""
+    kind = expr.get('kind')
+    if kind in ('number', 'missing', 'tagged_missing'):
+        return True, expr.get('value')
+    if kind == 'arithmetic':
+        a, left = _constant_numeric(expr['left'])
+        b, right = _constant_numeric(expr['right'])
+        if not (a and b): return False, None
+        if expr['op'] == '/': return True, sas_divide(left, right)
+        if left is None or right is None: return True, None
+        return True, left + right if expr['op'] == '+' else left - right
+    if kind == 'call':
+        values = [_constant_numeric(arg) for arg in expr['args']]
+        if all(known for known, _ in values):
+            return True, apply(expr['name'], [value for _, value in values])
+    return False, None
+
+
+def validate_numeric_composition(value, schema):
+    """New division/INT descriptors and constants, even on zero-trip input."""
+    for node, _ in expression_nodes(value):
+        if node.get('kind') == 'arithmetic':
+            if node.get('op') not in ('+', '-', '/'):
+                raise ValueError('unsupported arithmetic plan operator')
+            if node['op'] != '/': continue
+            for side in ('left', 'right'):
+                validate_sum_expression(node[side], schema)
+                known, constant = _constant_numeric(node[side])
+                if known:
+                    from sas_semantics import sas_bounded_numeric
+                    sas_bounded_numeric(constant)
+                    if side == 'right' and constant == 0:
+                        raise ValueError('division by zero requires error-state review')
+            _constant_numeric(node)
+        elif node.get('kind') == 'call' and node.get('name') == 'int':
+            args = node.get('args')
+            if not isinstance(args, list) or len(args) != 1:
+                raise ValueError('INT requires one numeric expression')
+            validate_sum_expression(args[0], schema)
+            known, constant = _constant_numeric(args[0])
+            if known: sas_int(constant)
 
 
 def validate_substr_calls(value, schema):

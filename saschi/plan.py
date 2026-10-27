@@ -88,8 +88,8 @@ def atom(text):
     return None
 
 
-def _arithmetic_positions(text):
-    """Offsets of depth-0, unquoted + and - in an expression."""
+def _arithmetic_positions(text, operators='+-'):
+    """Binary depth-zero offsets, excluding numeric exponent/unary signs."""
     depth, quote, positions = 0, "", []
     for index, char in enumerate(text):
         if quote:
@@ -103,7 +103,12 @@ def _arithmetic_positions(text):
             depth += 1
         elif char == ")":
             depth -= 1
-        elif char in "+-" and depth == 0:
+        elif char in operators and depth == 0:
+            before = text[:index].rstrip()
+            if not before or before[-1] in '+-/*(,':
+                continue
+            if char in '+-' and re.search(r'(?<![\w.])(?:\d+(?:\.\d*)?|\.\d+)[eE]$', before):
+                continue
             positions.append(index)
     return positions
 
@@ -231,8 +236,10 @@ def _string_nodes(value):
             yield from _string_nodes(child)
 
 
-def expression(text):
+def expression(text, _depth=0):
     text = text.strip()
+    if _depth > 32:
+        return None
     parts = _concat_parts(text)
     if parts is not None:
         if not 2 <= len(parts) <= 32:
@@ -244,20 +251,34 @@ def expression(text):
     value = operand(text)
     if value is not None:
         return value
-    for position in _arithmetic_positions(text):
-        left, right = operand(text[:position]), operand(text[position + 1:])
-        if left is not None and right is not None:
-            return {'kind': 'arithmetic', 'left': left, 'op': text[position], 'right': right}
+    if text.startswith('(') and text.endswith(')'):
+        depth, quote, enclosed = 0, '', True
+        for index, char in enumerate(text):
+            if quote:
+                if char == quote: quote = ''
+            elif char in "'\"": quote = char
+            elif char == '(': depth += 1
+            elif char == ')':
+                depth -= 1
+                if depth == 0 and index != len(text) - 1: enclosed = False
+        if enclosed and depth == 0 and not quote:
+            return expression(text[1:-1], _depth + 1)
+    for operators in ('+-', '/'):
+        for position in reversed(_arithmetic_positions(text, operators)):
+            left = expression(text[:position], _depth + 1)
+            right = expression(text[position + 1:], _depth + 1)
+            if left is not None and right is not None:
+                return {'kind': 'arithmetic', 'left': left, 'op': text[position], 'right': right}
     return None
 
 
 def predicate(text):
-    value = operand(text)
+    value = expression(text)
     if value is not None:
         return {'left': value, 'op': 'truth'}
     match = re.fullmatch(r'(.+?)\s*(<=|>=|\^=|~=|<>|=|<|>|\beq\b|\bne\b|\blt\b|\bgt\b|\ble\b|\bge\b)\s*(.+)', text, re.I)
-    if match and operand(match[1]) is not None and operand(match[3]) is not None:
-        return {'left': operand(match[1]), 'op': match[2].lower(), 'right': operand(match[3])}
+    if match and expression(match[1]) is not None and expression(match[3]) is not None:
+        return {'left': expression(match[1]), 'op': match[2].lower(), 'right': expression(match[3])}
     return None
 
 
@@ -442,8 +463,8 @@ def compile_plan(source: str) -> Plan:
     def finish():
         nonlocal active_do
         if active_do is not None:
-            family = 'do-until' if active_do.kind == 'do_until' else 'do-counted'
-            label = 'DO UNTIL' if active_do.kind == 'do_until' else 'counted DO'
+            family = {'do_until': 'do-until', 'do_while': 'do-while'}.get(active_do.kind, 'do-counted')
+            label = {'do_until': 'DO UNTIL', 'do_while': 'DO WHILE'}.get(active_do.kind, 'counted DO')
             plan.tickets.append(Ticket(active_do.line, 'DO', family, label + ' requires a closing END before the step ends'))
             active_do = None
         if step and any(o.kind == 'put_all' for o in walk_operations(step.operations)):
@@ -460,10 +481,11 @@ def compile_plan(source: str) -> Plan:
                         plan.tickets.append(Ticket(op.line, 'SUM', 'sum-statement', 'sum statements require DATA execution and cannot change BY keys'))
                     step.retained.setdefault(op.args['name'], {'kind': 'number', 'value': 0.0})
                     plan.matched.append(('sum-statement', 'DS-034', op.line))
-                if op.kind == 'do_until':
+                if op.kind in ('do_until', 'do_while'):
                     if any(node.get('kind') == 'call' and node.get('name') in LAG_FUNCTIONS
                            for node, _ in expression_nodes(op.args)):
-                        plan.tickets.append(Ticket(op.line, 'LAG/DIF', 'do-until', 'DO UNTIL queue scheduling requires review'))
+                        label = 'DO UNTIL' if op.kind == 'do_until' else 'DO WHILE'
+                        plan.tickets.append(Ticket(op.line, 'LAG/DIF', op.kind.replace('_', '-'), label + ' queue scheduling requires review'))
             for op in flat:
                 payload = op.args.get('value') if op.kind == 'assign' else op.args.get('condition')
                 nodes = list(_string_nodes(payload))
@@ -480,10 +502,10 @@ def compile_plan(source: str) -> Plan:
                 plan.matched.append(('concat-catx', 'DS-029', step.line))
             if any(node.get('name') == 'catx' for node in where_nodes):
                 plan.tickets.append(Ticket(step.line, 'CATX', 'concat-catx', 'CATX in WHERE requires temporary-buffer review'))
-            if (step.name == '_null_' and any(o.kind in ('do_counted', 'do_until') for o in flat)
+            if (step.name == '_null_' and any(o.kind in ('do_counted', 'do_until', 'do_while') for o in flat)
                     and any(o.kind == 'output' for o in flat)):
-                family = 'do-until' if any(o.kind == 'do_until' for o in flat) else 'do-counted'
-                label = 'DO UNTIL' if family == 'do-until' else 'counted DO'
+                family = 'do-until' if any(o.kind == 'do_until' for o in flat) else 'do-while' if any(o.kind == 'do_while' for o in flat) else 'do-counted'
+                label = {'do-until': 'DO UNTIL', 'do-while': 'DO WHILE'}.get(family, 'counted DO')
                 plan.tickets.append(Ticket(step.line, 'OUTPUT', family, 'explicit OUTPUT in DATA _NULL_ ' + label + ' steps is deferred'))
             for op in flat:
                 if op.kind == 'output' and op.args['target'] not in (None, step.name):
@@ -553,15 +575,16 @@ def compile_plan(source: str) -> Plan:
             reject(st, construct, "statement is outside a supported step")
             continue
         if re.match(r'^do\b(?!\s*=)', text, re.I):
-            until = re.fullmatch(r'do\s+until\s*\((.*)\)', text, re.I | re.S)
+            until = re.fullmatch(r'do\s+(until|while)\s*\((.*)\)', text, re.I | re.S)
             if until and active_do is None and context == 'data' and step.kind == 'data':
-                test = predicate(until[1])
+                name = until[1].lower()
+                test = predicate(until[2])
                 if test is None:
-                    reject(st, 'do-until', 'DO UNTIL requires a supported predicate')
+                    reject(st, 'do-' + name, 'DO ' + name.upper() + ' requires a supported predicate')
                 else:
-                    active_do = Operation('do_until', st.line, {'condition': test, 'body': []})
+                    active_do = Operation('do_' + name, st.line, {'condition': test, 'body': []})
                     step.operations.append(active_do)
-                    plan.matched.append(('do-until', 'DS-035', st.line))
+                    plan.matched.append(('do-' + name, 'DS-035' if name == 'until' else 'DS-038', st.line))
                 continue
             match = re.fullmatch(r'do\s+(' + NAME + r')\s*=\s*([+-]?[0-9]+)\s+to\s+([+-]?[0-9]+)(?:\s+by\s+([+-]?[0-9]+))?', text, re.I | re.ASCII)
             if active_do is not None:
@@ -591,8 +614,8 @@ def compile_plan(source: str) -> Plan:
                 active_do = None
             continue
         if active_do is not None:
-            family = 'do-until' if active_do.kind == 'do_until' else 'do-counted'
-            label = 'DO UNTIL' if family == 'do-until' else 'counted DO'
+            family = {'do_until': 'do-until', 'do_while': 'do-while'}.get(active_do.kind, 'do-counted')
+            label = {'do-until': 'DO UNTIL', 'do-while': 'DO WHILE'}.get(family, 'counted DO')
             target = re.match(r'(' + NAME + r')\s*(?:=|\+(?!=))', text)
             if target and active_do.kind == 'do_counted' and target[1].lower() == active_do.args['index']:
                 reject(st, 'do-counted', 'assignment to the counted DO index inside its body is deferred')
@@ -717,8 +740,8 @@ def compile_plan(source: str) -> Plan:
             continue
         if re.match(r'^if\b', text, re.I):
             if active_do is not None:
-                family = 'do-until' if active_do.kind == 'do_until' else 'do-counted'
-                label = 'DO UNTIL' if family == 'do-until' else 'counted DO'
+                family = {'do_until': 'do-until', 'do_while': 'do-while'}.get(active_do.kind, 'do-counted')
+                label = {'do-until': 'DO UNTIL', 'do-while': 'DO WHILE'}.get(family, 'counted DO')
                 reject(st, family, 'subsetting IF inside ' + label + ' is deferred')
                 continue
             condition = predicate(re.sub(r'^if\s*', '', text, flags=re.I))
@@ -826,4 +849,19 @@ def compile_plan(source: str) -> Plan:
     for name in ('mdy', 'weekday'):
         plan.matched.extend(('calendar', 'DS-033', line or 1)
                             for line in function_call_lines(plan.to_dict(), name))
+    numeric_nodes = [(node, line) for node, line in expression_nodes(plan.to_dict())
+                     if node.get('kind') == 'arithmetic' and node.get('op') == '/'
+                     or node.get('kind') == 'call' and node.get('name') == 'int']
+    for node, line in numeric_nodes:
+        family, rule = ('int', 'DS-037') if node['kind'] == 'call' else ('division', 'DS-036')
+        plan.matched.append((family, rule, line or 1))
+    if numeric_nodes:
+        for compiled in plan.steps:
+            nodes = [node for node, _ in expression_nodes(asdict(compiled))]
+            if not any(node.get('kind') == 'arithmetic' and node.get('op') == '/'
+                       or node.get('kind') == 'call' and node.get('name') == 'int' for node in nodes):
+                continue
+            count = sum(node.get('kind') in ('arithmetic', 'call') for node in nodes)
+            if count > 128:
+                plan.tickets.append(Ticket(compiled.line, 'expression', 'division', 'numeric composition exceeds the128-node step policy'))
     return plan

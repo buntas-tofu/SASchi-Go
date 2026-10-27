@@ -8,8 +8,8 @@ from sas_semantics import sas_round, sas_merge_by, sas_put_literals, sas_put_cha
 from .functions import apply as apply_function, assign_spec, character_width, validate_reverse_calls, validate_string_expressions, expression_nodes, validate_substr_calls, substr_context_errors, validate_bitwise_calls, SAS_BITWISE_ARITY, LAG_FUNCTIONS, validate_lag_calls
 from .operations import walk_operations as operations
 from .values import normalize_catalog, column_type, coerce, missing, order
-from .functions import validate_calendar_calls, validate_sum_expression
-from sas_semantics import sas_sum_statement, sas_do_until
+from .functions import validate_calendar_calls, validate_sum_expression, validate_numeric_composition
+from sas_semantics import sas_sum_statement, sas_do_until, sas_do_while, sas_divide
 
 
 def evaluate(expr, row, schema=None):
@@ -46,6 +46,8 @@ def number(expr, row, schema=None):
         return sas_concat(values)
     if kind == 'arithmetic':
         left, right = number(expr['left'], row, schema), number(expr['right'], row, schema)
+        if expr['op'] == '/':
+            return sas_divide(left, right)
         if isinstance(left, str) or isinstance(right, str):
             raise ValueError('implicit character to numeric conversion is unsupported')
         if missing(left) or missing(right):
@@ -135,15 +137,20 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
     tables, logs = normalize_catalog({} if catalog is None else catalog), []
     for step in plan['steps']:
         inputs, keys, ops = step['inputs'], step['by'], step['operations']
+        nodes = [node for node, _ in expression_nodes(step)]
+        if any(node.get('kind') == 'arithmetic' and node.get('op') == '/'
+               or node.get('kind') == 'call' and node.get('name') == 'int' for node in nodes):
+            if sum(node.get('kind') in ('arithmetic', 'call') for node in nodes) > 128:
+                raise ValueError('numeric composition exceeds the128-node step policy')
         lag_queues = {}  # Per-step/run state, keyed by structural execution position.
         lag_present = any(node.get('kind') == 'call' and node.get('name') in LAG_FUNCTIONS
                           for node, _ in expression_nodes(step))
         if lag_present and step['kind'] not in ('data', 'merge'):
             raise ValueError('LAG/DIF requires a DATA-step execution scope')
         flat = list(operations(ops))
-        if (step['name'] == '_null_' and any(op['kind'] in ('do_counted', 'do_until') for op in flat)
+        if (step['name'] == '_null_' and any(op['kind'] in ('do_counted', 'do_until', 'do_while') for op in flat)
                 and any(op['kind'] == 'output' for op in flat)):
-            label = 'DO UNTIL' if any(op['kind'] == 'do_until' for op in flat) else 'counted DO'
+            label = 'DO UNTIL' if any(op['kind'] == 'do_until' for op in flat) else 'DO WHILE' if any(op['kind'] == 'do_while' for op in flat) else 'counted DO'
             raise ValueError('explicit OUTPUT in DATA _NULL_ ' + label + ' steps is deferred')
         put_all = any(op['kind'] == 'put_all' for op in flat)
         if put_all and lag_present:
@@ -217,6 +224,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
             validate_substr_calls(where, where_schema)
             validate_bitwise_calls(where, where_schema)
             validate_calendar_calls(where, where_schema)
+            validate_numeric_composition(where, where_schema)
             validate_lag_calls(where, where_schema)
             rows = [r for r in rows if condition(where, r, where_schema)]
         if keys and any(key(a) > key(b) for a, b in zip(rows, rows[1:])):
@@ -313,21 +321,22 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                         raise ValueError('counted DO body operation is outside the bounded contract')
                     if child['kind'] == 'output' and step['name'] == '_null_':
                         raise ValueError('explicit OUTPUT in DATA _NULL_ counted DO is deferred')
-            elif kind == 'do_until':
+            elif kind in ('do_until', 'do_while'):
+                label = 'DO UNTIL' if kind == 'do_until' else 'DO WHILE'
                 if (set(args) != {'condition', 'body'} or not isinstance(args['body'], list)
                         or step['kind'] != 'data'):
-                    raise ValueError('DO UNTIL requires condition/body only in a DATA step')
+                    raise ValueError(label + ' requires condition/body only in a DATA step')
                 test = args['condition']
                 comparisons = {'=', 'eq', '^=', '~=', '<>', 'ne', '<', 'lt', '>', 'gt', '<=', 'le', '>=', 'ge'}
                 if (not isinstance(test, dict) or test.get('op') not in comparisons | {'truth'} or
                         set(test) != ({'left', 'op'} if test.get('op') == 'truth' else {'left', 'op', 'right'})):
-                    raise ValueError('DO UNTIL requires a supported numeric predicate')
+                    raise ValueError(label + ' requires a supported numeric predicate')
                 allowed = {'assign', 'round', 'sum_statement', 'if', 'put', 'put_literal', 'put_character_list', 'put_numeric_list', 'output'}
                 if any(child['kind'] not in allowed for child in operations(args['body'])):
-                    raise ValueError('DO UNTIL body requires single-level simple actions')
+                    raise ValueError(label + ' body requires single-level simple actions')
                 if any(node.get('kind') == 'call' and node.get('name') in LAG_FUNCTIONS
                        for node, _ in expression_nodes(args)):
-                    raise ValueError('DO UNTIL queue scheduling requires review')
+                    raise ValueError(label + ' queue scheduling requires review')
                 for value in expressions(test):
                     add_reference(value)
             elif kind == 'put_literal':
@@ -387,11 +396,12 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
         for op in flat:
             validate_reverse_calls(op['args'], schema)
             validate_calendar_calls(op['args'], schema)
+            validate_numeric_composition(op['args'], schema)
             if op['kind'] == 'sum_statement':
                 validate_sum_expression(op['args']['value'], schema)
                 if column_type(schema[op['args']['name']]) != 'number':
                     raise ValueError('sum statement requires a numeric target')
-            elif op['kind'] == 'do_until':
+            elif op['kind'] in ('do_until', 'do_while'):
                 for side in ('left', 'right'):
                     if side in op['args']['condition']:
                         validate_sum_expression(op['args']['condition'][side], schema)
@@ -467,7 +477,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                 kind = expr['kind']
                 if kind == 'arithmetic':
                     a, b = sum_value(expr['left']), sum_value(expr['right'])
-                    value = None if a is None or b is None else sas_sum_statement(a, b if expr['op'] == '+' else -b)
+                    value = sas_divide(a, b) if expr['op'] == '/' else None if a is None or b is None else sas_sum_statement(a, b if expr['op'] == '+' else -b)
                 elif kind == 'call':
                     value = apply_function(expr['name'], [sum_value(arg) for arg in expr['args']])
                 else:
@@ -503,7 +513,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                         for child_index, child in enumerate(args['body']):
                             perform(child, path + ('body', child_index))
                     row[args['index']] = float(final)
-                elif kind == 'do_until':
+                elif kind in ('do_until', 'do_while'):
                     def body():
                         for child_index, child in enumerate(args['body']):
                             perform(child, path + ('body', child_index))
@@ -512,7 +522,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                         resolved = {side: {'kind': 'number', 'value': sum_value(test[side])}
                                     for side in ('left', 'right') if side in test}
                         return condition({'op': test['op'], **resolved}, row, schema)
-                    sas_do_until(body, stop)
+                    (sas_do_until if kind == 'do_until' else sas_do_while)(body, stop)
                 elif kind == 'if':
                     if condition(args['condition'], row, schema):
                         return perform(args['operation'], path + ('operation',))
