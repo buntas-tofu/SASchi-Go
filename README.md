@@ -67,10 +67,13 @@ fixed expected output and base-R evidence. Special missings retain their tags.
   settings, forbidden patterns, and validation tests.
 - [docs/capability-manifest.json](docs/capability-manifest.json) : the coverage manifest. Enumerated entries of
   the SAS reference documents each carry one disposition (GATED, RULE,
-  POLICY, HUMAN-REVIEW, DOCTRINE, OUT-OF-SCOPE, or UNASSESSED) with the gate
-  or rule that proves it. The denominator is the published reference listing,
-  not an estimate, and [examples/verify_capability.py](examples/verify_capability.py) refuses a manifest
-  whose claims do not resolve.
+  POLICY, HUMAN-REVIEW, DOCTRINE, OUT-OF-SCOPE, or UNASSESSED). GATED entries
+  declare bounded reference-fixture or source-execution evidence; a guidance rule
+  alone does not prove execution. Only two reference areas are enumerated, so
+  the catalogue supplies no whole-SAS coverage percentage.
+  [examples/verify_capability.py](examples/verify_capability.py) checks evidence
+  scopes, registrations and rollups. [The coverage backlog](docs/COVERAGE_BACKLOG.md)
+  reconciles the current gates and prioritizes the next composition proofs.
 - [docs/USER_GUIDE.md](docs/USER_GUIDE.md) : the user guide: running the gates, reading the
   receipts, understanding the equivalence classes, and verifying a new
   construct family.

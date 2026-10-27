@@ -4,7 +4,7 @@
 The manifest is a coverage claim, and a coverage claim that nothing checks is a
 brochure. This gate is what makes it a claim instead of prose.
 
-It asserts seven things, all of them mechanical:
+It asserts nine things, all of them mechanical:
 
 1. The manifest exists and parses.
 2. Every entry names a document declared in the reference frame.
@@ -16,7 +16,10 @@ It asserts seven things, all of them mechanical:
    rulebook. A rule reference that does not resolve is a dangling claim.
 6. Every entry's document count matches the document's declared universe. A
    document that declares 108 entries and carries 90 has lost 18 silently.
-7. No entry is missing a required field.
+7. No entry is missing a required field or duplicates a document/name pair.
+8. GATED evidence declares a bounded scope and separates reference fixtures
+   from source execution. Related evidence cannot satisfy a GATED claim.
+9. Recorded rollups agree with the entries, including unassessed entries.
 
 Standard library only, and it reads files by path relative to its own location,
 so a copy of the tree is checked as a copy. Nothing here imports the package.
@@ -90,10 +93,15 @@ def main() -> int:
         problems.append("no disposition vocabulary declared")
 
     # 7. required fields
+    seen = set()
     for e in entries:
         for f in REQUIRED_FIELDS:
             if not e.get(f):
                 problems.append(f"entry {e.get('entry', '?')!r} is missing required field {f!r}")
+        key = (e.get('document'), e.get('entry'))
+        if key in seen:
+            problems.append(f"duplicate document/entry pair {key!r}")
+        seen.add(key)
 
     # 2 and 3
     for e in entries:
@@ -130,20 +138,54 @@ def main() -> int:
             if g not in gates:
                 problems.append(f"GATED entry {e['entry']!r} names gate {g!r}, which is not registered in verify_all.py")
 
+        # A registered name proves existence, not the scope of the claim.
+        evidence = e.get('gate_evidence') or []
+        covered = set()
+        for item in evidence:
+            if item.get('level') not in {'reference-fixture', 'source-execution'}:
+                problems.append(f"GATED entry {e['entry']!r} has an invalid evidence level")
+            if not isinstance(item.get('scope'), str) or not item['scope'].strip():
+                problems.append(f"GATED entry {e['entry']!r} lacks an evidence scope")
+            if not item.get('gates'):
+                problems.append(f"GATED entry {e['entry']!r} has evidence without gates")
+            covered.update(item.get('gates') or [])
+        if not evidence or covered != set(named):
+            problems.append(f"GATED entry {e['entry']!r} evidence does not cover exactly its named gates")
+
+    # Related evidence remains resolvable, but cannot promote a disposition.
+    for e in entries:
+        for g in e.get('related_evidence', {}).get('gates', []):
+            if g not in gates:
+                problems.append(f"entry {e['entry']!r} has unregistered related gate {g!r}")
+
     # 5. RULE entries name rule ids that resolve
     ids = rulebook_ids()
     if not ids:
         problems.append("could not read any rule ids from the shipped rulebook")
     for e in entries:
-        if e.get("disposition") != "RULE":
-            continue
         named = e.get("rule_ids") or []
-        if not named:
+        if e.get("disposition") == "RULE" and not named:
             problems.append(f"RULE entry {e['entry']!r} names no rule id")
             continue
         for rid in named:
             if rid not in ids:
-                problems.append(f"RULE entry {e['entry']!r} names rule {rid!r}, which is not in the shipped rulebook")
+                problems.append(f"entry {e['entry']!r} names rule {rid!r}, which is not in the shipped rulebook")
+
+    # 9. Materialized summary counts must be derived from the same entries.
+    fields = {'gated': 'GATED', 'rule': 'RULE', 'human_review': 'HUMAN-REVIEW',
+              'out_of_scope': 'OUT-OF-SCOPE', 'unassessed': 'UNASSESSED'}
+    for did, document in documents.items():
+        if document.get('universe') is None:
+            continue
+        subset = [e for e in entries if e.get('document') == did]
+        expected = {field: sum(e.get('disposition') == label for e in subset)
+                    for field, label in fields.items()}
+        expected.update(universe=len(subset), assessed=sum(
+            e.get('disposition') != 'UNASSESSED' for e in subset))
+        actual = man.get('rollup', {}).get(did, {})
+        for field, count in expected.items():
+            if actual.get(field) != count:
+                problems.append(f"document {did!r} rollup {field!r}: expected {count}, got {actual.get(field)!r}")
 
     if problems:
         print(f"FAIL: {len(problems)} manifest problem(s)")
