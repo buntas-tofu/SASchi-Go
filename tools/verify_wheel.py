@@ -87,6 +87,13 @@ exec(over.code, namespace)
 assert namespace['result'] == {'datasets': {'d': {
     'schema': {'x': 'number', 'y': 'number', 'n': 'number'},
     'rows': [{'x': 1., 'y': 2., 'n': 3.}]}}, 'log': []}
+nested = translate('data d; n=2; total=0; do i=1 to n; do j=i to n; total=total+j; end; end; run;')
+assert not nested.blocked, nested.tickets
+namespace = {}
+exec(nested.code, namespace)
+assert namespace['result'] == {'datasets': {'d': {
+    'schema': {'n': 'number', 'total': 'number', 'i': 'number', 'j': 'number'},
+    'rows': [{'n': 2., 'total': 5., 'i': 3., 'j': 3.}]}}, 'log': []}
 print('VERIFIED: isolated installed wheel, canonical rulebook, all web assets, CLI entry point, MOD-to-PUT output, calendar, sum/UNTIL and division/INT/WHILE')
 '''
 

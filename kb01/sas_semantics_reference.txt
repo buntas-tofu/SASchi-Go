@@ -2016,6 +2016,25 @@ def sas_do_counted(start, stop, by=1):
     return [start + trip * by for trip in range(count)], start + count * by
 
 
+def sas_counted_control(value):
+    """DS-041: exact finite integer controls, independently gated in base R."""
+    if (type(value) not in (int, float) or abs(value) > 2147483647
+            or not math.isfinite(value) or int(value) != value):
+        raise ValueError('bounded counted DO controls require finite integers within2147483647')
+    return int(value)
+
+
+def sas_counted_capture(start, stop, by, spent):
+    """Capture one invocation and reserve its trips from a per-row work budget."""
+    if type(spent) is not int or not 0 <= spent <= 10000:
+        raise ValueError('bounded counted DO work counter is invalid')
+    controls = tuple(sas_counted_control(v) for v in (start, stop, by))
+    values, final = sas_do_counted(*controls)
+    if spent + len(values) > 10000:
+        raise ValueError('bounded counted DO exceeds10000 total iterations per DATA row')
+    return values, final, spent + len(values)
+
+
 # DS-028: single-byte fixed-character reversal, independently gated in base R.
 def sas_reverse(value):
     """Reverse every byte-position, including blanks, in the bounded ASCII slice."""

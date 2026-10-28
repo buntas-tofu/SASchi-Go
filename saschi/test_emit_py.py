@@ -95,7 +95,6 @@ class BlockedProgramTests(unittest.TestCase):
 
     UNSUPPORTED = {
         "if/do": "data _null_; x=1; if 0 then do; x=2; end; put x=; run;",
-        "loop": "data _null_; do i=1 to stop; x=i; end; run;",
         "macro definition": "%macro m; %mend;",
         "input declaration": "data d; infile 'x'; input a b; run;",
     }
@@ -109,6 +108,20 @@ class BlockedProgramTests(unittest.TestCase):
                 with self.assertRaises(RuntimeError) as caught:
                     exec(compile(t.code, "blocked.py", "exec"), {})
                 self.assertIn("blocked translation", str(caught.exception))
+
+    def test_former_variable_loop_refusal_remains_atomic_for_missing_control(self):
+        source = "data _null_; do i=1 to stop; x=i; end; run;"
+        translated = translate(source)
+        self.assertFalse(translated.blocked, translated.tickets)
+        namespace = {}; printed = io.StringIO()
+        with contextlib.redirect_stdout(printed), self.assertRaisesRegex(ValueError, 'counted DO controls'):
+            exec(translated.code, namespace)
+        self.assertNotIn('result', namespace)
+        self.assertEqual(printed.getvalue(), '')
+        accepted = translate('data d; stop=2; do i=1 to stop; x=i; end; run;')
+        exec(accepted.code, namespace)
+        self.assertEqual(namespace['result']['datasets']['d']['rows'],
+                         [{'stop': 2., 'i': 3., 'x': 2.}])
 
     def test_a_blocked_unit_prints_nothing(self):
         t = translate(self.UNSUPPORTED["if/do"])

@@ -185,8 +185,13 @@ class OperationTraversalTests(unittest.TestCase):
         self.assertEqual([op.line for op in compiled], [2, 3, 4, 5])
         self.assertEqual([asdict(op) for op in compiled], serialized)
         self.assertEqual([root, tail], original)
-        # An analysis walk of nested shapes does not admit nested SAS control.
-        self.assertTrue(compile_plan('data d; do i=1 to 2; do j=1 to 2; output; end; end; run;').blocked)
+        # DS-041 promotes this exact former nested-control refusal.
+        from .runtime import run_plan
+        nested = compile_plan('data d; do i=1 to 2; do j=1 to 2; output; end; end; run;')
+        self.assertFalse(nested.blocked, nested.tickets)
+        self.assertEqual(run_plan(nested.to_dict())['datasets']['d'],
+                         {'schema': {'i': 'number', 'j': 'number'},
+                          'rows': [{'i': i, 'j': j} for i in (1., 2.) for j in (1., 2.)]})
 
     def test_output_target_tickets_keep_source_order_in_skipped_bodies(self):
         source = ('data d;\nif 0 then output first;\ndo i=2 to 1;\n'

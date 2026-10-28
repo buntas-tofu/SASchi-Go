@@ -12,6 +12,8 @@ from .functions import validate_calendar_calls, validate_sum_expression, validat
 from sas_semantics import sas_sum_statement, sas_do_until, sas_do_while, sas_divide
 from sas_semantics import sas_numeric_array_value, sas_numeric_array_index, sas_do_over
 from .arrays import validate_step as validate_array_step, contains_array, value as array_value
+from .counted import validate_step as validate_counted_step, evaluate_control
+from sas_semantics import sas_counted_capture
 
 
 def evaluate(expr, row, schema=None, arrays=None, current=None):
@@ -141,6 +143,9 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
     tables, logs = normalize_catalog({} if catalog is None else catalog), []
     for step in plan['steps']:
         inputs, keys, ops = step['inputs'], step['by'], step['operations']
+        bounded_counted = validate_counted_step(step)
+        if bounded_counted and plan['version'] != 2:
+            raise ValueError('bounded counted loops require a version2 plan')
         arrays = validate_array_step(step)
         if arrays and plan['version'] != 2:
             raise ValueError('numeric arrays require a version2 DATA plan')
@@ -320,17 +325,26 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
             elif kind == 'do_over':
                 pass  # Independent array validation checks shape, binding and body.
             elif kind == 'do_counted':
-                if set(args) != {'index', 'start', 'stop', 'by', 'body'}:
+                bounded = args.get('profile') == 'bounded'
+                expected = {'index', 'start', 'stop', 'by', 'body'} | ({'profile'} if bounded else set())
+                if set(args) != expected:
                     raise ValueError('counted DO has unexpected plan arguments')
                 name = args['index']
                 if (not isinstance(name, str) or not re.fullmatch(r'[a-z_][a-z0-9_]{0,31}', name)
                         or name in ('_n_', '_error_', '_infile_', '_file_', '_ods_', '_page_', '_blankpage_')
                         or step['kind'] != 'data'):
                     raise ValueError('counted DO requires a numeric DATA-step index')
-                sas_do_counted(args['start'], args['stop'], args['by'])
+                if not bounded:
+                    sas_do_counted(args['start'], args['stop'], args['by'])
+                else:
+                    for key in ('start', 'stop', 'by'):
+                        for value in expressions(args[key]):
+                            add_reference(value)
                 if name not in schema or column_type(schema[name]) != 'number':
                     raise ValueError('counted DO index requires a preceding numeric declaration')
                 allowed = {'assign', 'array_set', 'round', 'sum_statement', 'if', 'put', 'put_literal', 'put_character_list', 'put_numeric_list', 'output'}
+                if bounded:
+                    allowed |= {'declare', 'do_counted'}
                 for child in operations(args['body']):
                     if (child['kind'] not in allowed or
                             child['kind'] in ('assign', 'round', 'sum_statement') and child['args']['name'] == name):
@@ -410,6 +424,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
             else:
                 raise ValueError(f'unsupported operation: {kind}')
         validate_array_step(step, schema)
+        validate_counted_step(step, schema)
         for op in flat:
             validate_reverse_calls(op['args'], schema)
             validate_calendar_calls(op['args'], schema)
@@ -492,6 +507,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                 output.append({n: deepcopy(row[n]) for n in schema})
 
             current = {}  # Internal per-row DO OVER bindings; never part of schema.
+            counted_spent = 0  # Shared by A2 loops in this DATA iteration only.
 
             def sum_value(expr):
                 """Check every numeric operand before arithmetic can hide a tag/overflow."""
@@ -509,6 +525,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                 return value
 
             def perform(op, path):
+                nonlocal counted_spent
                 args, kind = op['args'], op['kind']
                 if kind == 'assign':
                     expression = args['value']
@@ -559,7 +576,14 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                     finally:
                         current.pop(name, None)
                 elif kind == 'do_counted':
-                    values, final = sas_do_counted(args['start'], args['stop'], args['by'])
+                    if args.get('profile') == 'bounded':
+                        try:
+                            controls = [evaluate_control(args[k], row) for k in ('start', 'stop', 'by')]
+                            values, final, counted_spent = sas_counted_capture(*controls, counted_spent)
+                        except ValueError as exc:
+                            raise ValueError(f"SAS line {op['line']}: {exc}") from exc
+                    else:
+                        values, final = sas_do_counted(args['start'], args['stop'], args['by'])
                     for value in values:
                         row[args['index']] = float(value)
                         for child_index, child in enumerate(args['body']):

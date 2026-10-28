@@ -2114,6 +2114,40 @@
         "https://support.sas.com/documentation/onlinedoc/iml/ex_code/151/alpha2.html",
         "https://support.sas.com/resources/papers/proceedings10/209-2010.pdf"
       ]
+    },
+    {
+      "rule_id": "DS-041",
+      "sas_pattern": "Bounded nested and computed numeric counted DATA-step loops",
+      "scope": "data-step",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "Sparse bounded-profile do_counted trees, captured checked integer controls, recursive row execution and a shared per-DATA-row work budget."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent while-loop control capture, nested recapture, named row snapshots and original whole-program witness."
+      },
+      "required_settings": [
+        "Only DATA counted loops nest, at most8 active levels, with distinct indices and no body writes to any active index. Existing literal-only single-level plans retain DS-026 shape and behavior.",
+        "New computed or nested plans carry profile:bounded on every loop in the tree. Each invocation captures start/stop/BY before assigning its index; own-index references refuse. Inner controls are captured again on every entry.",
+        "Controls use signed ASCII integer literals, ordinary numeric variables, _N_, parentheses and exact integer +/-. Each operand/result must be finite and integral within2147483647; nonzero BY. Missing, tags, coercion, calls and array controls refuse.",
+        "At most10000 aggregate A2 loop iterations per DATA row, shared across A2 roots; no synthetic budget/index columns. At most128 control-expression nodes per step,32 expression levels and256 operations per bounded loop body.",
+        "Existing assignments, indexed arrays, retained sum statements, bounded IF/ELSE, scalar PUT and named OUTPUT retain their contracts. Schema and OUTPUT discovery includes skipped bodies and empty/filtered inputs; failures publish no accepted partial result or buffered stdout.",
+        "Conditional/grouped loops, WHILE/UNTIL/OVER nesting, index mutation, LAG/DIF inside A2, body declarations except nested index introductions, input operations, MERGE, DATA _NULL_ OUTPUT, mixed literal/numeric PUT and C++ remain deferred."
+      ],
+      "silent_difference_checks": [
+        "Capture mutable bounds/BY once per entry, recapture inner controls each visit, preserve zero-trip and post-loop index values.",
+        "Protect every active index, aliases and static descriptors on skipped paths; preserve output multiplicity, schema order and resets.",
+        "Reject work/depth/expression budgets and malformed plans independently; compare wrong value/order/multiplicity/schema controls and atomic failures."
+      ],
+      "validation_test": "examples/verify_counted_nested.py; saschi.test_counted_nested",
+      "confidence": "bounded repository/base-R evidence; no live SAS",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000201276.htm",
+        "https://support.sas.com/documentation/cdl/en/lestmtsref/63323/PDF/default/lestmtsref.pdf",
+        "https://www2.sas.com/onlinetutor/linklib/doloop.htm"
+      ]
     }
   ],
   "runtime_capabilities": {
@@ -2298,6 +2332,22 @@
       "r_witness": "examples/do_over.R",
       "boundary_tests": "saschi.test_do_over",
       "evidence": "Original pins, independent base-R snapshots and full unmodified loops_foreach.sas source/result/stdout proof with CLI and emitted execution; no live SAS."
+    },
+    "counted_nested": {
+      "rule_id": "DS-041",
+      "target": "saschi.runtime.run_plan",
+      "scope": [
+        "Only DATA counted loops nest, at most8 active levels, with distinct indices and no body writes to any active index. Existing literal-only single-level plans retain DS-026 shape and behavior.",
+        "New computed or nested plans carry profile:bounded on every loop in the tree. Each invocation captures start/stop/BY before assigning its index; own-index references refuse. Inner controls are captured again on every entry.",
+        "Controls use signed ASCII integer literals, ordinary numeric variables, _N_, parentheses and exact integer +/-. Each operand/result must be finite and integral within2147483647; nonzero BY. Missing, tags, coercion, calls and array controls refuse.",
+        "At most10000 aggregate A2 loop iterations per DATA row, shared across A2 roots; no synthetic budget/index columns. At most128 control-expression nodes per step,32 expression levels and256 operations per bounded loop body.",
+        "Existing assignments, indexed arrays, retained sum statements, bounded IF/ELSE, scalar PUT and named OUTPUT retain their contracts. Schema and OUTPUT discovery includes skipped bodies and empty/filtered inputs; failures publish no accepted partial result or buffered stdout.",
+        "Conditional/grouped loops, WHILE/UNTIL/OVER nesting, index mutation, LAG/DIF inside A2, body declarations except nested index introductions, input operations, MERGE, DATA _NULL_ OUTPUT, mixed literal/numeric PUT and C++ remain deferred."
+      ],
+      "validation_test": "examples/verify_counted_nested.py",
+      "r_witness": "examples/counted_nested.R",
+      "boundary_tests": "saschi.test_counted_nested",
+      "evidence": "Original whole-program source/result/stdout pins, independent base R and source/emitted/CLI execution. No new complete corpus proof or live SAS."
     }
   }
 }

@@ -69,8 +69,8 @@ existing function profile. This is a local expression restriction, not a ban on
 other functions elsewhere in the DATA step. New trees have a32-level parse and
 128-node-per-step budget; oversized new syntax refuses promptly.
 
-Single-level counted, UNTIL and WHILE bodies can use indexed assignments and
-bounded IF/ELSE actions. Their existing scheduling/body limits remain. Declarations,
+Counted, single-level UNTIL and WHILE bodies can use indexed assignments and
+bounded IF/ELSE actions. DS-041 adds [nested/computed counted bodies](COUNTED_LOOPS.md). Their existing scheduling/body limits remain. Declarations,
 literal index errors and incompatible descriptors refuse even for empty, skipped
 or zero-trip input. Dynamic indices are evaluated only when their statement runs;
 out-of-range, missing and nonintegral indices then refuse with source-line
@@ -99,8 +99,8 @@ wheel smoke also executes this profile with the standard library alone.
 DS-040 separately supplies [bounded numeric DO OVER](DO_OVER.md): implicit
 current-element binding, declared iteration order, reset and OUTPUT scheduling.
 Its own source suite proves the entire pinned loops_foreach.sas program. DS-039
-remains the indexed-array slice documented here.100_doors.sas still requires
-nested/computed loops and mixed literal/numeric PUT.
+remains the indexed-array slice documented here. With DS-041,100_doors.sas compiles
+but still refuses mixed literal/numeric PUT; A3 retains that proof obligation.
 
 Primary syntax inputs: [SAS array syntax](https://support.sas.com/documentation/cdl/en/lrcon/62955/HTML/default/a001022719.htm)
 and [SAS array references](https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000203460.htm).
