@@ -3,12 +3,18 @@
 Status: development changes with original pins and Python/base-R evidence; no
 live SAS comparison. Branch synchronization is separate from a release.
 
+- Add DS-042 bounded mixed literal/numeric PUT with exact logical spacing,
+  conservative integer fields, skipped-path descriptor checks and atomic failure.
+  Preserve earlier PUT profiles. The unchanged100_doors.sas supplies the eleventh
+  complete external-program proof, with source/result/stdout pins, independent
+  base R, a divisor-parity hand check and CLI/emitted execution.
+
 - Add DS-041 bounded nested/computed counted loops with captured integer controls,
   eight-level nesting, a shared per-row work budget, protected active indices,
   skipped-path schema/OUTPUT discovery and atomic failure. Original full-program
   pins, independent base R and actual CLI/emitted execution provide the evidence.
-  Preserve legacy literal-loop plans. No new complete corpus proof is claimed;
-  the unchanged100_doors.sas still refuses mixed literal/numeric PUT.
+  Preserve legacy literal-loop plans. DS-042 subsequently completes the
+  mixed-output profile required by100_doors.sas.
 
 - Add bounded numeric source-array declarations, indexed alias reads/writes and
   SUM OF, with independent base-R and original source/OUTPUT evidence. Preserve

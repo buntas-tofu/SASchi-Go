@@ -15,6 +15,7 @@ from .operations import walk_operations as _walk_operations
 from .rules import route_function, route_statement
 from .arrays import declaration as array_declaration, validate_step as validate_array_step
 from .counted import parse_control, validate_step as validate_counted_step
+from .put_mixed import validate_items as validate_mixed_put_items
 
 NAME = r"[A-Za-z_][A-Za-z0-9_]{0,31}"
 NUMBER = re.compile(r"[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?\Z")
@@ -463,6 +464,19 @@ def compile_plan(source: str) -> Plan:
                     plan.matched.append(('put-numeric-list', 'DS-027', st.line))
                     return Operation('put_numeric_list', st.line, {'names': names})
                 return None
+            if any(item.kind == Kind.STRING for item in items) and all(types.get(name) == 'number' for name in names):
+                mixed = [{'kind': 'literal', 'value': item.text} if item.kind == Kind.STRING
+                         else {'kind': 'variable', 'value': item.text.lower()} for item in items]
+                try:
+                    if step.kind != 'data' or active_do is not None and active_do.kind != 'do_counted':
+                        raise ValueError('mixed numeric PUT requires DATA, optionally counted DO or simple IF')
+                    validate_mixed_put_items(mixed)
+                except ValueError as exc:
+                    reject(st, 'put-mixed-numeric', str(exc))
+                else:
+                    plan.matched.append(('put-mixed-numeric', 'DS-042', st.line))
+                    return Operation('put_mixed_numeric', st.line, {'items': mixed})
+                return None
             known = set(step.lengths)
             for previous in walk_operations(step.operations):
                 if previous.kind in ('assign', 'round', 'declare'):
@@ -521,7 +535,7 @@ def compile_plan(source: str) -> Plan:
     def admit_loop_branch(op, st):
         if active_do is None:
             return True
-        allowed = {'assign', 'array_set', 'round', 'sum_statement', 'if', 'put', 'put_literal', 'put_character_list', 'put_numeric_list', 'output'}
+        allowed = {'assign', 'array_set', 'round', 'sum_statement', 'if', 'put', 'put_literal', 'put_character_list', 'put_numeric_list', 'put_mixed_numeric', 'output'}
         if any(child.kind not in allowed or
                child.kind in ('assign', 'round', 'sum_statement') and child.args['name'] in {loop.args['index'] for loop in do_parents + [active_do] if loop.kind == 'do_counted'}
                for child in walk_operations([op])):
@@ -936,7 +950,7 @@ def compile_plan(source: str) -> Plan:
                 if any(not 32 <= ord(char) <= 126 for char in token.text):
                     reject(st, 'substr', 'checked SUBSTR requires printable ASCII source character values')
     has_strings = any(item[0] == 'concat-catx' for item in plan.matched)
-    if has_strings or any(contains_put(compiled.operations, {'put_character_list', 'put_numeric_list', 'put_all'}) for compiled in plan.steps):
+    if has_strings or any(contains_put(compiled.operations, {'put_character_list', 'put_numeric_list', 'put_mixed_numeric', 'put_all'}) for compiled in plan.steps):
         # Macros resolve before DATA execution. Without taint tracking, even
         # unused or prior-step literals can affect this output contract.
         for st in statements:
@@ -944,7 +958,7 @@ def compile_plan(source: str) -> Plan:
                    any(char in token.text for char in '&%') for token in st.tokens):
                 reject(st, 'concat-catx' if has_strings else 'put', ('bounded character operations' if has_strings else 'bounded PUT') + ' require macro-free source: double-quoted & or % anywhere in the program requires macro review')
     has_all_put = any(contains_put(compiled.operations, {'put_all'}) for compiled in plan.steps)
-    if has_strings or has_all_put or any(contains_put(compiled.operations, {'put_numeric_list'}) for compiled in plan.steps):
+    if has_strings or has_all_put or any(contains_put(compiled.operations, {'put_numeric_list', 'put_mixed_numeric'}) for compiled in plan.steps):
         for st in statements:
             if any(token.kind == Kind.STRING and any(not 32 <= ord(c) <= 126 for c in token.text) for token in st.tokens):
                 reject(st, 'concat-catx' if has_strings else 'put-all' if has_all_put else 'put',

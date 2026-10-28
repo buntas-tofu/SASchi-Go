@@ -152,6 +152,7 @@ CONSTRUCT_MAP: dict[str, str] = {
     "count": "DS-022",
     "put-literal": "DS-023",
     "put-character-list": "DS-024",
+    "put-mixed-numeric": "DS-042",
     "put-all": "DS-025",
     "do-counted": "DS-026",
     "do-if": "DS-031",

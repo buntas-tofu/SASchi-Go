@@ -87,6 +87,7 @@ VERIFIERS = [
     ("numeric-arrays", HERE / "examples" / "verify_numeric_arrays.py"),
     ("do-over", HERE / "examples" / "verify_do_over.py"),
     ("counted-nested", HERE / "examples" / "verify_counted_nested.py"),
+    ("put-mixed-numeric", HERE / "examples" / "verify_put_mixed_numeric.py"),
 ]
 
 # The translator suites, run as unittest modules. They carry the same weight as
@@ -133,6 +134,7 @@ SUITES = [
     ("suite-numeric-arrays", "saschi.test_numeric_arrays"),
     ("suite-do-over", "saschi.test_do_over"),
     ("suite-counted-nested", "saschi.test_counted_nested"),
+    ("suite-put-mixed-numeric", "saschi.test_put_mixed_numeric"),
 ]
 
 
