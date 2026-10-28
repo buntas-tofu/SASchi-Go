@@ -80,7 +80,7 @@ def classify(filename, ticket, owner):
         if ticket.reason == 'statement is outside a supported step':
             return 'step-context-cascade', 'Downstream diagnostic after rejected DATA header/options'
         return 'needs-triage', 'Unclassified diagnostic, must be reviewed before ranking'
-    if ticket.construct in ('do-counted', 'do-if', 'do-until', 'do-while', 'if'):
+    if ticket.construct in ('do-counted', 'do-if', 'do-until', 'do-while', 'do-over', 'if'):
         return 'control-composition', 'Rejected control form/action or cascading closure'
     if ticket.construct == 'put' or ticket.construct.startswith('put-'):
         return 'output-profile', 'Output typing, formatting or item profile'

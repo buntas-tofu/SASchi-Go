@@ -1622,6 +1622,20 @@ def sas_numeric_array_sum(values):
     return sas_sum(*values)
 
 
+def sas_do_over(size, body):
+    """DS-040: visit bounded array offsets in declaration order, once each.
+
+    The callback receives an internal zero-based offset. It is not a PDV column.
+    Array membership is fixed; callback writes affect the actual row variables.
+    """
+    sas_numeric_array_index(1, 1, size)
+    if not callable(body):
+        raise ValueError('DO OVER requires a body callback')
+    for offset in range(size):
+        body(offset)
+    return size
+
+
 # ---------------------------------------------------------------------------
 # Fisher exact, 2x2 (the 2018-corpus family). SAS PROC FREQ with an EXACT
 # FISHER statement reports three p-values: left-sided (XPL_FISH),

@@ -1,19 +1,21 @@
 # Coverage reconciliation and next gate series
 
-Status: Repository/base-R planning evidence at main08eaa7b, reconciled2026-10-27.
+Status: Repository/base-R planning evidence, originally reconciled at main08eaa7b
+on2026-10-27 and updated through DS-040. The handoff binds current acceptance.
 For principal/maintainer prioritization. Counts describe this checkout and the56
 pinned sibling corpus files, not all SAS or live-SAS equivalence. Updated for
-DS-039 numeric source arrays after the original reconciliation. Rankings,
+DS-039 numeric source arrays and DS-040 numeric DO OVER after the original
+reconciliation. Rankings,
 diagnostic categories and projected unlocks are explicitly analyst inferences.
 Implementation and publication are not authorized by this planning exercise.
 
 ## Inventory reconciled against actual evidence
 
-The golden command registers47 fixture runners,37 translator suites and1
-synthesis runner. The latest passing baseline contains650 tests, zero skips,
+The golden command registers48 fixture runners,38 translator suites and1
+synthesis runner. The current acceptance contains682 tests, zero skips,
 60 faithful synthesis checks and60 naive controls. The separate1k workload
 checks total39:18 ledger and21 text. These counts have different units. Neither
-74 rulebook rules nor85 golden-command runners is a SAS capability denominator.
+75 rulebook rules nor87 golden-command runners is a SAS capability denominator.
 
 [The capability manifest](capability-manifest.json) still enumerates108 statements
 and40 data-set options. The other7 declared reference areas remain unenumerated:
@@ -22,7 +24,8 @@ utilities, macros and procedures. Their null universes are not zero.
 
 The reconciled148 entries contain23 GATED,5 RULE,8 HUMAN-REVIEW,22 OUT-OF-SCOPE
 and90 UNASSESSED. Among GATED entries,22 have bounded source-execution evidence;
-1 has reference fixtures only: IN=. DS-039 adds source-array evidence without
+1 has reference fixtures only: IN=. DS-039 and DS-040 add bounded source-array
+evidence without
 changing dispositions or reference universes. The original reconciliation below
 remains its historical assessment event. These are
 catalogue-entry counts, not counts of implemented features or supported forms.
@@ -53,10 +56,12 @@ The5 RULE entries and8 HUMAN-REVIEW entries retain their review boundaries.
 
 ## Unknown blockers classified
 
-The current56-file compile census remains12 clean and44 blocked, with737 ticket
-occurrences across27 current route labels. All483 occurrences previously routed
+The current56-file compile census has13 clean and43 blocked, with734 ticket
+occurrences. DO OVER resolves the three remaining tickets from loops_foreach.sas.
+All483 occurrences previously routed
 as unknown receive a primary planning category, with file, line, ticket ordinal,
-statement hash and classification basis preserved. No compiler ticket is removed.
+statement hash and classification basis preserved. Classification preserves every
+current compiler ticket.
 
 | Primary category for unknown tickets | Occurrences |
 | --- | ---: |
@@ -87,11 +92,13 @@ unterminated tickets. They need an explicit source-boundary decision; silently
 discarding those sections would invalidate a complete unmodified-file claim.
 No sibling corpus file was changed or copied into this repository.
 
-Nine files retain existing complete-program proofs. The other3 compile-clean
+Ten files now have complete-program proofs, including the new loops_foreach.sas
+source/result/stdout pins and independent base-R witness. The other3 compile-clean
 files remain separate: hello_world_text.sas needs a whole-file witness,
 comments.sas needs an explicit no-op acceptance witness, and bitwise_operations.sas
-retains the67-column refusal under the64-column PUT_ALL profile. No proof count
-is increased by this analysis. Compile tickets also miss runtime limitations:
+retains the67-column refusal under the64-column PUT_ALL profile. The original
+reconciliation itself did not increase the proof count. Compile tickets also miss
+runtime limitations:
 numeric-list PUT is currently bounded integer output; division requires exact
 representability; INT has its conservative near-integer refusal band.
 
@@ -106,7 +113,7 @@ evidence-cost ranking, not a schedule or an estimate of business demand.
 | Order | Slice | Dependencies | Target and projected result | Evidence cost |
 | --- | --- | --- | --- | --- |
 | A0, optional evidence closeout | Hello-world and comment-only whole-file witnesses | Existing behavior | At most2 new proofs, no language expansion | Low |
-| A1, first implementation milestone | Numeric array declarations, indexed access/assignment, OF aggregation and DO OVER alias iteration | Existing DS-016 helper witnesses | loops_foreach.sas is the first projected full-file target | High: descriptor discovery, alias state and loop scheduling |
+| A1, implemented in DS-039/DS-040 | Numeric array declarations, indexed access/assignment, OF aggregation and DO OVER alias iteration | Existing DS-016 helper witnesses | loops_foreach.sas is now the first accepted full-file target | High: descriptor discovery, alias state and loop scheduling |
 | A2, second milestone | Nested and computed counted-loop controls | A1 for indexed bodies | Original composition proofs;100_doors.sas still needs A3 | High: captured controls, recursive state and bounded execution |
 | A3, third milestone | Mixed literal/numeric PUT with a narrow integer profile | Existing PUT profiles; A1+A2 for target |100_doors.sas becomes a projected full-file target | Medium: separator, width, type and atomic publication contracts |
 | B1 | Character TRIM/STRIP composition | A2 | loops_for.sas, including both DATA steps, becomes a projected target | Medium: fixed-width blank/empty behavior |
@@ -116,8 +123,9 @@ evidence-cost ranking, not a schedule or an estimate of business demand.
 | B5 | Fractional numeric rendering, wider arithmetic and elementary functions | Separate precision/error contracts | sum_of_a_series.sas and trigonometric_functions.sas require several additional slices | High, retain current exact-division and INT refusals until replaced by evidence |
 
 A1 has reviewable sub-slices: bounded numeric array declaration/index/OF
-execution is now implemented in DS-039; DO OVER scheduling remains next. See
-[the numeric-array profile](NUMERIC_ARRAYS.md) for the exact scope and receipts. A source parser recognizing ARRAY
+execution is implemented in DS-039; single-level implicit numeric DO OVER is
+implemented in DS-040. See [the numeric-array profile](NUMERIC_ARRAYS.md) and
+[the DO OVER profile](DO_OVER.md) for exact scopes and evidence. A source parser recognizing ARRAY
 without those state and descriptor proofs is insufficient. A2 must state how
 start/stop/BY expressions are captured, bound nested work and prohibit unsupported
 index mutation. A3 must define how literal blanks, numeric fields and record

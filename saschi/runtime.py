@@ -10,13 +10,13 @@ from .operations import walk_operations as operations
 from .values import normalize_catalog, column_type, coerce, missing, order
 from .functions import validate_calendar_calls, validate_sum_expression, validate_numeric_composition
 from sas_semantics import sas_sum_statement, sas_do_until, sas_do_while, sas_divide
-from sas_semantics import sas_numeric_array_value, sas_numeric_array_index
+from sas_semantics import sas_numeric_array_value, sas_numeric_array_index, sas_do_over
 from .arrays import validate_step as validate_array_step, contains_array, value as array_value
 
 
-def evaluate(expr, row, schema=None, arrays=None):
+def evaluate(expr, row, schema=None, arrays=None, current=None):
     """Value of one wired function call with optional static descriptors."""
-    values = [argument(arg, row, schema, arrays) for arg in expr['args']]
+    values = [argument(arg, row, schema, arrays, current) for arg in expr['args']]
     if expr['name'] == 'reverse':
         width = character_width(expr['args'][0], schema)
         if isinstance(values[0], str):
@@ -26,30 +26,30 @@ def evaluate(expr, row, schema=None, arrays=None):
     return apply_function(expr['name'], values)
 
 
-def argument(expr, row, schema=None, arrays=None):
+def argument(expr, row, schema=None, arrays=None, current=None):
     """One call argument: a format token passes through, everything else is a value."""
-    return expr if expr['kind'] == 'format' else number(expr, row, schema, arrays)
+    return expr if expr['kind'] == 'format' else number(expr, row, schema, arrays, current)
 
 
-def number(expr, row, schema=None, arrays=None):
+def number(expr, row, schema=None, arrays=None, current=None):
     if arrays and contains_array(expr):
-        return array_value(expr, row, arrays)
+        return array_value(expr, row, arrays, current)
     kind = expr['kind']
     if kind in ('variable', 'automatic'):
         return row.get(expr['value'])
     if kind == 'call':
-        return evaluate(expr, row, schema, arrays)
+        return evaluate(expr, row, schema, arrays, current)
     if kind == 'concat':
         values = []
         for arg in expr['args']:
-            value = number(arg, row, schema, arrays)
+            value = number(arg, row, schema, arrays, current)
             width = character_width(arg, schema)
             if not isinstance(value, str) or width is None:
                 raise ValueError('character concatenation requires character operands')
             values.append(value.ljust(width)[:width])
         return sas_concat(values)
     if kind == 'arithmetic':
-        left, right = number(expr['left'], row, schema, arrays), number(expr['right'], row, schema, arrays)
+        left, right = number(expr['left'], row, schema, arrays, current), number(expr['right'], row, schema, arrays, current)
         if expr['op'] == '/':
             return sas_divide(left, right)
         if isinstance(left, str) or isinstance(right, str):
@@ -73,14 +73,14 @@ def round_value(value, unit):
         return None
 
 
-def condition(expr, row, schema=None, arrays=None):
-    left = number(expr['left'], row, schema, arrays)
+def condition(expr, row, schema=None, arrays=None, current=None):
+    left = number(expr['left'], row, schema, arrays, current)
     op = expr['op']
     if op == 'truth':
         if isinstance(left, str):
             raise ValueError('numeric truth predicate required')
         return not missing(left) and left != 0
-    right = number(expr['right'], row, schema, arrays)
+    right = number(expr['right'], row, schema, arrays, current)
     if isinstance(left, str) != isinstance(right, str):
         raise ValueError('implicit comparison conversion is unsupported')
     if isinstance(left, str):
@@ -156,9 +156,9 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
         if lag_present and step['kind'] not in ('data', 'merge'):
             raise ValueError('LAG/DIF requires a DATA-step execution scope')
         flat = list(operations(ops))
-        if (step['name'] == '_null_' and any(op['kind'] in ('do_counted', 'do_until', 'do_while') for op in flat)
+        if (step['name'] == '_null_' and any(op['kind'] in ('do_counted', 'do_until', 'do_while', 'do_over') for op in flat)
                 and any(op['kind'] == 'output' for op in flat)):
-            label = 'DO UNTIL' if any(op['kind'] == 'do_until' for op in flat) else 'DO WHILE' if any(op['kind'] == 'do_while' for op in flat) else 'counted DO'
+            label = 'DO OVER' if any(op['kind'] == 'do_over' for op in flat) else 'DO UNTIL' if any(op['kind'] == 'do_until' for op in flat) else 'DO WHILE' if any(op['kind'] == 'do_while' for op in flat) else 'counted DO'
             raise ValueError('explicit OUTPUT in DATA _NULL_ ' + label + ' steps is deferred')
         put_all = any(op['kind'] == 'put_all' for op in flat)
         if put_all and lag_present:
@@ -293,7 +293,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
             elif kind == 'array_declare':
                 for name in args['names']:
                     schema.setdefault(name, deepcopy(legacy_schema.get(name, 'number')))
-            elif kind == 'array_set':
+            elif kind in ('array_set', 'array_current_set'):
                 for expr in expressions(args):
                     add_reference(expr)
             elif kind == 'read':
@@ -317,6 +317,8 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                 schema.setdefault(args['name'], spec)
                 for value in expressions(args):
                     add_reference(value)
+            elif kind == 'do_over':
+                pass  # Independent array validation checks shape, binding and body.
             elif kind == 'do_counted':
                 if set(args) != {'index', 'start', 'stop', 'by', 'body'}:
                     raise ValueError('counted DO has unexpected plan arguments')
@@ -385,7 +387,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                 if kind == 'if':
                     if set(args) not in ({'condition', 'operation'}, {'condition', 'operation', 'otherwise'}):
                         raise ValueError('IF has unexpected plan arguments')
-                    leaves = {'assign', 'array_set', 'sum_statement', 'output', 'put', 'put_literal', 'put_character_list', 'put_numeric_list'}
+                    leaves = {'assign', 'array_set', 'array_current_set', 'sum_statement', 'output', 'put', 'put_literal', 'put_character_list', 'put_numeric_list'}
                     true_branch = args['operation']
                     false_branch = args.get('otherwise')
                     if (not isinstance(true_branch, dict) or true_branch.get('kind') not in leaves or
@@ -489,10 +491,12 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
             def snapshot():
                 output.append({n: deepcopy(row[n]) for n in schema})
 
+            current = {}  # Internal per-row DO OVER bindings; never part of schema.
+
             def sum_value(expr):
                 """Check every numeric operand before arithmetic can hide a tag/overflow."""
                 if arrays and contains_array(expr):
-                    return array_value(expr, row, arrays)
+                    return array_value(expr, row, arrays, current)
                 kind = expr['kind']
                 if kind == 'arithmetic':
                     a, b = sum_value(expr['left']), sum_value(expr['right'])
@@ -500,7 +504,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                 elif kind == 'call':
                     value = apply_function(expr['name'], [sum_value(arg) for arg in expr['args']])
                 else:
-                    value = number(expr, row, schema, arrays)
+                    value = number(expr, row, schema, arrays, current)
                 sas_sum_statement(None, value)
                 return value
 
@@ -517,7 +521,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                         value = queue.invoke(number(expression['args'][0], row, schema), difference=family == 'dif')
                     else:
                         try:
-                            value = put_all_value(expression, row) if put_all else number(expression, row, schema, arrays)
+                            value = put_all_value(expression, row) if put_all else number(expression, row, schema, arrays, current)
                         except ValueError as exc:
                             if arrays and contains_array(expression):
                                 raise ValueError(f"SAS line {op['line']}: {exc}") from exc
@@ -528,19 +532,32 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                     row[args['name']] = coerce(value, schema[args['name']], encoding)
                     if args['name'] in array_members:
                         row[args['name']] = sas_numeric_array_value(row[args['name']])
+                elif kind == 'array_current_set':
+                    name = args['name']
+                    row[arrays[name]['names'][current[name]]] = array_value(args['value'], row, arrays, current)
                 elif kind == 'array_set':
                     try:
                         a = arrays[args['name']]
-                        index = sas_numeric_array_index(array_value(args['index'], row, arrays), a['lower'], len(a['names']))
-                        row[a['names'][index]] = array_value(args['value'], row, arrays)
+                        index = sas_numeric_array_index(array_value(args['index'], row, arrays, current), a['lower'], len(a['names']))
+                        row[a['names'][index]] = array_value(args['value'], row, arrays, current)
                     except ValueError as exc:
                         raise ValueError(f"SAS line {op['line']}: {exc}") from exc
                 elif kind == 'round':
-                    row[args['name']] = round_value(number(args['value'], row, schema, arrays), number(args['unit'], row, schema, arrays))
+                    row[args['name']] = round_value(number(args['value'], row, schema, arrays, current), number(args['unit'], row, schema, arrays, current))
                     if args['name'] in array_members:
                         row[args['name']] = sas_numeric_array_value(row[args['name']])
                 elif kind == 'sum_statement':
                     row[args['name']] = sas_sum_statement(row[args['name']], sum_value(args['value']))
+                elif kind == 'do_over':
+                    name = args['name']
+                    def body(offset):
+                        current[name] = offset
+                        for child_index, child in enumerate(args['body']):
+                            perform(child, path + ('body', child_index))
+                    try:
+                        sas_do_over(len(arrays[name]['names']), body)
+                    finally:
+                        current.pop(name, None)
                 elif kind == 'do_counted':
                     values, final = sas_do_counted(args['start'], args['stop'], args['by'])
                     for value in values:
@@ -559,12 +576,12 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                         return condition({'op': test['op'], **resolved}, row, schema)
                     (sas_do_until if kind == 'do_until' else sas_do_while)(body, stop)
                 elif kind == 'if':
-                    if condition(args['condition'], row, schema, arrays):
+                    if condition(args['condition'], row, schema, arrays, current):
                         return perform(args['operation'], path + ('operation',))
                     if 'otherwise' in args:
                         return perform(args['otherwise'], path + ('otherwise',))
                 elif kind == 'subset':
-                    return condition(args['condition'], row, schema, arrays)
+                    return condition(args['condition'], row, schema, arrays, current)
                 elif kind == 'output':
                     snapshot()
                 elif kind == 'put_literal':

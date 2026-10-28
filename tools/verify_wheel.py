@@ -80,6 +80,13 @@ assert namespace['result'] == {'datasets': {'d': {
     'schema': {'x': 'number', 'y': 'number', 't': 'number'},
     'rows': [{'x': 3., 'y': 4., 't': 7.}]}}, 'log': []}
 assert main(['inspect', sys.argv[4]]) == 0
+over = translate('data d; array a x y; n=1; do over a; a=n; n=n+1; end; run;')
+assert not over.blocked, over.tickets
+namespace = {}
+exec(over.code, namespace)
+assert namespace['result'] == {'datasets': {'d': {
+    'schema': {'x': 'number', 'y': 'number', 'n': 'number'},
+    'rows': [{'x': 1., 'y': 2., 'n': 3.}]}}, 'log': []}
 print('VERIFIED: isolated installed wheel, canonical rulebook, all web assets, CLI entry point, MOD-to-PUT output, calendar, sum/UNTIL and division/INT/WHILE')
 '''
 

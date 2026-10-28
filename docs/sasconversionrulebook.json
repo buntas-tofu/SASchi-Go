@@ -2065,7 +2065,7 @@
         "At most1024 declared elements per DATA step; fixed one-dimensional integer bounds within signed2147483647. Explicit names, unpadded ascending numbered ranges or generated names; inferred extent requires names.",
         "Values and every new arithmetic/SUM OF partial result are finite binary64 within2147483647; exact representability required for +/-. Ordinary missing is admitted, tags/coercion/nonfinite/wider values refuse.",
         "Array declarations are unconditional and precede indexed/OF uses. Braces/brackets reference elements; parenthetical element references remain deferred.",
-        "Existing scalar operations and output paths retain their profiles. Calls/division inside new array expressions, DO OVER, character/multidimensional/temporary/initializer-retained arrays, array members as retained/BY/loop-index variables, array WHERE/PUT_ALL and C++ execution remain deferred."
+        "Existing scalar operations and output paths retain their profiles. Calls/division inside new array expressions, character/multidimensional/temporary/initializer-retained arrays, array members as retained/BY/loop-index variables, array WHERE/PUT_ALL and C++ execution remain deferred. DO OVER is separately scoped by DS-040."
       ],
       "silent_difference_checks": [
         "Array elements alias row variables in both directions; overlapping arrays share bindings without copying values.",
@@ -2078,6 +2078,41 @@
       "sources": [
         "https://support.sas.com/documentation/cdl/en/lrcon/62955/HTML/default/a001022719.htm",
         "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000203460.htm"
+      ]
+    },
+    {
+      "rule_id": "DS-040",
+      "sas_pattern": "Bounded single-level numeric DO OVER with implicit current-element aliases",
+      "scope": "data-step",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "do_over visits ordered declared row names through an internal offset; array_current/array_current_set read and write the actual cell. Sparse implicit mode is required by new loop plans; old non-DO-OVER plan shapes are preserved."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent named-vector iteration and actual cell replacement; compare all row snapshots and consume the entire pinned external program."
+      },
+      "required_settings": [
+        "Single-level numeric implicit ARRAY without declared bounds or a named index. A preceding unconditional declaration binds ordered ordinary row variables; at most1024 total element references per DATA step.",
+        "One active current-element name per loop. Bare reads/writes resolve the actual row cell. The internal position is not a column; _I_ access, other implicit current names, nested loops and indexed reads/writes inside DO OVER refuse.",
+        "Current expressions inherit DS-039 finite numeric/ordinary-missing storage, magnitude2147483647, exact +/- arithmetic,32-level and128-node budgets. Source parsing is deterministic in DO OVER bodies.",
+        "Simple assignments, bounded IF/ELSE, existing scalar PUT and named-dataset OUTPUT retain their profiles. Explicit OUTPUT anywhere suppresses implicit output, including skipped branches. Empty/filtered input still validates schema and static restrictions.",
+        "Explicit arrays are not DO OVER controls. Character/temporary/initialized arrays, named implicit indices, LAG/DIF, sum-statement/ROUND operations inside the loop, direct current-element PUT, DATA _NULL_ OUTPUT and C++ remain deferred."
+      ],
+      "silent_difference_checks": [
+        "Both alias directions, declaration order and overlapping sequential arrays; per-row/per-run state reset.",
+        "Schema discovery includes skipped leaves and empty input. No array name or internal index appears in output.",
+        "Current access requires its active loop and preceding implicit declaration. Forged scopes, extra fields and nested controls refuse.",
+        "No accepted partial dataset or buffered stdout on late failures. Full source/result/stdout pins and independent base R bind the unmodified corpus proof."
+      ],
+      "validation_test": "examples/verify_do_over.py; saschi.test_do_over",
+      "confidence": "bounded repository/base-R evidence; no live SAS",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/lestmtsref/63323/HTML/default/p08do6szetrxe2n136ush727sbuo.htm",
+        "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000203460.htm",
+        "https://support.sas.com/documentation/onlinedoc/iml/ex_code/151/alpha2.html",
+        "https://support.sas.com/resources/papers/proceedings10/209-2010.pdf"
       ]
     }
   ],
@@ -2242,12 +2277,27 @@
         "At most1024 declared elements per DATA step; fixed one-dimensional integer bounds within signed2147483647. Explicit names, unpadded ascending numbered ranges or generated names; inferred extent requires names.",
         "Values and every new arithmetic/SUM OF partial result are finite binary64 within2147483647; exact representability required for +/-. Ordinary missing is admitted, tags/coercion/nonfinite/wider values refuse.",
         "Array declarations are unconditional and precede indexed/OF uses. Braces/brackets reference elements; parenthetical element references remain deferred.",
-        "Existing scalar operations and output paths retain their profiles. Calls/division inside new array expressions, DO OVER, character/multidimensional/temporary/initializer-retained arrays, array members as retained/BY/loop-index variables, array WHERE/PUT_ALL and C++ execution remain deferred."
+        "Existing scalar operations and output paths retain their profiles. Calls/division inside new array expressions, character/multidimensional/temporary/initializer-retained arrays, array members as retained/BY/loop-index variables, array WHERE/PUT_ALL and C++ execution remain deferred. DO OVER is separately scoped by DS-040."
       ],
       "validation_test": "examples/verify_numeric_arrays.py",
       "r_witness": "examples/numeric_arrays.R",
       "boundary_tests": "saschi.test_numeric_arrays",
       "evidence": "Original pins and synthetic source compositions plus independent base R; no new complete external-program proof or live SAS."
+    },
+    "do_over": {
+      "rule_id": "DS-040",
+      "target": "saschi.runtime.run_plan",
+      "scope": [
+        "Single-level numeric implicit ARRAY without declared bounds or a named index. A preceding unconditional declaration binds ordered ordinary row variables; at most1024 total element references per DATA step.",
+        "One active current-element name per loop. Bare reads/writes resolve the actual row cell. The internal position is not a column; _I_ access, other implicit current names, nested loops and indexed reads/writes inside DO OVER refuse.",
+        "Current expressions inherit DS-039 finite numeric/ordinary-missing storage, magnitude2147483647, exact +/- arithmetic,32-level and128-node budgets. Source parsing is deterministic in DO OVER bodies.",
+        "Simple assignments, bounded IF/ELSE, existing scalar PUT and named-dataset OUTPUT retain their profiles. Explicit OUTPUT anywhere suppresses implicit output, including skipped branches. Empty/filtered input still validates schema and static restrictions.",
+        "Explicit arrays are not DO OVER controls. Character/temporary/initialized arrays, named implicit indices, LAG/DIF, sum-statement/ROUND operations inside the loop, direct current-element PUT, DATA _NULL_ OUTPUT and C++ remain deferred."
+      ],
+      "validation_test": "examples/verify_do_over.py",
+      "r_witness": "examples/do_over.R",
+      "boundary_tests": "saschi.test_do_over",
+      "evidence": "Original pins, independent base-R snapshots and full unmodified loops_foreach.sas source/result/stdout proof with CLI and emitted execution; no live SAS."
     }
   }
 }

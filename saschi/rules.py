@@ -170,6 +170,7 @@ CONSTRUCT_MAP: dict[str, str] = {
     "substr": "DS-030",
     "arrays": "DS-016",
     "numeric-arrays": "DS-039",
+    "do-over": "DS-040",
     "formats": "DS-010",
     "by-group": "DS-006",
     # Rest of the data-step surface.
@@ -224,6 +225,7 @@ CONSTRUCT_MAP: dict[str, str] = {
 # Statement-level routing: statement-start regex -> construct name.
 # Order matters: longest/most specific first.
 STATEMENT_ROUTER: list[tuple[re.Pattern, str]] = [
+    (re.compile(r'^\s*DO\s+OVER\b', re.I), 'do-over'),
     (re.compile(r'^\s*DO\s+WHILE\b', re.I), 'do-while'),
     (re.compile(r'^\s*DO\s+UNTIL\b', re.I), 'do-until'),
     (re.compile(r'^\s*[A-Za-z_][A-Za-z0-9_]{0,31}\s*\+(?!=)', re.I), 'sum-statement'),

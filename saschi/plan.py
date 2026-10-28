@@ -159,16 +159,16 @@ def _format_argument(text):
     return None
 
 
-def _argument(text, allow_format=False):
+def _argument(text, allow_format=False, strict=False):
     """One argument: a format token only in a position this function declares."""
     if allow_format:
         value = _format_argument(text)
         if value is not None:
             return value
-    return expression(text)
+    return expression(text, strict=strict)
 
 
-def call(text):
+def call(text, strict=False):
     """Parse a call to a wired function, or None when it is not wired."""
     match = CALL.fullmatch(text.strip())
     if not match:
@@ -182,13 +182,13 @@ def call(text):
         return None
     if spec.max_args >= 0 and len(parts) > spec.max_args:
         return None
-    values = [_argument(part, index in spec.format_args) for index, part in enumerate(parts)]
+    values = [_argument(part, index in spec.format_args, strict) for index, part in enumerate(parts)]
     if any(value is None for value in values):
         return None
     return {"kind": "call", "name": name, "args": values}
 
 
-def operand(text, _depth=0):
+def operand(text, _depth=0, strict=False):
     """One expression operand: an atom or a wired call."""
     value = atom(text)
     if value is not None:
@@ -196,7 +196,7 @@ def operand(text, _depth=0):
     summed = re.fullmatch(r'sum\s*\(\s*of\s+(' + NAME + r')\s*(?:\{\s*\*\s*\}|\[\s*\*\s*\]|\(\s*\*\s*\))\s*\)', text, re.I)
     if summed:
         return {'kind': 'array_sum', 'name': summed[1].lower()}
-    value = call(text)
+    value = call(text, strict)
     if value is not None:
         return value
     indexed = re.match(r'(' + NAME + r')\s*([{\[])', text, re.I)
@@ -222,7 +222,7 @@ def operand(text, _depth=0):
                     break
         if not complete:
             return None
-        index = expression(text[indexed.end():-1], _depth + 1)
+        index = expression(text[indexed.end():-1], _depth + 1, strict)
         if index is not None:
             return {'kind': 'array_get', 'name': indexed[1].lower(), 'index': index}
     return None
@@ -271,7 +271,7 @@ def _string_nodes(value):
             yield from _string_nodes(child)
 
 
-def expression(text, _depth=0):
+def expression(text, _depth=0, strict=False):
     text = text.strip()
     if _depth > 32:
         return None
@@ -279,11 +279,11 @@ def expression(text, _depth=0):
     if parts is not None:
         if not 2 <= len(parts) <= 32:
             return None
-        values = [operand(part) for part in parts]
+        values = [operand(part, strict=strict) for part in parts]
         if any(value is None for value in values):
             return None
         return {'kind': 'concat', 'args': values}
-    value = operand(text, _depth)
+    value = operand(text, _depth, strict)
     if value is not None:
         return value
     if text.startswith('(') and text.endswith(')'):
@@ -297,38 +297,38 @@ def expression(text, _depth=0):
                 depth -= 1
                 if depth == 0 and index != len(text) - 1: enclosed = False
         if enclosed and depth == 0 and not quote:
-            return expression(text[1:-1], _depth + 1)
+            return expression(text[1:-1], _depth + 1, strict)
     for operators in ('+-', '/'):
         positions = _arithmetic_positions(text, operators)
         # New array expressions use deterministic precedence instead of trying
         # alternative binary splits after a depth/budget refusal.
-        if re.search(NAME + r'\s*[{\[]', text):
+        if strict or re.search(NAME + r'\s*[{\[]', text):
             positions = positions[-1:]
         for position in reversed(positions):
-            left = expression(text[:position], _depth + 1)
-            right = expression(text[position + 1:], _depth + 1)
+            left = expression(text[:position], _depth + 1, strict)
+            right = expression(text[position + 1:], _depth + 1, strict)
             if left is not None and right is not None:
                 return {'kind': 'arithmetic', 'left': left, 'op': text[position], 'right': right}
-            if re.search(NAME + r'\s*[{\[]', text):
+            if strict or re.search(NAME + r'\s*[{\[]', text):
                 return None
     return None
 
 
-def predicate(text):
-    value = expression(text)
+def predicate(text, strict=False):
+    value = expression(text, strict=strict)
     if value is not None:
         return {'left': value, 'op': 'truth'}
     match = re.fullmatch(r'(.+?)\s*(<=|>=|\^=|~=|<>|=|<|>|\beq\b|\bne\b|\blt\b|\bgt\b|\ble\b|\bge\b)\s*(.+)', text, re.I)
-    if match and expression(match[1]) is not None and expression(match[3]) is not None:
-        return {'left': expression(match[1]), 'op': match[2].lower(), 'right': expression(match[3])}
+    if match and expression(match[1], strict=strict) is not None and expression(match[3], strict=strict) is not None:
+        return {'left': expression(match[1], strict=strict), 'op': match[2].lower(), 'right': expression(match[3], strict=strict)}
     return None
 
 
-def action(text, line):
+def action(text, line, strict=False):
     match = re.fullmatch(r'(' + NAME + r')\s*\+\s*(.+)', text)
     reserved = {'_n_', '_error_', '_all_', '_numeric_', '_character_', '_infile_', '_file_', '_ods_', '_page_', '_blankpage_'}
     if match and match[1].lower() not in reserved:
-        value = expression(match[2])
+        value = expression(match[2], strict=strict)
         if value is not None:
             return Operation('sum_statement', line, {'name': match[1].lower(), 'value': value})
     match = re.fullmatch(r'output(?:\s+(' + NAME + r'))?', text, re.I)
@@ -336,12 +336,12 @@ def action(text, line):
         return Operation('output', line, {'target': match[1].lower() if match[1] else None})
     indexed = re.fullmatch(r'(.+?)\s*=\s*(.+)', text)
     if indexed:
-        target, value = operand(indexed[1].strip()), expression(indexed[2])
+        target, value = operand(indexed[1].strip(), strict=strict), expression(indexed[2], strict=strict)
         if target is not None and target['kind'] == 'array_get' and value is not None:
             return Operation('array_set', line, {'name': target['name'], 'index': target['index'], 'value': value})
     match = re.fullmatch(r'(' + NAME + r')\s*=\s*(.+)', text)
     if match and match[1].lower() != '_n_':
-        value = expression(match[2])
+        value = expression(match[2], strict=strict)
         # ROUND keeps its dedicated operation: the rule id DS-012 is recorded on
         # that path, and the C++ pilot emits its scalar call from it.
         if value is not None and not (value.get('kind') == 'call' and value['name'] == 'round'):
@@ -361,7 +361,7 @@ def put_known_types(ops):
 
     def expression_type(expr):
         kind = expr['kind']
-        if kind in ('number', 'missing', 'tagged_missing', 'automatic', 'array_get', 'array_sum'):
+        if kind in ('number', 'missing', 'tagged_missing', 'automatic', 'array_get', 'array_sum', 'array_current'):
             return 'number'
         if kind in ('character', 'concat'):
             return 'character'
@@ -391,6 +391,21 @@ def contains_put(ops, kinds):
     return any(op.kind in kinds for op in walk_operations(ops, all_containers=True))
 
 
+def bind_current(node, name):
+    """Bind only bare references to this loop's array; leave other arrays scoped."""
+    if isinstance(node, dict):
+        if node.get('kind') == 'variable' and node.get('value') == name:
+            node.clear()
+            node.update(kind='array_current', name=name)
+        elif node.get('kind') == 'assign' and node['args']['name'] == name:
+            node['kind'] = 'array_current_set'
+        for child in node.values():
+            bind_current(child, name)
+    elif isinstance(node, list):
+        for child in node:
+            bind_current(child, name)
+
+
 def compile_plan(source: str) -> Plan:
     plan, step, context, active_do = Plan(), None, None, None
     pending_if, chain_length, pending_end = None, 0, None
@@ -400,6 +415,8 @@ def compile_plan(source: str) -> Plan:
             step.operations.append(op)
             return op.args
         serialized = asdict(op)
+        if active_do.kind == 'do_over':
+            bind_current(serialized, active_do.args['name'])
         active_do.args['body'].append(serialized)
         return serialized['args']
 
@@ -475,7 +492,7 @@ def compile_plan(source: str) -> Plan:
         return Operation('put', st.line, {'names': names})
 
     def simple_branch(st):
-        nested = action(st.text, st.line)
+        nested = action(st.text, st.line, strict=active_do is not None and active_do.kind == 'do_over')
         if nested is None and re.match(r'^put\b', st.text, re.I):
             nested = put_action(st)
         if nested is None or nested.kind == 'put_all':
@@ -489,7 +506,7 @@ def compile_plan(source: str) -> Plan:
         for pos, token in enumerate(st.tokens[1:], 1):
             if token.kind != Kind.WORD or token.text.lower() != 'then':
                 continue
-            condition = predicate(' '.join(t.text for t in st.tokens[1:pos]))
+            condition = predicate(' '.join(t.text for t in st.tokens[1:pos]), strict=active_do is not None and active_do.kind == 'do_over')
             tail = st.tokens[pos + 1:]
             if condition is None or not tail:
                 continue
@@ -513,8 +530,8 @@ def compile_plan(source: str) -> Plan:
     def finish():
         nonlocal active_do
         if active_do is not None:
-            family = {'do_until': 'do-until', 'do_while': 'do-while'}.get(active_do.kind, 'do-counted')
-            label = {'do_until': 'DO UNTIL', 'do_while': 'DO WHILE'}.get(active_do.kind, 'counted DO')
+            family = {'do_until': 'do-until', 'do_while': 'do-while', 'do_over': 'do-over'}.get(active_do.kind, 'do-counted')
+            label = {'do_until': 'DO UNTIL', 'do_while': 'DO WHILE', 'do_over': 'DO OVER'}.get(active_do.kind, 'counted DO')
             plan.tickets.append(Ticket(active_do.line, 'DO', family, label + ' requires a closing END before the step ends'))
             active_do = None
         if step and any(o.kind == 'put_all' for o in walk_operations(step.operations)):
@@ -552,10 +569,10 @@ def compile_plan(source: str) -> Plan:
                 plan.matched.append(('concat-catx', 'DS-029', step.line))
             if any(node.get('name') == 'catx' for node in where_nodes):
                 plan.tickets.append(Ticket(step.line, 'CATX', 'concat-catx', 'CATX in WHERE requires temporary-buffer review'))
-            if (step.name == '_null_' and any(o.kind in ('do_counted', 'do_until', 'do_while') for o in flat)
+            if (step.name == '_null_' and any(o.kind in ('do_counted', 'do_until', 'do_while', 'do_over') for o in flat)
                     and any(o.kind == 'output' for o in flat)):
-                family = 'do-until' if any(o.kind == 'do_until' for o in flat) else 'do-while' if any(o.kind == 'do_while' for o in flat) else 'do-counted'
-                label = {'do-until': 'DO UNTIL', 'do-while': 'DO WHILE'}.get(family, 'counted DO')
+                family = 'do-over' if any(o.kind == 'do_over' for o in flat) else 'do-until' if any(o.kind == 'do_until' for o in flat) else 'do-while' if any(o.kind == 'do_while' for o in flat) else 'do-counted'
+                label = {'do-until': 'DO UNTIL', 'do-while': 'DO WHILE', 'do-over': 'DO OVER'}.get(family, 'counted DO')
                 plan.tickets.append(Ticket(step.line, 'OUTPUT', family, 'explicit OUTPUT in DATA _NULL_ ' + label + ' steps is deferred'))
             for op in flat:
                 if op.kind == 'output' and op.args['target'] not in (None, step.name):
@@ -628,13 +645,19 @@ def compile_plan(source: str) -> Plan:
             try:
                 if active_do is not None:
                     raise ValueError('numeric ARRAY declarations must be outside loop bodies')
-                args = array_declaration(text)
+                args = array_declaration(text, preserve_mode=True)
                 append_operation(Operation('array_declare', st.line, args))
                 plan.matched.append(('numeric-arrays', 'DS-039', st.line))
             except ValueError as exc:
                 reject(st, 'numeric-arrays', str(exc))
             continue
         if re.match(r'^do\b(?!\s*=)', text, re.I):
+            over = re.fullmatch(r'do\s+over\s+(' + NAME + r')', text, re.I)
+            if over and active_do is None and context == 'data' and step.kind == 'data':
+                active_do = Operation('do_over', st.line, {'name': over[1].lower(), 'body': []})
+                step.operations.append(active_do)
+                plan.matched.append(('do-over', 'DS-040', st.line))
+                continue
             until = re.fullmatch(r'do\s+(until|while)\s*\((.*)\)', text, re.I | re.S)
             if until and active_do is None and context == 'data' and step.kind == 'data':
                 name = until[1].lower()
@@ -674,8 +697,8 @@ def compile_plan(source: str) -> Plan:
                 active_do = None
             continue
         if active_do is not None:
-            family = {'do_until': 'do-until', 'do_while': 'do-while'}.get(active_do.kind, 'do-counted')
-            label = {'do-until': 'DO UNTIL', 'do-while': 'DO WHILE'}.get(family, 'counted DO')
+            family = {'do_until': 'do-until', 'do_while': 'do-while', 'do_over': 'do-over'}.get(active_do.kind, 'do-counted')
+            label = {'do-until': 'DO UNTIL', 'do-while': 'DO WHILE', 'do-over': 'DO OVER'}.get(family, 'counted DO')
             target = re.match(r'(' + NAME + r')(?:\s*[({\[].*?[)}\]])?\s*(?:=|\+(?!=))', text)
             if target and active_do.kind == 'do_counted' and target[1].lower() == active_do.args['index']:
                 reject(st, 'do-counted', 'assignment to the counted DO index inside its body is deferred')
@@ -782,6 +805,8 @@ def compile_plan(source: str) -> Plan:
                 pending_if = None
                 continue
             pending_if['otherwise'] = asdict(nested)
+            if active_do is not None and active_do.kind == 'do_over':
+                bind_current(pending_if['otherwise'], active_do.args['name'])
             pending_if = pending_if['otherwise']['args'] if nested.kind == 'if' else None
             pending_end = st.tokens[-1].end
             chain_length += int(nested.kind == 'if')
@@ -800,8 +825,8 @@ def compile_plan(source: str) -> Plan:
             continue
         if re.match(r'^if\b', text, re.I):
             if active_do is not None:
-                family = {'do_until': 'do-until', 'do_while': 'do-while'}.get(active_do.kind, 'do-counted')
-                label = {'do-until': 'DO UNTIL', 'do-while': 'DO WHILE'}.get(family, 'counted DO')
+                family = {'do_until': 'do-until', 'do_while': 'do-while', 'do_over': 'do-over'}.get(active_do.kind, 'do-counted')
+                label = {'do-until': 'DO UNTIL', 'do-while': 'DO WHILE', 'do-over': 'DO OVER'}.get(family, 'counted DO')
                 reject(st, family, 'subsetting IF inside ' + label + ' is deferred')
                 continue
             condition = predicate(re.sub(r'^if\s*', '', text, flags=re.I))
@@ -810,7 +835,7 @@ def compile_plan(source: str) -> Plan:
             else:
                 reject(st, 'if', 'unsupported subsetting predicate')
             continue
-        simple = action(text, st.line)
+        simple = action(text, st.line, strict=active_do is not None and active_do.kind == 'do_over')
         if simple:
             append_operation(simple)
             continue
@@ -826,7 +851,7 @@ def compile_plan(source: str) -> Plan:
                                                                     "unit": atom(rounded[2])}))
                 plan.matched.append(("round", "DS-012", st.line))
                 continue
-            value = expression(assignment[2])
+            value = expression(assignment[2], strict=active_do is not None and active_do.kind == 'do_over')
             if value is not None:
                 if value['kind'] == 'call' and value['name'] == 'round':
                     plan.matched.append(("round", "DS-012", st.line))
@@ -845,6 +870,13 @@ def compile_plan(source: str) -> Plan:
         reject(st, family if family != "unknown" else construct, "no operation for this statement")
     finish()
     for compiled in plan.steps:
+        # Preserve the old serialized shape unless new DO OVER needs source mode.
+        over_names = {op.args['name'] for op in walk_operations(compiled.operations) if op.kind == 'do_over'}
+        for op in walk_operations(compiled.operations):
+            if op.kind == 'do_over':
+                bind_current(op.args['body'], op.args['name'])
+            if op.kind == 'array_declare' and op.args['name'] not in over_names:
+                op.args.pop('mode', None)
         try:
             arrays = validate_array_step(asdict(compiled))
             if arrays:

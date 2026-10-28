@@ -97,7 +97,8 @@
    "report": "docs/COVERAGE_BACKLOG.md",
    "qualification": "Reference fixtures, descriptor transport and source execution are separate. GATED means evidence for the stated slice, never every form of a language entry. Historical measured_at anchors remain the original enumeration/disposition baseline."
   },
-  "numeric_arrays_update": "DS-039 adds bounded source ARRAY/indexed reads and writes/SUM OF with numeric-arrays and suite-numeric-arrays plus independent R. ARRAY/Array Reference gain source evidence without disposition, rollup or universe changes. No DO OVER or new complete-program proof; no live SAS."
+  "numeric_arrays_update": "DS-039 adds bounded source ARRAY/indexed reads and writes/SUM OF with numeric-arrays and suite-numeric-arrays plus independent R. ARRAY/Array Reference gain source evidence without disposition, rollup or universe changes. No DO OVER or new complete-program proof; no live SAS.",
+  "do_over_update": "DS-040 adds bounded legacy implicit numeric DO OVER, current-element aliases and the full loops_foreach.sas proof. Evidence is attached to existing ARRAY/Array Reference/END entries. DO OVER is not a newly enumerated SAS9.4 reference entry; grouped DO remains UNASSESSED. Dispositions, rollups and universes are unchanged; no live SAS."
  },
  "rollup": {
   "stmt": {
@@ -140,15 +141,18 @@
    "disposition": "GATED",
    "rule_ids": [
     "DS-016",
-    "DS-039"
+    "DS-039",
+    "DS-040"
    ],
    "gates": [
     "arrays",
     "numeric-arrays",
-    "suite-numeric-arrays"
+    "suite-numeric-arrays",
+    "do-over",
+    "suite-do-over"
    ],
    "reference_page": 21,
-   "note": "Reference DS-016 and bounded source DS-039 evidence are separately scoped. See docs/NUMERIC_ARRAYS.md.",
+   "note": "Reference DS-016 and bounded source DS-039 evidence are separately scoped. See docs/NUMERIC_ARRAYS.md. DS-040 implicit DO OVER is separately scoped in docs/DO_OVER.md.",
    "gate_evidence": [
     {
      "level": "reference-fixture",
@@ -164,6 +168,14 @@
       "suite-numeric-arrays"
      ],
      "scope": "DS-039 fixed one-dimensional numeric declarations, brace/bracket indexed alias reads/writes and SUM OF;1024-element step limit, finite bounded values/exact arithmetic and explicit profile refusals. No DO OVER, character/temporary arrays or new whole-file proof."
+    },
+    {
+     "level": "source-execution",
+     "gates": [
+      "do-over",
+      "suite-do-over"
+     ],
+     "scope": "DS-040 single-level legacy implicit numeric DO OVER with current-element row aliases, fresh internal state, static schema/OUTPUT discovery and atomic failures. Whole loops_foreach.sas source/result/stdout pins and independent base R. Explicit controls, named indices, shared-current arrays, nested loops and wider array forms remain refused."
     }
    ]
   },
@@ -176,12 +188,15 @@
    "disposition": "GATED",
    "rule_ids": [
     "DS-016",
-    "DS-039"
+    "DS-039",
+    "DS-040"
    ],
    "gates": [
     "arrays",
     "numeric-arrays",
-    "suite-numeric-arrays"
+    "suite-numeric-arrays",
+    "do-over",
+    "suite-do-over"
    ],
    "reference_page": 27,
    "gate_evidence": [
@@ -199,9 +214,17 @@
       "suite-numeric-arrays"
      ],
      "scope": "DS-039 fixed one-dimensional numeric declarations, brace/bracket indexed alias reads/writes and SUM OF;1024-element step limit, finite bounded values/exact arithmetic and explicit profile refusals. No DO OVER, character/temporary arrays or new whole-file proof."
+    },
+    {
+     "level": "source-execution",
+     "gates": [
+      "do-over",
+      "suite-do-over"
+     ],
+     "scope": "DS-040 single-level legacy implicit numeric DO OVER with current-element row aliases, fresh internal state, static schema/OUTPUT discovery and atomic failures. Whole loops_foreach.sas source/result/stdout pins and independent base R. Explicit controls, named indices, shared-current arrays, nested loops and wider array forms remain refused."
     }
    ],
-   "note": "Reference DS-016 and bounded source DS-039 evidence are separately scoped. See docs/NUMERIC_ARRAYS.md."
+   "note": "Reference DS-016 and bounded source DS-039 evidence are separately scoped. See docs/NUMERIC_ARRAYS.md. DS-040 implicit DO OVER is separately scoped in docs/DO_OVER.md."
   },
   {
    "entry": "Assignment Statement",
@@ -599,7 +622,8 @@
     "DS-016",
     "DS-026",
     "DS-035",
-    "DS-038"
+    "DS-038",
+    "DS-040"
    ],
    "gates": [
     "do-counted",
@@ -607,10 +631,12 @@
     "do-until",
     "suite-do-until",
     "do-while",
-    "suite-do-while"
+    "suite-do-while",
+    "do-over",
+    "suite-do-over"
    ],
    "reference_page": 81,
-   "note": "Single-level DATA-step numeric pre-test. False/missing truth permits zero trips. Fixed10000-body budget per invocation; false after body10000 succeeds, true there refuses before body10001. _N_ advances per outer DATA row. Entire-step OUTPUT discovery suppresses implicit output even on skipped/zero-trip paths. Nested/combined loop forms stay deferred; other recorded counted/UNTIL/array evidence remains separate.",
+   "note": "Single-level DATA-step numeric pre-test. False/missing truth permits zero trips. Fixed10000-body budget per invocation; false after body10000 succeeds, true there refuses before body10001. _N_ advances per outer DATA row. Entire-step OUTPUT discovery suppresses implicit output even on skipped/zero-trip paths. Nested/combined loop forms stay deferred; other recorded counted/UNTIL/array evidence remains separate. DS-040 implicit DO OVER is separately scoped in docs/DO_OVER.md.",
    "gate_evidence": [
     {
      "level": "source-execution",
@@ -623,6 +649,14 @@
       "suite-do-while"
      ],
      "scope": "Closes one supported counted/UNTIL/WHILE loop; no grouped DO or nested control."
+    },
+    {
+     "level": "source-execution",
+     "gates": [
+      "do-over",
+      "suite-do-over"
+     ],
+     "scope": "DS-040 single-level legacy implicit numeric DO OVER with current-element row aliases, fresh internal state, static schema/OUTPUT discovery and atomic failures. Whole loops_foreach.sas source/result/stdout pins and independent base R. Explicit controls, named indices, shared-current arrays, nested loops and wider array forms remain refused."
     }
    ],
    "related_evidence": {

@@ -718,5 +718,15 @@ review; no live SAS or additional complete external-program proof.
 Bounded numeric declarations, indexed alias reads/writes and SUM OF now execute
 through the shared plan. [The numeric-array profile](NUMERIC_ARRAYS.md) states
 the1024-element, finite numeric, exact arithmetic and eager/lazy refusal contracts.
-Existing output/receipt behavior remains; DO OVER and broader array forms remain
+Existing output/receipt behavior remains; broader array forms remain
 deferred. The reference-only DS-016 witnesses are preserved separately.
+
+
+## Implicit numeric DO OVER
+
+Status: DS-040 repository/base-R evidence for principal/maintainer review, not
+live-SAS validation. [The DO OVER profile](DO_OVER.md) defines current-element
+aliasing, declaration mode, iteration order, resets, schema discovery, OUTPUT
+scheduling, atomic failures and retained refusal boundaries. The complete
+unmodified loops_foreach.sas program has source/result/stdout pins, independent
+base R and source, emitted and CLI execution evidence.
