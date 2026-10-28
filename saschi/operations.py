@@ -7,7 +7,7 @@ containers of unknown kinds as well, preserving conservative source checks.
 from collections.abc import Mapping
 
 
-def walk_operations(ops, *, all_containers=False, _if_depth=0):
+def walk_operations(ops, *, all_containers=False, _if_depth=0, _do_depth=0):
     """Yield original object/mapping nodes in source-order preorder.
 
     Compiled roots may contain serialized children. Preserve their identity and
@@ -15,6 +15,12 @@ def walk_operations(ops, *, all_containers=False, _if_depth=0):
     retains its separate IF and DO scheduling and operation allowlists.
     """
     for op in ops:
+        if isinstance(op, Mapping):
+            if (set(op) != {'kind', 'line', 'args'} or not isinstance(op['args'], Mapping)
+                    or not isinstance(op['kind'], str)):
+                raise ValueError('operation requires kind/line/args mapping')
+        elif not all(hasattr(op, key) for key in ('kind', 'line', 'args')):
+            raise ValueError('operation must be a mapping or compiler operation')
         yield op
         kind, args = (op['kind'], op['args']) if isinstance(op, Mapping) else (op.kind, op.args)
         if kind == 'do_over' and (not isinstance(args, Mapping) or not isinstance(args.get('body'), list)
@@ -27,15 +33,17 @@ def walk_operations(ops, *, all_containers=False, _if_depth=0):
             child = args.get('operation')
             if not isinstance(child, Mapping) and not (hasattr(child, 'kind') and hasattr(child, 'args')):
                 raise ValueError('IF then branch must be an operation')
-            yield from walk_operations([child], all_containers=all_containers, _if_depth=_if_depth + 1)
+            yield from walk_operations([child], all_containers=all_containers, _if_depth=_if_depth + 1, _do_depth=_do_depth)
         if (kind == 'if' or all_containers) and 'otherwise' in args:
             child = args['otherwise']
             if not isinstance(child, Mapping) and not (hasattr(child, 'kind') and hasattr(child, 'args')):
                 raise ValueError('IF otherwise branch must be an operation')
-            yield from walk_operations([child], all_containers=all_containers, _if_depth=_if_depth + 1)
+            yield from walk_operations([child], all_containers=all_containers, _if_depth=_if_depth + 1, _do_depth=_do_depth)
         if kind in ('do_counted', 'do_until', 'do_while', 'do_over') or (all_containers and 'body' in args):
+            if _do_depth >= 8:
+                raise ValueError('DO nesting exceeds the bounded8-level policy')
             body = args.get('body')
             if not isinstance(body, list):
                 label = {'do_counted': 'counted DO', 'do_until': 'DO UNTIL', 'do_while': 'DO WHILE'}.get(kind, 'operation')
                 raise ValueError(f'{label} body must be a list')
-            yield from walk_operations(body, all_containers=all_containers, _if_depth=_if_depth)
+            yield from walk_operations(body, all_containers=all_containers, _if_depth=_if_depth, _do_depth=_do_depth + 1)

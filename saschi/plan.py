@@ -14,6 +14,7 @@ from .parser import Kind, ParseError, Statement, split_statements, tokenize
 from .operations import walk_operations as _walk_operations
 from .rules import route_function, route_statement
 from .arrays import declaration as array_declaration, validate_step as validate_array_step
+from .counted import parse_control, validate_step as validate_counted_step
 
 NAME = r"[A-Za-z_][A-Za-z0-9_]{0,31}"
 NUMBER = re.compile(r"[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?\Z")
@@ -409,6 +410,7 @@ def bind_current(node, name):
 def compile_plan(source: str) -> Plan:
     plan, step, context, active_do = Plan(), None, None, None
     pending_if, chain_length, pending_end = None, 0, None
+    do_parents = []
 
     def append_operation(op):
         if active_do is None:
@@ -521,7 +523,7 @@ def compile_plan(source: str) -> Plan:
             return True
         allowed = {'assign', 'array_set', 'round', 'sum_statement', 'if', 'put', 'put_literal', 'put_character_list', 'put_numeric_list', 'output'}
         if any(child.kind not in allowed or
-               active_do.kind == 'do_counted' and child.kind in ('assign', 'round', 'sum_statement') and child.args['name'] == active_do.args['index']
+               child.kind in ('assign', 'round', 'sum_statement') and child.args['name'] in {loop.args['index'] for loop in do_parents + [active_do] if loop.kind == 'do_counted'}
                for child in walk_operations([op])):
             reject(st, 'do-counted', 'counted DO branches require simple actions and cannot write the loop index')
             return False
@@ -534,6 +536,7 @@ def compile_plan(source: str) -> Plan:
             label = {'do_until': 'DO UNTIL', 'do_while': 'DO WHILE', 'do_over': 'DO OVER'}.get(active_do.kind, 'counted DO')
             plan.tickets.append(Ticket(active_do.line, 'DO', family, label + ' requires a closing END before the step ends'))
             active_do = None
+            do_parents.clear()
         if step and any(o.kind == 'put_all' for o in walk_operations(step.operations)):
             if (step.kind != 'data' or step.inputs or step.by or step.retained or step.where or
                     (step.name == '_null_' and any(o.kind == 'output' for o in step.operations)) or
@@ -669,38 +672,50 @@ def compile_plan(source: str) -> Plan:
                     step.operations.append(active_do)
                     plan.matched.append(('do-' + name, 'DS-035' if name == 'until' else 'DS-038', st.line))
                 continue
-            match = re.fullmatch(r'do\s+(' + NAME + r')\s*=\s*([+-]?[0-9]+)\s+to\s+([+-]?[0-9]+)(?:\s+by\s+([+-]?[0-9]+))?', text, re.I | re.ASCII)
-            if active_do is not None:
-                reject(st, 'do-counted', 'nested DO is deferred')
+            match = re.fullmatch(r'do\s+(' + NAME + r')\s*=\s*(.*?)\s+to\s+(.*?)(?:\s+by\s+(.*))?', text, re.I | re.ASCII)
+            if active_do is not None and active_do.kind != 'do_counted':
+                reject(st, 'do-counted', 'only counted loops can nest in the A2 profile')
             elif context != 'data' or step.kind != 'data' or not match:
-                reject(st, 'do-counted', 'supported DO controls: index=start TO stop [BY step], signed integer literals only')
+                reject(st, 'do-counted', 'supported DO controls: index=start TO stop [BY step]')
             elif match[1].lower() in ('_n_', '_error_', '_infile_', '_file_', '_ods_', '_page_', '_blankpage_'):
                 reject(st, 'do-counted', 'automatic variables cannot be counted DO indices')
+            elif active_do is not None and len(do_parents) >= 7:
+                reject(st, 'do-counted-bounded', 'counted DO exceeds8 nested levels')
             else:
                 try:
-                    start, stop, by = int(match[2]), int(match[3]), int(match[4] or '1')
-                    sas_do_counted(start, stop, by)
+                    start, stop, by = (parse_control(v) for v in (match[2], match[3], match[4] or '1'))
+                    if all(type(v) is int for v in (start, stop, by)):
+                        sas_do_counted(start, stop, by)
                 except ValueError as exc:
                     reject(st, 'do-counted', str(exc))
                 else:
                     name = match[1].lower()
                     step.display_names.setdefault(name, match[1])
                     append_operation(Operation('declare', st.line, {'name': name, 'spec': 'number'}))
-                    active_do = Operation('do_counted', st.line, {'index': name, 'start': start, 'stop': stop, 'by': by, 'body': []})
-                    step.operations.append(active_do)
+                    args = {'index': name, 'start': start, 'stop': stop, 'by': by, 'body': []}
+                    if active_do is not None or any(type(v) is not int for v in (start, stop, by)):
+                        args['profile'] = 'bounded'
+                        for parent in do_parents + ([active_do] if active_do else []):
+                            parent.args['profile'] = 'bounded'
+                        plan.matched.append(('do-counted-bounded', 'DS-041', st.line))
+                    # append_operation serializes children; keep the live stored args.
+                    stored = append_operation(Operation('do_counted', st.line, args))
+                    if active_do is not None:
+                        do_parents.append(active_do)
+                    active_do = Operation('do_counted', st.line, stored)
                     plan.matched.append(('do-counted', 'DS-026', st.line))
             continue
         if re.match(r'^end\b(?!\s*=)', text, re.I):
             if text.lower() != 'end' or active_do is None:
                 reject(st, 'do-counted', 'END requires one open counted DO')
             else:
-                active_do = None
+                active_do = do_parents.pop() if do_parents else None
             continue
         if active_do is not None:
             family = {'do_until': 'do-until', 'do_while': 'do-while', 'do_over': 'do-over'}.get(active_do.kind, 'do-counted')
             label = {'do-until': 'DO UNTIL', 'do-while': 'DO WHILE', 'do-over': 'DO OVER'}.get(family, 'counted DO')
             target = re.match(r'(' + NAME + r')(?:\s*[({\[].*?[)}\]])?\s*(?:=|\+(?!=))', text)
-            if target and active_do.kind == 'do_counted' and target[1].lower() == active_do.args['index']:
+            if target and target[1].lower() in {loop.args['index'] for loop in do_parents + [active_do] if loop.kind == 'do_counted'}:
                 reject(st, 'do-counted', 'assignment to the counted DO index inside its body is deferred')
                 continue
             if not target and not re.match(r'^(?:put|output|if|else)\b', text, re.I):
@@ -877,6 +892,10 @@ def compile_plan(source: str) -> Plan:
                 bind_current(op.args['body'], op.args['name'])
             if op.kind == 'array_declare' and op.args['name'] not in over_names:
                 op.args.pop('mode', None)
+        try:
+            validate_counted_step(asdict(compiled))
+        except ValueError as exc:
+            plan.tickets.append(Ticket(compiled.line, 'DO', 'do-counted-bounded', str(exc)))
         try:
             arrays = validate_array_step(asdict(compiled))
             if arrays:

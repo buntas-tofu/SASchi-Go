@@ -227,7 +227,7 @@ the separate session.
 
 ## Bounded counted DO
 
-DS-026 admits a single-level `DO index=start TO stop [BY step];` group in a
+DS-026 retains the original single-level `DO index=start TO stop [BY step];` group in a
 DATA step. Controls are signed ASCII integer literals, with magnitude at most
 2**31-1, and a nonzero step that defaults to one. The loop is rejected before
 execution when its trip count exceeds 10000. These limits bound the runtime;
@@ -247,8 +247,9 @@ SET may drive several DATA iterations; each counted loop reinitializes its
 index for that DATA iteration. Explicit OUTPUT anywhere in the step suppresses
 bottom-of-step output, including a skipped zero-trip body.
 
-Deferred cases include nested/grouped DO, WHILE/UNTIL, LEAVE/CONTINUE, subsetting
-IF, variable or computed controls, writes to the index inside the body,
+DS-041 separately adds [bounded nested/computed counted loops](COUNTED_LOOPS.md).
+Deferred cases include grouped/conditional DO, combined WHILE/UNTIL,
+LEAVE/CONTINUE, subsetting IF and writes to active indices inside the body,
 declarations or input operations inside the body, MERGE with DO, explicit
 OUTPUT in DATA _NULL_ counted-DO steps, PUT _ALL_ combinations, and C++. These
 are translator boundaries, not a claim that SAS rejects those programs.

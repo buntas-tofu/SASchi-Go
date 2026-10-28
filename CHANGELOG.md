@@ -3,10 +3,17 @@
 Status: development changes with original pins and Python/base-R evidence; no
 live SAS comparison. Branch synchronization is separate from a release.
 
+- Add DS-041 bounded nested/computed counted loops with captured integer controls,
+  eight-level nesting, a shared per-row work budget, protected active indices,
+  skipped-path schema/OUTPUT discovery and atomic failure. Original full-program
+  pins, independent base R and actual CLI/emitted execution provide the evidence.
+  Preserve legacy literal-loop plans. No new complete corpus proof is claimed;
+  the unchanged100_doors.sas still refuses mixed literal/numeric PUT.
+
 - Add bounded numeric source-array declarations, indexed alias reads/writes and
   SUM OF, with independent base-R and original source/OUTPUT evidence. Preserve
-  existing output and receipt behavior. DO OVER and broader array profiles remain
-  deferred; no new complete external-program proof is claimed.
+  existing output and receipt behavior. DS-040 separately supplies bounded numeric
+  DO OVER and the complete loops_foreach.sas proof; broader arrays remain deferred.
 
 - Add bounded counted DO and first-true IF/ELSE actions, including the unchanged
   external FizzBuzz complete-program proof. Preserve skipped-branch schema,

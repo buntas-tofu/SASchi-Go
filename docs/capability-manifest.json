@@ -507,14 +507,17 @@
    "disposition": "GATED",
    "rule_ids": [
     "DS-016",
-    "DS-026"
+    "DS-026",
+    "DS-041"
    ],
    "gates": [
     "do-counted",
-    "suite-do-counted"
+    "suite-do-counted",
+    "counted-nested",
+    "suite-counted-nested"
    ],
    "reference_page": 72,
-   "note": "DS-026 executable slice: single-level DATA-step index=start TO stop [BY step] with signed integer literal controls, magnitudes at most 2**31-1, nonzero step, at most 10000 trips; direct assignments/PUT/OUTPUT in body. Nested, conditional, computed/variable controls, index writes, declarations/input operations in body, DATA _NULL_ explicit OUTPUT, PUT _ALL_, MERGE and C++ are deferred. Existing DS-016 arrays evidence does not widen this translator slice.",
+   "note": "DS-026 preserves single-level signed-integer-literal controls and its existing plan contract. DS-041 adds captured integer-expression controls and at most8 counted levels with distinct protected indices and10000 aggregate A2 iterations per DATA row. Conditional/grouped/combined loops, LAG/DIF in A2, general body declarations/input, DATA _NULL_ OUTPUT, PUT _ALL_, MERGE and C++ remain deferred. See docs/COUNTED_LOOPS.md. Existing DS-016 helper evidence remains separate.",
    "gate_evidence": [
     {
      "level": "source-execution",
@@ -523,6 +526,14 @@
       "suite-do-counted"
      ],
      "scope": "Single-level signed-integer-literal index bounds/step; no computed, nested or DO OVER controls."
+    },
+    {
+     "level": "source-execution",
+     "gates": [
+      "counted-nested",
+      "suite-counted-nested"
+     ],
+     "scope": "DS-041 captured integer controls, bounded counted nesting, row aliases/schema/OUTPUT scheduling and atomic refusals. Original complete-program source/result/stdout pins and independent base R; no new full corpus or live-SAS claim."
     }
    ],
    "related_evidence": {

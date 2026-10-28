@@ -16,8 +16,8 @@ policies. Receipts record what passed for the source and environment tested.
 ## Current verification
 
 Status: version 0.4.0 development evidence for maintainer review, checked on
-2026-10-27. With the pinned Roku corpus present, `python verify_all.py` passes
-48 fixture gates, 38 suites and 683 tests with zero skips. Synthesis adds 60/60
+2026-10-28. With the pinned Roku corpus present, `python verify_all.py` passes
+49 fixture gates, 39 suites and 724 tests with zero skips. Synthesis adds 60/60
 faithful passes and catches 60/60 naive variants. Receipts bind these results to
 the recorded source and environment; live-SAS validation remains outstanding.
 
@@ -34,8 +34,12 @@ with original source pins and independent base-R evidence. Arrays alias row
 variables, preserve descriptors and retain the existing output/receipt paths.
 See the [numeric-array profile](docs/NUMERIC_ARRAYS.md). The separate
 [DO OVER profile](docs/DO_OVER.md) adds single-level implicit numeric current-element
-iteration and the complete unmodified `loops_foreach.sas` proof. Nested loops,
-shared implicit indices and broader array forms remain deferred.
+iteration and the complete unmodified `loops_foreach.sas` proof. DO OVER nesting,
+shared implicit indices and broader array forms remain deferred. The separate
+[A2 counted-loop profile](docs/COUNTED_LOOPS.md) adds bounded nested/computed
+counted loops, captured controls and original complete-program/base-R proofs.
+`100_doors.sas` now compiles but still refuses its mixed literal/numeric PUT;
+no new complete external-program proof is claimed.
 
 ## Operational workflow
 
@@ -70,7 +74,7 @@ fixed expected output and base-R evidence. Special missings retain their tags.
   sibling plus a fixture verifier (`verify_*.py`). Run any verifier directly,
   or all of them through [verify_all.py](verify_all.py).
 - [docs/sasconversionrulebook.json](docs/sasconversionrulebook.json) : the machine-consumable translation
-  rulebook. 75 rules with equivalence classes (EXACT,
+  rulebook. 76 rules with equivalence classes (EXACT,
   EQUIVALENT-WITH-SETTINGS, APPROXIMATE, NO-DIRECT-EQUIVALENT), required
   settings, forbidden patterns, and validation tests.
 - [docs/capability-manifest.json](docs/capability-manifest.json) : the coverage manifest. Enumerated entries of
@@ -256,14 +260,15 @@ The R interpreter is found via `ROSETTA_RSCRIPT`, then `Rscript` on PATH.
 
 ## Bounded source execution
 
-DS-026 gates one counted DO level in a DATA step: `do i=1 to 5 by 2;`
+DS-026 preserves the original single-level literal profile: `do i=1 to 5 by 2;`
 with signed integer literal controls, each magnitude at most 2**31-1, nonzero
 step, and at most 10000 iterations. These are implementation bounds. Direct
 assignments, existing PUT, OUTPUT and DS-031 bounded conditional actions may
 occur in the body; schema and OUTPUT
 suppression still apply at zero trips. The final index passes the stop, and
-`_N_` counts DATA iterations. Nested or conditional loops, computed controls,
-index writes, declarations or input operations inside the body, MERGE,
+`_N_` counts DATA iterations. DS-041 separately adds nested/computed counted
+loops under the [A2 profile](docs/COUNTED_LOOPS.md). Conditional loops,
+active-index writes, general declarations or input operations inside the body, MERGE,
 DATA _NULL_ explicit OUTPUT, PUT _ALL_ combinations, and C++ are deferred.
 [examples/verify_do_counted.py](examples/verify_do_counted.py) and [saschi.test_do_counted](saschi/test_do_counted.py) provide original
 repository pins and an independent base-R witness, with no live SAS claim.
@@ -319,7 +324,7 @@ with simple assignment,
 existing PUT and OUTPUT leaves, including bounded counted-DO bodies. Both branches
 participate in static schema discovery, source guards and explicit OUTPUT
 suppression; only the selected branch executes. Unreachable index writes,
-subsetting IF, nested/grouped DO, input/declarations and PUT_ALL in counted bodies
+subsetting IF, conditional/grouped DO, input/declarations and PUT_ALL in counted bodies
 and conditional ROUND remain refused. [examples/verify_do_if.py](examples/verify_do_if.py) and [saschi.test_do_if](saschi/test_do_if.py) provide original
 base-R branch evidence and an unmodified external FizzBuzz source/stdout/complete-
 result hash proof. Repository/base-R evidence for maintainer review, no live SAS.

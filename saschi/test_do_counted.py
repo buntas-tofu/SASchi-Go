@@ -153,8 +153,7 @@ class CountedDoTests(unittest.TestCase):
         self.assertEqual(result['datasets']['d']['rows'],[{'i':10001.}])
         for header in ('i=0 to 10000','i=10000 to 0 by -1','i=1 to 2 by 0',
                        'i=2147483648 to 2147483648','i=1 to 2 by 2147483648',
-                       'i=1.0 to 2','i=1e0 to 2','i=1 to x','i=x to 2',
-                       'i=1 to 2 by x','i=1 to 2 by 1+1','i=1 to 2 while(1)',
+                       'i=1.0 to 2','i=1e0 to 2','i=1 to 2 while(1)',
                        'i=1 to 2 until(1)','i=1,2','i=١ to ٢','K=1 to 2',
                        '_n_=1 to 2','_file_=1 to 2','i='+'9'*5000+' to 1'):
             with self.subTest(header=header):
@@ -164,11 +163,27 @@ class CountedDoTests(unittest.TestCase):
 
     def test_unsupported_bodies_refuse(self):
         for body in ('I=5','i=round(3,1)','if 1 then i=3','if 1',
-                     'do j=1 to 2; x=1; end','do while(1); end','leave','continue',
+                     'do while(1); end','leave','continue',
                      'length x $3','retain x 0','set a','merge a b','where x=1','put _all_',
                      'output other','file log','input x'):
             with self.subTest(body=body):
                 self.assertTrue(compile_plan('data d; do i=1 to 2; '+body+'; end; run;').blocked)
+
+    def test_formerly_refused_A2_controls_and_nested_body_are_now_verified(self):
+        # Preserve every promoted refusal source with stronger execution assertions.
+        for header in ('i=1 to x', 'i=x to 2', 'i=1 to 2 by x'):
+            source = "data d; put 'before'; do " + header + "; put 'body'; end; run;"
+            job = build_job(source)
+            self.assertEqual(job.code, 1)  # Uninitialized dynamic control, atomic.
+            self.assertIsNone(job.result)
+        source = "data d; put 'before'; do i=1 to 2 by 1+1; put 'body'; end; run;"
+        result, printed = execute(source)
+        self.assertEqual(result, {'datasets': {'d': {'schema': {'i': 'number'},
+                         'rows': [{'i': 3.}]}}, 'log': ['before', 'body']})
+        self.assertEqual(printed, 'before\nbody\n')
+        result, printed = execute('data d; do i=1 to 2; do j=1 to 2; x=1; end; end; run;')
+        self.assertEqual(result['datasets']['d']['rows'], [{'i': 3., 'j': 3., 'x': 1.}])
+        self.assertEqual(printed, '')
 
     def test_formerly_refused_conditional_body_is_now_verified(self):
         # Preserve the exact old source as a value assertion under DS-031.
