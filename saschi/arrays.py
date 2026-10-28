@@ -183,9 +183,14 @@ def validate_step(step, schema=None):
     if any(op['kind'] == 'do_over' for op in flat):
         if '_i_' in set(step.get('retained', {})) | set(step['by']) | set(schema or {}):
             raise ValueError('DO OVER implicit index _I_ is internal in this profile')
+        for op in flat:
+            args = op['args']
+            if (args.get('name') == '_i_' or args.get('index') == '_i_'
+                    or isinstance(args.get('names'), list) and '_i_' in args['names']):
+                raise ValueError('DO OVER implicit index _I_ is internal in this profile')
         for node, _ in expression_nodes(step):
-            if (node.get('name') == '_i_' or node.get('value') == '_i_'
-                    or isinstance(node.get('names'), list) and '_i_' in node['names']):
+            if (node.get('kind') in ('variable', 'automatic') and node.get('value') == '_i_'
+                    or node.get('kind') in KINDS and node.get('name') == '_i_'):
                 raise ValueError('DO OVER implicit index _I_ is internal in this profile')
     arrays, cells, budget = {}, set(), 0
     for op, current in zip(flat, contexts):

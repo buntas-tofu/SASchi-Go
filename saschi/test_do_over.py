@@ -179,6 +179,18 @@ class DoOverTests(unittest.TestCase):
         raw={'raw':{'schema':{'_i_':'number'},'rows':[]}}
         self.assertEqual(job_with_inputs('data d; set raw; array a x; do over a; a=1; end; run;',raw).code,1)
 
+    def test_internal_index_spelling_is_allowed_as_data(self):
+        for literal in ("'_i_'", "'_I_'", '"_i_"'):
+            source='data _i_; array a x; label='+literal+'; do over a; a=1; copied=label; end; put label=; run;'
+            result,printed=execute(source)
+            value=literal[1:-1]
+            self.assertEqual(result,{'datasets':{'_i_':{
+                'schema':{'x':'number','label':{'type':'character','length':3},
+                          'copied':{'type':'character','length':3}},
+                'rows':[{'x':1.,'label':value,'copied':value}]}},'log':['label='+value]})
+            self.assertEqual(printed,'label='+value+'\n')
+        self.blocked('array _i_ x; do over _i_; end;')
+
     def test_boundary_syntax_and_state_conflicts_remain_refused(self):
         for body in ('do over a; a=1; end; array a x;',
                      'array a x; a=1; do over a; end;',

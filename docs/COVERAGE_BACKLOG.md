@@ -12,7 +12,7 @@ Implementation and publication are not authorized by this planning exercise.
 ## Inventory reconciled against actual evidence
 
 The golden command registers48 fixture runners,38 translator suites and1
-synthesis runner. The current acceptance contains682 tests, zero skips,
+synthesis runner. The current acceptance contains683 tests, zero skips,
 60 faithful synthesis checks and60 naive controls. The separate1k workload
 checks total39:18 ledger and21 text. These counts have different units. Neither
 75 rulebook rules nor87 golden-command runners is a SAS capability denominator.
