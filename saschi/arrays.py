@@ -6,7 +6,7 @@ not change. Each reference resolves into the current row's named variables.
 from __future__ import annotations
 
 import re
-from .functions import FUNCTIONS, expression_nodes
+from .functions import FUNCTIONS, LAG_FUNCTIONS, expression_nodes
 from .operations import walk_operations
 from .values import column_type
 from sas_semantics import (SAS_NUMERIC_ARRAY_LIMIT, sas_numeric_array_value,
@@ -18,14 +18,14 @@ RESERVED = {'_n_', '_error_', '_all_', '_numeric_', '_character_', '_temporary_'
 ARRAY_RESERVED = RESERVED | set(FUNCTIONS) | {
     'array', 'data', 'do', 'end', 'if', 'else', 'set', 'merge', 'retain',
     'length', 'output', 'where', 'run', 'quit'}
-KINDS = {'array_get', 'array_sum'}
+KINDS = {'array_get', 'array_sum', 'array_current'}
 
 
 def ordinary(name):
     return isinstance(name, str) and re.fullmatch(NAME, name) and name not in RESERVED
 
 
-def declaration(text):
+def declaration(text, *, preserve_mode=False):
     """Parse only the documented bounded syntax; reject all leftover text."""
     match = re.fullmatch(r'array\s+(' + NAME + r')(?=\s|[({\[]|$)\s*(.*)', text.lower(), re.S)
     if not match:
@@ -74,13 +74,17 @@ def declaration(text):
     else:
         raise ValueError('numeric ARRAY requires fixed integer bounds or inferred * extent')
     result = {'name': name, 'lower': lower, 'names': names}
+    if preserve_mode and extent is None:
+        result['mode'] = 'implicit'
     validate_declaration(result)
     return result
 
 
 def validate_declaration(args):
-    if not isinstance(args, dict) or set(args) != {'name', 'lower', 'names'}:
-        raise ValueError('numeric ARRAY plan requires name/lower/names only')
+    if not isinstance(args, dict) or set(args) not in ({'name', 'lower', 'names'}, {'name', 'lower', 'names', 'mode'}):
+        raise ValueError('numeric ARRAY plan requires name/lower/names and optional implicit mode')
+    if 'mode' in args and (args['mode'] != 'implicit' or type(args['lower']) is not int or args['lower'] != 1):
+        raise ValueError('DO OVER declaration requires implicit mode and lower bound1')
     name, names = args['name'], args['names']
     if (not ordinary(name) or name in ARRAY_RESERVED or not isinstance(names, list) or
             not names or len(names) > SAS_NUMERIC_ARRAY_LIMIT or
@@ -105,7 +109,7 @@ def literal(expr):
     return False, None
 
 
-def validate_expression(expr, arrays, schema=None, depth=0):
+def validate_expression(expr, arrays, schema=None, depth=0, current=None):
     if depth > 32 or not isinstance(expr, dict):
         raise ValueError('numeric array expression exceeds the32-level profile or is malformed')
     kind = expr.get('kind')
@@ -125,14 +129,18 @@ def validate_expression(expr, arrays, schema=None, depth=0):
         if set(expr) != {'kind', 'left', 'op', 'right'} or expr['op'] not in ('+', '-'):
             raise ValueError('numeric array expressions support exact bounded + and - only; store other function results first')
         for side in ('left', 'right'):
-            validate_expression(expr[side], arrays, schema, depth + 1)
+            validate_expression(expr[side], arrays, schema, depth + 1, current)
         literal(expr)
     elif kind in KINDS:
         expected = {'kind', 'name', 'index'} if kind == 'array_get' else {'kind', 'name'}
         if set(expr) != expected or not isinstance(expr['name'], str) or expr['name'] not in arrays:
             raise ValueError('numeric array reference requires a preceding declaration in this DATA step')
+        if kind == 'array_current' and (expr['name'] != current or arrays[expr['name']].get('mode') != 'implicit'):
+            raise ValueError('current element requires its active implicit DO OVER loop')
         if kind == 'array_get':
-            validate_expression(expr['index'], arrays, schema, depth + 1)
+            if arrays[expr['name']].get('mode') == 'implicit':
+                raise ValueError('mixed indexed/current references to a DO OVER array require review')
+            validate_expression(expr['index'], arrays, schema, depth + 1, current)
             known, value = literal(expr['index'])
             if known:
                 a = arrays[expr['name']]
@@ -144,18 +152,48 @@ def validate_expression(expr, arrays, schema=None, depth=0):
 def validate_step(step, schema=None):
     """Enforce source order and plan shape, independently of compiler admission."""
     roots = step['operations']; flat = list(walk_operations(roots))
-    if not any(op['kind'] in ('array_declare', 'array_set') or contains_array(op['args']) for op in flat) and not contains_array(step.get('where')):
+    if not any(op['kind'] in ('array_declare', 'array_set', 'array_current_set', 'do_over') or contains_array(op['args']) for op in flat) and not contains_array(step.get('where')):
         return {}
     if step['kind'] != 'data' or contains_array(step.get('where')):
         raise ValueError('numeric arrays require DATA execution; MERGE and array references in WHERE are deferred')
-    if any(op['kind'] in ('array_declare', 'array_set') and not isinstance(op['args'], dict) for op in flat):
+    if any(op['kind'] in ('array_declare', 'array_set', 'array_current_set', 'do_over') and not isinstance(op['args'], dict) for op in flat):
         raise ValueError('numeric array operation arguments must be mappings')
     all_names = [op['args'].get('name') for op in flat if op['kind'] == 'array_declare']
     if any(not isinstance(n, str) for n in all_names):
         raise ValueError('numeric ARRAY names must be strings')
     all_names = set(all_names)
-    arrays, cells, budget = {}, set(), 0
     for op in flat:
+        if op['kind'] == 'do_over':
+            args = op['args']
+            if (not any(op is root for root in roots) or not isinstance(args, dict)
+                    or set(args) != {'name', 'body'} or not isinstance(args['name'], str)
+                    or not isinstance(args['body'], list)):
+                raise ValueError('DO OVER requires name/body only as an unconditional single-level loop')
+            allowed = {'assign', 'array_current_set', 'if', 'put', 'put_literal', 'put_numeric_list', 'output'}
+            if any(node.get('kind') == 'call' and node.get('name') in LAG_FUNCTIONS
+                   for node, _ in expression_nodes(args)):
+                raise ValueError('DO OVER queue scheduling requires separate review')
+            if any(node.get('kind') == 'array_get' for node, _ in expression_nodes(args)):
+                raise ValueError('indexed array reads inside DO OVER require composition review')
+            for child in walk_operations(args['body']):
+                if child['kind'] not in allowed:
+                    raise ValueError('DO OVER body requires bounded assignments, IF/ELSE, PUT or OUTPUT')
+    contexts = [root['args']['name'] if root['kind'] == 'do_over' and child is not root else None
+                for root in roots for child in walk_operations([root])]
+    if any(op['kind'] == 'do_over' for op in flat):
+        if '_i_' in set(step.get('retained', {})) | set(step['by']) | set(schema or {}):
+            raise ValueError('DO OVER implicit index _I_ is internal in this profile')
+        for op in flat:
+            args = op['args']
+            if (args.get('name') == '_i_' or args.get('index') == '_i_'
+                    or isinstance(args.get('names'), list) and '_i_' in args['names']):
+                raise ValueError('DO OVER implicit index _I_ is internal in this profile')
+        for node, _ in expression_nodes(step):
+            if (node.get('kind') in ('variable', 'automatic') and node.get('value') == '_i_'
+                    or node.get('kind') in KINDS and node.get('name') == '_i_'):
+                raise ValueError('DO OVER implicit index _I_ is internal in this profile')
+    arrays, cells, budget = {}, set(), 0
+    for op, current in zip(flat, contexts):
         kind, args = op['kind'], op['args']
         if kind == 'array_declare':
             if not any(op is root for root in roots):
@@ -167,6 +205,14 @@ def validate_step(step, schema=None):
                 raise ValueError('numeric arrays exceed the1024-element step policy')
             arrays[args['name']] = args
             cells.update(args['names'])
+        elif kind == 'do_over':
+            if args['name'] not in arrays or arrays[args['name']].get('mode') != 'implicit':
+                raise ValueError('DO OVER requires a preceding implicit ARRAY declaration')
+        elif kind == 'array_current_set':
+            if set(args) != {'name', 'value'}:
+                raise ValueError('current-element assignment requires name/value only')
+            validate_expression({'kind': 'array_current', 'name': args['name']}, arrays, schema, current=current)
+            validate_expression(args['value'], arrays, schema, current=current)
         elif kind == 'array_set':
             if set(args) != {'name', 'index', 'value'}:
                 raise ValueError('numeric array assignment requires name/index/value only')
@@ -174,16 +220,16 @@ def validate_step(step, schema=None):
             validate_expression(args['value'], arrays, schema)
         elif contains_array({k: v for k, v in args.items() if k not in ('body', 'operation', 'otherwise')}):
             if kind in ('assign', 'sum_statement'):
-                validate_expression(args['value'], arrays, schema)
+                validate_expression(args['value'], arrays, schema, current=current)
             elif kind in ('if', 'subset', 'do_until', 'do_while'):
                 # Body/branch expressions are checked at their own source positions.
                 for side in ('left', 'right'):
                     if side in args['condition']:
-                        validate_expression(args['condition'][side], arrays, schema)
+                        validate_expression(args['condition'][side], arrays, schema, current=current)
             else:
                 raise ValueError('array references in this operation require composition review')
         payload = {k: v for k, v in args.items() if k not in ('body', 'operation', 'otherwise')}
-        if kind == 'array_set' or contains_array(payload):
+        if kind in ('array_set', 'array_current_set') or contains_array(payload):
             budget += sum(1 for n, _ in expression_nodes(payload) if 'kind' in n)
         if budget > 128:
             raise ValueError('numeric array expressions exceed the128-node step policy')
@@ -195,7 +241,7 @@ def validate_step(step, schema=None):
             raise ValueError('numeric array names/elements cannot be counted DO indices in this slice')
         for node, _ in expression_nodes(args):
             if node.get('kind') == 'variable' and node.get('value') in all_names:
-                raise ValueError('bare array-name references require DO OVER, which is deferred')
+                raise ValueError('bare array-name references require their active DO OVER loop')
         if kind in ('put', 'put_numeric_list') and any(n in all_names for n in args['names']):
             raise ValueError('PUT cannot emit an array name as a scalar')
         if kind == 'sum_statement' and args['name'] in cells:
@@ -214,7 +260,7 @@ def validate_step(step, schema=None):
     return arrays
 
 
-def value(expr, row, arrays):
+def value(expr, row, arrays, current=None):
     """Evaluate only the validated exact numeric array-expression profile."""
     kind = expr['kind']
     if kind in ('number', 'missing'):
@@ -222,11 +268,16 @@ def value(expr, row, arrays):
     if kind in ('variable', 'automatic'):
         return sas_numeric_array_value(row.get(expr['value']))
     if kind == 'arithmetic':
-        return sas_numeric_array_add(value(expr['left'], row, arrays), value(expr['right'], row, arrays), expr['op'] == '-')
+        return sas_numeric_array_add(value(expr['left'], row, arrays, current), value(expr['right'], row, arrays, current), expr['op'] == '-')
     if kind in KINDS:
         a = arrays[expr['name']]
         if kind == 'array_sum':
             return sas_numeric_array_sum([row.get(n) for n in a['names']])
-        index = sas_numeric_array_index(value(expr['index'], row, arrays), a['lower'], len(a['names']))
+        if kind == 'array_current':
+            if current is None or expr['name'] not in current:
+                raise ValueError('current element has no active DO OVER binding')
+            index = current[expr['name']]
+        else:
+            index = sas_numeric_array_index(value(expr['index'], row, arrays, current), a['lower'], len(a['names']))
         return sas_numeric_array_value(row.get(a['names'][index]))
     raise ValueError('expression is outside the numeric array profile')

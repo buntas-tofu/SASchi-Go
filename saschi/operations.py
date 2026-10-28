@@ -17,6 +17,10 @@ def walk_operations(ops, *, all_containers=False, _if_depth=0):
     for op in ops:
         yield op
         kind, args = (op['kind'], op['args']) if isinstance(op, Mapping) else (op.kind, op.args)
+        if kind == 'do_over' and (not isinstance(args, Mapping) or not isinstance(args.get('body'), list)
+                or any(not isinstance(child, Mapping) or set(child) != {'kind', 'line', 'args'}
+                       or not isinstance(child['args'], Mapping) for child in args['body'])):
+            raise ValueError('DO OVER requires a list of well-formed body operations')
         if kind == 'if' and _if_depth >= 32:
             raise ValueError('IF branch nesting exceeds the bounded32-condition policy')
         if kind == 'if' or (all_containers and 'operation' in args):
@@ -29,7 +33,7 @@ def walk_operations(ops, *, all_containers=False, _if_depth=0):
             if not isinstance(child, Mapping) and not (hasattr(child, 'kind') and hasattr(child, 'args')):
                 raise ValueError('IF otherwise branch must be an operation')
             yield from walk_operations([child], all_containers=all_containers, _if_depth=_if_depth + 1)
-        if kind in ('do_counted', 'do_until', 'do_while') or (all_containers and 'body' in args):
+        if kind in ('do_counted', 'do_until', 'do_while', 'do_over') or (all_containers and 'body' in args):
             body = args.get('body')
             if not isinstance(body, list):
                 label = {'do_counted': 'counted DO', 'do_until': 'DO UNTIL', 'do_while': 'DO WHILE'}.get(kind, 'operation')

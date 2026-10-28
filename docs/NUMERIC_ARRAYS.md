@@ -79,7 +79,7 @@ Failures publish no accepted partial dataset or earlier buffered log.
 
 Existing PUT paths and their formatting/width limits are unchanged. PUT a[i],
 PUT array-name, new-array PUT_ALL compositions, array references in WHERE, MERGE
-arrays, character/multidimensional arrays, DO OVER, temporary/initializer-retained
+arrays, character/multidimensional arrays, temporary/initializer-retained
 arrays, array members used as explicit RETAIN/sum-statement/BY/loop-index state,
 DIM/LBOUND/HBOUND source calls and C++ array execution remain deferred. Existing
 general array helper witnesses continue to cover their broader reference slices.
@@ -96,12 +96,11 @@ descriptors, control/OUTPUT composition, state reset, malformed serialized plans
 lazy dynamic indices, eager static refusals and atomic diagnostics. The isolated
 wheel smoke also executes this profile with the standard library alone.
 
-The next authorized feature would need its own request. DO OVER is the next
-proposed slice: implicit current-element binding, iteration order, reset and
-OUTPUT scheduling, followed by the entire pinned loops_foreach.sas witness.
-This slice does not promote that file, partial programs or compile-only files to
-complete-program proofs.100_doors.sas still requires nested/computed loops and
-mixed literal/numeric PUT.
+DS-040 separately supplies [bounded numeric DO OVER](DO_OVER.md): implicit
+current-element binding, declared iteration order, reset and OUTPUT scheduling.
+Its own source suite proves the entire pinned loops_foreach.sas program. DS-039
+remains the indexed-array slice documented here.100_doors.sas still requires
+nested/computed loops and mixed literal/numeric PUT.
 
 Primary syntax inputs: [SAS array syntax](https://support.sas.com/documentation/cdl/en/lrcon/62955/HTML/default/a001022719.htm)
 and [SAS array references](https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000203460.htm).
