@@ -17,11 +17,11 @@ policies. Receipts record what passed for the source and environment tested.
 
 Status: version 0.4.0 development evidence for maintainer review, checked on
 2026-10-28. With the pinned Roku corpus present, `python verify_all.py` passes
-49 fixture gates, 39 suites and 724 tests with zero skips. Synthesis adds 60/60
+50 fixture gates, 40 suites and 755 tests with zero skips. Synthesis adds 60/60
 faithful passes and catches 60/60 naive variants. Receipts bind these results to
 the recorded source and environment; live-SAS validation remains outstanding.
 
-Ten unmodified external programs pass complete-program checks, including
+Eleven unmodified external programs pass complete-program checks, including
 FizzBuzz, the day-of-the-week calendar program and `loops_do_while.sas`, whose
 body-first DO UNTIL composes with a retained sum statement. `loops_while.sas`
 adds bounded division, safe INT and pre-test DO WHILE composition. The bitwise program remains
@@ -38,8 +38,9 @@ iteration and the complete unmodified `loops_foreach.sas` proof. DO OVER nesting
 shared implicit indices and broader array forms remain deferred. The separate
 [A2 counted-loop profile](docs/COUNTED_LOOPS.md) adds bounded nested/computed
 counted loops, captured controls and original complete-program/base-R proofs.
-`100_doors.sas` now compiles but still refuses its mixed literal/numeric PUT;
-no new complete external-program proof is claimed.
+[A3 mixed PUT](docs/MIXED_PUT.md) composes literals with bounded numeric fields.
+The entire unchanged `100_doors.sas` now passes source/result/stdout pins,
+independent base R and the divisor-parity hand check: ten doors remain open.
 
 ## Operational workflow
 
@@ -74,7 +75,7 @@ fixed expected output and base-R evidence. Special missings retain their tags.
   sibling plus a fixture verifier (`verify_*.py`). Run any verifier directly,
   or all of them through [verify_all.py](verify_all.py).
 - [docs/sasconversionrulebook.json](docs/sasconversionrulebook.json) : the machine-consumable translation
-  rulebook. 76 rules with equivalence classes (EXACT,
+  rulebook. 77 rules with equivalence classes (EXACT,
   EQUIVALENT-WITH-SETTINGS, APPROXIMATE, NO-DIRECT-EQUIVALENT), required
   settings, forbidden patterns, and validation tests.
 - [docs/capability-manifest.json](docs/capability-manifest.json) : the coverage manifest. Enumerated entries of

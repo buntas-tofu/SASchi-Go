@@ -162,7 +162,7 @@ def validate_step(step, schema=None):
                for n, _ in expression_nodes(args['body'])):
             raise ValueError('bounded counted LAG/DIF scheduling requires separate review')
         allowed = {'assign', 'array_set', 'round', 'sum_statement', 'if', 'put',
-                   'put_literal', 'put_character_list', 'put_numeric_list', 'output',
+                   'put_literal', 'put_character_list', 'put_numeric_list', 'put_mixed_numeric', 'output',
                    'declare', 'do_counted'}
         for child in children:
             if child['kind'] not in allowed:

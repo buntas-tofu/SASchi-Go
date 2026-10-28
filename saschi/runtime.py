@@ -14,6 +14,8 @@ from sas_semantics import sas_numeric_array_value, sas_numeric_array_index, sas_
 from .arrays import validate_step as validate_array_step, contains_array, value as array_value
 from .counted import validate_step as validate_counted_step, evaluate_control
 from sas_semantics import sas_counted_capture
+from sas_semantics import sas_put_mixed_numeric
+from .put_mixed import validate_items as validate_mixed_put_items
 
 
 def evaluate(expr, row, schema=None, arrays=None, current=None):
@@ -143,6 +145,14 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
     tables, logs = normalize_catalog({} if catalog is None else catalog), []
     for step in plan['steps']:
         inputs, keys, ops = step['inputs'], step['by'], step['operations']
+        # Reject malformed mixed-output plans before other expression walkers or input work.
+        for op in operations(ops):
+            if op['kind'] == 'put_mixed_numeric':
+                args = op['args']
+                if (plan['version'] != 2 or step['kind'] != 'data' or not isinstance(args, dict)
+                        or set(args) != {'items'} or type(op.get('line')) is not int or op['line'] < 1):
+                    raise ValueError('PUT mixed numeric requires version2 DATA, items only and a positive source line')
+                validate_mixed_put_items(args['items'])
         bounded_counted = validate_counted_step(step)
         if bounded_counted and plan['version'] != 2:
             raise ValueError('bounded counted loops require a version2 plan')
@@ -342,7 +352,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                             add_reference(value)
                 if name not in schema or column_type(schema[name]) != 'number':
                     raise ValueError('counted DO index requires a preceding numeric declaration')
-                allowed = {'assign', 'array_set', 'round', 'sum_statement', 'if', 'put', 'put_literal', 'put_character_list', 'put_numeric_list', 'output'}
+                allowed = {'assign', 'array_set', 'round', 'sum_statement', 'if', 'put', 'put_literal', 'put_character_list', 'put_numeric_list', 'put_mixed_numeric', 'output'}
                 if bounded:
                     allowed |= {'declare', 'do_counted'}
                 for child in operations(args['body']):
@@ -383,6 +393,11 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                     raise ValueError('PUT numeric list: nonempty normalized ordinary variable names required')
                 if any(name not in schema for name in names):
                     raise ValueError('PUT numeric list: variables must be known before PUT')
+            elif kind == 'put_mixed_numeric':
+                try:
+                    validate_mixed_put_items(args['items'], schema)
+                except ValueError as error:
+                    raise ValueError(f"SAS line {op['line']}: {error}") from error
             elif kind == 'put_character_list':
                 if not isinstance(args.get('items'), list) or not args['items']:
                     raise ValueError('PUT character list: nonempty plan items required')
@@ -401,7 +416,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                 if kind == 'if':
                     if set(args) not in ({'condition', 'operation'}, {'condition', 'operation', 'otherwise'}):
                         raise ValueError('IF has unexpected plan arguments')
-                    leaves = {'assign', 'array_set', 'array_current_set', 'sum_statement', 'output', 'put', 'put_literal', 'put_character_list', 'put_numeric_list'}
+                    leaves = {'assign', 'array_set', 'array_current_set', 'sum_statement', 'output', 'put', 'put_literal', 'put_character_list', 'put_numeric_list', 'put_mixed_numeric'}
                     true_branch = args['operation']
                     false_branch = args.get('otherwise')
                     if (not isinstance(true_branch, dict) or true_branch.get('kind') not in leaves or
@@ -440,6 +455,11 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
         # Descriptors must be checked even for empty SET inputs or filtered
         # rows. Formats change PUT output and cannot silently be discarded.
         for op in flat:
+            if op['kind'] == 'put_mixed_numeric':
+                try:
+                    validate_mixed_put_items(op['args']['items'], schema)
+                except ValueError as exc:
+                    raise ValueError(f"SAS line {op['line']}: {exc}") from exc
             if op['kind'] == 'put_character_list':
                 resolved = []
                 for item in op['args']['items']:
@@ -616,6 +636,14 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                 elif kind == 'put_numeric_list':
                     try:
                         logs.append(sas_put_numeric_list([row[name] for name in args['names']]))
+                    except ValueError as exc:
+                        raise ValueError(f"SAS line {op['line']}: {exc}") from exc
+                elif kind == 'put_mixed_numeric':
+                    resolved = [item if item['kind'] == 'literal' else
+                                {'kind': 'numeric', 'value': row[item['value']]}
+                                for item in args['items']]
+                    try:
+                        logs.append(sas_put_mixed_numeric(resolved))
                     except ValueError as exc:
                         raise ValueError(f"SAS line {op['line']}: {exc}") from exc
                 elif kind == 'put_character_list':

@@ -73,7 +73,6 @@ class NumericListPutTests(unittest.TestCase):
         for source in ('data _null_; put n; n=7; run;',
                        'data _null_; n=7; put n unknown; run;',
                        "data _null_; n=7; c='A'; put n c; run;",
-                       "data _null_; n=7; put '[' n ']'; run;",
                        "data _null_; set raw; copy=n; put copy; run;"):
             job = build_job(source, numeric_catalog([7]))
             self.assertIn(job.code, (1, 2), source)
@@ -82,6 +81,13 @@ class NumericListPutTests(unittest.TestCase):
             job = build_job('data _null_; set raw; put n; run;', numeric_catalog(values))
             self.assertEqual(job.code, 1)
             self.assertIsNone(job.result)
+
+    def test_former_mixed_literal_numeric_refusal_is_now_gated(self):
+        source="data _null_; n=7; put '[' n ']'; run;"
+        result,stdout=self.execute(source)
+        self.assertEqual(result,{'datasets':{},'log':['[7 ]']})
+        self.assertEqual(stdout,'[7 ]\n')
+        self.assertEqual(build_job(source).code,0)
 
     def test_character_literal_named_and_existing_refusals_are_unchanged(self):
         result, _ = self.execute("data _null_; c=' A '; n=7; put c; put '[' c ']'; put 'hi'; put n=; put n; run;")

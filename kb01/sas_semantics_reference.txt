@@ -461,6 +461,30 @@ def sas_put_numeric_list(values):
     return record
 
 
+def sas_put_mixed_numeric(items):
+    """DS-042 logical record: quoted literals and bounded numeric variables."""
+    if not isinstance(items, (list, tuple)) or not 2 <= len(items) <= 64:
+        raise ValueError('PUT mixed numeric: requires2..64 items')
+    parts, kinds = [], set()
+    for item in items:
+        if not isinstance(item, dict) or set(item) != {'kind', 'value'}:
+            raise ValueError('PUT mixed numeric: each item needs kind and value')
+        kind, value = item['kind'], item['value']
+        if kind == 'literal':
+            parts.append(sas_put_literals([value]))
+        elif kind == 'numeric':
+            parts.append(sas_put_numeric_list([value]))
+        else:
+            raise ValueError('PUT mixed numeric: only literal and numeric items are gated')
+        kinds.add(kind)
+    if kinds != {'literal', 'numeric'}:
+        raise ValueError('PUT mixed numeric: requires both a literal and a numeric variable')
+    record = ''.join(parts)
+    if len(record) > 64:
+        raise ValueError('PUT mixed numeric: output beyond64 columns requires LINESIZE review')
+    return record
+
+
 def sas_put_all(fields):
     """DS-025 scalar named PDV output, followed by _ERROR_=0 and _N_=1.
 

@@ -86,7 +86,7 @@ body input operations, MERGE, DATA _NULL_ explicit OUTPUT, PUT _ALL_ and C++ rem
 deferred. DO OVER stays single-level. Existing numeric-array limits and all output
 and receipt contracts remain in place.
 
-The unchanged100_doors.sas now compiles, but runtime refuses its mixed
-literal/numeric PUT before any accepted output. It is not an eleventh corpus
-proof. A3 must separately characterize and prove that output profile. The full
+DS-042 separately adds [bounded mixed literal/numeric PUT](MIXED_PUT.md).
+The unchanged100_doors.sas now supplies the eleventh complete corpus proof,
+including all source bytes, exact stdout and independent base-R simulation. The full
 loops_for.sas still needs TRIM/STRIP. No corpus source was copied into this tree.

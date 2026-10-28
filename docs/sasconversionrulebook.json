@@ -2134,7 +2134,7 @@
         "Controls use signed ASCII integer literals, ordinary numeric variables, _N_, parentheses and exact integer +/-. Each operand/result must be finite and integral within2147483647; nonzero BY. Missing, tags, coercion, calls and array controls refuse.",
         "At most10000 aggregate A2 loop iterations per DATA row, shared across A2 roots; no synthetic budget/index columns. At most128 control-expression nodes per step,32 expression levels and256 operations per bounded loop body.",
         "Existing assignments, indexed arrays, retained sum statements, bounded IF/ELSE, scalar PUT and named OUTPUT retain their contracts. Schema and OUTPUT discovery includes skipped bodies and empty/filtered inputs; failures publish no accepted partial result or buffered stdout.",
-        "Conditional/grouped loops, WHILE/UNTIL/OVER nesting, index mutation, LAG/DIF inside A2, body declarations except nested index introductions, input operations, MERGE, DATA _NULL_ OUTPUT, mixed literal/numeric PUT and C++ remain deferred."
+        "Conditional/grouped loops, WHILE/UNTIL/OVER nesting, index mutation, LAG/DIF inside A2, body declarations except nested index introductions, input operations, MERGE, DATA _NULL_ OUTPUT and C++ remain deferred. DS-042 separately gates mixed literal/numeric PUT in counted bodies."
       ],
       "silent_difference_checks": [
         "Capture mutable bounds/BY once per entry, recapture inner controls each visit, preserve zero-trip and post-loop index values.",
@@ -2147,6 +2147,40 @@
         "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000201276.htm",
         "https://support.sas.com/documentation/cdl/en/lestmtsref/63323/PDF/default/lestmtsref.pdf",
         "https://www2.sas.com/onlinetutor/linklib/doloop.htm"
+      ]
+    },
+    {
+      "rule_id": "DS-042",
+      "sas_pattern": "Bounded mixed literal and numeric-variable list PUT",
+      "scope": "data-step",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "Ordered literal decoding and existing numeric-list rendering in a separate validated put_mixed_numeric operation; atomic logical records."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent literal scanner, native integer rendering and complete-program door simulation."
+      },
+      "required_settings": [
+        "DATA-step ordered mixtures require at least one quoted literal and one ordinary numeric variable known before PUT in source order. Exact version2 put_mixed_numeric items preserve literal tokens and variable references. The type-neutral statement router retains its earlier route.",
+        "Each numeric field uses the existing unformatted BEST12 integer subset: ordinary missing is a period; finite integral magnitudes at most99999999999 render in decimal followed by one blank. Literals add no separator, preserve their blanks, decode doubled quotes and preserve the existing empty-quote behavior.",
+        "Printable ASCII only,2..64 items and at most64 logical columns including separators. These are implementation bounds. No physical SAS log equivalence is claimed.",
+        "Source-order numeric discovery, descriptors, attached formats and minimum width validate even on empty, filtered or skipped paths. Reached dynamic values validate before publication; any failure discards buffered stdout and accepted results.",
+        "Top-level DATA, bounded simple IF/ELSE and counted-loop bodies only. PUT does not emit rows or alter OUTPUT suppression, schema, aliases or row/run reset. No new internal columns.",
+        "Character/numeric variable mixtures, descriptor-only unknown variables, expressions, direct arrays, automatic names, fractions, tagged missing, attached formats, pointers, line controls, FILE, macros, DO OVER/WHILE/UNTIL mixed-output bodies, MERGE and C++ remain deferred."
+      ],
+      "silent_difference_checks": [
+        "Preserve literal blanks and one following numeric separator, including trailing blanks; reject naive joins, trimming, fractions and width overflow.",
+        "Preserve source-order types, empty/skipped descriptor checks, row aliases, output schedule and atomic failures.",
+        "Pin complete source/result/stdout; independently simulate all100 doors and check divisor parity, with source/emitted/CLI execution."
+      ],
+      "validation_test": "examples/verify_put_mixed_numeric.py; saschi.test_put_mixed_numeric",
+      "confidence": "bounded repository/base-R evidence; no live SAS",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/lestmtsref/63323/HTML/default/p0jcwhe1ofmb49n1xf1q2kc44b0v.htm",
+        "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000161869.htm",
+        "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000178212.htm"
       ]
     }
   ],
@@ -2342,12 +2376,28 @@
         "Controls use signed ASCII integer literals, ordinary numeric variables, _N_, parentheses and exact integer +/-. Each operand/result must be finite and integral within2147483647; nonzero BY. Missing, tags, coercion, calls and array controls refuse.",
         "At most10000 aggregate A2 loop iterations per DATA row, shared across A2 roots; no synthetic budget/index columns. At most128 control-expression nodes per step,32 expression levels and256 operations per bounded loop body.",
         "Existing assignments, indexed arrays, retained sum statements, bounded IF/ELSE, scalar PUT and named OUTPUT retain their contracts. Schema and OUTPUT discovery includes skipped bodies and empty/filtered inputs; failures publish no accepted partial result or buffered stdout.",
-        "Conditional/grouped loops, WHILE/UNTIL/OVER nesting, index mutation, LAG/DIF inside A2, body declarations except nested index introductions, input operations, MERGE, DATA _NULL_ OUTPUT, mixed literal/numeric PUT and C++ remain deferred."
+        "Conditional/grouped loops, WHILE/UNTIL/OVER nesting, index mutation, LAG/DIF inside A2, body declarations except nested index introductions, input operations, MERGE, DATA _NULL_ OUTPUT and C++ remain deferred. DS-042 separately gates mixed literal/numeric PUT in counted bodies."
       ],
       "validation_test": "examples/verify_counted_nested.py",
       "r_witness": "examples/counted_nested.R",
       "boundary_tests": "saschi.test_counted_nested",
       "evidence": "Original whole-program source/result/stdout pins, independent base R and source/emitted/CLI execution. No new complete corpus proof or live SAS."
+    },
+    "put_mixed_numeric": {
+      "rule_id": "DS-042",
+      "target": "saschi.runtime.run_plan",
+      "scope": [
+        "DATA-step ordered mixtures require at least one quoted literal and one ordinary numeric variable known before PUT in source order. Exact version2 put_mixed_numeric items preserve literal tokens and variable references. The type-neutral statement router retains its earlier route.",
+        "Each numeric field uses the existing unformatted BEST12 integer subset: ordinary missing is a period; finite integral magnitudes at most99999999999 render in decimal followed by one blank. Literals add no separator, preserve their blanks, decode doubled quotes and preserve the existing empty-quote behavior.",
+        "Printable ASCII only,2..64 items and at most64 logical columns including separators. These are implementation bounds. No physical SAS log equivalence is claimed.",
+        "Source-order numeric discovery, descriptors, attached formats and minimum width validate even on empty, filtered or skipped paths. Reached dynamic values validate before publication; any failure discards buffered stdout and accepted results.",
+        "Top-level DATA, bounded simple IF/ELSE and counted-loop bodies only. PUT does not emit rows or alter OUTPUT suppression, schema, aliases or row/run reset. No new internal columns.",
+        "Character/numeric variable mixtures, descriptor-only unknown variables, expressions, direct arrays, automatic names, fractions, tagged missing, attached formats, pointers, line controls, FILE, macros, DO OVER/WHILE/UNTIL mixed-output bodies, MERGE and C++ remain deferred."
+      ],
+      "validation_test": "examples/verify_put_mixed_numeric.py",
+      "r_witness": "examples/put_mixed_numeric.R",
+      "boundary_tests": "saschi.test_put_mixed_numeric",
+      "evidence": "9 pins,2400 constructive source/runtime/R cases,18 shared refusals,5 spacing/format controls, original snapshots and full unmodified100_doors.sas source/result/stdout pins. No live SAS."
     }
   }
 }

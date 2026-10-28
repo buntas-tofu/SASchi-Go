@@ -94,6 +94,15 @@ exec(nested.code, namespace)
 assert namespace['result'] == {'datasets': {'d': {
     'schema': {'n': 'number', 'total': 'number', 'i': 'number', 'j': 'number'},
     'rows': [{'n': 2., 'total': 5., 'i': 3., 'j': 3.}]}}, 'log': []}
+mixed = translate("data d; do i=1 to 2; do j=1 to i; put '[' i j ']'; end; end; run;")
+assert not mixed.blocked, mixed.tickets
+namespace = {}; printed = io.StringIO()
+with contextlib.redirect_stdout(printed):
+    exec(mixed.code, namespace)
+assert printed.getvalue() == '[1 1 ]\n[2 1 ]\n[2 2 ]\n'
+assert namespace['result'] == {'datasets': {'d': {
+    'schema': {'i': 'number', 'j': 'number'}, 'rows': [{'i': 3., 'j': 3.}]}},
+    'log': ['[1 1 ]', '[2 1 ]', '[2 2 ]']}
 print('VERIFIED: isolated installed wheel, canonical rulebook, all web assets, CLI entry point, MOD-to-PUT output, calendar, sum/UNTIL and division/INT/WHILE')
 '''
 

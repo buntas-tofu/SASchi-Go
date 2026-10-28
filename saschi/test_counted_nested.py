@@ -257,16 +257,16 @@ class CountedNestedTests(unittest.TestCase):
                 self.assertFalse(job.receipt['accepted']);self.assertNotEqual(job.code,0)
                 self.assertEqual(job.result,hand_result())
 
-    def test_null_output_cpp_and_A3_boundary_remain_closed(self):
+    def test_null_output_cpp_and_promoted_A3_whole_program(self):
         self.assertTrue(compile_plan('data _null_; n=2; do i=1 to n; output; end; run;').blocked)
         self.assertEqual(build_job(PROGRAM.read_text(),target='cpp').code,2)
         source=(ROKU_CORPUS/'100_doors.sas').read_text()
         plan=compile_plan(source)
-        # Entire original remains refused until its separate mixed PUT proof.
+        # DS-042 promotes the exact former runtime refusal to whole-file evidence.
         self.assertFalse(plan.blocked,plan.tickets)
         job=build_job(source)
-        self.assertEqual(job.code,1);self.assertIsNone(job.result)
-        self.assertIn('PUT character list requires unformatted character variables',job.receipt['error'])
+        self.assertEqual(job.code,0);self.assertTrue(job.receipt['accepted'])
+        self.assertEqual(job.result,{'datasets':{},'log':['Number of Open Doors:  10 ']})
 
     def test_step_expression_and_body_operation_budgets(self):
         self.blocked('n=1;'+'do i=1 to n; end;'*43)

@@ -99,8 +99,9 @@ wheel smoke also executes this profile with the standard library alone.
 DS-040 separately supplies [bounded numeric DO OVER](DO_OVER.md): implicit
 current-element binding, declared iteration order, reset and OUTPUT scheduling.
 Its own source suite proves the entire pinned loops_foreach.sas program. DS-039
-remains the indexed-array slice documented here. With DS-041,100_doors.sas compiles
-but still refuses mixed literal/numeric PUT; A3 retains that proof obligation.
+remains the indexed-array slice documented here. DS-041 counted loops and [DS-042 mixed PUT](MIXED_PUT.md)
+compose into a complete unchanged100_doors.sas proof, including independent
+base R and exact source/result/stdout pins.
 
 Primary syntax inputs: [SAS array syntax](https://support.sas.com/documentation/cdl/en/lrcon/62955/HTML/default/a001022719.htm)
 and [SAS array references](https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000203460.htm).
