@@ -10,6 +10,7 @@ import re
 from dataclasses import asdict, dataclass, field
 from sas_semantics import sas_put_literals, sas_put_character_list, sas_put_numeric_list, sas_do_counted, SAS_BITWISE_ARITY
 from .functions import FUNCTIONS, format_token, FORMATS, function_call_lines, substr_context_errors, catx_arguments_allowed, LAG_FUNCTIONS, validate_lag_calls, expression_nodes
+from .trim_strip import validate_step as validate_trim_step
 from .parser import Kind, ParseError, Statement, split_statements, tokenize
 from .operations import walk_operations as _walk_operations
 from .rules import route_function, route_statement
@@ -184,7 +185,9 @@ def call(text, strict=False):
         return None
     if spec.max_args >= 0 and len(parts) > spec.max_args:
         return None
-    values = [_argument(part, index in spec.format_args, strict) for index, part in enumerate(parts)]
+    # B1 admits a single atom. Refuse nested syntax without recursive parsing.
+    values = ([atom(parts[0])] if name in ('trim', 'strip') else
+              [_argument(part, index in spec.format_args, strict) for index, part in enumerate(parts)])
     if any(value is None for value in values):
         return None
     return {"kind": "call", "name": name, "args": values}
@@ -899,6 +902,10 @@ def compile_plan(source: str) -> Plan:
         reject(st, family if family != "unknown" else construct, "no operation for this statement")
     finish()
     for compiled in plan.steps:
+        try:
+            validate_trim_step(asdict(compiled))
+        except ValueError as exc:
+            plan.tickets.append(Ticket(compiled.line, 'TRIM/STRIP', 'trim-strip', str(exc)))
         # Preserve the old serialized shape unless new DO OVER needs source mode.
         over_names = {op.args['name'] for op in walk_operations(compiled.operations) if op.kind == 'do_over'}
         for op in walk_operations(compiled.operations):
@@ -949,7 +956,10 @@ def compile_plan(source: str) -> Plan:
                     reject(st, 'substr', 'checked SUBSTR requires macro-free source character values')
                 if any(not 32 <= ord(char) <= 126 for char in token.text):
                     reject(st, 'substr', 'checked SUBSTR requires printable ASCII source character values')
-    has_strings = any(item[0] == 'concat-catx' for item in plan.matched)
+    for name in ('trim', 'strip'):
+        plan.matched.extend(('trim-strip', 'DS-043', line or 1)
+                            for line in function_call_lines(plan.to_dict(), name))
+    has_strings = any(item[0] in ('concat-catx', 'trim-strip') for item in plan.matched)
     if has_strings or any(contains_put(compiled.operations, {'put_character_list', 'put_numeric_list', 'put_mixed_numeric', 'put_all'}) for compiled in plan.steps):
         # Macros resolve before DATA execution. Without taint tracking, even
         # unused or prior-step literals can affect this output contract.

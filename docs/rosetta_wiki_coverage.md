@@ -56,3 +56,9 @@ Notes:
   Laplace distribution; its material recorded a density value used as
   noise, which is a constant. The laplace gate pins that lesson as a
   landmine and never compares draws.
+
+The later [DS-043 TRIM/STRIP profile](TRIM_STRIP.md) extends character
+concatenation with direct shortened function operands and fixed descriptors.
+This is repository/base-R execution evidence for maintainer review, including
+both DATA steps of the unchanged `loops_for.sas`; no live-SAS claim is made.
+It does not promote the separate C.8 numeric-concatenation rule.

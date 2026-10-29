@@ -30,7 +30,7 @@ evidence; the gate suite is the proof; nothing is verified by assertion.
   a Python verifier (`verify_*.py`), an R twin (`*.R`), and in most cases
   fixture data embedded in the verifier.
 - `docs/sasconversionrulebook.json` : the machine-consumable translation
-  rulebook. 73 rules across data-step (DS), PROC SQL (SQL), statistical
+  rulebook. 78 rules across data-step (DS), PROC SQL (SQL), statistical
   procs (ST), survey procs (SV), the macro layer (MC), and the IML
   matrix surface (MX), each with an
   equivalence class (EXACT, EQUIVALENT-WITH-SETTINGS, APPROXIMATE,
@@ -78,6 +78,12 @@ checked SUBSTR descriptors and supported string compositions, including the
 remaining local temporary-width refusals, bounded conditional actions, unsigned32
 bitwise calls and numeric direct-RHS LAG/DIF invocation queues. The historical fixture
 reference below describes the original interfaces.
+
+The [TRIM/STRIP profile](TRIM_STRIP.md) adds bounded printable ASCII literal or
+variable arguments in assignment and concatenation. Declared widths remain
+fixed while direct function operands contribute shortened bytes. Both DATA
+steps of unchanged `loops_for.sas` have full source/result/stdout pins and an
+independent base-R witness. Nested temporary consumers remain deferred.
 
 ## Requirements
 

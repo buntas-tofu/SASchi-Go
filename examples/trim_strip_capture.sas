@@ -1,0 +1,27 @@
+/* Original DS-043 assignment, snapshot and counted-body witness. */
+data capture;
+length a $4;
+length t $4;
+length s $4;
+length joined $6;
+a=' X ';
+t=trim(a);
+s=strip(a);
+joined='['||strip(a)||']';
+output;
+a=' ';
+t=trim(a);
+s=strip(a);
+joined='['||trim(a)||']';
+output;
+joined='['||strip(a)||']';
+output;
+put joined;
+run;
+data after;
+length a $3;
+do n=1 to 3;
+a=strip(a)||'*';
+output;
+end;
+run;
