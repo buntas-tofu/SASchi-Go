@@ -77,7 +77,7 @@ scalar and supplied-catalog steps retain their earlier behavior.
 ## Evidence
 
 The appended gate checks12 hand pins,600 constructive source/runtime/R cases,
-24 shared refusals and4 wrong-interpretation controls. The25-test suite adds
+24 shared refusals and4 wrong-interpretation controls. The31-test suite adds
 record and row limits, static/empty/skipped schema, state reset, snapshots,
 malformed plans, atomic failure, comparator controls and actual CLI execution.
 An installed wheel exercises inline input without site packages or new runtime

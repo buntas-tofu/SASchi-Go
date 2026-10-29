@@ -7,8 +7,8 @@ from copy import deepcopy
 from sas_semantics import sas_round, sas_merge_by, sas_put_literals, sas_put_character_list, sas_put_numeric_list, sas_put_all, sas_do_counted, sas_concat, SasNumericLagQueue
 from .functions import apply as apply_function, assign_spec, character_width, validate_reverse_calls, validate_string_expressions, expression_nodes, validate_substr_calls, substr_context_errors, validate_bitwise_calls, SAS_BITWISE_ARITY, LAG_FUNCTIONS, validate_lag_calls
 from .operations import walk_operations as operations
-from .values import normalize_catalog, column_type, coerce, missing, order
-from .functions import validate_calendar_calls, validate_sum_expression, validate_numeric_composition
+from .values import normalize_catalog, column_type, coerce, descriptor, missing, order
+from .functions import FUNCTIONS, validate_calendar_calls, validate_sum_expression, validate_numeric_composition
 from sas_semantics import sas_sum_statement, sas_do_until, sas_do_while, sas_divide
 from sas_semantics import sas_numeric_array_value, sas_numeric_array_index, sas_do_over
 from .arrays import validate_step as validate_array_step, contains_array, value as array_value
@@ -143,6 +143,118 @@ def put_all_value(expr, row):
     return value
 
 
+def validate_inline_types(ops, schema, retained):
+    """Check inline scalar descriptors before any complete read can execute."""
+    def ordinary_name(value):
+        return isinstance(value, str) and value != '_n_' and re.fullmatch(r'[a-z_][a-z0-9_]{0,31}', value)
+
+    def expression_type(expr):
+        if not isinstance(expr, dict):
+            raise ValueError('numeric INPUT actions require expression mappings')
+        kind = expr.get('kind')
+        if kind in ('number', 'missing', 'tagged_missing', 'character', 'variable', 'automatic'):
+            if set(expr) != {'kind', 'value'}:
+                raise ValueError('numeric INPUT scalar expression has unexpected fields')
+            if kind == 'number':
+                value = expr['value']
+                if type(value) not in (int, float) or not math.isfinite(value):
+                    raise ValueError('numeric INPUT actions require finite numeric literals')
+            elif kind == 'missing' and expr['value'] is not None:
+                raise ValueError('numeric INPUT ordinary missing requires None')
+            elif kind == 'character' and not isinstance(expr['value'], str):
+                raise ValueError('numeric INPUT character literals require text')
+            elif kind == 'tagged_missing':
+                order(expr['value'])
+                if not isinstance(expr['value'], dict) or set(expr['value']) != {'missing'}:
+                    raise ValueError('numeric INPUT scalar tagged missing requires a valid tag')
+            elif kind == 'variable' and not ordinary_name(expr['value']):
+                raise ValueError('numeric INPUT scalar variables require normalized ordinary names')
+            elif kind == 'automatic' and expr['value'] != '_n_':
+                raise ValueError('numeric INPUT supports only the _N_ automatic reference')
+            if kind == 'variable':
+                return column_type(schema.get(expr['value'], 'number')) if schema is not None else None
+            return 'character' if kind == 'character' else 'number'
+        if kind == 'arithmetic':
+            if (set(expr) != {'kind', 'op', 'left', 'right'} or expr['op'] not in ('+', '-', '/')
+                    or any(expression_type(expr[side]) not in (None, 'number') for side in ('left', 'right'))):
+                raise ValueError('numeric INPUT arithmetic requires numeric operands')
+            return 'number'
+        if kind == 'concat':
+            if (set(expr) != {'kind', 'args'} or not isinstance(expr['args'], list)
+                    or not 2 <= len(expr['args']) <= 32
+                    or any(expression_type(arg) not in (None, 'character') for arg in expr['args'])):
+                raise ValueError('numeric INPUT concatenation requires character operands')
+            return 'character'
+        if kind != 'call' or set(expr) != {'kind', 'name', 'args'}:
+            raise ValueError('numeric INPUT action has an unsupported expression shape')
+        spec, args = FUNCTIONS.get(expr['name']) if isinstance(expr['name'], str) else None, expr['args']
+        if (spec is None or not isinstance(args, list) or len(args) < spec.min_args
+                or spec.max_args >= 0 and len(args) > spec.max_args):
+            raise ValueError('numeric INPUT call requires a wired function and supported arity')
+        name, types = expr['name'], []
+        for index, arg in enumerate(args):
+            if index in spec.format_args:
+                if (not isinstance(arg, dict) or set(arg) != {'kind', 'name', 'w', 'd'}
+                        or arg['kind'] != 'format' or type(arg['w']) is not int or type(arg['d']) is not int
+                        or arg['w'] < 0 or arg['d'] < 0
+                        or name == 'put' and arg['name'] == '' and not 1 <= arg['w'] <= 32767
+                        or arg['name'] != '' and arg['d'] != 0
+                        or arg['name'] not in (('', 'date') if name == 'put' else ('yymmdd',))):
+                    raise ValueError('numeric INPUT call requires a supported format argument')
+                types.append('format')
+            else:
+                types.append(expression_type(arg))
+        if name in ('length', 'lengthn', 'lengthc'):
+            valid = types[0] in (None, 'number', 'character')
+        elif name == 'input':
+            valid = types[0] in (None, 'character') or args[0].get('kind') == 'missing'
+        elif name == 'put':
+            valid = types[0] in (None, 'number')
+        elif name == 'substr':
+            valid = types[0] in (None, 'character') and all(kind in (None, 'number') for kind in types[1:])
+        elif name in ('reverse', 'trim', 'strip', 'catx', 'count'):
+            valid = all(kind in (None, 'character') for kind in types)
+        else:
+            valid = all(kind in (None, 'number') for kind in types)
+        if not valid:
+            raise ValueError(f'numeric INPUT {name.upper()} operands require compatible static types')
+        return spec.returns
+
+    if not isinstance(retained, dict) or any(not ordinary_name(name) for name in retained):
+        raise ValueError('numeric INPUT RETAIN requires normalized ordinary names')
+    for initial in retained.values():
+        if (not isinstance(initial, dict) or initial.get('kind') not in ('number', 'missing')
+                or expression_type(initial) != 'number'):
+            raise ValueError('numeric INPUT RETAIN requires a numeric or ordinary-missing literal')
+    comparisons = {'=', 'eq', '^=', '~=', '<>', 'ne', '<', 'lt', '>', 'gt', '<=', 'le', '>=', 'ge'}
+    for op in ops:
+        kind, args = op['kind'], op['args']
+        if kind == 'declare':
+            if set(args) != {'name', 'spec'} or not ordinary_name(args['name']):
+                raise ValueError('numeric INPUT declaration requires an ordinary name and descriptor')
+            descriptor(args['spec'])
+        elif kind in ('assign', 'round', 'sum_statement'):
+            if (set(args) != ({'name', 'value', 'unit'} if kind == 'round' else {'name', 'value'})
+                    or not ordinary_name(args['name']) or args['name'] == '_n_'):
+                raise ValueError('numeric INPUT scalar assignment has an invalid shape or target')
+            actual = expression_type(args['value'])
+            if schema is not None and actual != column_type(schema[args['name']]):
+                raise ValueError('numeric INPUT assignment requires compatible static types')
+            if kind == 'round' and (actual not in (None, 'number') or expression_type(args['unit']) not in (None, 'number')):
+                raise ValueError('numeric INPUT ROUND requires numeric operands')
+        elif kind in ('if', 'subset'):
+            test = args.get('condition')
+            if (not isinstance(test, dict) or not isinstance(test.get('op'), str)
+                    or test['op'] not in comparisons | {'truth'}
+                    or set(test) != ({'left', 'op'} if test.get('op') == 'truth' else {'left', 'op', 'right'})):
+                raise ValueError('numeric INPUT requires a supported predicate shape')
+            left = expression_type(test['left'])
+            right = expression_type(test['right']) if test['op'] != 'truth' else None
+            if (test['op'] == 'truth' and left not in (None, 'number')
+                    or test['op'] != 'truth' and left is not None and right is not None and left != right):
+                raise ValueError('numeric INPUT predicates require compatible static types')
+
+
 def run_plan(plan, catalog=None, *, allow_partial=False):
     if plan['version'] not in (1, 2):
         raise ValueError('unsupported plan version')
@@ -152,6 +264,8 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
     for step in plan['steps']:
         inputs, keys, ops = step['inputs'], step['by'], step['operations']
         inline_rows = validate_input_step(step, plan['version'])
+        if inline_rows is not None:
+            validate_inline_types(list(operations(ops)), None, step.get('retained', {}))
         validate_trim_step(step, plan['version'])
         # Reject malformed mixed-output plans before other expression walkers or input work.
         for op in operations(ops):
@@ -497,6 +611,8 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
             schema.setdefault(name, 'number')
             if column_type(schema[name]) != 'number':
                 raise ValueError('RETAIN initializers in this slice must be numeric')
+        if inline_rows is not None:
+            validate_inline_types(flat, schema, retained)
         if put_all:
             display = step.get('display_names', {})
             for name, spec in schema.items():

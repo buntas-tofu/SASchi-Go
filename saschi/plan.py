@@ -678,8 +678,9 @@ def compile_plan(source: str) -> Plan:
             continue
         if re.match(r'^input\b(?!\s*=)', text, re.I):
             names = text.split()[1:]
+            source_names_valid = all(re.fullmatch(NAME, name, re.ASCII) for name in names)
             names = [n.lower() for n in names]
-            if (step.kind != 'data' or active_do is not None or not input_names_valid(names)
+            if (step.kind != 'data' or active_do is not None or not source_names_valid or not input_names_valid(names)
                     or any(o.kind != 'declare' for o in step.operations)):
                 reject(st, 'input-list', 'one numeric INPUT with1..32 unique names must be the first top-level executable statement')
             else:

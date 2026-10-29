@@ -17,7 +17,7 @@ policies. Receipts record what passed for the source and environment tested.
 
 Status: version 0.4.0 development evidence for maintainer review, checked on
 2026-10-29. With the pinned Roku corpus present, `python verify_all.py` passes
-52 fixture gates, 42 suites and 810 tests with zero skips. Synthesis adds 60/60
+52 fixture gates, 42 suites and 816 tests with zero skips. Synthesis adds 60/60
 faithful passes and catches 60/60 naive variants. Receipts bind these results to
 the recorded source and environment; live-SAS validation remains outstanding.
 

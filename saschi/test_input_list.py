@@ -50,6 +50,15 @@ class InputListTests(unittest.TestCase):
             self.assertIn(('input-list','DS-044',1),p.matched)
             self.assertEqual(execute(source(['1 2'],header=keyword))[0]['datasets']['d']['rows'],[{'a':1.,'b':2.}])
 
+    def test_source_names_require_ascii_before_normalizing_case(self):
+        for name in ('K','aK','İ','ſ','ı'):
+            with self.subTest(name=name):
+                self.assertTrue(compile_plan(source(['1'],names=[name])).blocked)
+        plan=compile_plan(source(['1 2 3'],names=['A','Input','_value']))
+        self.assertFalse(plan.blocked,plan.tickets)
+        self.assertEqual(plan.steps[0].operations[0].args['names'],['a','input','_value'])
+        self.assertEqual(run_plan(plan.to_dict())['datasets']['d']['rows'],[{'a':1.,'input':2.,'_value':3.}])
+
     def test_crlf_and_blank_records(self):
         text=source(['','1','','2','']).replace('\n','\r\n')
         self.assertEqual(execute(text)[0]['datasets']['d']['rows'],[{'a':1.,'b':2.}])
@@ -67,6 +76,82 @@ class InputListTests(unittest.TestCase):
         for records in ([],['1 2']):
             self.assertEqual(build_job(source(records,prefix='length a $3;')).code,1)
             self.assertEqual(build_job(source(records,body="if 0 then a='x';")).code,1)
+
+    def test_predicate_types_refuse_on_empty_and_skipped_paths(self):
+        bodies=("if a='x' then output;", "if 'x'=a then output;", "if 'x' then output;",
+                "if a='x';", "if 'x';", "if 1 then output;else if a='x' then output;",
+                "if c=a then output;", "if c then output;")
+        for records in ([],['1 2']):
+            for body in bodies:
+                with self.subTest(records=records,body=body):
+                    job=build_job(source(records,prefix='length c $3;',body=body))
+                    self.assertEqual(job.code,1);self.assertIsNone(job.result)
+                    self.assertFalse(job.receipt['accepted'])
+
+    def test_operand_types_refuse_on_empty_and_skipped_paths(self):
+        expressions=("a+'x'", "mod(a,'x')", "sum(a,'x')", "min(a,'x')", "max(a,'x')",
+                     "round(a,'x')", "count(a,'x')", "input(a)", "put('x',8.2)")
+        for records in ([],['1 2']):
+            for expr in expressions:
+                for body in (f'x={expr};',f'if 0 then x={expr};',f'if 1 then output;else x={expr};'):
+                    with self.subTest(records=records,body=body):
+                        job=build_job(source(records,body=body))
+                        self.assertIn(job.code,(1,2));self.assertIsNone(job.result)
+                        self.assertFalse(job.receipt['accepted'])
+
+    def test_static_types_preserve_explicit_conversion_and_character_composition(self):
+        body=("c='12';parsed=input(c);ordinary=input(.);width=length(a);hits=count(c,'1');"
+              "formatted=put(a,8.2);backward=reverse(c);total=sum(a,b);if c='12' then output;")
+        for records in ([],['1 2']):
+            job=build_job(source(records,prefix='length c $3;',body=body))
+            self.assertEqual(job.code,0,job.receipt.get('error'))
+            rows=job.result['datasets']['d']['rows']
+            if not records:self.assertEqual(rows,[])
+            else:self.assertEqual(rows,[{'c':'12 ','a':1.,'b':2.,'parsed':12.,'ordinary':None,
+                                        'width':12.,'hits':1.,'formatted':'    1.00','backward':' 21','total':3.}])
+            tagged=build_job(source(records,body='tagged=.A;if tagged=.A then output;'))
+            self.assertEqual(tagged.code,0,tagged.receipt.get('error'))
+            self.assertEqual(tagged.result['datasets']['d']['rows'],
+                             [{'a':1.,'b':2.,'tagged':{'missing':'A'}}] if records else [])
+
+    def test_forged_empty_predicate_and_expression_shapes_refuse(self):
+        original=compile_plan(source([],body='if a>0;')).to_dict()
+        bad_tests=({}, {'op':'truth'}, {'op':[],'left':{'kind':'number','value':1}},
+                   {'op':'other','left':{'kind':'number','value':1}},
+                   {'op':'truth','left':{'kind':'character','value':'x'}},
+                   {'op':'=','left':{'kind':'variable','value':'a'},'right':{'kind':'character','value':'x'}},
+                   {'op':'truth','left':{'kind':'unknown','value':1}},
+                   {'op':'truth','left':{'kind':'number','value':True}},
+                   {'op':'truth','left':{'kind':'call','name':'sum','args':[]}},
+                   {'op':'truth','left':{'kind':'call','name':'sum','args':[{'kind':'character','value':'x'}]}},
+                   {'op':'truth','left':{'kind':'call','name':'sum','args':[{'kind':'format','name':'','w':8,'d':2}]}},
+                   {'op':'truth','left':{'kind':'variable','value':[]}},
+                   {'op':'truth','left':{'kind':'automatic','value':'unknown'}},
+                   {'op':'truth','left':{'kind':'tagged_missing','value':{'missing':'bad'}}})
+        for test in bad_tests:
+            p=deepcopy(original);p['steps'][0]['operations'][1]['args']['condition']=test
+            with self.subTest(test=test),self.assertRaises(ValueError):run_plan(p)
+        formatted=compile_plan(source([],body='x=put(a,8.2);')).to_dict()
+        for key,value in (('w',0),('w',32768),('d',-1),('d',True),('name','yymmdd')):
+            p=deepcopy(formatted);p['steps'][0]['operations'][1]['args']['value']['args'][1][key]=value
+            with self.subTest(key=key,value=value),self.assertRaises(ValueError):run_plan(p)
+        rounded=compile_plan(source([],body='x=round(a,b);')).to_dict()
+        del rounded['steps'][0]['operations'][1]['args']['unit']
+        with self.assertRaises(ValueError):run_plan(rounded)
+        declared=compile_plan(source([],prefix='length c $3;')).to_dict()
+        for key,value in (('name','_n_'),('name',[]),('spec',{'type':'character','length':0})):
+            p=deepcopy(declared);p['steps'][0]['operations'][0]['args'][key]=value
+            with self.subTest(key=key,value=value),self.assertRaises(ValueError):run_plan(p)
+
+    def test_forged_empty_retain_initializers_refuse(self):
+        original=compile_plan(source([])).to_dict()
+        for initial in ({'kind':'character','value':'x'}, {'kind':'variable','value':'a'},
+                        {'kind':'number','value':True}, {'kind':'number','value':float('inf')},
+                        {'kind':'missing','value':0}, {'kind':'number','value':1,'extra':True}):
+            p=deepcopy(original);p['steps'][0]['retained']={'x':initial}
+            with self.subTest(initial=initial),self.assertRaises(ValueError):run_plan(p)
+        p=deepcopy(original);p['steps'][0]['retained']={'_n_':{'kind':'number','value':7}}
+        with self.assertRaises(ValueError):run_plan(p)
 
     def test_input_overwrites_retained_target_and_resets_scratch(self):
         result,_=execute(source(['1 2','3 4'],prefix='retain a 7;',body='before=scratch;scratch=a;a=99;'))
