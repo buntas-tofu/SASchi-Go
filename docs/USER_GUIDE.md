@@ -30,7 +30,7 @@ evidence; the gate suite is the proof; nothing is verified by assertion.
   a Python verifier (`verify_*.py`), an R twin (`*.R`), and in most cases
   fixture data embedded in the verifier.
 - `docs/sasconversionrulebook.json` : the machine-consumable translation
-  rulebook. 79 rules across data-step (DS), PROC SQL (SQL), statistical
+  rulebook. 81 rules across data-step (DS), PROC SQL (SQL), statistical
   procs (ST), survey procs (SV), the macro layer (MC), and the IML
   matrix surface (MX), each with an
   equivalence class (EXACT, EQUIVALENT-WITH-SETTINGS, APPROXIMATE,
@@ -367,3 +367,27 @@ and scalar OUTPUT scheduling are checked against independent base R. See
 [the bounded input contract](INPUT_LIST.md) for exact numeric/record limits,
 whole-program pins and deferred forms. This is repository evidence, not live-SAS
 validation.
+
+
+## Bounded numeric composition and complete basic programs
+
+DS-045 admits exact bounded binary64 multiplication in existing numeric expression
+contexts, including permitted arrays and control bodies. Products, operands and
+new product-bearing intermediates stay within2147483647; ordinary missing
+propagates after operand checks. New rounding/error-state, exponentiation, counted
+control multiplication and C++ require separate evidence. Existing division and
+INT limits remain in place.
+
+DS-046 lets a catalog-free DATA numeric-list PUT discover an ordinary numeric
+column as missing. Static schema discovery covers skipped/empty paths and earlier
+OUTPUT snapshots; scratch resets across rows, steps and runs. Existing formatting
+and64-column limits remain. See [the numeric composition profile](NUMERIC_COMPOSITION.md)
+for exact limits, representation and complete-program pins. The unchanged array
+sum target leaves c unassigned; its missing value must not be replaced by an
+invented product.
+
+The separate corpus-basics suite proves existing hello-world and comment-only
+execution through full-source accounting, independent base R, exact logical logs,
+emitted execution and actual CLI jobs. A comment-only source is accepted as an
+explicit no-op, with no datasets or log records. These are repository/base-R
+whole-program proofs, not live-SAS validation or additional language features.

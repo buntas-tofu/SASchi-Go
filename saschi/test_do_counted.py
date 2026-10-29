@@ -210,8 +210,11 @@ class CountedDoTests(unittest.TestCase):
 
     def test_zero_trip_descriptor_validation_and_atomic_failure(self):
         source="data d; put 'before'; do i=2 to 1; put c; end; run;"
-        # Catalog-free uninitialized PUT remains a compiler refusal.
-        self.assertTrue(compile_plan(source).blocked)
+        # DS-046 discovers skipped output-only numeric columns without executing PUT.
+        result,printed=execute(source)
+        self.assertEqual(result,{'datasets':{'d':{'schema':{'i':'number','c':'number'},
+                         'rows':[{'i':2.,'c':None}]}},'log':['before']})
+        self.assertEqual(printed,'before\n')
         source="data d; set a; put 'before'; do i=2 to 1; put c; end; run;"
         inputs={'a':{'schema':{'c':{'type':'character','length':2,'format':'$2.'}},'rows':[]}}
         self.assertEqual(job_with_inputs(source,inputs).code,1)

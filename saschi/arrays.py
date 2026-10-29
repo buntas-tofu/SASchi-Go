@@ -10,7 +10,7 @@ from .functions import FUNCTIONS, LAG_FUNCTIONS, expression_nodes
 from .operations import walk_operations
 from .values import column_type
 from sas_semantics import (SAS_NUMERIC_ARRAY_LIMIT, sas_numeric_array_value,
-                           sas_numeric_array_index, sas_numeric_array_add, sas_numeric_array_sum)
+                           sas_numeric_array_index, sas_numeric_array_add, sas_numeric_array_sum, sas_multiply)
 
 NAME = r'[a-z_][a-z0-9_]{0,31}'
 RESERVED = {'_n_', '_error_', '_all_', '_numeric_', '_character_', '_temporary_',
@@ -105,7 +105,7 @@ def literal(expr):
     if kind == 'arithmetic':
         a, x = literal(expr['left']); b, y = literal(expr['right'])
         if a and b:
-            return True, sas_numeric_array_add(x, y, expr['op'] == '-')
+            return True, sas_multiply(x, y) if expr['op'] == '*' else sas_numeric_array_add(x, y, expr['op'] == '-')
     return False, None
 
 
@@ -126,8 +126,8 @@ def validate_expression(expr, arrays, schema=None, depth=0, current=None):
         if schema is not None and column_type(schema.get(expr['value'], 'number')) != 'number':
             raise ValueError('numeric array expression cannot coerce a character descriptor')
     elif kind == 'arithmetic':
-        if set(expr) != {'kind', 'left', 'op', 'right'} or expr['op'] not in ('+', '-'):
-            raise ValueError('numeric array expressions support exact bounded + and - only; store other function results first')
+        if set(expr) != {'kind', 'left', 'op', 'right'} or expr['op'] not in ('+', '-', '*'):
+            raise ValueError('numeric array expressions support exact bounded +, - and * only; store other function results first')
         for side in ('left', 'right'):
             validate_expression(expr[side], arrays, schema, depth + 1, current)
         literal(expr)
@@ -268,7 +268,8 @@ def value(expr, row, arrays, current=None):
     if kind in ('variable', 'automatic'):
         return sas_numeric_array_value(row.get(expr['value']))
     if kind == 'arithmetic':
-        return sas_numeric_array_add(value(expr['left'], row, arrays, current), value(expr['right'], row, arrays, current), expr['op'] == '-')
+        left, right = value(expr['left'], row, arrays, current), value(expr['right'], row, arrays, current)
+        return sas_multiply(left, right) if expr['op'] == '*' else sas_numeric_array_add(left, right, expr['op'] == '-')
     if kind in KINDS:
         a = arrays[expr['name']]
         if kind == 'array_sum':

@@ -2249,6 +2249,69 @@
         "https://support.sas.com/documentation/cdl/en/lestmtsref/63323/HTML/default/n1rill4udj0tfun1fvce3j401plo.htm",
         "https://support.sas.com/documentation/cdl/en/lrcon/62955/HTML/default/a003209907.htm"
       ]
+    },
+    {
+      "rule_id": "DS-045",
+      "sas_pattern": "Bounded exact binary64 multiplication",
+      "scope": "data-step",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "Execute the bounded profile after independent source/serialized-plan and static descriptor validation."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent native R exact bit-product and PDV scheduling witnesses."
+      },
+      "required_settings": [
+        "Finite numeric operands and results have magnitude at most2147483647; ordinary missing propagates only after both operands validate. Bool, character coercion, special missing tags, nonfinite, overflow, underflow and rounded products refuse. Zero normalizes. These are implementation limits, not SAS limits.",
+        "Multiplication shares division precedence and associates left to right, below parentheses and above addition/subtraction. Exponentiation and wider arithmetic are separate contracts.",
+        "An arithmetic subtree containing multiplication uses exact bounded addition/subtraction, the existing exact division contract and exact multiplication, validating all leaves and reached intermediates. Unrelated earlier arithmetic keeps its behavior. Numeric function operands retain their existing allowed shapes and consumers.",
+        "Scalar assignment, supplied numeric DATA input, IF/WHERE, retained sum statements and existing permitted counted/array bodies compose. Numeric-array bounds and alias/state contracts remain unchanged. Counted control multiplication, broader array-call/division composition and C++ remain refused.",
+        "Literal and descriptor errors refuse on empty, filtered, skipped and zero-trip paths. Dynamic values validate only when reached. New product trees have32 expression levels and the existing128 arithmetic/call-node-per-step limit. Source and serialized plans check independently; failures publish no accepted partial result or buffered stdout. A separate256-container structural-depth guard rejects forged wrappers before recursive descriptor checks."
+      ],
+      "silent_difference_checks": [
+        "Preserve existing gate order, earlier plan shape, ordinary missing and atomic result/stdout publication.",
+        "Pin the complete unchanged target and independent whole-source accounting; do not infer wider SAS support."
+      ],
+      "validation_test": "examples/verify_multiply.py; saschi.test_numeric_composition",
+      "confidence": "bounded repository/base-R evidence; no live SAS",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/basess/58133/HTML/default/a001334675.htm",
+        "https://support.sas.com/documentation/cdl/en/lrcon/62955/HTML/default/a000989183.htm"
+      ]
+    },
+    {
+      "rule_id": "DS-046",
+      "sas_pattern": "Bounded output-only numeric discovery in list PUT",
+      "scope": "data-step",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "Execute the bounded profile after independent source/serialized-plan and static descriptor validation."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent native R exact bit-product and PDV scheduling witnesses."
+      },
+      "required_settings": [
+        "Only version2 catalog-free DATA steps use numeric-list PUT discovery. New ordinary numeric names become ordinary-missing PDV columns in first-use source order; they remain missing until assigned. Existing known-name PUT plans retain exactly their previous serialized shape.",
+        "Only new put_numeric_list operations carry an optional nonempty unique discover list contained in names. Marker shape, normalized ordinary names, scope, descriptors and minimum output width validate before execution, including empty or skipped paths. Unmarked older plans retain their known-before-PUT check.",
+        "Static discovery includes permitted nested/skipped bodies and columns first seen after OUTPUT, so earlier snapshots include their current missing value. Discovered scratch resets per row, step and run. Later ordinary scalar uses and existing output forms see the established numeric descriptor.",
+        "Existing numeric-list formatting remains: ordinary missing period, finite bounded integer rendering, one following blank per field and at most64 logical columns. This slice adds no fractional, mixed unknown-name, format, automatic-name, special missing, pointer or line-control output.",
+        "SET/lookup/catalog-dependent discovery, MERGE/SORT discovery, direct array output and C++ remain deferred. Physical SAS uninitialized-variable notes and log diagnostics are not emulated. The full sum_and_product_of_an_array.sas proof preserves unassigned c as missing instead of inventing a product."
+      ],
+      "silent_difference_checks": [
+        "Preserve existing gate order, earlier plan shape, ordinary missing and atomic result/stdout publication.",
+        "Pin the complete unchanged target and independent whole-source accounting; do not infer wider SAS support."
+      ],
+      "validation_test": "examples/verify_numeric_discovery.py; saschi.test_numeric_composition",
+      "confidence": "bounded repository/base-R evidence; no live SAS",
+      "sources": [
+        "https://support.sas.com/publishing/pubcat/chaps/55625.pdf",
+        "https://support.sas.com/documentation/cdl/en/lrcon/62955/HTML/default/a000695113.htm",
+        "https://support.sas.com/documentation/cdl/en/lestmtsref/63323/HTML/default/p0jcwhe1ofmb49n1xf1q2kc44b0v.htm"
+      ]
     }
   ],
   "runtime_capabilities": {
@@ -2496,6 +2559,36 @@
       "r_witness": "examples/input_list.R",
       "boundary_tests": "saschi.test_input_list",
       "evidence": "12 hand pins,600 constructive source/runtime/R cases,24 shared refusals,4 naive controls, original five-snapshot program and whole unchanged integer_comparison.sas. No live SAS."
+    },
+    "multiplication": {
+      "rule_id": "DS-045",
+      "target": "saschi.runtime.run_plan",
+      "scope": [
+        "Finite numeric operands and results have magnitude at most2147483647; ordinary missing propagates only after both operands validate. Bool, character coercion, special missing tags, nonfinite, overflow, underflow and rounded products refuse. Zero normalizes. These are implementation limits, not SAS limits.",
+        "Multiplication shares division precedence and associates left to right, below parentheses and above addition/subtraction. Exponentiation and wider arithmetic are separate contracts.",
+        "An arithmetic subtree containing multiplication uses exact bounded addition/subtraction, the existing exact division contract and exact multiplication, validating all leaves and reached intermediates. Unrelated earlier arithmetic keeps its behavior. Numeric function operands retain their existing allowed shapes and consumers.",
+        "Scalar assignment, supplied numeric DATA input, IF/WHERE, retained sum statements and existing permitted counted/array bodies compose. Numeric-array bounds and alias/state contracts remain unchanged. Counted control multiplication, broader array-call/division composition and C++ remain refused.",
+        "Literal and descriptor errors refuse on empty, filtered, skipped and zero-trip paths. Dynamic values validate only when reached. New product trees have32 expression levels and the existing128 arithmetic/call-node-per-step limit. Source and serialized plans check independently; failures publish no accepted partial result or buffered stdout. A separate256-container structural-depth guard rejects forged wrappers before recursive descriptor checks."
+      ],
+      "validation_test": "examples/verify_multiply.py",
+      "r_witness": "examples/multiply.R",
+      "boundary_tests": "saschi.test_numeric_composition",
+      "evidence": "Separate semantic gates, independent base R, original snapshots and complete unchanged sum_and_product_of_an_array.sas source/result/stdout pins. No live SAS."
+    },
+    "put_numeric_discovery": {
+      "rule_id": "DS-046",
+      "target": "saschi.runtime.run_plan",
+      "scope": [
+        "Only version2 catalog-free DATA steps use numeric-list PUT discovery. New ordinary numeric names become ordinary-missing PDV columns in first-use source order; they remain missing until assigned. Existing known-name PUT plans retain exactly their previous serialized shape.",
+        "Only new put_numeric_list operations carry an optional nonempty unique discover list contained in names. Marker shape, normalized ordinary names, scope, descriptors and minimum output width validate before execution, including empty or skipped paths. Unmarked older plans retain their known-before-PUT check.",
+        "Static discovery includes permitted nested/skipped bodies and columns first seen after OUTPUT, so earlier snapshots include their current missing value. Discovered scratch resets per row, step and run. Later ordinary scalar uses and existing output forms see the established numeric descriptor.",
+        "Existing numeric-list formatting remains: ordinary missing period, finite bounded integer rendering, one following blank per field and at most64 logical columns. This slice adds no fractional, mixed unknown-name, format, automatic-name, special missing, pointer or line-control output.",
+        "SET/lookup/catalog-dependent discovery, MERGE/SORT discovery, direct array output and C++ remain deferred. Physical SAS uninitialized-variable notes and log diagnostics are not emulated. The full sum_and_product_of_an_array.sas proof preserves unassigned c as missing instead of inventing a product."
+      ],
+      "validation_test": "examples/verify_numeric_discovery.py",
+      "r_witness": "examples/numeric_discovery.R",
+      "boundary_tests": "saschi.test_numeric_composition",
+      "evidence": "Separate semantic gates, independent base R, original snapshots and complete unchanged sum_and_product_of_an_array.sas source/result/stdout pins. No live SAS."
     }
   }
 }

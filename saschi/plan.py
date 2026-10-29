@@ -279,6 +279,10 @@ def _string_nodes(value):
 
 def expression(text, _depth=0, strict=False):
     text = text.strip()
+    # A failed depth-budget split must never regroup a product and hide an
+    # invalid intermediate behind zero or missing in another parse tree.
+    unquoted = re.sub(r"'(?:[^']|'')*'|\"(?:[^\"]|\"\")*\"", '', text)
+    strict = strict or '*' in unquoted
     if _depth > 32:
         return None
     parts = _concat_parts(text)
@@ -304,7 +308,7 @@ def expression(text, _depth=0, strict=False):
                 if depth == 0 and index != len(text) - 1: enclosed = False
         if enclosed and depth == 0 and not quote:
             return expression(text[1:-1], _depth + 1, strict)
-    for operators in ('+-', '/'):
+    for operators in ('+-', '/*'):
         positions = _arithmetic_positions(text, operators)
         # New array expressions use deterministic precedence instead of trying
         # alternative binary splits after a depth/budget refusal.
@@ -387,6 +391,9 @@ def put_known_types(ops):
         elif kind in ('array_declare', 'input_list'):
             for name in args['names']:
                 known.setdefault(name, 'number')
+        elif kind == 'put_numeric_list':
+            for name in args.get('discover', []):
+                known.setdefault(name, 'number')
         elif kind in ('assign', 'round', 'sum_statement'):
             known.setdefault(args['name'], 'number' if kind in ('round', 'sum_statement') else expression_type(args['value']))
     return known
@@ -457,7 +464,13 @@ def compile_plan(source: str) -> Plan:
                 return None
             names = [item.text.lower() for item in items if item.kind == Kind.WORD]
             types = put_known_types(step.operations)
-            if all(item.kind == Kind.WORD for item in items) and all(types.get(name) == 'number' for name in names):
+            discover = list(dict.fromkeys(name for name in names if name not in types))
+            discovery_profile = (bool(discover) and step.kind == 'data' and not step.inputs
+                and not any(o.kind == 'lookup' for o in step.operations)
+                and all(item.kind == Kind.WORD and re.fullmatch(NAME, item.text, re.ASCII) for item in items)
+                and all(name not in types or types[name] == 'number' for name in names))
+            if all(item.kind == Kind.WORD for item in items) and (
+                    all(types.get(name) == 'number' for name in names) or discovery_profile):
                 if any(name in ('_n_', '_infile_', '_file_', '_ods_', '_page_', '_blankpage_') for name in names):
                     reject(st, 'put', 'PUT automatic variables and special controls require review')
                     return None
@@ -467,7 +480,11 @@ def compile_plan(source: str) -> Plan:
                     reject(st, 'put', str(exc))
                 else:
                     plan.matched.append(('put-numeric-list', 'DS-027', st.line))
-                    return Operation('put_numeric_list', st.line, {'names': names})
+                    args = {'names': names}
+                    if discovery_profile:
+                        args['discover'] = discover
+                        plan.matched.append(('put-numeric-discovery', 'DS-046', st.line))
+                    return Operation('put_numeric_list', st.line, args)
                 return None
             if any(item.kind == Kind.STRING for item in items) and all(types.get(name) == 'number' for name in names):
                 mixed = [{'kind': 'literal', 'value': item.text} if item.kind == Kind.STRING
@@ -565,6 +582,10 @@ def compile_plan(source: str) -> Plan:
         if step:
             flat = list(walk_operations(step.operations))
             for op in flat:
+                if op.kind == 'put_numeric_list' and 'discover' in op.args and (
+                        step.inputs or any(o.kind == 'lookup' for o in step.operations)):
+                    plan.tickets.append(Ticket(op.line, 'PUT', 'put-numeric-discovery',
+                        'output-only numeric discovery requires a catalog-free DATA step'))
                 if op.kind == 'sum_statement':
                     if step.kind != 'data' or op.args['name'] in step.by:
                         plan.tickets.append(Ticket(op.line, 'SUM', 'sum-statement', 'sum statements require DATA execution and cannot change BY keys'))
@@ -1029,15 +1050,16 @@ def compile_plan(source: str) -> Plan:
         plan.matched.extend(('calendar', 'DS-033', line or 1)
                             for line in function_call_lines(plan.to_dict(), name))
     numeric_nodes = [(node, line) for node, line in expression_nodes(plan.to_dict())
-                     if node.get('kind') == 'arithmetic' and node.get('op') == '/'
+                     if node.get('kind') == 'arithmetic' and node.get('op') in ('/', '*')
                      or node.get('kind') == 'call' and node.get('name') == 'int']
     for node, line in numeric_nodes:
-        family, rule = ('int', 'DS-037') if node['kind'] == 'call' else ('division', 'DS-036')
+        family, rule = (('int', 'DS-037') if node['kind'] == 'call' else
+                        ('multiplication', 'DS-045') if node['op'] == '*' else ('division', 'DS-036'))
         plan.matched.append((family, rule, line or 1))
     if numeric_nodes:
         for compiled in plan.steps:
             nodes = [node for node, _ in expression_nodes(asdict(compiled))]
-            if not any(node.get('kind') == 'arithmetic' and node.get('op') == '/'
+            if not any(node.get('kind') == 'arithmetic' and node.get('op') in ('/', '*')
                        or node.get('kind') == 'call' and node.get('name') == 'int' for node in nodes):
                 continue
             count = sum(node.get('kind') in ('arithmetic', 'call') for node in nodes)

@@ -1,0 +1,30 @@
+/* Original B3 composition witness; repository/base-R evidence, no live SAS. */
+data capture;
+array a{0:2} first second third;
+first=1.5;
+second=2;
+third=.;
+factor=2;
+do i=0 to 2;
+  a{i}=a{i}*factor;
+end;
+total=sum(of a{*});
+product=first*second;
+output;
+first=first*2;
+product=first*second;
+output;
+put total product untouched;
+run;
+
+data fresh;
+array a{0:1} first second;
+first=3;
+second=4;
+do i=0 to 1;
+  a{i}=a{i}*2;
+end;
+product=first*second;
+output;
+put product;
+run;

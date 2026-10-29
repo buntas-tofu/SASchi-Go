@@ -1513,7 +1513,8 @@
     "DS-024",
     "DS-025",
     "DS-027",
-    "DS-042"
+    "DS-042",
+    "DS-046"
    ],
    "gates": [
     "put-literal",
@@ -1525,10 +1526,12 @@
     "put-numeric-list",
     "suite-put-numeric",
     "put-mixed-numeric",
-    "suite-put-mixed-numeric"
+    "suite-put-mixed-numeric",
+    "numeric-discovery",
+    "suite-numeric-composition"
    ],
    "reference_page": 265,
-   "note": "Bounded logical records of quoted literals and ordinary unformatted nonblank character variables: printable ASCII, at most 64 columns including variable separators, documented spacing and quote decoding. Blank fields, numeric output, attached formats, special controls, literal adjacency/comment-only separation, FILE, pointers, macros, and C++ require review. Named-list output has a separate entry. DS-025 adds bounded scalar PUT _ALL_: ordered named PDV fields, ordinary numeric missing and conservative BEST12 integers, _ERROR_=0 and _N_=1. No general error-flag or physical SAS log equivalence. DS-027 separately gates source-order known numeric variables: ordinary missing and finite integers with magnitude at most 99999999999, one following separator per field, at most 64 logical columns. Types and attached formats are validated even on empty or filtered SET input; mixed numeric items, unknown/descriptor-only variables, fractions, special missing output, formats, controls, and C++ retain refusals. DS-042 separately gates literal/known numeric-variable mixtures in DATA, simple IF and counted loops. Preserve literal blanks and numeric following separators, ordinary missing and bounded integers within64 logical columns. See docs/MIXED_PUT.md; other profiles retain their contracts.",
+   "note": "Bounded logical records of quoted literals and ordinary unformatted nonblank character variables: printable ASCII, at most 64 columns including variable separators, documented spacing and quote decoding. Blank fields, numeric output, attached formats, special controls, literal adjacency/comment-only separation, FILE, pointers, macros, and C++ require review. Named-list output has a separate entry. DS-025 adds bounded scalar PUT _ALL_: ordered named PDV fields, ordinary numeric missing and conservative BEST12 integers, _ERROR_=0 and _N_=1. No general error-flag or physical SAS log equivalence. DS-027 separately gates source-order known numeric variables: ordinary missing and finite integers with magnitude at most 99999999999, one following separator per field, at most 64 logical columns. Types and attached formats are validated even on empty or filtered SET input; mixed numeric items, unknown/descriptor-only variables, fractions, special missing output, formats, controls, and C++ retain refusals. DS-042 separately gates literal/known numeric-variable mixtures in DATA, simple IF and counted loops. Preserve literal blanks and numeric following separators, ordinary missing and bounded integers within64 logical columns. See docs/MIXED_PUT.md; other profiles retain their contracts. DS-046 separately gates output-only ordinary numeric discovery for catalog-free DATA numeric-list PUT; prior output contracts remain separate. See docs/NUMERIC_COMPOSITION.md.",
    "gate_evidence": [
     {
      "level": "source-execution",
@@ -1551,6 +1554,14 @@
       "suite-put-mixed-numeric"
      ],
      "scope": "DS-042 bounded mixed literal/numeric PUT with source-order type evidence, descriptor/width validation and atomic output. Original snapshots and complete unmodified100_doors.sas source/result/stdout proof with independent base R; no live SAS."
+    },
+    {
+     "level": "source-execution",
+     "gates": [
+      "numeric-discovery",
+      "suite-numeric-composition"
+     ],
+     "scope": "DS-046 version2 catalog-free numeric-list PUT discovery, ordinary-missing PDV state, source order, static schemas and unchanged output formatting. Complete sum_and_product_of_an_array.sas proof; no live SAS."
     }
    ]
   },
@@ -1586,7 +1597,8 @@
    "rule_ids": [
     "DS-023",
     "DS-024",
-    "DS-027"
+    "DS-027",
+    "DS-046"
    ],
    "gates": [
     "put-literal",
@@ -1594,10 +1606,12 @@
     "put-character-list",
     "suite-put-list",
     "put-numeric-list",
-    "suite-put-numeric"
+    "suite-put-numeric",
+    "numeric-discovery",
+    "suite-numeric-composition"
    ],
    "reference_page": 296,
-   "note": "Bounded logical records of quoted literals and ordinary unformatted nonblank character variables: printable ASCII, at most 64 columns including variable separators, documented spacing and quote decoding. Blank fields, numeric output, attached formats, special controls, literal adjacency/comment-only separation, FILE, pointers, macros, and C++ require review. Named-list output has a separate entry. DS-027 separately gates source-order known numeric variables: ordinary missing and finite integers with magnitude at most 99999999999, one following separator per field, at most 64 logical columns. Types and attached formats are validated even on empty or filtered SET input; mixed numeric items, unknown/descriptor-only variables, fractions, special missing output, formats, controls, and C++ retain refusals.",
+   "note": "Bounded logical records of quoted literals and ordinary unformatted nonblank character variables: printable ASCII, at most 64 columns including variable separators, documented spacing and quote decoding. Blank fields, numeric output, attached formats, special controls, literal adjacency/comment-only separation, FILE, pointers, macros, and C++ require review. Named-list output has a separate entry. DS-027 separately gates source-order known numeric variables: ordinary missing and finite integers with magnitude at most 99999999999, one following separator per field, at most 64 logical columns. Types and attached formats are validated even on empty or filtered SET input; mixed numeric items, unknown/descriptor-only variables, fractions, special missing output, formats, controls, and C++ retain refusals. DS-046 separately gates output-only ordinary numeric discovery for catalog-free DATA numeric-list PUT; prior output contracts remain separate. See docs/NUMERIC_COMPOSITION.md.",
    "gate_evidence": [
     {
      "level": "source-execution",
@@ -1610,6 +1624,14 @@
       "suite-put-numeric"
      ],
      "scope": "Bounded literal/character and separately numeric variable-list output; not arbitrary SAS list output."
+    },
+    {
+     "level": "source-execution",
+     "gates": [
+      "numeric-discovery",
+      "suite-numeric-composition"
+     ],
+     "scope": "DS-046 version2 catalog-free numeric-list PUT discovery, ordinary-missing PDV state, source order, static schemas and unchanged output formatting. Complete sum_and_product_of_an_array.sas proof; no live SAS."
     }
    ]
   },

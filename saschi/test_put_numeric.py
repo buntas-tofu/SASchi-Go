@@ -70,9 +70,12 @@ class NumericListPutTests(unittest.TestCase):
             self.assertIn('unformatted numeric', str(job.receipt))
 
     def test_source_order_known_type_keeps_unknown_and_mixed_refusals(self):
-        for source in ('data _null_; put n; n=7; run;',
-                       'data _null_; n=7; put n unknown; run;',
-                       "data _null_; n=7; c='A'; put n c; run;",
+        for source,expected in (('data _null_; put n; n=7; run;',['. ']),
+                                ('data _null_; n=7; put n unknown; run;',['7 . '])):
+            result,printed=self.execute(source,numeric_catalog([7]))
+            self.assertEqual(result,{'datasets':numeric_catalog([7]),'log':expected})
+            self.assertEqual(printed,'\n'.join(expected)+'\n')
+        for source in ("data _null_; n=7; c='A'; put n c; run;",
                        "data _null_; set raw; copy=n; put copy; run;"):
             job = build_job(source, numeric_catalog([7]))
             self.assertIn(job.code, (1, 2), source)

@@ -120,7 +120,14 @@ exec(inline.code, namespace)
 assert namespace['result'] == {'datasets': {'d': {
     'schema': {'a': 'number', 'b': 'number', 'seq': 'number'},
     'rows': [{'a': 1., 'b': 2., 'seq': 1.}, {'a': None, 'b': 4., 'seq': 2.}]}}, 'log': []}
-print('VERIFIED: isolated installed wheel, canonical rulebook, all web assets, CLI entry point, MOD-to-PUT output, calendar, sum/UNTIL, division/INT/WHILE and numeric inline INPUT')
+multiplied = translate('data d;array a{2} x y;x=3;y=4;a[1]=x*y;p=a[1]*a[2];put p unseen;run;')
+assert not multiplied.blocked, multiplied.tickets
+namespace = {}
+exec(multiplied.code, namespace)
+assert namespace['result'] == {'datasets': {'d': {
+    'schema': {'x': 'number', 'y': 'number', 'p': 'number', 'unseen': 'number'},
+    'rows': [{'x': 12., 'y': 4., 'p': 48., 'unseen': None}]}}, 'log': ['48 . ']}
+print('VERIFIED: isolated installed wheel, canonical rulebook, all web assets, CLI entry point, MOD-to-PUT output, calendar, sum/UNTIL, division/INT/WHILE and numeric inline INPUT and exact multiplication/output discovery')
 '''
 
 

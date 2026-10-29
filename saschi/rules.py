@@ -155,6 +155,8 @@ CONSTRUCT_MAP: dict[str, str] = {
     "put-mixed-numeric": "DS-042",
     "trim-strip": "DS-043",
     "input-list": "DS-044",
+    "multiplication": "DS-045",
+    "put-numeric-discovery": "DS-046",
     "put-all": "DS-025",
     "do-counted": "DS-026",
     "do-if": "DS-031",

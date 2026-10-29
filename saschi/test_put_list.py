@@ -162,7 +162,11 @@ class CharacterListPutTests(unittest.TestCase):
         for rows in ([], [{'c': 1}]):
             inputs = {'raw': {'schema': {'c': 'number'}, 'rows': rows}}
             self.assertEqual(build_job('data _null_; set raw; put unknown; run;', inputs).code, 1)
-        self.assertEqual(build_job('data _null_; put unknown; run;').code, 2)
+        source='data _null_; put unknown; run;'
+        result,printed=self.execute(source)
+        self.assertEqual(result,{'datasets':{},'log':['. ']})
+        self.assertEqual(printed,'. \n')
+        self.assertTrue(build_job(source).receipt['accepted'])
 
     def test_attached_format_refuses_even_without_rows_or_after_length(self):
         for rows in ([], ['ab']):

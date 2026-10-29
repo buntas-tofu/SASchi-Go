@@ -17,11 +17,11 @@ policies. Receipts record what passed for the source and environment tested.
 
 Status: version 0.4.0 development evidence for maintainer review, checked on
 2026-10-29. With the pinned Roku corpus present, `python verify_all.py` passes
-52 fixture gates, 42 suites and 816 tests with zero skips. Synthesis adds 60/60
+54 fixture gates, 44 suites and 867 tests with zero skips. Synthesis adds 60/60
 faithful passes and catches 60/60 naive variants. Receipts bind these results to
 the recorded source and environment; live-SAS validation remains outstanding.
 
-Thirteen unmodified external programs pass complete-program checks, including
+Sixteen unmodified external programs pass complete-program checks, including
 FizzBuzz, the day-of-the-week calendar program and `loops_do_while.sas`, whose
 body-first DO UNTIL composes with a retained sum statement. `loops_while.sas`
 adds bounded division, safe INT and pre-test DO WHILE composition. The bitwise program remains
@@ -49,6 +49,13 @@ Bounded numeric list INPUT with CARDS/DATALINES now drives scalar DATA steps,
 including FLOWOVER, record release and incomplete-EOF handling. The complete
 unchanged `integer_comparison.sas` agrees with its hand truth table and independent
 base-R witness. See the [numeric inline-input profile](docs/INPUT_LIST.md).
+
+[B3 numeric composition](docs/NUMERIC_COMPOSITION.md) adds bounded exact
+multiplication and output-only numeric discovery. The entire unchanged
+`sum_and_product_of_an_array.sas` computes the sum of100 squares and leaves its
+unassigned c missing. The A0 companions prove the entire hello-world source and
+explicit comment-only no-op without expanding the language profile. All three
+have source/result/stdout pins, independent R accounting and actual CLI evidence.
 
 
 ## Operational workflow
@@ -84,7 +91,7 @@ fixed expected output and base-R evidence. Special missings retain their tags.
   sibling plus a fixture verifier (`verify_*.py`). Run any verifier directly,
   or all of them through [verify_all.py](verify_all.py).
 - [docs/sasconversionrulebook.json](docs/sasconversionrulebook.json) : the machine-consumable translation
-  rulebook. 79 rules with equivalence classes (EXACT,
+  rulebook. 81 rules with equivalence classes (EXACT,
   EQUIVALENT-WITH-SETTINGS, APPROXIMATE, NO-DIRECT-EQUIVALENT), required
   settings, forbidden patterns, and validation tests.
 - [docs/capability-manifest.json](docs/capability-manifest.json) : the coverage manifest. Enumerated entries of
