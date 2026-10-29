@@ -17,6 +17,7 @@ from .rules import route_function, route_statement
 from .arrays import declaration as array_declaration, validate_step as validate_array_step
 from .counted import parse_control, validate_step as validate_counted_step
 from .put_mixed import validate_items as validate_mixed_put_items
+from .input_list import names_valid as input_names_valid, source_records, validate_step as validate_input_step
 
 NAME = r"[A-Za-z_][A-Za-z0-9_]{0,31}"
 NUMBER = re.compile(r"[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?\Z")
@@ -383,7 +384,7 @@ def put_known_types(ops):
         if kind == 'declare':
             spec = args['spec']
             known.setdefault(args['name'], spec if isinstance(spec, str) else spec['type'])
-        elif kind == 'array_declare':
+        elif kind in ('array_declare', 'input_list'):
             for name in args['names']:
                 known.setdefault(name, 'number')
         elif kind in ('assign', 'round', 'sum_statement'):
@@ -415,6 +416,7 @@ def compile_plan(source: str) -> Plan:
     plan, step, context, active_do = Plan(), None, None, None
     pending_if, chain_length, pending_end = None, 0, None
     do_parents = []
+    inline_pending = False
 
     def append_operation(op):
         if active_do is None:
@@ -611,6 +613,19 @@ def compile_plan(source: str) -> Plan:
         return plan
     for st in statements:
         text = st.text
+        if any(t.kind == Kind.DATA for t in st.tokens):
+            try:
+                if not inline_pending or step is None:
+                    raise ValueError('inline data requires one preceding numeric INPUT and CARDS/DATALINES')
+                op, = [o for o in step.operations if o.kind == 'input_list']
+                raw, = [t for t in st.tokens if t.kind == Kind.DATA]
+                op.args.update(records=source_records(raw.text), data_line=raw.line + 1)
+            except ValueError as exc:
+                reject(st, 'input-list', str(exc))
+            inline_pending = False
+            finish()
+            step, context = None, None
+            continue
         is_else = bool(re.match(r'^else\b(?!\s*=)', text, re.I))
         if not is_else:
             pending_if, chain_length, pending_end = None, 0, None
@@ -660,6 +675,24 @@ def compile_plan(source: str) -> Plan:
             continue
         if step is None:
             reject(st, construct, "statement is outside a supported step")
+            continue
+        if re.match(r'^input\b(?!\s*=)', text, re.I):
+            names = text.split()[1:]
+            source_names_valid = all(re.fullmatch(NAME, name, re.ASCII) for name in names)
+            names = [n.lower() for n in names]
+            if (step.kind != 'data' or active_do is not None or not source_names_valid or not input_names_valid(names)
+                    or any(o.kind != 'declare' for o in step.operations)):
+                reject(st, 'input-list', 'one numeric INPUT with1..32 unique names must be the first top-level executable statement')
+            else:
+                step.operations.append(Operation('input_list', st.line, {'names': names}))
+                plan.matched.append(('input-list', 'DS-044', st.line))
+            continue
+        if re.fullmatch(r'(?:cards|datalines)', text, re.I):
+            if (active_do is not None or step.kind != 'data'
+                    or sum(o.kind == 'input_list' for o in step.operations) != 1):
+                reject(st, 'input-list', 'CARDS/DATALINES requires one preceding top-level numeric INPUT')
+            else:
+                inline_pending = True
             continue
         if re.match(r'^array\b(?!\s*=)', text, re.I):
             try:
@@ -902,6 +935,10 @@ def compile_plan(source: str) -> Plan:
         reject(st, family if family != "unknown" else construct, "no operation for this statement")
     finish()
     for compiled in plan.steps:
+        try:
+            validate_input_step(asdict(compiled))
+        except ValueError as exc:
+            plan.tickets.append(Ticket(compiled.line, 'INPUT', 'input-list', str(exc)))
         try:
             validate_trim_step(asdict(compiled))
         except ValueError as exc:

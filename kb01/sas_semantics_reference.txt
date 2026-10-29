@@ -2246,3 +2246,46 @@ def sas_trim_concat(values, shortened):
     if len(result) > 32767:
         raise ValueError('TRIM/STRIP concatenation exceeds 32767 bytes')
     return result
+
+
+def sas_input_number(token):
+    """DS-044 ordinary missing or an exact bounded decimal-to-binary64 read."""
+    from fractions import Fraction
+    if not isinstance(token, str) or not 1 <= len(token) <= 32:
+        raise ValueError('numeric INPUT token requires 1..32 ASCII characters')
+    if token == '.':
+        return None
+    match = re.fullmatch(r'[+-]?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE]([+-]?[0-9]+))?', token)
+    if not match:
+        raise ValueError('numeric INPUT requires an ordinary decimal or period')
+    significand = re.split('[eE]', token)[0]
+    if sum(c.isdigit() for c in significand) > 15 or abs(int(match[1] or '0')) > 15:
+        raise ValueError('numeric INPUT permits at most15 significand digits and exponent magnitude15')
+    exact = Fraction(token)
+    value = float(exact)
+    if abs(exact) > 2147483647 or Fraction(value) != exact:
+        raise ValueError('numeric INPUT requires exact binary64 within2147483647; rounding/error-state review deferred')
+    return 0.0 if value == 0 else value
+
+
+def sas_input_records(records, width):
+    """Default FLOWOVER, release after each read, and stop at incomplete EOF."""
+    if type(width) is not int or not 1 <= width <= 32:
+        raise ValueError('numeric INPUT requires 1..32 fields')
+    if not isinstance(records, list) or len(records) > 10000:
+        raise ValueError('numeric INPUT requires a list of at most10000 physical records')
+    for record in records:
+        if (not isinstance(record, str) or len(record) > 80 or ';' in record
+                or any(not 32 <= ord(c) <= 126 for c in record)):
+            raise ValueError('numeric INPUT requires printable ASCII records, at most80 bytes, without semicolons')
+    rows, pending = [], []
+    for record in records:
+        for token in record.split(' '):
+            if not token:
+                continue
+            pending.append(sas_input_number(token))
+            if len(pending) == width:
+                rows.append(pending)
+                pending = []
+                break  # No trailing @/@@: unread fields on this record are lost.
+    return rows  # EOF terminates INPUT without outputting an incomplete row.
