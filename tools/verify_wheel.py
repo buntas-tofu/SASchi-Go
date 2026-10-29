@@ -103,6 +103,16 @@ assert printed.getvalue() == '[1 1 ]\n[2 1 ]\n[2 2 ]\n'
 assert namespace['result'] == {'datasets': {'d': {
     'schema': {'i': 'number', 'j': 'number'}, 'rows': [{'i': 3., 'j': 3.}]}},
     'log': ['[1 1 ]', '[2 1 ]', '[2 2 ]']}
+trimmed = translate("data d; length a $4; do i=1 to 2; a=strip(a)||'*'; output; end; b='['||trim(' ')||']'; c='['||strip(' ')||']'; output; run;")
+assert not trimmed.blocked, trimmed.tickets
+namespace = {}
+exec(trimmed.code, namespace)
+assert namespace['result'] == {'datasets': {'d': {
+    'schema': {'a': {'type': 'character', 'length': 4}, 'i': 'number',
+               'b': {'type': 'character', 'length': 3}, 'c': {'type': 'character', 'length': 3}},
+    'rows': [{'a': '*   ', 'i': 1., 'b': '   ', 'c': '   '},
+             {'a': '**  ', 'i': 2., 'b': '   ', 'c': '   '},
+             {'a': '**  ', 'i': 3., 'b': '[ ]', 'c': '[] '}]}}, 'log': []}
 print('VERIFIED: isolated installed wheel, canonical rulebook, all web assets, CLI entry point, MOD-to-PUT output, calendar, sum/UNTIL and division/INT/WHILE')
 '''
 

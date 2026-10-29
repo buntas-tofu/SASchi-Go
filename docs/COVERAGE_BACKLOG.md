@@ -1,7 +1,7 @@
 # Coverage reconciliation and next gate series
 
 Status: Repository/base-R planning evidence, originally reconciled at main08eaa7b
-on2026-10-27 and updated through DS-042. The handoff binds current acceptance.
+on2026-10-27 and updated through DS-043. The handoff binds current acceptance.
 For principal/maintainer prioritization. Counts describe this checkout and the56
 pinned sibling corpus files, not all SAS or live-SAS equivalence. Updated for
 DS-039 arrays, DS-040 DO OVER and DS-041 nested/computed counted loops after the original
@@ -11,11 +11,11 @@ Implementation and publication are not authorized by this planning exercise.
 
 ## Inventory reconciled against actual evidence
 
-The golden command registers50 fixture runners,40 translator suites and1
-synthesis runner. The current acceptance contains755 tests, zero skips,
+The golden command registers51 fixture runners,41 translator suites and1
+synthesis runner. The current acceptance contains785 tests, zero skips,
 60 faithful synthesis checks and60 naive controls. The separate1k workload
 checks total39:18 ledger and21 text. These counts have different units. Neither
-77 rulebook rules nor91 golden-command runners is a SAS capability denominator.
+78 rulebook rules nor93 golden-command runners is a SAS capability denominator.
 
 [The capability manifest](capability-manifest.json) still enumerates108 statements
 and40 data-set options. The other7 declared reference areas remain unenumerated:
@@ -56,9 +56,10 @@ The5 RULE entries and8 HUMAN-REVIEW entries retain their review boundaries.
 
 ## Unknown blockers classified
 
-The current56-file compile census has14 clean and42 blocked, with714 ticket
+The current56-file compile census has15 clean and41 blocked, with712 ticket
 occurrences. A2 resolves20 compiler tickets across the corpus. The newly compile-
 clean100_doors.sas now passes the DS-042 mixed-output whole-program proof.
+B1 resolves two further tickets and adds the complete loops_for.sas proof.
 All483 occurrences previously routed
 as unknown receive a primary planning category, with file, line, ticket ordinal,
 statement hash and classification basis preserved. Classification preserves every
@@ -93,8 +94,9 @@ unterminated tickets. They need an explicit source-boundary decision; silently
 discarding those sections would invalidate a complete unmodified-file claim.
 No sibling corpus file was changed or copied into this repository.
 
-Eleven files now have complete-program proofs, including the new loops_foreach.sas
-source/result/stdout pins and independent base-R witness. DS-042 adds the unchanged100_doors.sas proof. The other3 compile-clean
+Twelve files now have complete-program proofs, including the new loops_foreach.sas
+source/result/stdout pins and independent base-R witness. DS-042 adds the unchanged100_doors.sas proof, and DS-043 proves both steps of
+unchanged loops_for.sas. The other3 compile-clean
 files remain separate: hello_world_text.sas needs a whole-file witness,
 comments.sas needs an explicit no-op acceptance witness, and bitwise_operations.sas
 retains the67-column refusal under the64-column PUT_ALL profile. The original
@@ -117,7 +119,7 @@ evidence-cost ranking, not a schedule or an estimate of business demand.
 | A1, implemented in DS-039/DS-040 | Numeric array declarations, indexed access/assignment, OF aggregation and DO OVER alias iteration | Existing DS-016 helper witnesses | loops_foreach.sas is now the first accepted full-file target | High: descriptor discovery, alias state and loop scheduling |
 | A2, implemented in DS-041 | Nested and computed counted-loop controls | A1 for indexed bodies | Original composition proofs; DS-042 supplies the target output profile | High: captured controls, recursive state and bounded execution |
 | A3, implemented in DS-042 | Mixed literal/numeric PUT with a narrow integer profile | Existing PUT profiles; A1+A2 for target |100_doors.sas now passes the complete unmodified-file proof | Medium: separator, width, type and atomic publication contracts |
-| B1 | Character TRIM/STRIP composition | A2 | loops_for.sas, including both DATA steps, becomes a projected target | Medium: fixed-width blank/empty behavior |
+| B1, implemented in DS-043 | Character TRIM/STRIP composition | A2 | loops_for.sas, including both DATA steps, now passes the complete unmodified-file proof | Medium: fixed-width blank/empty behavior |
 | B2 | Numeric list INPUT and CARDS/DATALINES | Separate original input contract | integer_comparison.sas is a projected target | High: record/row scheduling, missing/coercion and static typing |
 | B3 | Multiplication, output-only uninitialized numeric discovery and array composition | A1 | sum_and_product_of_an_array.sas is a projected target; its c is uninitialized | High: numeric limits, missing state and output descriptors |
 | B4 | KEEP/DROP projection, followed by declarations/options | Separate input/output timing profiles | Broad composition value, no immediate full-file unlock claimed | Medium |
@@ -133,8 +135,9 @@ and prohibits active-index mutation, with original whole-program and base-R proo
 width in a separate operation, preserving existing PUT paths and the bitwise refusal.
 
 Projected target dependencies are conjunctive. A2 alone adds no claimed corpus
-proof; A1+A2+A3 together prove100_doors.sas. loops_for.sas still needs
-TRIM/STRIP, and the Fibonacci corpus file still needs FCMP recursion after its
+proof; A1+A2+A3 together prove100_doors.sas. DS-043 now proves both DATA steps of
+loops_for.sas with fixed descriptors and shortened temporary operands. See the
+[B1 profile](TRIM_STRIP.md). The Fibonacci corpus file still needs FCMP recursion after its
 first DATA step. Each projection must be rechecked after implementation because
 compiler tickets can hide additional runtime refusals. No projected proof is
 accepted until the entire pinned file executes and compares successfully.

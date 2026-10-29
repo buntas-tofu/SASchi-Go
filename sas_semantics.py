@@ -2219,3 +2219,30 @@ class SasNumericLagQueue:
         # Only a successful checked invocation advances the queue, including None.
         self._history.append(value)
         return result
+
+
+# DS-043: raw shortened values are distinct from fixed-width assigned storage.
+def sas_trim(value):
+    """Remove trailing ASCII blanks, retaining one blank for all-blank input."""
+    return _sas_concat_text(value).rstrip(' ') or ' '
+
+
+def sas_strip(value):
+    """Remove leading/trailing ASCII blanks; all-blank input yields no bytes."""
+    return _sas_concat_text(value).strip(' ')
+
+
+def sas_trim_concat(values, shortened):
+    """Concatenate B1 temporaries without padding; legacy fixed values stay strict."""
+    if (not isinstance(values, (list, tuple)) or not isinstance(shortened, (list, tuple))
+            or not 2 <= len(values) <= 32 or len(values) != len(shortened)
+            or any(type(flag) is not bool for flag in shortened) or not any(shortened)):
+        raise ValueError('TRIM/STRIP concatenation requires 2..32 marked character operands')
+    for value, short in zip(values, shortened):
+        if short and value == '':
+            continue
+        _sas_concat_text(value)
+    result = ''.join(values)
+    if len(result) > 32767:
+        raise ValueError('TRIM/STRIP concatenation exceeds 32767 bytes')
+    return result

@@ -88,6 +88,7 @@ VERIFIERS = [
     ("do-over", HERE / "examples" / "verify_do_over.py"),
     ("counted-nested", HERE / "examples" / "verify_counted_nested.py"),
     ("put-mixed-numeric", HERE / "examples" / "verify_put_mixed_numeric.py"),
+    ("trim-strip", HERE / "examples" / "verify_trim_strip.py"),
 ]
 
 # The translator suites, run as unittest modules. They carry the same weight as
@@ -135,6 +136,7 @@ SUITES = [
     ("suite-do-over", "saschi.test_do_over"),
     ("suite-counted-nested", "saschi.test_counted_nested"),
     ("suite-put-mixed-numeric", "saschi.test_put_mixed_numeric"),
+    ("suite-trim-strip", "saschi.test_trim_strip"),
 ]
 
 

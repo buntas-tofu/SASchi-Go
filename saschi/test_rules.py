@@ -26,8 +26,8 @@ class LoaderTests(unittest.TestCase):
     def setUp(self):
         self.rules = load_rulebook(REPO_ROOT / "docs" / "sasconversionrulebook.json")
 
-    def test_rule_count_is_77(self):
-        self.assertEqual(len(self.rules), 77)
+    def test_rule_count_is_78(self):
+        self.assertEqual(len(self.rules), 78)
         self.assertIn(f"rulebook. {len(self.rules)} rules", (REPO_ROOT / "README.md").read_text())
 
     def test_rule_ids_unique(self):
@@ -36,7 +36,7 @@ class LoaderTests(unittest.TestCase):
 
     def test_family_counts(self):
         counts = family_counts(self.rules)
-        self.assertEqual(counts["DS"], 42)
+        self.assertEqual(counts["DS"], 43)
         self.assertEqual(counts["SQL"], 3)
         self.assertEqual(counts["ST"], 16)
         self.assertEqual(counts["SV"], 6)

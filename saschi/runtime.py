@@ -16,6 +16,8 @@ from .counted import validate_step as validate_counted_step, evaluate_control
 from sas_semantics import sas_counted_capture
 from sas_semantics import sas_put_mixed_numeric
 from .put_mixed import validate_items as validate_mixed_put_items
+from .trim_strip import is_call as is_trim_call, validate_expression as validate_trim_expression, validate_step as validate_trim_step
+from sas_semantics import sas_trim_concat
 
 
 def evaluate(expr, row, schema=None, arrays=None, current=None):
@@ -45,13 +47,16 @@ def number(expr, row, schema=None, arrays=None, current=None):
         return evaluate(expr, row, schema, arrays, current)
     if kind == 'concat':
         values = []
+        trimmed = []
         for arg in expr['args']:
             value = number(arg, row, schema, arrays, current)
             width = character_width(arg, schema)
             if not isinstance(value, str) or width is None:
                 raise ValueError('character concatenation requires character operands')
-            values.append(value.ljust(width)[:width])
-        return sas_concat(values)
+            short = is_trim_call(arg)
+            values.append(value if short else value.ljust(width)[:width])
+            trimmed.append(short)
+        return sas_trim_concat(values, trimmed) if any(trimmed) else sas_concat(values)
     if kind == 'arithmetic':
         left, right = number(expr['left'], row, schema, arrays, current), number(expr['right'], row, schema, arrays, current)
         if expr['op'] == '/':
@@ -145,6 +150,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
     tables, logs = normalize_catalog({} if catalog is None else catalog), []
     for step in plan['steps']:
         inputs, keys, ops = step['inputs'], step['by'], step['operations']
+        validate_trim_step(step, plan['version'])
         # Reject malformed mixed-output plans before other expression walkers or input work.
         for op in operations(ops):
             if op['kind'] == 'put_mixed_numeric':
@@ -294,6 +300,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
             payloads = [(args.get('value'), 'assignment')] if kind == 'assign' else [
                 (value, 'other') for key, value in args.items() if key not in ('body', 'operation', 'otherwise')]
             for payload, context in payloads:
+                validate_trim_expression(payload, schema, context=context)
                 context_error = next(substr_context_errors(payload, context), None)
                 if context_error:
                     raise ValueError(context_error)

@@ -21,6 +21,8 @@ Gate provenance, function by function:
 - `examples/verify_length_reverse.py`  REVERSE, fixed-width printable ASCII
   character reversal with descriptor-derived return length.
 - `examples/verify_concat_catx.py`  bounded character CATX and operator concatenation.
+- `examples/verify_trim_strip.py`  character TRIM/STRIP assignment and shortened
+  concatenation values, with fixed argument-derived destination widths.
 - `examples/verify_substr_compositions.py`  stored-value/fixed-source combinations
   and padding-insensitive checked SUBSTR CATX items, with local temporary refusals.
 - `examples/verify_substr.py`  checked ASCII SUBSTR bounds and source-derived
@@ -42,6 +44,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from sas_semantics import sas_divide, sas_int
+from sas_semantics import sas_trim, sas_strip
+from .trim_strip import call_width as trim_width
 import math
 import re
 
@@ -67,6 +71,7 @@ GATE_BITWISE = "examples/verify_bitwise.py"
 GATE_LAG_EXECUTION = "examples/verify_lag_execution.py"
 GATE_CALENDAR = "examples/verify_calendar.py"
 GATE_INT = "examples/verify_int.py"
+GATE_TRIM_STRIP = "examples/verify_trim_strip.py"
 
 LAG_FUNCTIONS = {family + suffix: (family, depth)
                  for family in ("lag", "dif")
@@ -101,6 +106,8 @@ FUNCTIONS: dict[str, FunctionSpec] = {
         FunctionSpec("lengthc", "number", GATE_FUNCS, 1, 1),
         FunctionSpec("substr", "character", GATE_SUBSTR, 3, 3),
         FunctionSpec("reverse", "character", GATE_LENGTH_REVERSE, 1, 1),
+        FunctionSpec("trim", "character", GATE_TRIM_STRIP, 1, 1),
+        FunctionSpec("strip", "character", GATE_TRIM_STRIP, 1, 1),
         FunctionSpec("catx", "character", GATE_CONCAT, 2, 33),
         FunctionSpec("count", "number", GATE_COUNT, 2, 3),
         FunctionSpec("mod", "number", GATE_MOD, 2, 2),
@@ -163,6 +170,10 @@ def apply(name: str, values: list):
         return sas_bitwise(name, *values)
     if name == "reverse":
         return sas_reverse(values[0])
+    if name in ('trim', 'strip'):
+        if len(values) != 1:
+            raise ValueError('TRIM/STRIP requires exactly one argument')
+        return (sas_trim if name == 'trim' else sas_strip)(values[0])
     if name == "catx":
         return sas_catx(*values)
     if name == "count":
@@ -254,6 +265,8 @@ def character_width(expr, schema=None) -> int | None:
             raise ValueError('character concatenation exceeds 32767 bytes')
         return width
     name = expr.get("name")
+    if name in ('trim', 'strip'):
+        return trim_width(expr, schema)
     if name == 'reverse':
         argument = expr['args'][0]
         if argument.get('kind') == 'character':

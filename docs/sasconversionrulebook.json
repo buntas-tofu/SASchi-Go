@@ -2182,6 +2182,38 @@
         "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000161869.htm",
         "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000178212.htm"
       ]
+    },
+    {
+      "rule_id": "DS-043",
+      "sas_pattern": "Bounded character TRIM/STRIP assignment and concatenation",
+      "scope": "data-step",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "Keep fixed descriptors while passing shortened TRIM/STRIP values to direct concatenation operands; pad only on assignment."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent raw-byte blank scanning, fixed-width storage and whole-program counted-loop interpreter."
+      },
+      "required_settings": [
+        "Printable ASCII character literals and ordinary variables with preceding character descriptors, widths 1..32767. No numeric conversion, array elements or automatic names. Source and serialized plans validate the same profile.",
+        "TRIM removes trailing blanks and returns one blank for all-blank input. STRIP removes leading and trailing blanks and returns zero bytes for all-blank input. Neither changes the argument descriptor. New assignment targets inherit argument width; assignment truncates or pads to the receiving width.",
+        "Direct assignment or direct operands in a character concatenation RHS only. Other operands are literals or ordinary character variables. Concatenation uses shortened temporary bytes without padding those operands; ordinary operands retain fixed width. Result descriptor sums operand declared widths, with 2..32 operands and total width at most32767.",
+        "DATA top-level, simple IF/ELSE and existing counted bodies, including bounded nested loops. Schema validation runs on empty, filtered and skipped paths. Reached character values validate before publication, with atomic results and stdout. Existing OUTPUT scheduling and row/run/step reset remain unchanged; no internal columns.",
+        "Nested function arguments, LENGTH/REVERSE/SUBSTR/CATX temporary consumers, predicates, WHERE, PUT expressions, PUT _ALL_, DO OVER/WHILE/UNTIL bodies, MERGE and C++ remain refused. No Unicode, control-character or general temporary-expression parity claim."
+      ],
+      "silent_difference_checks": [
+        "Distinguish all-blank TRIM from empty STRIP and preserve leading blanks in TRIM. Reject repadded temporary concatenation and width inference from observed bytes.",
+        "Preserve empty/skipped schema discovery, row/run/step reset, snapshot ordering and atomic failure.",
+        "Pin both DATA steps of the entire unchanged loops_for.sas and compare independent hand accounting, base R, source/runtime, emitted code and CLI."
+      ],
+      "validation_test": "examples/verify_trim_strip.py; saschi.test_trim_strip",
+      "confidence": "bounded repository/base-R evidence; no live SAS",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000212226.htm",
+        "https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/n0xk6tl87f4b4qn1sp1ywen1ntan.htm"
+      ]
     }
   ],
   "runtime_capabilities": {
@@ -2398,6 +2430,21 @@
       "r_witness": "examples/put_mixed_numeric.R",
       "boundary_tests": "saschi.test_put_mixed_numeric",
       "evidence": "9 pins,2400 constructive source/runtime/R cases,18 shared refusals,5 spacing/format controls, original snapshots and full unmodified100_doors.sas source/result/stdout pins. No live SAS."
+    },
+    "trim_strip": {
+      "rule_id": "DS-043",
+      "target": "saschi.runtime.run_plan",
+      "scope": [
+        "Printable ASCII character literals and ordinary variables with preceding character descriptors, widths 1..32767. No numeric conversion, array elements or automatic names. Source and serialized plans validate the same profile.",
+        "TRIM removes trailing blanks and returns one blank for all-blank input. STRIP removes leading and trailing blanks and returns zero bytes for all-blank input. Neither changes the argument descriptor. New assignment targets inherit argument width; assignment truncates or pads to the receiving width.",
+        "Direct assignment or direct operands in a character concatenation RHS only. Other operands are literals or ordinary character variables. Concatenation uses shortened temporary bytes without padding those operands; ordinary operands retain fixed width. Result descriptor sums operand declared widths, with 2..32 operands and total width at most32767.",
+        "DATA top-level, simple IF/ELSE and existing counted bodies, including bounded nested loops. Schema validation runs on empty, filtered and skipped paths. Reached character values validate before publication, with atomic results and stdout. Existing OUTPUT scheduling and row/run/step reset remain unchanged; no internal columns.",
+        "Nested function arguments, LENGTH/REVERSE/SUBSTR/CATX temporary consumers, predicates, WHERE, PUT expressions, PUT _ALL_, DO OVER/WHILE/UNTIL bodies, MERGE and C++ remain refused. No Unicode, control-character or general temporary-expression parity claim."
+      ],
+      "validation_test": "examples/verify_trim_strip.py",
+      "r_witness": "examples/trim_strip.R",
+      "boundary_tests": "saschi.test_trim_strip",
+      "evidence": "12 hand pins,1600 source/runtime/R comparisons,20 shared refusals,4 naive controls, original six-snapshot program and both complete DATA steps of unchanged loops_for.sas. No live SAS."
     }
   }
 }
