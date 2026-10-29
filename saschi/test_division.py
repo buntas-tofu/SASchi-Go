@@ -91,14 +91,20 @@ class DivisionTests(unittest.TestCase):
 
     def test_forged_operators_and_complexity_cannot_bypass_guards(self):
         original=compile_plan('data d; y=8/2; run;').to_dict()
-        for op in ('*','^','unknown'):
+        product=deepcopy(original);product['steps'][0]['operations'][0]['args']['value']['op']='*'
+        self.assertEqual(run_plan(product)['datasets']['d']['rows'],[{'y':16.}])
+        for op in ('^','unknown'):
             plan=deepcopy(original);plan['steps'][0]['operations'][0]['args']['value']['op']=op
             with self.assertRaises(ValueError):run_plan(plan,allow_partial=True)
         self.assertTrue(compile_plan('data d; '+''.join('x=8/2;' for _ in range(129))+' run;').blocked)
         p=deepcopy(original);p['steps'][0]['operations']*=129
         with self.assertRaisesRegex(ValueError,'128'):run_plan(p,allow_partial=True)
         self.assertTrue(compile_plan('data d; x='+'('*34+'8/2'+')'*34+'; run;').blocked)
-        for expr in ('-y/2','2*y','8//2'):
+        product,stdout=execute('data d; x=2*y; run;')
+        self.assertEqual(product,{'datasets':{'d':{'schema':{'x':'number','y':'number'},
+                         'rows':[{'x':None,'y':None}]}},'log':[]})
+        self.assertEqual(stdout,'')
+        for expr in ('-y/2','8//2'):
             self.assertTrue(compile_plan('data d; x='+expr+'; run;').blocked)
         # A new numeric step must not quarantine a separate legacy step.
         source='data prior; '+''.join('x=mod(8,3);' for _ in range(129))+' run; data d; y=8/2; run;'

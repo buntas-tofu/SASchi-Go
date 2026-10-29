@@ -90,6 +90,8 @@ VERIFIERS = [
     ("put-mixed-numeric", HERE / "examples" / "verify_put_mixed_numeric.py"),
     ("trim-strip", HERE / "examples" / "verify_trim_strip.py"),
     ("input-list", HERE / "examples" / "verify_input_list.py"),
+    ("multiplication", HERE / "examples" / "verify_multiply.py"),
+    ("numeric-discovery", HERE / "examples" / "verify_numeric_discovery.py"),
 ]
 
 # The translator suites, run as unittest modules. They carry the same weight as
@@ -139,6 +141,8 @@ SUITES = [
     ("suite-put-mixed-numeric", "saschi.test_put_mixed_numeric"),
     ("suite-trim-strip", "saschi.test_trim_strip"),
     ("suite-input-list", "saschi.test_input_list"),
+    ("suite-numeric-composition", "saschi.test_numeric_composition"),
+    ("suite-corpus-basics", "saschi.test_corpus_basics"),
 ]
 
 

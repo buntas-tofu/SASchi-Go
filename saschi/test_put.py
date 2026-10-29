@@ -73,7 +73,12 @@ class LiteralPutTests(unittest.TestCase):
         self.assertIn('verify_put.py', load_rulebook()['DS-023'].validation_test)
 
     def test_non_literal_forms_still_block_the_whole_job(self):
-        for statement in ("put 'value' x", "put x= 'suffix'", 'put x', 'put',
+        source="data _null_; put 'first'; put x; run;"
+        result,printed=self.execute(source)
+        self.assertEqual(result,{'datasets':{},'log':['first','. ']})
+        self.assertEqual(printed,'first\n. \n')
+        self.assertTrue(build_job(source).receipt['accepted'])
+        for statement in ("put 'value' x", "put x= 'suffix'", 'put',
                           "put 'value' @", "put 'value' @@", "put @4 'value'",
                           "put 'value' / 'next'", "put 'value' +2 'next'",
                           "put 2*'value'", "put ('value')", "put 'value' $8.",

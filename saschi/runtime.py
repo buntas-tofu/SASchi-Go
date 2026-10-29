@@ -8,9 +8,9 @@ from sas_semantics import sas_round, sas_merge_by, sas_put_literals, sas_put_cha
 from .functions import apply as apply_function, assign_spec, character_width, validate_reverse_calls, validate_string_expressions, expression_nodes, validate_substr_calls, substr_context_errors, validate_bitwise_calls, SAS_BITWISE_ARITY, LAG_FUNCTIONS, validate_lag_calls
 from .operations import walk_operations as operations
 from .values import normalize_catalog, column_type, coerce, descriptor, missing, order
-from .functions import FUNCTIONS, validate_calendar_calls, validate_sum_expression, validate_numeric_composition
-from sas_semantics import sas_sum_statement, sas_do_until, sas_do_while, sas_divide
-from sas_semantics import sas_numeric_array_value, sas_numeric_array_index, sas_do_over
+from .functions import FUNCTIONS, validate_calendar_calls, validate_sum_expression, validate_numeric_composition, validate_multiplication_profile
+from sas_semantics import sas_sum_statement, sas_do_until, sas_do_while, sas_divide, sas_multiply
+from sas_semantics import sas_numeric_array_value, sas_numeric_array_index, sas_numeric_array_add, sas_do_over
 from .arrays import validate_step as validate_array_step, contains_array, value as array_value
 from .counted import validate_step as validate_counted_step, evaluate_control
 from sas_semantics import sas_counted_capture
@@ -38,10 +38,33 @@ def argument(expr, row, schema=None, arrays=None, current=None):
     return expr if expr['kind'] == 'format' else number(expr, row, schema, arrays, current)
 
 
+def product_value(expr, row, schema=None, arrays=None, current=None):
+    """Evaluate a multiplication-bearing numeric tree with bounded intermediates."""
+    if arrays and contains_array(expr):
+        return array_value(expr, row, arrays, current)
+    kind = expr['kind']
+    if kind == 'arithmetic':
+        left = product_value(expr['left'], row, schema, arrays, current)
+        right = product_value(expr['right'], row, schema, arrays, current)
+        if expr['op'] == '*':
+            return sas_multiply(left, right)
+        if expr['op'] == '/':
+            return sas_divide(left, right)
+        return sas_numeric_array_add(left, right, expr['op'] == '-')
+    if kind == 'call':
+        values = [product_value(arg, row, schema, arrays, current) for arg in expr['args']]
+        return sas_numeric_array_value(apply_function(expr['name'], values))
+    value = row.get(expr['value']) if kind in ('variable', 'automatic') else expr['value']
+    return sas_numeric_array_value(value)
+
+
 def number(expr, row, schema=None, arrays=None, current=None):
     if arrays and contains_array(expr):
         return array_value(expr, row, arrays, current)
     kind = expr['kind']
+    if kind == 'arithmetic' and any(node.get('kind') == 'arithmetic' and node.get('op') == '*'
+                                  for node, _ in expression_nodes(expr)):
+        return product_value(expr, row, schema, arrays, current)
     if kind in ('variable', 'automatic'):
         return row.get(expr['value'])
     if kind == 'call':
@@ -62,6 +85,8 @@ def number(expr, row, schema=None, arrays=None, current=None):
         left, right = number(expr['left'], row, schema, arrays, current), number(expr['right'], row, schema, arrays, current)
         if expr['op'] == '/':
             return sas_divide(left, right)
+        if expr['op'] == '*':
+            return sas_multiply(left, right)
         if isinstance(left, str) or isinstance(right, str):
             raise ValueError('implicit character to numeric conversion is unsupported')
         if missing(left) or missing(right):
@@ -175,7 +200,7 @@ def validate_inline_types(ops, schema, retained):
                 return column_type(schema.get(expr['value'], 'number')) if schema is not None else None
             return 'character' if kind == 'character' else 'number'
         if kind == 'arithmetic':
-            if (set(expr) != {'kind', 'op', 'left', 'right'} or expr['op'] not in ('+', '-', '/')
+            if (set(expr) != {'kind', 'op', 'left', 'right'} or expr['op'] not in ('+', '-', '/', '*')
                     or any(expression_type(expr[side]) not in (None, 'number') for side in ('left', 'right'))):
                 raise ValueError('numeric INPUT arithmetic requires numeric operands')
             return 'number'
@@ -263,6 +288,13 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
     tables, logs = normalize_catalog({} if catalog is None else catalog), []
     for step in plan['steps']:
         inputs, keys, ops = step['inputs'], step['by'], step['operations']
+        validate_multiplication_profile(step)
+        for op in operations(ops):
+            if op['kind'] == 'put_numeric_list' and 'discover' in op['args']:
+                if (plan['version'] != 2 or step['kind'] != 'data' or inputs
+                        or type(op.get('line')) is not int or op['line'] < 1
+                        or any(item['kind'] == 'lookup' for item in operations(ops))):
+                    raise ValueError('PUT discovery requires a catalog-free version2 DATA step')
         inline_rows = validate_input_step(step, plan['version'])
         if inline_rows is not None:
             validate_inline_types(list(operations(ops)), None, step.get('retained', {}))
@@ -283,7 +315,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
             raise ValueError('numeric arrays require a version2 DATA plan')
         array_members = {n for a in arrays.values() for n in a['names']}
         nodes = [node for node, _ in expression_nodes(step)]
-        if any(node.get('kind') == 'arithmetic' and node.get('op') == '/'
+        if any(node.get('kind') == 'arithmetic' and node.get('op') in ('/', '*')
                or node.get('kind') == 'call' and node.get('name') == 'int' for node in nodes):
             if sum(node.get('kind') in ('arithmetic', 'call') for node in nodes) > 128:
                 raise ValueError('numeric composition exceeds the128-node step policy')
@@ -516,13 +548,23 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                     raise ValueError('PUT _ALL_: unexpected plan arguments')
             elif kind == 'put_numeric_list':
                 names = args.get('names')
-                if (set(args) != {'names'} or not isinstance(names, list) or not names or
+                if (set(args) not in ({'names'}, {'names', 'discover'}) or not isinstance(names, list) or not names or
                         any(not isinstance(name, str) or not re.fullmatch(r'[a-z_][a-z0-9_]{0,31}', name)
                             or name in ('_n_', '_error_', '_all_', '_numeric_', '_character_', '_infile_', '_file_', '_ods_', '_page_', '_blankpage_')
                             for name in names)):
                     raise ValueError('PUT numeric list: nonempty normalized ordinary variable names required')
+                if 'discover' in args:
+                    discover = args['discover']
+                    if (plan['version'] != 2 or step['kind'] != 'data' or inputs or lookups
+                            or not isinstance(discover, list) or not discover or len(discover) > 32
+                            or any(not isinstance(name, str) or name not in names for name in discover)
+                            or len(discover) != len(set(discover))
+                            or discover != list(dict.fromkeys(name for name in names if name in discover))):
+                        raise ValueError('PUT discovery requires unique output names in a catalog-free version2 DATA step')
+                    for name in discover:
+                        schema.setdefault(name, 'number')
                 if any(name not in schema for name in names):
-                    raise ValueError('PUT numeric list: variables must be known before PUT')
+                    raise ValueError('PUT numeric list: variables must be known before PUT or explicitly discovered')
             elif kind == 'put_mixed_numeric':
                 try:
                     validate_mixed_put_items(args['items'], schema)
@@ -665,10 +707,14 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                 """Check every numeric operand before arithmetic can hide a tag/overflow."""
                 if arrays and contains_array(expr):
                     return array_value(expr, row, arrays, current)
+                if any(node.get('kind') == 'arithmetic' and node.get('op') == '*'
+                       for node, _ in expression_nodes(expr)):
+                    return product_value(expr, row, schema, arrays, current)
                 kind = expr['kind']
                 if kind == 'arithmetic':
                     a, b = sum_value(expr['left']), sum_value(expr['right'])
-                    value = sas_divide(a, b) if expr['op'] == '/' else None if a is None or b is None else sas_sum_statement(a, b if expr['op'] == '+' else -b)
+                    value = (sas_divide(a, b) if expr['op'] == '/' else sas_multiply(a, b) if expr['op'] == '*'
+                             else None if a is None or b is None else sas_sum_statement(a, b if expr['op'] == '+' else -b))
                 elif kind == 'call':
                     value = apply_function(expr['name'], [sum_value(arg) for arg in expr['args']])
                 else:

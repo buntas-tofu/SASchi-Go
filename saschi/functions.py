@@ -43,7 +43,7 @@ Gate provenance, function by function:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from sas_semantics import sas_divide, sas_int
+from sas_semantics import sas_divide, sas_int, sas_multiply, sas_numeric_array_add, sas_numeric_array_value, sas_numeric_order
 from sas_semantics import sas_trim, sas_strip
 from .trim_strip import call_width as trim_width
 import math
@@ -344,15 +344,105 @@ def validate_string_expressions(value, schema, *, direct_catx=False):
 
 
 def expression_nodes(value, line=None):
-    """Read-only expression dictionaries with their enclosing source line."""
-    if isinstance(value, dict):
-        line = value.get('line', line)
-        yield value, line
-        for child in value.values():
-            yield from expression_nodes(child, line)
-    elif isinstance(value, (list, tuple)):
-        for child in value:
-            yield from expression_nodes(child, line)
+    """Read-only preorder nodes and source lines, without Python recursion."""
+    pending, active = [(value, line, False)], set()
+    while pending:
+        node, source_line, closing = pending.pop()
+        if closing:
+            active.remove(id(node))
+            continue
+        if not isinstance(node, (dict, list, tuple)):
+            continue
+        if id(node) in active:
+            raise ValueError('expression and plan trees cannot contain cycles')
+        active.add(id(node))
+        pending.append((node, source_line, True))
+        if isinstance(node, dict):
+            source_line = node.get('line', source_line)
+            yield node, source_line
+            children = list(node.values())
+        else:
+            children = node
+        pending.extend((child, source_line, False) for child in reversed(children))
+
+
+def validate_multiplication_profile(value):
+    """Bound new multiplication trees before recursive descriptor walkers."""
+    nodes = [node for node, _ in expression_nodes(value)]
+    if not any(node.get('kind') == 'arithmetic' and node.get('op') == '*' for node in nodes):
+        return
+    if sum(node.get('kind') in ('arithmetic', 'call') for node in nodes) > 128:
+        raise ValueError('numeric composition exceeds the128-node step policy')
+    structures = [(value, 0)]
+    while structures:
+        node, structural_depth = structures.pop()
+        if not isinstance(node, (dict, list, tuple)):
+            continue
+        if structural_depth > 256:
+            raise ValueError('multiplication plan structure exceeds the bounded validation profile')
+        children = node.values() if isinstance(node, dict) else node
+        structures.extend((child, structural_depth + 1) for child in children)
+    expression_kinds = {'number', 'missing', 'tagged_missing', 'character', 'variable',
+                        'automatic', 'format', 'arithmetic', 'call', 'concat',
+                        'array_get', 'array_sum', 'array_current'}
+    pending = [(value, 0)]
+    while pending:
+        node, depth = pending.pop()
+        if isinstance(node, dict):
+            kind = node.get('kind')
+            is_expression = isinstance(kind, str) and kind in expression_kinds
+            if depth and not is_expression:
+                raise ValueError('multiplication composition has an unsupported expression kind')
+            depth = depth + 1 if is_expression else 0
+            if depth > 32:
+                raise ValueError('multiplication expressions exceed the32-level profile')
+            if kind in ('number', 'missing', 'tagged_missing', 'character', 'variable', 'automatic'):
+                if set(node) != {'kind', 'value'}:
+                    raise ValueError('multiplication composition has a malformed scalar operand')
+                if kind == 'number' and (type(node['value']) not in (int, float)
+                        or type(node['value']) is float and not math.isfinite(node['value'])):
+                    raise ValueError('multiplication numeric literals require finite numbers')
+                if kind == 'missing' and node['value'] is not None:
+                    raise ValueError('multiplication ordinary missing requires None')
+                if kind == 'character' and not isinstance(node['value'], str):
+                    raise ValueError('multiplication character literals require text')
+                if kind == 'tagged_missing':
+                    if not isinstance(node['value'], dict) or set(node['value']) != {'missing'}:
+                        raise ValueError('multiplication scalar tagged missing requires a valid encoding')
+                    sas_numeric_order(node['value'])
+                if kind == 'variable' and (not isinstance(node['value'], str)
+                        or not re.fullmatch(r'[a-z_][a-z0-9_]{0,31}', node['value'])):
+                    raise ValueError('multiplication operands require normalized ordinary variable names')
+                if kind == 'automatic' and (not isinstance(node['value'], str)
+                        or node['value'] != '_n_' and not re.fullmatch(r'(?:first|last)\.[a-z_][a-z0-9_]{0,31}', node['value'])):
+                    raise ValueError('multiplication automatic operands require a supported reference')
+            if kind == 'format' and (set(node) != {'kind', 'name', 'w', 'd'}
+                    or not isinstance(node['name'], str) or node['name'] not in FORMATS
+                    or type(node['w']) is not int or type(node['d']) is not int
+                    or node['w'] < 0 or node['d'] < 0):
+                raise ValueError('multiplication composition requires supported format metadata')
+            if kind == 'call':
+                spec = FUNCTIONS.get(node.get('name')) if isinstance(node.get('name'), str) else None
+                args = node.get('args')
+                if (set(node) != {'kind', 'name', 'args'} or spec is None or not isinstance(args, list)
+                        or any(not isinstance(arg, dict) for arg in args)
+                        or len(args) < spec.min_args or spec.max_args >= 0 and len(args) > spec.max_args):
+                    raise ValueError('multiplication composition requires supported call shapes and arity')
+            if kind == 'arithmetic' and (set(node) != {'kind', 'op', 'left', 'right'}
+                    or node.get('op') not in ('+', '-', '/', '*')
+                    or not all(isinstance(node[side], dict) for side in ('left', 'right'))):
+                raise ValueError('multiplication composition requires supported arithmetic shapes')
+            if kind == 'arithmetic':
+                children = [node['left'], node['right']]
+            elif kind in ('call', 'concat'):
+                children = [node.get('args')]
+            elif kind == 'array_get':
+                children = [node.get('index')]
+            else:
+                children = [] if is_expression else node.values()
+            pending.extend((child, depth) for child in children)
+        elif isinstance(node, (list, tuple)):
+            pending.extend((child, depth) for child in node)
 
 
 def function_call_lines(value, name, line=None):
@@ -371,7 +461,7 @@ def _substr_arguments(expr):
 
 def _numeric_expression(expr, schema):
     kind = expr.get('kind')
-    if kind in ('number', 'missing', 'tagged_missing', 'automatic', 'array_get', 'array_sum'):
+    if kind in ('number', 'missing', 'tagged_missing', 'automatic', 'array_get', 'array_sum', 'array_current'):
         return True
     if kind == 'variable':
         spec = schema.get(expr['value'], 'number')
@@ -397,7 +487,7 @@ def validate_sum_expression(expr, schema):
             if kind == 'missing' and node.get('value') is not None:
                 raise ValueError('sum/UNTIL ordinary missing requires None')
             sas_sum_statement(None, node.get('value'))
-        if kind == 'arithmetic' and node.get('op') not in ('+', '-', '/'):
+        if kind == 'arithmetic' and node.get('op') not in ('+', '-', '/', '*'):
             raise ValueError('sum/UNTIL supports gated arithmetic only')
         if kind == 'call':
             spec = FUNCTIONS[node['name']]
@@ -417,6 +507,7 @@ def _constant_numeric(expr):
         b, right = _constant_numeric(expr['right'])
         if not (a and b): return False, None
         if expr['op'] == '/': return True, sas_divide(left, right)
+        if expr['op'] == '*': return True, sas_multiply(left, right)
         if left is None or right is None: return True, None
         return True, left + right if expr['op'] == '+' else left - right
     if kind == 'call':
@@ -426,20 +517,46 @@ def _constant_numeric(expr):
     return False, None
 
 
+def _constant_product(expr):
+    """Literal product-profile trees, including bounded exact + and -."""
+    kind = expr.get('kind')
+    if kind in ('number', 'missing'):
+        return True, sas_numeric_array_value(expr.get('value'))
+    if kind == 'arithmetic':
+        a, left = _constant_product(expr['left'])
+        b, right = _constant_product(expr['right'])
+        if not (a and b):
+            return False, None
+        if expr['op'] == '*':
+            return True, sas_multiply(left, right)
+        if expr['op'] == '/':
+            return True, sas_divide(left, right)
+        return True, sas_numeric_array_add(left, right, expr['op'] == '-')
+    if kind == 'call':
+        values = [_constant_product(arg) for arg in expr['args']]
+        if all(known for known, _ in values):
+            return True, sas_numeric_array_value(apply(expr['name'], [value for _, value in values]))
+    return False, None
+
+
 def validate_numeric_composition(value, schema):
-    """New division/INT descriptors and constants, even on zero-trip input."""
+    """Bounded arithmetic/INT descriptors and constants on empty/skipped paths."""
     for node, _ in expression_nodes(value):
         if node.get('kind') == 'arithmetic':
-            if node.get('op') not in ('+', '-', '/'):
+            if node.get('op') not in ('+', '-', '/', '*'):
                 raise ValueError('unsupported arithmetic plan operator')
-            if node['op'] != '/': continue
+            if any(child.get('kind') == 'arithmetic' and child.get('op') == '*'
+                   for child, _ in expression_nodes(node)):
+                validate_sum_expression(node, schema)
+                _constant_product(node)
+            if node['op'] not in ('/', '*'): continue
             for side in ('left', 'right'):
                 validate_sum_expression(node[side], schema)
                 known, constant = _constant_numeric(node[side])
                 if known:
                     from sas_semantics import sas_bounded_numeric
-                    sas_bounded_numeric(constant)
-                    if side == 'right' and constant == 0:
+                    (sas_bounded_numeric if node['op'] == '/' else sas_numeric_array_value)(constant)
+                    if node['op'] == '/' and side == 'right' and constant == 0:
                         raise ValueError('division by zero requires error-state review')
             _constant_numeric(node)
         elif node.get('kind') == 'call' and node.get('name') == 'int':

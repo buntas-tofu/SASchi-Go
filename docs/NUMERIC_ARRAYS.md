@@ -55,7 +55,8 @@ check; unrelated scalar arithmetic retains its existing profile.
 
 Indices must be integral and within declared bounds. New array expressions
 support numeric literals, ordinary numeric variables, _N_, array reads, SUM OF,
-and bounded exact +/-. Every arithmetic result must be representable without
+and bounded exact +/-. [DS-045 multiplication](NUMERIC_COMPOSITION.md) extends that
+profile with exact bounded products. Every arithmetic result must be representable without
 rounding and remain within2147483647. SUM OF processes the declared element
 order, ignores ordinary missing and returns missing when all elements are missing.
 Every nonmissing ordered partial sum must meet the same exactness/range profile.

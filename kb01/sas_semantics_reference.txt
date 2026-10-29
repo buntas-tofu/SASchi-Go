@@ -2289,3 +2289,25 @@ def sas_input_records(records, width):
                 pending = []
                 break  # No trailing @/@@: unread fields on this record are lost.
     return rows  # EOF terminates INPUT without outputting an incomplete row.
+
+
+def sas_multiply(left, right):
+    """DS-045 exact bounded binary64 product with ordinary-missing propagation."""
+    from fractions import Fraction
+    values = []
+    for value in (left, right):
+        if value is None:
+            values.append(None)
+        elif (isinstance(value, bool) or not isinstance(value, (int, float))
+                or not -2147483647 <= value <= 2147483647):
+            raise ValueError('multiplication requires finite numeric/ordinary-missing operands within2147483647')
+        else:
+            values.append(float(value))
+    left, right = values
+    if left is None or right is None:
+        return None
+    exact = Fraction(left) * Fraction(right)
+    result = left * right
+    if abs(exact) > 2147483647 or not math.isfinite(result) or Fraction(result) != exact:
+        raise ValueError('multiplication requires an exact binary64 product within2147483647')
+    return 0.0 if result == 0 else result
