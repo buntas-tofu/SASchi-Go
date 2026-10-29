@@ -17,6 +17,7 @@ from sas_semantics import sas_counted_capture
 from sas_semantics import sas_put_mixed_numeric
 from .put_mixed import validate_items as validate_mixed_put_items
 from .trim_strip import is_call as is_trim_call, validate_expression as validate_trim_expression, validate_step as validate_trim_step
+from .input_list import validate_step as validate_input_step
 from sas_semantics import sas_trim_concat
 
 
@@ -150,6 +151,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
     tables, logs = normalize_catalog({} if catalog is None else catalog), []
     for step in plan['steps']:
         inputs, keys, ops = step['inputs'], step['by'], step['operations']
+        inline_rows = validate_input_step(step, plan['version'])
         validate_trim_step(step, plan['version'])
         # Reject malformed mixed-output plans before other expression walkers or input work.
         for op in operations(ops):
@@ -237,6 +239,8 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
             rows = [{n: r.get(n) for n in schema} for r in rows]
         else:
             rows = deepcopy(tables[inputs[0]]['rows']) if inputs else [{}]
+        if inline_rows is not None:
+            rows = inline_rows
         where = step.get('where')
         if where:
             if not inputs or step['kind'] != 'data':
@@ -315,6 +319,11 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
             elif kind == 'array_declare':
                 for name in args['names']:
                     schema.setdefault(name, deepcopy(legacy_schema.get(name, 'number')))
+            elif kind == 'input_list':
+                for name in args['names']:
+                    if name in schema and column_type(schema[name]) != 'number':
+                        raise ValueError('numeric INPUT cannot read a character variable')
+                    schema.setdefault(name, 'number')
             elif kind in ('array_set', 'array_current_set'):
                 for expr in expressions(args):
                     add_reference(expr)
@@ -668,7 +677,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                         if isinstance(v, str): return v.rstrip(' ')
                         return format(v, '.17g')
                     logs.append(' '.join(n + '=' + render(row.get(n)) for n in args['names']))
-                elif kind not in ('lookup', 'read', 'declare', 'array_declare'):
+                elif kind not in ('lookup', 'read', 'declare', 'array_declare', 'input_list'):
                     raise ValueError(f'unsupported operation: {kind}')
                 return True
 

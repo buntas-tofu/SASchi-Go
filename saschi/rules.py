@@ -154,6 +154,7 @@ CONSTRUCT_MAP: dict[str, str] = {
     "put-character-list": "DS-024",
     "put-mixed-numeric": "DS-042",
     "trim-strip": "DS-043",
+    "input-list": "DS-044",
     "put-all": "DS-025",
     "do-counted": "DS-026",
     "do-if": "DS-031",
@@ -228,6 +229,7 @@ CONSTRUCT_MAP: dict[str, str] = {
 # Statement-level routing: statement-start regex -> construct name.
 # Order matters: longest/most specific first.
 STATEMENT_ROUTER: list[tuple[re.Pattern, str]] = [
+    (re.compile(r'^\s*(?:INPUT\b(?!\s*=)|(?:CARDS|DATALINES)\s*$)', re.I), 'input-list'),
     (re.compile(r'^\s*DO\s+OVER\b', re.I), 'do-over'),
     (re.compile(r'^\s*DO\s+WHILE\b', re.I), 'do-while'),
     (re.compile(r'^\s*DO\s+UNTIL\b', re.I), 'do-until'),

@@ -2214,6 +2214,41 @@
         "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000212226.htm",
         "https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/n0xk6tl87f4b4qn1sp1ywen1ntan.htm"
       ]
+    },
+    {
+      "rule_id": "DS-044",
+      "sas_pattern": "Bounded numeric list INPUT with CARDS/DATALINES",
+      "scope": "data-step",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "Decode checked numeric fields with a physical-record cursor, drive DATA iterations from complete reads and preserve scalar PDV/OUTPUT scheduling."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent decimal factorization, explicit record cursor and whole-source scalar interpreter."
+      },
+      "required_settings": [
+        "One first top-level numeric INPUT with1..32 unique ordinary names, followed by one final CARDS or DATALINES block. Raw physical records stay opaque. Version2 input_list carries names, records and source line; no new default fields change older plans.",
+        "At most10000 printable ASCII records,80 bytes per record, spaces as delimiters and no embedded semicolon. Default FLOWOVER completes short reads across lines; blank records supply no fields; unused fields on the last consumed record are discarded. Incomplete EOF emits no observation.",
+        "Ordinary missing is a period. Signed decimal and E exponent spellings require at most32 token bytes,15 significand digits, exponent magnitude15, exact binary64 representation and magnitude at most2147483647. Zero is normalized. These are implementation bounds, not SAS language limits.",
+        "Scalar assignments, numeric RETAIN/sum statements, simple IF/ELSE, subset IF and existing bounded numeric/literal PUT and OUTPUT retain their contracts. INPUT overwrites its variables each read; scratch resets and retained state persists. Schema discovery includes empty/skipped paths; internal record state never appears in output.",
+        "Eager source and independent serialized-plan checks refuse unsupported input or consumed invalid tokens atomically. Runtime failures publish no accepted partial result or buffered stdout. Physical SAS notes, warnings and invalid-data recovery are not emulated.",
+        "Character/modified/formatted/named input, variable lists, arrays, loops, SET/MERGE/BY/WHERE, INFILE/external files, pointer/line controls, @/@@, LINES and *4 aliases, tagged missing, inexact decimals, tabs/non-ASCII, PUT _ALL_ and C++ remain deferred."
+      ],
+      "silent_difference_checks": [
+        "Do not replace FLOWOVER with MISSOVER, flatten extra fields into later rows, or publish incomplete EOF.",
+        "Keep period missing distinct from repeated delimiters, exact numeric conversion separate from error-state recovery, and unused fields opaque.",
+        "Pin the entire unchanged integer_comparison.sas with hand truth table, independent base R, source/runtime, emitted and CLI execution."
+      ],
+      "validation_test": "examples/verify_input_list.py; saschi.test_input_list",
+      "confidence": "bounded repository/base-R evidence; no live SAS",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/lestmtsref/63323/HTML/default/n0oaql83drile0n141pdacojq97s.htm",
+        "https://support.sas.com/documentation/cdl/en/lestmtsref/63323/HTML/default/p0114gachtut3nn1and4ap8ke9nf.htm",
+        "https://support.sas.com/documentation/cdl/en/lestmtsref/63323/HTML/default/n1rill4udj0tfun1fvce3j401plo.htm",
+        "https://support.sas.com/documentation/cdl/en/lrcon/62955/HTML/default/a003209907.htm"
+      ]
     }
   ],
   "runtime_capabilities": {
@@ -2445,6 +2480,22 @@
       "r_witness": "examples/trim_strip.R",
       "boundary_tests": "saschi.test_trim_strip",
       "evidence": "12 hand pins,1600 source/runtime/R comparisons,20 shared refusals,4 naive controls, original six-snapshot program and both complete DATA steps of unchanged loops_for.sas. No live SAS."
+    },
+    "input_list": {
+      "rule_id": "DS-044",
+      "target": "saschi.runtime.run_plan",
+      "scope": [
+        "One first top-level numeric INPUT with1..32 unique ordinary names, followed by one final CARDS or DATALINES block. Raw physical records stay opaque. Version2 input_list carries names, records and source line; no new default fields change older plans.",
+        "At most10000 printable ASCII records,80 bytes per record, spaces as delimiters and no embedded semicolon. Default FLOWOVER completes short reads across lines; blank records supply no fields; unused fields on the last consumed record are discarded. Incomplete EOF emits no observation.",
+        "Ordinary missing is a period. Signed decimal and E exponent spellings require at most32 token bytes,15 significand digits, exponent magnitude15, exact binary64 representation and magnitude at most2147483647. Zero is normalized. These are implementation bounds, not SAS language limits.",
+        "Scalar assignments, numeric RETAIN/sum statements, simple IF/ELSE, subset IF and existing bounded numeric/literal PUT and OUTPUT retain their contracts. INPUT overwrites its variables each read; scratch resets and retained state persists. Schema discovery includes empty/skipped paths; internal record state never appears in output.",
+        "Eager source and independent serialized-plan checks refuse unsupported input or consumed invalid tokens atomically. Runtime failures publish no accepted partial result or buffered stdout. Physical SAS notes, warnings and invalid-data recovery are not emulated.",
+        "Character/modified/formatted/named input, variable lists, arrays, loops, SET/MERGE/BY/WHERE, INFILE/external files, pointer/line controls, @/@@, LINES and *4 aliases, tagged missing, inexact decimals, tabs/non-ASCII, PUT _ALL_ and C++ remain deferred."
+      ],
+      "validation_test": "examples/verify_input_list.py",
+      "r_witness": "examples/input_list.R",
+      "boundary_tests": "saschi.test_input_list",
+      "evidence": "12 hand pins,600 constructive source/runtime/R cases,24 shared refusals,4 naive controls, original five-snapshot program and whole unchanged integer_comparison.sas. No live SAS."
     }
   }
 }

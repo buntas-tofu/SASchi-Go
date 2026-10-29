@@ -113,7 +113,14 @@ assert namespace['result'] == {'datasets': {'d': {
     'rows': [{'a': '*   ', 'i': 1., 'b': '   ', 'c': '   '},
              {'a': '**  ', 'i': 2., 'b': '   ', 'c': '   '},
              {'a': '**  ', 'i': 3., 'b': '[ ]', 'c': '[] '}]}}, 'log': []}
-print('VERIFIED: isolated installed wheel, canonical rulebook, all web assets, CLI entry point, MOD-to-PUT output, calendar, sum/UNTIL and division/INT/WHILE')
+inline = translate('data d; input a b; seq=_n_; datalines;\n1\n2 99\n. 4\n5\n;\nrun;')
+assert not inline.blocked, inline.tickets
+namespace = {}
+exec(inline.code, namespace)
+assert namespace['result'] == {'datasets': {'d': {
+    'schema': {'a': 'number', 'b': 'number', 'seq': 'number'},
+    'rows': [{'a': 1., 'b': 2., 'seq': 1.}, {'a': None, 'b': 4., 'seq': 2.}]}}, 'log': []}
+print('VERIFIED: isolated installed wheel, canonical rulebook, all web assets, CLI entry point, MOD-to-PUT output, calendar, sum/UNTIL, division/INT/WHILE and numeric inline INPUT')
 '''
 
 

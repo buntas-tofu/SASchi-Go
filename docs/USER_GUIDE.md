@@ -30,7 +30,7 @@ evidence; the gate suite is the proof; nothing is verified by assertion.
   a Python verifier (`verify_*.py`), an R twin (`*.R`), and in most cases
   fixture data embedded in the verifier.
 - `docs/sasconversionrulebook.json` : the machine-consumable translation
-  rulebook. 78 rules across data-step (DS), PROC SQL (SQL), statistical
+  rulebook. 79 rules across data-step (DS), PROC SQL (SQL), statistical
   procs (ST), survey procs (SV), the macro layer (MC), and the IML
   matrix surface (MX), each with an
   equivalence class (EXACT, EQUIVALENT-WITH-SETTINGS, APPROXIMATE,
@@ -358,3 +358,12 @@ The README carries the current list. The shape of the list:
 ## License
 
 MIT. See [LICENSE](../LICENSE).
+
+## Numeric inline input
+
+DS-044 accepts one first top-level numeric list INPUT followed by CARDS or
+DATALINES. Default FLOWOVER, release of unused fields, incomplete EOF, row reset
+and scalar OUTPUT scheduling are checked against independent base R. See
+[the bounded input contract](INPUT_LIST.md) for exact numeric/record limits,
+whole-program pins and deferred forms. This is repository evidence, not live-SAS
+validation.

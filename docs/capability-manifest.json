@@ -98,17 +98,18 @@
    "qualification": "Reference fixtures, descriptor transport and source execution are separate. GATED means evidence for the stated slice, never every form of a language entry. Historical measured_at anchors remain the original enumeration/disposition baseline."
   },
   "numeric_arrays_update": "DS-039 adds bounded source ARRAY/indexed reads and writes/SUM OF with numeric-arrays and suite-numeric-arrays plus independent R. ARRAY/Array Reference gain source evidence without disposition, rollup or universe changes. No DO OVER or new complete-program proof; no live SAS.",
-  "do_over_update": "DS-040 adds bounded legacy implicit numeric DO OVER, current-element aliases and the full loops_foreach.sas proof. Evidence is attached to existing ARRAY/Array Reference/END entries. DO OVER is not a newly enumerated SAS9.4 reference entry; grouped DO remains UNASSESSED. Dispositions, rollups and universes are unchanged; no live SAS."
+  "do_over_update": "DS-040 adds bounded legacy implicit numeric DO OVER, current-element aliases and the full loops_foreach.sas proof. Evidence is attached to existing ARRAY/Array Reference/END entries. DO OVER is not a newly enumerated SAS9.4 reference entry; grouped DO remains UNASSESSED. Dispositions, rollups and universes are unchanged; no live SAS.",
+  "input_list_update": "DS-044 promotes INPUT Statement, INPUT Statement: List, CARDS Statement and DATALINES Statement for the explicitly bounded numeric inline subset. Prior dispositions are recorded per entry; all earlier evidence and every universe remain unchanged. No live SAS."
  },
  "rollup": {
   "stmt": {
    "universe": 108,
-   "assessed": 30,
-   "gated": 22,
+   "assessed": 34,
+   "gated": 26,
    "rule": 5,
    "human_review": 1,
    "out_of_scope": 2,
-   "unassessed": 78
+   "unassessed": 74
   },
   "dso": {
    "universe": 40,
@@ -326,10 +327,33 @@
    "category": "File-Handling",
    "type": "Declarative",
    "valid_in": "DATA step",
-   "disposition": "UNASSESSED",
-   "rule_ids": [],
-   "gates": [],
-   "reference_page": 47
+   "disposition": "GATED",
+   "rule_ids": [
+    "DS-044"
+   ],
+   "gates": [
+    "input-list",
+    "suite-input-list"
+   ],
+   "reference_page": 47,
+   "assessment_history": [
+    {
+     "date": "2026-10-29",
+     "prior_disposition": "UNASSESSED",
+     "basis": "DS-044 bounded source execution and independent base-R witness; broader forms remain unassessed."
+    }
+   ],
+   "note": "Bounded numeric inline list-input subset only. See docs/INPUT_LIST.md. Other input forms and physical SAS log validation remain outstanding.",
+   "gate_evidence": [
+    {
+     "level": "source-execution",
+     "gates": [
+      "input-list",
+      "suite-input-list"
+     ],
+     "scope": "DS-044 first top-level numeric list INPUT, opaque CARDS/DATALINES, FLOWOVER/release/EOF, bounded exact numeric conversion and scalar DATA state/output; complete integer_comparison.sas proof. No live SAS."
+    }
+   ]
   },
   {
    "entry": "CARDS4 Statement",
@@ -416,10 +440,33 @@
    "category": "File-Handling",
    "type": "Declarative",
    "valid_in": "DATA step",
-   "disposition": "UNASSESSED",
-   "rule_ids": [],
-   "gates": [],
-   "reference_page": 61
+   "disposition": "GATED",
+   "rule_ids": [
+    "DS-044"
+   ],
+   "gates": [
+    "input-list",
+    "suite-input-list"
+   ],
+   "reference_page": 61,
+   "assessment_history": [
+    {
+     "date": "2026-10-29",
+     "prior_disposition": "UNASSESSED",
+     "basis": "DS-044 bounded source execution and independent base-R witness; broader forms remain unassessed."
+    }
+   ],
+   "note": "Bounded numeric inline list-input subset only. See docs/INPUT_LIST.md. Other input forms and physical SAS log validation remain outstanding.",
+   "gate_evidence": [
+    {
+     "level": "source-execution",
+     "gates": [
+      "input-list",
+      "suite-input-list"
+     ],
+     "scope": "DS-044 first top-level numeric list INPUT, opaque CARDS/DATALINES, FLOWOVER/release/EOF, bounded exact numeric conversion and scalar DATA state/output; complete integer_comparison.sas proof. No live SAS."
+    }
+   ]
   },
   {
    "entry": "DATALINES4 Statement",
@@ -1035,10 +1082,33 @@
    "category": "File-Handling",
    "type": "Executable",
    "valid_in": "DATA step",
-   "disposition": "UNASSESSED",
-   "rule_ids": [],
-   "gates": [],
-   "reference_page": 165
+   "disposition": "GATED",
+   "rule_ids": [
+    "DS-044"
+   ],
+   "gates": [
+    "input-list",
+    "suite-input-list"
+   ],
+   "reference_page": 165,
+   "assessment_history": [
+    {
+     "date": "2026-10-29",
+     "prior_disposition": "UNASSESSED",
+     "basis": "DS-044 bounded source execution and independent base-R witness; broader forms remain unassessed."
+    }
+   ],
+   "note": "Bounded numeric inline list-input subset only. See docs/INPUT_LIST.md. Other input forms and physical SAS log validation remain outstanding.",
+   "gate_evidence": [
+    {
+     "level": "source-execution",
+     "gates": [
+      "input-list",
+      "suite-input-list"
+     ],
+     "scope": "DS-044 first top-level numeric list INPUT, opaque CARDS/DATALINES, FLOWOVER/release/EOF, bounded exact numeric conversion and scalar DATA state/output; complete integer_comparison.sas proof. No live SAS."
+    }
+   ]
   },
   {
    "entry": "INPUT Statement: Column",
@@ -1068,10 +1138,33 @@
    "category": "File-Handling",
    "type": "Executable",
    "valid_in": "DATA step",
-   "disposition": "UNASSESSED",
-   "rule_ids": [],
-   "gates": [],
-   "reference_page": 192
+   "disposition": "GATED",
+   "rule_ids": [
+    "DS-044"
+   ],
+   "gates": [
+    "input-list",
+    "suite-input-list"
+   ],
+   "reference_page": 192,
+   "assessment_history": [
+    {
+     "date": "2026-10-29",
+     "prior_disposition": "UNASSESSED",
+     "basis": "DS-044 bounded source execution and independent base-R witness; broader forms remain unassessed."
+    }
+   ],
+   "note": "Bounded numeric inline list-input subset only. See docs/INPUT_LIST.md. Other input forms and physical SAS log validation remain outstanding.",
+   "gate_evidence": [
+    {
+     "level": "source-execution",
+     "gates": [
+      "input-list",
+      "suite-input-list"
+     ],
+     "scope": "DS-044 first top-level numeric list INPUT, opaque CARDS/DATALINES, FLOWOVER/release/EOF, bounded exact numeric conversion and scalar DATA state/output; complete integer_comparison.sas proof. No live SAS."
+    }
+   ]
   },
   {
    "entry": "INPUT Statement: Named",
