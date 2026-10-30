@@ -2448,6 +2448,65 @@
       "sources": [
         "https://support.sas.com/documentation/cdl/en/leforinforref/64790/HTML/default/p1fum54c93f8r0n1wrs5mrb05nzi.htm"
       ]
+    },
+    {
+      "rule_id": "DS-052",
+      "sas_pattern": "Explicit rounded scalar arithmetic with output projection",
+      "scope": "data-step",
+      "equivalence_class": "APPROXIMATE",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "Independently validate explicit source/portable profile, selected inputs and complete static PDV before execution."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent full-source row scheduling and sequential numeric witnesses with separate exact logical text."
+      },
+      "required_settings": [
+        "Only new executable power/Pi/trig syntax combined with validated projection selects binary64-rows-v1. Earlier binary64-v1 plans retain their catalog-free/no-projection admission and exact unmarked arithmetic behavior. No default plan fields or old serialized shapes change.",
+        "Catalog-free DATA may combine one existing KEEP/DROP statement or DATA output option with bounded scalar operations. The numeric declaration remains first; a DATA output selector immediately follows at the same source line. Resolve selection against the full static PDV, preserving calculation/PUT/retention and earlier snapshots before selecting output columns in PDV order.",
+        "Reuse the arithmetic domains, ordinary missing, function limits, logical decimal fields and resource policies recorded by DS-049/050/051. This new rule owns composition admission; it does not claim base DS-049 catalog-free marker admission for new contexts. Unknown/conflicting/empty or nested selection, stale/forged metadata and masked errors refuse. No live SAS or exact BEST12 claim."
+      ],
+      "silent_difference_checks": [
+        "Preserve every previous gate and order, all149 helper ASTs and all12 earlier example plan shapes.",
+        "Distinguish numeric tolerance from exact missing/schema/order/logical text and preserve atomic publication."
+      ],
+      "validation_test": "examples/verify_numeric_rows.py; saschi.test_numeric_rows",
+      "confidence": "bounded repository/base-R policy evidence; no live SAS or exact BEST12",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/lrcon/62955/HTML/default/a000695119.htm",
+        "https://support.sas.com/documentation/cdl/en/lestmtsref/63323/HTML/default/n1dfiqj146yi2cn1maeju9wo7ijs.htm"
+      ]
+    },
+    {
+      "rule_id": "DS-053",
+      "sas_pattern": "One selected numeric SET with explicit rounded scalar arithmetic",
+      "scope": "data-step",
+      "equivalence_class": "APPROXIMATE",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "Independently validate explicit source/portable profile, selected inputs and complete static PDV before execution."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent full-source row scheduling and sequential numeric witnesses with separate exact logical text."
+      },
+      "required_settings": [
+        "Only binary64-rows-v1 with actual executable numeric trigger admits exactly one driving SET before executable work. SET may resolve a supplied catalog table or a prior-step produced table, with both origins independently witnessed. Optional existing bounded input/output selectors compose. BY/WHERE/MERGE/LOOKUP, inline INPUT, arrays and WHILE/UNTIL remain separate.",
+        "Full generic catalog normalization precedes input projection. Every selected ordinary column name, numeric descriptor and selected imported value validates eagerly against the unchanged binary64 domain before row execution, including unused, output-dropped, overwritten or skipped values and empty input descriptors. Legal selected-out values retain generic catalog normalization requirements. Signed zero normalizes only in a private copy; preserve metadata, order and caller catalogs.",
+        "SET columns overwrite each row including missing values. Excluded and reintroduced scratch resets; sum targets retain unless overwritten by selected input. Explicit/implicit OUTPUT, conditional skipping, retained/input-name collisions and per-row counted budgets require separate witnesses. Static/literal failures check empty/skipped/zero-trip paths. Reached arithmetic keeps existing validation. Failures publish no accepted result or buffered logical stdout.",
+        "Earlier accepted shapes and old marker refusals remain unchanged. No new numeric domains, function families, text formatting, dependencies, automatic source-name discovery or broad SAS claim."
+      ],
+      "silent_difference_checks": [
+        "Preserve every previous gate and order, all149 helper ASTs and all12 earlier example plan shapes.",
+        "Distinguish numeric tolerance from exact missing/schema/order/logical text and preserve atomic publication."
+      ],
+      "validation_test": "examples/verify_numeric_set.py; saschi.test_numeric_rows",
+      "confidence": "bounded repository/base-R policy evidence; no live SAS or exact BEST12",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/lrcon/62955/HTML/default/a000695119.htm",
+        "https://support.sas.com/documentation/cdl/en/lestmtsref/63323/HTML/default/n1dfiqj146yi2cn1maeju9wo7ijs.htm"
+      ]
     }
   ],
   "runtime_capabilities": {
@@ -2786,6 +2845,33 @@
       "r_witness": "examples/binary64.R",
       "boundary_tests": "saschi.test_binary64",
       "evidence": "Bounded repository/base-R evidence. Exact logical output and numerical tolerance are separate; no live SAS."
+    },
+    "numeric_projection": {
+      "rule_id": "DS-052",
+      "target": "saschi.runtime.run_plan",
+      "scope": [
+        "Only new executable power/Pi/trig syntax combined with validated projection selects binary64-rows-v1. Earlier binary64-v1 plans retain their catalog-free/no-projection admission and exact unmarked arithmetic behavior. No default plan fields or old serialized shapes change.",
+        "Catalog-free DATA may combine one existing KEEP/DROP statement or DATA output option with bounded scalar operations. The numeric declaration remains first; a DATA output selector immediately follows at the same source line. Resolve selection against the full static PDV, preserving calculation/PUT/retention and earlier snapshots before selecting output columns in PDV order.",
+        "Reuse the arithmetic domains, ordinary missing, function limits, logical decimal fields and resource policies recorded by DS-049/050/051. This new rule owns composition admission; it does not claim base DS-049 catalog-free marker admission for new contexts. Unknown/conflicting/empty or nested selection, stale/forged metadata and masked errors refuse. No live SAS or exact BEST12 claim."
+      ],
+      "validation_test": "examples/verify_numeric_rows.py",
+      "r_witness": "examples/numeric_rows.R",
+      "boundary_tests": "saschi.test_numeric_rows",
+      "evidence": "Independent source/control schedules, separate numeric/text policies, static and dynamic refusals and actual CLI/emitted witnesses; no live SAS."
+    },
+    "numeric_set": {
+      "rule_id": "DS-053",
+      "target": "saschi.runtime.run_plan",
+      "scope": [
+        "Only binary64-rows-v1 with actual executable numeric trigger admits exactly one driving SET before executable work. SET may resolve a supplied catalog table or a prior-step produced table, with both origins independently witnessed. Optional existing bounded input/output selectors compose. BY/WHERE/MERGE/LOOKUP, inline INPUT, arrays and WHILE/UNTIL remain separate.",
+        "Full generic catalog normalization precedes input projection. Every selected ordinary column name, numeric descriptor and selected imported value validates eagerly against the unchanged binary64 domain before row execution, including unused, output-dropped, overwritten or skipped values and empty input descriptors. Legal selected-out values retain generic catalog normalization requirements. Signed zero normalizes only in a private copy; preserve metadata, order and caller catalogs.",
+        "SET columns overwrite each row including missing values. Excluded and reintroduced scratch resets; sum targets retain unless overwritten by selected input. Explicit/implicit OUTPUT, conditional skipping, retained/input-name collisions and per-row counted budgets require separate witnesses. Static/literal failures check empty/skipped/zero-trip paths. Reached arithmetic keeps existing validation. Failures publish no accepted result or buffered logical stdout.",
+        "Earlier accepted shapes and old marker refusals remain unchanged. No new numeric domains, function families, text formatting, dependencies, automatic source-name discovery or broad SAS claim."
+      ],
+      "validation_test": "examples/verify_numeric_set.py",
+      "r_witness": "examples/numeric_rows.R",
+      "boundary_tests": "saschi.test_numeric_rows",
+      "evidence": "Independent source/control schedules, separate numeric/text policies, static and dynamic refusals and actual CLI/emitted witnesses; no live SAS."
     }
   }
 }

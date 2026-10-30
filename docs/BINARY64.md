@@ -59,6 +59,13 @@ an older plan. The profile admits scalar assignments, counted DO bodies, IF,
 retained sum statements, OUTPUT and numeric-list PUT. Arrays, SET, INPUT,
 WHILE/UNTIL, procedures, macros and the C++ backend remain outside this increment.
 
+DS-052/053 provide a separately gated extension through binary64-rows-v1 for
+projection and one numeric SET per step. The original binary64-v1 marker retains
+the catalog-free admission described here. New row/projection plans must satisfy
+their own composition trigger and eager selected-input validation; see
+[numeric row composition](NUMERIC_ROWS.md). Numeric domains, text policies and
+all earlier accepted serialized plan shapes remain unchanged.
+
 Every arithmetic operand and reached intermediate is ordinary numeric missing,
 zero or a finite normal binary64 value with magnitude at most2147483647. Both
 operands validate before missing propagation. Boolean, character, tagged missing,

@@ -94,6 +94,8 @@ VERIFIERS = [
     ("numeric-discovery", HERE / "examples" / "verify_numeric_discovery.py"),
     ("projection", HERE / "examples" / "verify_projection.py"),
     ("binary64", HERE / "examples" / "verify_binary64.py"),
+    ("numeric-projection", HERE / "examples" / "verify_numeric_rows.py"),
+    ("numeric-set", HERE / "examples" / "verify_numeric_set.py"),
 ]
 
 # The translator suites, run as unittest modules. They carry the same weight as
@@ -147,6 +149,7 @@ SUITES = [
     ("suite-corpus-basics", "saschi.test_corpus_basics"),
     ("suite-projection", "saschi.test_projection"),
     ("suite-binary64", "saschi.test_binary64"),
+    ("suite-numeric-rows", "saschi.test_numeric_rows"),
 ]
 
 

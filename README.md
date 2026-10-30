@@ -16,8 +16,8 @@ policies. Receipts record what passed for the source and environment tested.
 ## Current verification
 
 Status: version 0.4.0 development evidence for maintainer review, checked on
-2026-10-29. With the pinned Roku corpus present, `python verify_all.py` passes
-56 fixture gates, 46 suites and 922 tests with zero skips. Synthesis adds 60/60
+2026-10-30. With the pinned Roku corpus present, `python verify_all.py` passes
+58 fixture gates, 47 suites and 947 tests with zero skips. Synthesis adds 60/60
 faithful passes and catches 60/60 naive variants. Receipts bind these results to
 the recorded source and environment; live-SAS validation remains outstanding.
 
@@ -70,6 +70,14 @@ Their numerical tolerances and inferred logical decimal text policy are separate
 contracts. Exact SAS BEST12/DECIMALCONV and live-SAS equivalence remain unproved.
 Earlier exact arithmetic and integer-output plans keep their previous contracts.
 
+[C1+C2 numeric rows](docs/NUMERIC_ROWS.md) combines rounded scalar calculations
+with KEEP/DROP and one numeric SET per step. A distinct binary64-rows-v1 marker
+preserves earlier profile admission and serialized shapes. Supplied and
+prior-step produced tables have independent witnesses for input selection,
+retention, scratch reset and output snapshots. Every selected input descriptor
+and value validates before row execution. This adds composition evidence without
+claiming another complete external-program proof.
+
 
 ## Operational workflow
 
@@ -104,7 +112,7 @@ fixed expected output and base-R evidence. Special missings retain their tags.
   sibling plus a fixture verifier (`verify_*.py`). Run any verifier directly,
   or all of them through [verify_all.py](verify_all.py).
 - [docs/sasconversionrulebook.json](docs/sasconversionrulebook.json) : the machine-consumable translation
-  rulebook. 86 rules with equivalence classes (EXACT,
+  rulebook. 88 rules with equivalence classes (EXACT,
   EQUIVALENT-WITH-SETTINGS, APPROXIMATE, NO-DIRECT-EQUIVALENT), required
   settings, forbidden patterns, and validation tests.
 - [docs/capability-manifest.json](docs/capability-manifest.json) : the coverage manifest. Enumerated entries of
@@ -219,13 +227,15 @@ The R interpreter is found via `ROSETTA_RSCRIPT`, then `Rscript` on PATH.
   These are logical-record contracts,
   not physical SAS log equivalence ([examples/verify_put_list.py](examples/verify_put_list.py),
   [saschi.test_put_list](saschi/test_put_list.py)).
-- Numeric-variable list PUT has its own DS-027 slice. Preceding numeric
-  declarations or statically numeric assignments enable simple lists such as
+- The earlier DS-027 numeric-variable list PUT profile uses preceding numeric
+  declarations or statically numeric assignments to enable simple lists such as
   `n=7; m=.; put n m;`, with logical record `7 . `. Ordinary missing and finite
   integers with magnitude at most 99999999999 are gated. Each field retains
   one following separator, including the final field, within 64 columns.
   Fractions, special missing output, mixed numeric/literal/character lists,
-  attached formats, and descriptor-only numeric SET variables require review.
+  attached formats, and descriptor-only numeric SET variables require review in
+  that earlier profile. DS-053 separately admits selected numeric SET variables
+  through binary64-rows-v1; see [numeric row composition](docs/NUMERIC_ROWS.md).
   Descriptor checks also run on empty or filtered inputs. These are bounded
   repository and independent base-R records, without a live SAS log capture
   ([examples/verify_put_numeric.py](examples/verify_put_numeric.py), [saschi.test_put_numeric](saschi/test_put_numeric.py)). The composed

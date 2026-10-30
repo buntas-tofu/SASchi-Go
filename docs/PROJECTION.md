@@ -22,7 +22,7 @@ describes this same input/output distinction. Sources consulted2026-10-29.
 
 Design inference: store a declaration as a version2 `projection` operation with
 exactly `mode`, `names` and `scope`. The scope is `statement`, `output` or `input`.
-No default field is added to existing plans. An output option is the first
+No default field is added to existing plans. In the base profile, an output option is the first
 operation on the DATA header's source line. An input marker immediately precedes
 its single driving SET read on that read's source line. Runtime validates marker
 shape and placement independently of compiler admission.
@@ -85,8 +85,10 @@ declarations, zero-column results, general dataset options, multiple DATA
 destinations, PROC options and C++ projection remain refused. PUT _ALL_ retains
 its prior scalar-only profile. LABEL, FORMAT, INFORMAT, ATTRIB and numeric LENGTH
 declarations are outside this slice; existing descriptor transport does not
-authorize their source syntax. The separate B5 numeric profile requires its own
-composition evidence before combining with projection.
+authorize their source syntax. The original B5 binary64-v1 profile remains
+non-projecting. DS-052/053 separately prove projection and one numeric SET through
+the explicit binary64-rows-v1 marker. See [numeric row composition](NUMERIC_ROWS.md)
+for the declaration-prefix exception, input validation and state witnesses.
 
 Eight existing sibling corpus KEEP statements now route to bounded selection,
 including numbered lists. The sole DATA DROP= form is recognized, but its full

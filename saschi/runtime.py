@@ -348,6 +348,8 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
         sources = {name: tables[name] for name in inputs + lookups}
         if input_projection is not None:
             sources[inputs[0]] = project_table(sources[inputs[0]], input_projection)
+        if rounded_profile and inputs:
+            sources[inputs[0]] = binary64.validate_input_table(sources[inputs[0]])
         key = lambda row: tuple(order(row[k]) for k in keys)
         if step['kind'] == 'sort':
             table = deepcopy(tables[inputs[0]])
