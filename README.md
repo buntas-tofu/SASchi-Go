@@ -17,11 +17,11 @@ policies. Receipts record what passed for the source and environment tested.
 
 Status: version 0.4.0 development evidence for maintainer review, checked on
 2026-10-30. With the pinned Roku corpus present, `python verify_all.py` passes
-58 fixture gates, 47 suites and 947 tests with zero skips. Synthesis adds 60/60
+59 fixture gates, 48 suites and 970 tests with zero skips. Synthesis adds 60/60
 faithful passes and catches 60/60 naive variants. Receipts bind these results to
 the recorded source and environment; live-SAS validation remains outstanding.
 
-Eighteen unmodified external programs pass complete-program repository/base-R checks.
+Nineteen unmodified external programs pass complete-program repository/base-R checks.
 The two B5 programs use declared numerical tolerances and an inferred logical text
 policy; exact SAS BEST12/DECIMALCONV remains unproved. Earlier programs include
 FizzBuzz, the day-of-the-week calendar program and `loops_do_while.sas`, whose
@@ -79,6 +79,12 @@ and value validates before row execution. This adds composition evidence without
 claiming another complete external-program proof.
 
 
+[D4a SQL creation](docs/SQL_CREATE.md) adds descriptor-only empty tables from
+one explicit CHAR-column declaration inside bare PROC SQL and QUIT. The complete
+unchanged postal-address source now has independent R, ordered descriptor,
+empty-result, emitted Python and CLI evidence. Every existing destination refuses.
+Query creation, numeric columns, DML and general PROC SQL remain separate.
+
 ## Operational workflow
 
 The typed execution workflow and C++ scalar pilot use a shared, versioned
@@ -112,7 +118,7 @@ fixed expected output and base-R evidence. Special missings retain their tags.
   sibling plus a fixture verifier (`verify_*.py`). Run any verifier directly,
   or all of them through [verify_all.py](verify_all.py).
 - [docs/sasconversionrulebook.json](docs/sasconversionrulebook.json) : the machine-consumable translation
-  rulebook. 88 rules with equivalence classes (EXACT,
+  rulebook. 89 rules with equivalence classes (EXACT,
   EQUIVALENT-WITH-SETTINGS, APPROXIMATE, NO-DIRECT-EQUIVALENT), required
   settings, forbidden patterns, and validation tests.
 - [docs/capability-manifest.json](docs/capability-manifest.json) : the coverage manifest. Enumerated entries of

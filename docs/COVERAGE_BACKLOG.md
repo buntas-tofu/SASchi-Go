@@ -1,7 +1,7 @@
 # Coverage reconciliation and next gate series
 
 Status: Repository/base-R planning evidence, originally reconciled at main08eaa7b
-on2026-10-27 and updated through DS-053 and A0. The handoff binds current acceptance.
+on2026-10-27 and updated through DS-053, SQL-004 and A0. The handoff binds current acceptance.
 For principal/maintainer prioritization. Counts describe this checkout and the56
 pinned sibling corpus files, not all SAS or live-SAS equivalence. Updated for
 DS-039 arrays, DS-040 DO OVER and DS-041 nested/computed counted loops after the original
@@ -11,11 +11,11 @@ Implementation and publication are not authorized by this planning exercise.
 
 ## Inventory reconciled against actual evidence
 
-The golden command registers58 fixture runners,47 translator suites and1
-synthesis runner. The current acceptance contains947 tests, zero skips,
+The golden command registers59 fixture runners,48 translator suites and1
+synthesis runner. The current acceptance contains970 tests, zero skips,
 60 faithful synthesis checks and60 naive controls. The separate1k workload
 checks total39:18 ledger and21 text. These counts have different units. Neither
-88 rulebook rules nor106 golden-command runners is a SAS capability denominator.
+89 rulebook rules nor108 golden-command runners is a SAS capability denominator.
 
 [The capability manifest](capability-manifest.json) still enumerates108 statements
 and40 data-set options. The other7 declared reference areas remain unenumerated:
@@ -58,7 +58,7 @@ The5 RULE entries and8 HUMAN-REVIEW entries retain their review boundaries.
 
 ## Unknown blockers classified
 
-The current56-file compile census has19 clean and37 blocked, with647 ticket
+The current56-file compile census has20 clean and36 blocked, with646 ticket
 occurrences. A2 resolves20 compiler tickets across the corpus. The newly compile-
 clean100_doors.sas now passes the DS-042 mixed-output whole-program proof.
 B1 resolves two further tickets and adds the complete loops_for.sas proof.
@@ -68,14 +68,17 @@ B3 removes18 further compiler tickets and one unknown occurrence.
 B4/B5 remove37 further compiler tickets and10 unknown occurrences.
 C1/C2 removes one further composition ticket in archimedean_spiral.sas; the full
 file still needs SGPLOT and a wider trigonometric domain before execution proof.
-The remaining422 occurrences routed
+SQL-004 adds the complete unchanged postal-address empty-table proof. The net
+ticket count falls by one; unsupported SQL procedures gain explicit profile
+diagnostics. Three formerly unknown SQL occurrences now route explicitly.
+The remaining419 occurrences routed
 as unknown receive a primary planning category, with file, line, ticket ordinal,
 statement hash and classification basis preserved. Classification preserves every
 current compiler ticket.
 
 | Primary category for unknown tickets | Occurrences |
 | --- | ---: |
-| Procedure backend/clauses |228|
+| Procedure backend/clauses |225|
 | Macro body, invocation or unresolved reference |129|
 | Input records, INPUT/INFILE and opaque inline data |3|
 | Labels, GOTO/LINK/RETURN/STOP |35|
@@ -84,10 +87,10 @@ current compiler ticket.
 | Descriptor/environment statements |4|
 | Corpus prose or printed output |2|
 | CALL side effects |2|
-| Total |422|
+| Total |419|
 
 The procedure subtotal includes DS2:95, OPTMODEL:76, IML:31, PRINT:9, MEANS:4,
-FCMP:3, SQL:3, SGPLOT:2, TTEST:2 and one each SORT, MULTTEST and UNIVARIATE.
+FCMP:3, SGPLOT:2, TTEST:2 and one each SORT, MULTTEST and UNIVARIATE.
 These are diagnostic occurrences under lexical ownership, including cascading
 clauses, not independent missing procedures or implementation estimates. Macro
 classification likewise groups body fallout under a macro contract. Several
@@ -100,11 +103,12 @@ unterminated tickets. They need an explicit source-boundary decision; silently
 discarding those sections would invalidate a complete unmodified-file claim.
 No sibling corpus file was changed or copied into this repository.
 
-Eighteen files now have complete-program repository/base-R proofs. B5 adds the unchanged sum_of_a_series.sas and trigonometric_functions.sas under explicit numerical tolerances and an inferred logical decimal text policy. These two proofs do not establish exact SAS BEST12/DECIMALCONV or physical-log equivalence. B3 adds the entire unchanged
+Nineteen files now have complete-program repository/base-R proofs. B5 adds the unchanged sum_of_a_series.sas and trigonometric_functions.sas under explicit numerical tolerances and an inferred logical decimal text policy. These two proofs do not establish exact SAS BEST12/DECIMALCONV or physical-log equivalence. B3 adds the entire unchanged
 sum_and_product_of_an_array.sas, retaining its unassigned c as missing. A0 separately
 closes existing hello_world_text.sas and explicit comment-only no-op evidence,
 without language expansion. DS-042, DS-043 and DS-044 retain the complete
-100_doors.sas, loops_for.sas and integer_comparison.sas proofs. The one other
+100_doors.sas, loops_for.sas and integer_comparison.sas proofs. SQL-004 separately proves the entire descriptor-only postal-address program.
+The one other
 compile-clean file is bitwise_operations.sas, whose67-column output still refuses
 under the unchanged64-column PUT_ALL profile. The original
 reconciliation itself did not increase the proof count. Compile tickets also miss
@@ -132,6 +136,7 @@ evidence-cost ranking, not a schedule or an estimate of business demand.
 | B5, implemented in DS-049/050/051 | Explicit rounded scalar arithmetic, integer power, Pi/trigonometry and logical fractional output | Separate numerical and inferred text policies | Complete unchanged series and trigonometry programs under stated repository/base-R policies | High; earlier exact arithmetic and INT refusals remain; no exact BEST12/live-SAS claim |
 | C1, implemented in DS-052 | B4 output selection with bounded rounded scalar operations | B4/B5, explicit binary64-rows-v1 marker | Original complete-PDV/selection/retained/snapshot witnesses; no new corpus proof | Medium; old binary64-v1 stays non-projecting |
 | C2, implemented in DS-053 | One selected numeric SET with the new row profile | C1 and existing SET state | Independent supplied/prior-step inputs, eager selected-value validation, row resets and retained collisions | High; INPUT/arrays/WHILE/UNTIL/BY/WHERE/MERGE/LOOKUP remain separate |
+| D4a, implemented in SQL-004 | Explicit CHAR descriptor-only CREATE TABLE | Bare PROC SQL, one CREATE, explicit QUIT | Complete unchanged postal-address empty-table proof, ordered descriptors and atomic destination refusals | Medium; numeric columns, queries, DML and general SQL remain separate |
 
 A1 has reviewable sub-slices: bounded numeric array declaration/index/OF
 execution is implemented in DS-039; single-level implicit numeric DO OVER is

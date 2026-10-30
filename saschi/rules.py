@@ -198,6 +198,7 @@ CONSTRUCT_MAP: dict[str, str] = {
     "sum-func": "DS-014",
     # SQL family (tickets in v1; gated later).
     "sql-general": "SQL-001",
+    "sql-create": "SQL-004",
     "sql-remerge": "SQL-002",
     "sql-into": "SQL-003",
     # Stat-proc family (tickets until Track B gates them).
