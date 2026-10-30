@@ -2507,6 +2507,37 @@
         "https://support.sas.com/documentation/cdl/en/lrcon/62955/HTML/default/a000695119.htm",
         "https://support.sas.com/documentation/cdl/en/lestmtsref/63323/HTML/default/n1dfiqj146yi2cn1maeju9wo7ijs.htm"
       ]
+    },
+    {
+      "rule_id": "SQL-004",
+      "sas_pattern": "Bounded descriptor-only PROC SQL CREATE TABLE",
+      "scope": "sql",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "Validate one explicit descriptor-only step and materialize a fresh empty logical table."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent full-source scanner and ordered character descriptor construction."
+      },
+      "required_settings": [
+        "Only bare PROC SQL followed by one descriptor-only CREATE TABLE and explicit QUIT is admitted. One unqualified normalized ordinary destination,1..64 explicit unique ordinary columns,CHAR(n) only,un-padded widths1..32767 and canonical splitter text at most16384 ASCII characters. Shared scanner whitespace normalization remains unchanged. Keyword/reserved-name refusal and source limits are conservative tool policies, not the full SAS grammar.",
+        "The new version2 sql_create step carries exactly one sql_create operation with an ordered columns list. Existing plan shapes remain unchanged. Runtime validates all metadata independently of source parsing before constructing an empty logical table with ordered character type/byte-length descriptors and no observations. No invented labels,formats,encoding or log records.",
+        "Every existing destination refuses, including an empty one. This is an explicit overwrite boundary, not emulated SAS recovery. Duplicate names ignoring case,qualified names,options,aliases,NUMERIC,AS SELECT,LIKE,constraints,DML,joins,macros and extra statements refuse. Failure publishes no accepted partial result or buffered earlier logical stdout.",
+        "Independent base-R complete-source accounting and schema/order witnesses, hand pins,constructive/refusal/naive controls,emitted Python and actual CLI pin the accepted logical result. The unchanged external postal-address source is a proof target only after full execution. Physical SAS file/diagnostic/ODS fidelity and broader PROC SQL remain unproved."
+      ],
+      "silent_difference_checks": [
+        "Preserve all earlier gates/order,149 helper ASTs,13 old example plan shapes,dependencies and corpus hashes.",
+        "Keep empty-table schema/order and source-boundary accounting exact; no broad SQL or SAS percentage."
+      ],
+      "validation_test": "examples/verify_sql_create.py; saschi.test_sql_create",
+      "confidence": "bounded repository/base-R evidence; no live SAS",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/sqlproc/63043/HTML/default/p1l9ypkml4febvn0zsbkwev7v5x9.htm",
+        "https://support.sas.com/documentation/cdl/en/sqlproc/63043/HTML/default/n07kfcv1vbih8rn1k9epo45umxil.htm",
+        "https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a002473683.htm"
+      ]
     }
   ],
   "runtime_capabilities": {
@@ -2872,6 +2903,20 @@
       "r_witness": "examples/numeric_rows.R",
       "boundary_tests": "saschi.test_numeric_rows",
       "evidence": "Independent source/control schedules, separate numeric/text policies, static and dynamic refusals and actual CLI/emitted witnesses; no live SAS."
+    },
+    "sql_create": {
+      "rule_id": "SQL-004",
+      "target": "saschi.sql_create.materialize",
+      "scope": [
+        "Only bare PROC SQL followed by one descriptor-only CREATE TABLE and explicit QUIT is admitted. One unqualified normalized ordinary destination,1..64 explicit unique ordinary columns,CHAR(n) only,un-padded widths1..32767 and canonical splitter text at most16384 ASCII characters. Shared scanner whitespace normalization remains unchanged. Keyword/reserved-name refusal and source limits are conservative tool policies, not the full SAS grammar.",
+        "The new version2 sql_create step carries exactly one sql_create operation with an ordered columns list. Existing plan shapes remain unchanged. Runtime validates all metadata independently of source parsing before constructing an empty logical table with ordered character type/byte-length descriptors and no observations. No invented labels,formats,encoding or log records.",
+        "Every existing destination refuses, including an empty one. This is an explicit overwrite boundary, not emulated SAS recovery. Duplicate names ignoring case,qualified names,options,aliases,NUMERIC,AS SELECT,LIKE,constraints,DML,joins,macros and extra statements refuse. Failure publishes no accepted partial result or buffered earlier logical stdout.",
+        "Independent base-R complete-source accounting and schema/order witnesses, hand pins,constructive/refusal/naive controls,emitted Python and actual CLI pin the accepted logical result. The unchanged external postal-address source is a proof target only after full execution. Physical SAS file/diagnostic/ODS fidelity and broader PROC SQL remain unproved."
+      ],
+      "validation_test": "examples/verify_sql_create.py",
+      "r_witness": "examples/sql_create.R",
+      "boundary_tests": "saschi.test_sql_create",
+      "evidence": "Separate descriptor-only source/backend evidence and whole-source checks; no general SQL or physical SAS claim."
     }
   }
 }

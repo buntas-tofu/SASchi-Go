@@ -26,8 +26,8 @@ class LoaderTests(unittest.TestCase):
     def setUp(self):
         self.rules = load_rulebook(REPO_ROOT / "docs" / "sasconversionrulebook.json")
 
-    def test_rule_count_is_88(self):
-        self.assertEqual(len(self.rules), 88)
+    def test_rule_count_is_89(self):
+        self.assertEqual(len(self.rules), 89)
         self.assertIn(f"rulebook. {len(self.rules)} rules", (REPO_ROOT / "README.md").read_text())
         self.assertIn('verify_multiply.py',self.rules['DS-045'].validation_test)
         self.assertIn('verify_numeric_discovery.py',self.rules['DS-046'].validation_test)
@@ -37,6 +37,7 @@ class LoaderTests(unittest.TestCase):
             self.assertIn('verify_binary64.py', self.rules[rule].validation_test)
         self.assertIn('verify_numeric_rows.py', self.rules['DS-052'].validation_test)
         self.assertIn('verify_numeric_set.py', self.rules['DS-053'].validation_test)
+        self.assertIn('verify_sql_create.py', self.rules['SQL-004'].validation_test)
 
     def test_rule_ids_unique(self):
         ids = list(self.rules)
@@ -45,7 +46,7 @@ class LoaderTests(unittest.TestCase):
     def test_family_counts(self):
         counts = family_counts(self.rules)
         self.assertEqual(counts["DS"], 53)
-        self.assertEqual(counts["SQL"], 3)
+        self.assertEqual(counts["SQL"], 4)
         self.assertEqual(counts["ST"], 16)
         self.assertEqual(counts["SV"], 6)
         self.assertEqual(counts["MC"], 9)

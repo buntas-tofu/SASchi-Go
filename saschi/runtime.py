@@ -11,6 +11,7 @@ from .values import normalize_catalog, column_type, coerce, descriptor, missing,
 from .functions import FUNCTIONS, validate_calendar_calls, validate_sum_expression, validate_numeric_composition, validate_multiplication_profile
 from sas_semantics import sas_sum_statement, sas_do_until, sas_do_while, sas_divide, sas_multiply
 from . import binary64
+from .sql_create import materialize as materialize_sql_create
 from sas_semantics import sas_numeric_array_value, sas_numeric_array_index, sas_numeric_array_add, sas_do_over
 from .arrays import validate_step as validate_array_step, contains_array, value as array_value
 from .counted import validate_step as validate_counted_step, evaluate_control
@@ -289,6 +290,10 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
         raise RuntimeError('saschi: blocked translation. Nothing from this program was executed.')
     tables, logs = normalize_catalog({} if catalog is None else catalog), []
     for step in plan['steps']:
+        if step.get('kind') == 'sql_create':
+            table = materialize_sql_create(step, tables, plan['version'])
+            tables[step['name']] = table
+            continue
         inputs, keys, ops = step['inputs'], step['by'], step['operations']
         rounded_profile = binary64.validate_step(step, plan['version'])
         input_projection, output_projection = validate_projection_step(step, plan['version'])

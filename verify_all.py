@@ -96,6 +96,7 @@ VERIFIERS = [
     ("binary64", HERE / "examples" / "verify_binary64.py"),
     ("numeric-projection", HERE / "examples" / "verify_numeric_rows.py"),
     ("numeric-set", HERE / "examples" / "verify_numeric_set.py"),
+    ("sql-create", HERE / "examples" / "verify_sql_create.py"),
 ]
 
 # The translator suites, run as unittest modules. They carry the same weight as
@@ -150,6 +151,7 @@ SUITES = [
     ("suite-projection", "saschi.test_projection"),
     ("suite-binary64", "saschi.test_binary64"),
     ("suite-numeric-rows", "saschi.test_numeric_rows"),
+    ("suite-sql-create", "saschi.test_sql_create"),
 ]
 
 

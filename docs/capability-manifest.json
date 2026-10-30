@@ -102,7 +102,8 @@
   "input_list_update": "DS-044 promotes INPUT Statement, INPUT Statement: List, CARDS Statement and DATALINES Statement for the explicitly bounded numeric inline subset. Prior dispositions are recorded per entry; all earlier evidence and every universe remain unchanged. No live SAS.",
   "projection_update": "DS-047/048 promote exactly KEEP/DROP statements and KEEP=/DROP= options for bounded source-execution profiles; prior dispositions retained per entry. All universes and earlier evidence remain intact. No complete external program is attributed to projection alone.",
   "binary64_update": "DS-049/050/051 record separate rounded arithmetic, elementary function and inferred logical text policies. Function/format universes remain null. No live SAS or exact BEST12 claim.",
-  "numeric_rows_update": "DS-052/053 extend bounded source evidence on seven already-GATED SET/projection/PUT entries. Existing dispositions, rollups, histories, reference universes and earlier gate evidence are preserved. No new whole-program proof or live SAS claim."
+  "numeric_rows_update": "DS-052/053 extend bounded source evidence on seven already-GATED SET/projection/PUT entries. Existing dispositions, rollups, histories, reference universes and earlier gate evidence are preserved. No new whole-program proof or live SAS claim.",
+  "sql_create_update": "SQL-004 adds one bounded descriptor-only PROC SQL CREATE TABLE source/backend profile. The PROC reference universe remains unenumerated; existing148 statement/data-set-option entries,dispositions,rollups and gate evidence are unchanged. No whole-SAS percentage or broader PROC SQL claim."
  },
  "rollup": {
   "stmt": {

@@ -20,6 +20,7 @@ from .put_mixed import validate_items as validate_mixed_put_items
 from .input_list import names_valid as input_names_valid, source_records, validate_step as validate_input_step
 from .projection import declaration as projection_declaration, dataset as projection_dataset, validate_step as validate_projection_step
 from .binary64 import PROFILE as BINARY64_PROFILE, ROWS_PROFILE as BINARY64_ROWS_PROFILE, FUNCTIONS as BINARY64_FUNCTIONS, validate_step as validate_binary64_step
+from .sql_create import parse_create as parse_sql_create, validate_step as validate_sql_create
 
 NAME = r"[A-Za-z_][A-Za-z0-9_]{0,31}"
 NUMBER = re.compile(r"[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?\Z")
@@ -461,6 +462,7 @@ def compile_plan(source: str) -> Plan:
     pending_if, chain_length, pending_end = None, 0, None
     do_parents = []
     inline_pending = False
+    sql_closed = set()
 
     def append_operation(op):
         if active_do is None:
@@ -606,6 +608,14 @@ def compile_plan(source: str) -> Plan:
 
     def finish():
         nonlocal active_do
+        if step and step.kind == 'sql_create':
+            if id(step) not in sql_closed:
+                plan.tickets.append(Ticket(step.line, 'PROC SQL', 'sql-create', 'descriptor-only PROC SQL requires explicit QUIT'))
+            try:
+                validate_sql_create(asdict(step), plan.version)
+            except ValueError as exc:
+                plan.tickets.append(Ticket(step.line, 'PROC SQL', 'sql-create', str(exc)))
+            return
         if active_do is not None:
             family = {'do_until': 'do-until', 'do_while': 'do-while', 'do_over': 'do-over'}.get(active_do.kind, 'do-counted')
             label = {'do_until': 'DO UNTIL', 'do_while': 'DO WHILE', 'do_over': 'DO OVER'}.get(active_do.kind, 'counted DO')
@@ -716,6 +726,32 @@ def compile_plan(source: str) -> Plan:
             reject(st, "unterminated", "statement terminator is missing")
             continue
         construct, rule = route_statement(text, context)
+        if context == 'sql-create':
+            if text.lower() == 'quit':
+                sql_closed.add(id(step))
+                finish()
+                step, context = None, None
+            elif re.match(r'^create\b', text, re.I):
+                if step.operations:
+                    reject(st, 'sql-create', 'one CREATE TABLE per bare PROC SQL is supported')
+                else:
+                    try:
+                        name, columns = parse_sql_create(text)
+                    except ValueError as exc:
+                        reject(st, 'sql-create', str(exc))
+                    else:
+                        step.name = name
+                        step.operations.append(Operation('sql_create', st.line, {'columns': columns}))
+                        plan.matched.append(('sql-create', 'SQL-004', st.line))
+            else:
+                reject(st, 'sql-create', 'descriptor-only PROC SQL admits one explicit CHAR CREATE followed by QUIT')
+            continue
+        if re.fullmatch(r'proc\s+sql', text, re.I):
+            finish()
+            step = Step('sql_create', '', st.line)
+            plan.steps.append(step)
+            context = 'sql-create'
+            continue
         if re.match(r"^data\b", text, re.I):
             finish()
             try:
@@ -1039,6 +1075,8 @@ def compile_plan(source: str) -> Plan:
         reject(st, family if family != "unknown" else construct, "no operation for this statement")
     finish()
     for compiled in plan.steps:
+        if compiled.kind == 'sql_create':
+            continue
         nodes = [node for node, _ in expression_nodes(asdict(compiled))]
         if any(node.get('kind') == 'arithmetic' and node.get('op') == '**'
                or node.get('kind') == 'call' and node.get('name') in BINARY64_FUNCTIONS for node in nodes):
