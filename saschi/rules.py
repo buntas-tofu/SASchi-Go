@@ -162,6 +162,8 @@ CONSTRUCT_MAP: dict[str, str] = {
     "binary64": "DS-049",
     "elementary-functions": "DS-050",
     "fractional-put": "DS-051",
+    "numeric-projection": "DS-052",
+    "numeric-set": "DS-053",
     "put-all": "DS-025",
     "do-counted": "DS-026",
     "do-if": "DS-031",

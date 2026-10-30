@@ -101,7 +101,8 @@
   "do_over_update": "DS-040 adds bounded legacy implicit numeric DO OVER, current-element aliases and the full loops_foreach.sas proof. Evidence is attached to existing ARRAY/Array Reference/END entries. DO OVER is not a newly enumerated SAS9.4 reference entry; grouped DO remains UNASSESSED. Dispositions, rollups and universes are unchanged; no live SAS.",
   "input_list_update": "DS-044 promotes INPUT Statement, INPUT Statement: List, CARDS Statement and DATALINES Statement for the explicitly bounded numeric inline subset. Prior dispositions are recorded per entry; all earlier evidence and every universe remain unchanged. No live SAS.",
   "projection_update": "DS-047/048 promote exactly KEEP/DROP statements and KEEP=/DROP= options for bounded source-execution profiles; prior dispositions retained per entry. All universes and earlier evidence remain intact. No complete external program is attributed to projection alone.",
-  "binary64_update": "DS-049/050/051 record separate rounded arithmetic, elementary function and inferred logical text policies. Function/format universes remain null. No live SAS or exact BEST12 claim."
+  "binary64_update": "DS-049/050/051 record separate rounded arithmetic, elementary function and inferred logical text policies. Function/format universes remain null. No live SAS or exact BEST12 claim.",
+  "numeric_rows_update": "DS-052/053 extend bounded source evidence on seven already-GATED SET/projection/PUT entries. Existing dispositions, rollups, histories, reference universes and earlier gate evidence are preserved. No new whole-program proof or live SAS claim."
  },
  "rollup": {
   "stmt": {
@@ -668,11 +669,16 @@
    "valid_in": "DATA step",
    "disposition": "GATED",
    "rule_ids": [
-    "DS-047"
+    "DS-047",
+    "DS-052",
+    "DS-053"
    ],
    "gates": [
     "projection",
-    "suite-projection"
+    "suite-projection",
+    "numeric-projection",
+    "numeric-set",
+    "suite-numeric-rows"
    ],
    "reference_page": 79,
    "assessment_history": [
@@ -682,7 +688,7 @@
      "basis": "Bounded source projection timing and independent base-R evidence."
     }
    ],
-   "note": "Bounded KEEP/DROP ordinary-name and numbered-range selection only. Statement/DATA output projection and single SET input selection have distinct timing contracts. See docs/PROJECTION.md. Wider syntax, declarations, PROC options and live SAS remain outstanding.",
+   "note": "Bounded KEEP/DROP ordinary-name and numbered-range selection only. Statement/DATA output projection and single SET input selection have distinct timing contracts. See docs/PROJECTION.md. Wider syntax, declarations, PROC options and live SAS remain outstanding. DS-052/053 add the separately gated rounded numeric row/projection composition in docs/NUMERIC_ROWS.md.",
    "gate_evidence": [
     {
      "level": "source-execution",
@@ -691,6 +697,15 @@
       "suite-projection"
      ],
      "scope": "Bounded KEEP/DROP ordinary-name and numbered-range selection only. Statement/DATA output projection and single SET input selection have distinct timing contracts. See docs/PROJECTION.md. Wider syntax, declarations, PROC options and live SAS remain outstanding."
+    },
+    {
+     "level": "source-execution",
+     "gates": [
+      "numeric-projection",
+      "numeric-set",
+      "suite-numeric-rows"
+     ],
+     "scope": "DS-052/053 explicit binary64-rows-v1 composition: output selection over full static PDV and one selected numeric SET with eager selected-input validation, row/reset/retained state, exact schema/order/missing/logical text and separate numeric tolerance. Earlier marker and format contracts remain; no live SAS or exact BEST12."
     }
    ]
   },
@@ -1210,11 +1225,16 @@
    "valid_in": "DATA step",
    "disposition": "GATED",
    "rule_ids": [
-    "DS-047"
+    "DS-047",
+    "DS-052",
+    "DS-053"
    ],
    "gates": [
     "projection",
-    "suite-projection"
+    "suite-projection",
+    "numeric-projection",
+    "numeric-set",
+    "suite-numeric-rows"
    ],
    "reference_page": 204,
    "assessment_history": [
@@ -1224,7 +1244,7 @@
      "basis": "Bounded source projection timing and independent base-R evidence."
     }
    ],
-   "note": "Bounded KEEP/DROP ordinary-name and numbered-range selection only. Statement/DATA output projection and single SET input selection have distinct timing contracts. See docs/PROJECTION.md. Wider syntax, declarations, PROC options and live SAS remain outstanding.",
+   "note": "Bounded KEEP/DROP ordinary-name and numbered-range selection only. Statement/DATA output projection and single SET input selection have distinct timing contracts. See docs/PROJECTION.md. Wider syntax, declarations, PROC options and live SAS remain outstanding. DS-052/053 add the separately gated rounded numeric row/projection composition in docs/NUMERIC_ROWS.md.",
    "gate_evidence": [
     {
      "level": "source-execution",
@@ -1233,6 +1253,15 @@
       "suite-projection"
      ],
      "scope": "Bounded KEEP/DROP ordinary-name and numbered-range selection only. Statement/DATA output projection and single SET input selection have distinct timing contracts. See docs/PROJECTION.md. Wider syntax, declarations, PROC options and live SAS remain outstanding."
+    },
+    {
+     "level": "source-execution",
+     "gates": [
+      "numeric-projection",
+      "numeric-set",
+      "suite-numeric-rows"
+     ],
+     "scope": "DS-052/053 explicit binary64-rows-v1 composition: output selection over full static PDV and one selected numeric SET with eager selected-input validation, row/reset/retained state, exact schema/order/missing/logical text and separate numeric tolerance. Earlier marker and format contracts remain; no live SAS or exact BEST12."
     }
    ]
   },
@@ -1562,7 +1591,9 @@
     "DS-025",
     "DS-027",
     "DS-042",
-    "DS-046"
+    "DS-046",
+    "DS-052",
+    "DS-053"
    ],
    "gates": [
     "put-literal",
@@ -1576,10 +1607,13 @@
     "put-mixed-numeric",
     "suite-put-mixed-numeric",
     "numeric-discovery",
-    "suite-numeric-composition"
+    "suite-numeric-composition",
+    "numeric-projection",
+    "numeric-set",
+    "suite-numeric-rows"
    ],
    "reference_page": 265,
-   "note": "Bounded logical records of quoted literals and ordinary unformatted nonblank character variables: printable ASCII, at most 64 columns including variable separators, documented spacing and quote decoding. Blank fields, numeric output, attached formats, special controls, literal adjacency/comment-only separation, FILE, pointers, macros, and C++ require review. Named-list output has a separate entry. DS-025 adds bounded scalar PUT _ALL_: ordered named PDV fields, ordinary numeric missing and conservative BEST12 integers, _ERROR_=0 and _N_=1. No general error-flag or physical SAS log equivalence. DS-027 separately gates source-order known numeric variables: ordinary missing and finite integers with magnitude at most 99999999999, one following separator per field, at most 64 logical columns. Types and attached formats are validated even on empty or filtered SET input; mixed numeric items, unknown/descriptor-only variables, fractions, special missing output, formats, controls, and C++ retain refusals. DS-042 separately gates literal/known numeric-variable mixtures in DATA, simple IF and counted loops. Preserve literal blanks and numeric following separators, ordinary missing and bounded integers within64 logical columns. See docs/MIXED_PUT.md; other profiles retain their contracts. DS-046 separately gates output-only ordinary numeric discovery for catalog-free DATA numeric-list PUT; prior output contracts remain separate. See docs/NUMERIC_COMPOSITION.md.",
+   "note": "Bounded logical records of quoted literals and ordinary unformatted nonblank character variables: printable ASCII, at most 64 columns including variable separators, documented spacing and quote decoding. Blank fields, numeric output, attached formats, special controls, literal adjacency/comment-only separation, FILE, pointers, macros, and C++ require review. Named-list output has a separate entry. DS-025 adds bounded scalar PUT _ALL_: ordered named PDV fields, ordinary numeric missing and conservative BEST12 integers, _ERROR_=0 and _N_=1. No general error-flag or physical SAS log equivalence. DS-027 separately gates source-order known numeric variables: ordinary missing and finite integers with magnitude at most 99999999999, one following separator per field, at most 64 logical columns. Types and attached formats are validated even on empty or filtered SET input; mixed numeric items, unknown/descriptor-only variables, fractions, special missing output, formats, controls, and C++ retain refusals. DS-042 separately gates literal/known numeric-variable mixtures in DATA, simple IF and counted loops. Preserve literal blanks and numeric following separators, ordinary missing and bounded integers within64 logical columns. See docs/MIXED_PUT.md; other profiles retain their contracts. DS-046 separately gates output-only ordinary numeric discovery for catalog-free DATA numeric-list PUT; prior output contracts remain separate. See docs/NUMERIC_COMPOSITION.md. DS-052/053 add the separately gated rounded numeric row/projection composition in docs/NUMERIC_ROWS.md.",
    "gate_evidence": [
     {
      "level": "source-execution",
@@ -1610,6 +1644,15 @@
       "suite-numeric-composition"
      ],
      "scope": "DS-046 version2 catalog-free numeric-list PUT discovery, ordinary-missing PDV state, source order, static schemas and unchanged output formatting. Complete sum_and_product_of_an_array.sas proof; no live SAS."
+    },
+    {
+     "level": "source-execution",
+     "gates": [
+      "numeric-projection",
+      "numeric-set",
+      "suite-numeric-rows"
+     ],
+     "scope": "DS-052/053 explicit binary64-rows-v1 composition: output selection over full static PDV and one selected numeric SET with eager selected-input validation, row/reset/retained state, exact schema/order/missing/logical text and separate numeric tolerance. Earlier marker and format contracts remain; no live SAS or exact BEST12."
     }
    ]
   },
@@ -1646,7 +1689,9 @@
     "DS-023",
     "DS-024",
     "DS-027",
-    "DS-046"
+    "DS-046",
+    "DS-052",
+    "DS-053"
    ],
    "gates": [
     "put-literal",
@@ -1656,10 +1701,13 @@
     "put-numeric-list",
     "suite-put-numeric",
     "numeric-discovery",
-    "suite-numeric-composition"
+    "suite-numeric-composition",
+    "numeric-projection",
+    "numeric-set",
+    "suite-numeric-rows"
    ],
    "reference_page": 296,
-   "note": "Bounded logical records of quoted literals and ordinary unformatted nonblank character variables: printable ASCII, at most 64 columns including variable separators, documented spacing and quote decoding. Blank fields, numeric output, attached formats, special controls, literal adjacency/comment-only separation, FILE, pointers, macros, and C++ require review. Named-list output has a separate entry. DS-027 separately gates source-order known numeric variables: ordinary missing and finite integers with magnitude at most 99999999999, one following separator per field, at most 64 logical columns. Types and attached formats are validated even on empty or filtered SET input; mixed numeric items, unknown/descriptor-only variables, fractions, special missing output, formats, controls, and C++ retain refusals. DS-046 separately gates output-only ordinary numeric discovery for catalog-free DATA numeric-list PUT; prior output contracts remain separate. See docs/NUMERIC_COMPOSITION.md.",
+   "note": "Bounded logical records of quoted literals and ordinary unformatted nonblank character variables: printable ASCII, at most 64 columns including variable separators, documented spacing and quote decoding. Blank fields, numeric output, attached formats, special controls, literal adjacency/comment-only separation, FILE, pointers, macros, and C++ require review. Named-list output has a separate entry. DS-027 separately gates source-order known numeric variables: ordinary missing and finite integers with magnitude at most 99999999999, one following separator per field, at most 64 logical columns. Types and attached formats are validated even on empty or filtered SET input; mixed numeric items, unknown/descriptor-only variables, fractions, special missing output, formats, controls, and C++ retain refusals. DS-046 separately gates output-only ordinary numeric discovery for catalog-free DATA numeric-list PUT; prior output contracts remain separate. See docs/NUMERIC_COMPOSITION.md. DS-052/053 add the separately gated rounded numeric row/projection composition in docs/NUMERIC_ROWS.md.",
    "gate_evidence": [
     {
      "level": "source-execution",
@@ -1680,6 +1728,15 @@
       "suite-numeric-composition"
      ],
      "scope": "DS-046 version2 catalog-free numeric-list PUT discovery, ordinary-missing PDV state, source order, static schemas and unchanged output formatting. Complete sum_and_product_of_an_array.sas proof; no live SAS."
+    },
+    {
+     "level": "source-execution",
+     "gates": [
+      "numeric-projection",
+      "numeric-set",
+      "suite-numeric-rows"
+     ],
+     "scope": "DS-052/053 explicit binary64-rows-v1 composition: output selection over full static PDV and one selected numeric SET with eager selected-input validation, row/reset/retained state, exact schema/order/missing/logical text and separate numeric tolerance. Earlier marker and format contracts remain; no live SAS or exact BEST12."
     }
    ]
   },
@@ -1891,15 +1948,19 @@
    "valid_in": "DATA step",
    "disposition": "GATED",
    "rule_ids": [
-    "DS-001"
+    "DS-001",
+    "DS-053"
    ],
    "gates": [
     "data-events",
     "typed-metadata",
-    "suite-events"
+    "suite-events",
+    "numeric-projection",
+    "numeric-set",
+    "suite-numeric-rows"
    ],
    "reference_page": 331,
-   "note": "concatenation rule; no dedicated fixture",
+   "note": "concatenation rule; no dedicated fixture DS-052/053 add the separately gated rounded numeric row/projection composition in docs/NUMERIC_ROWS.md.",
    "gate_evidence": [
     {
      "level": "source-execution",
@@ -1909,6 +1970,15 @@
       "suite-events"
      ],
      "scope": "One supplied driving SET and bounded initial IF _N_=1 THEN SET lookup; descriptor/state/filter timing; no general options or concatenation."
+    },
+    {
+     "level": "source-execution",
+     "gates": [
+      "numeric-projection",
+      "numeric-set",
+      "suite-numeric-rows"
+     ],
+     "scope": "DS-052/053 explicit binary64-rows-v1 composition: output selection over full static PDV and one selected numeric SET with eager selected-input validation, row/reset/retained state, exact schema/order/missing/logical text and separate numeric tolerance. Earlier marker and format contracts remain; no live SAS or exact BEST12."
     }
    ]
   },
@@ -2135,14 +2205,19 @@
    "valid_in": "DATA step and PROC steps",
    "disposition": "GATED",
    "rule_ids": [
-    "DS-048"
+    "DS-048",
+    "DS-052",
+    "DS-053"
    ],
    "gates": [
     "projection",
-    "suite-projection"
+    "suite-projection",
+    "numeric-projection",
+    "numeric-set",
+    "suite-numeric-rows"
    ],
    "reference_page": 20,
-   "note": "Bounded KEEP/DROP ordinary-name and numbered-range selection only. Statement/DATA output projection and single SET input selection have distinct timing contracts. See docs/PROJECTION.md. Wider syntax, declarations, PROC options and live SAS remain outstanding.",
+   "note": "Bounded KEEP/DROP ordinary-name and numbered-range selection only. Statement/DATA output projection and single SET input selection have distinct timing contracts. See docs/PROJECTION.md. Wider syntax, declarations, PROC options and live SAS remain outstanding. DS-052/053 add the separately gated rounded numeric row/projection composition in docs/NUMERIC_ROWS.md.",
    "assessment_history": [
     {
      "date": "2026-10-29",
@@ -2158,6 +2233,15 @@
       "suite-projection"
      ],
      "scope": "Bounded KEEP/DROP ordinary-name and numbered-range selection only. Statement/DATA output projection and single SET input selection have distinct timing contracts. See docs/PROJECTION.md. Wider syntax, declarations, PROC options and live SAS remain outstanding."
+    },
+    {
+     "level": "source-execution",
+     "gates": [
+      "numeric-projection",
+      "numeric-set",
+      "suite-numeric-rows"
+     ],
+     "scope": "DS-052/053 explicit binary64-rows-v1 composition: output selection over full static PDV and one selected numeric SET with eager selected-input validation, row/reset/retained state, exact schema/order/missing/logical text and separate numeric tolerance. Earlier marker and format contracts remain; no live SAS or exact BEST12."
     }
    ]
   },
@@ -2312,14 +2396,19 @@
    "valid_in": "DATA step and PROC steps",
    "disposition": "GATED",
    "rule_ids": [
-    "DS-048"
+    "DS-048",
+    "DS-052",
+    "DS-053"
    ],
    "gates": [
     "projection",
-    "suite-projection"
+    "suite-projection",
+    "numeric-projection",
+    "numeric-set",
+    "suite-numeric-rows"
    ],
    "reference_page": 45,
-   "note": "Bounded KEEP/DROP ordinary-name and numbered-range selection only. Statement/DATA output projection and single SET input selection have distinct timing contracts. See docs/PROJECTION.md. Wider syntax, declarations, PROC options and live SAS remain outstanding.",
+   "note": "Bounded KEEP/DROP ordinary-name and numbered-range selection only. Statement/DATA output projection and single SET input selection have distinct timing contracts. See docs/PROJECTION.md. Wider syntax, declarations, PROC options and live SAS remain outstanding. DS-052/053 add the separately gated rounded numeric row/projection composition in docs/NUMERIC_ROWS.md.",
    "assessment_history": [
     {
      "date": "2026-10-29",
@@ -2335,6 +2424,15 @@
       "suite-projection"
      ],
      "scope": "Bounded KEEP/DROP ordinary-name and numbered-range selection only. Statement/DATA output projection and single SET input selection have distinct timing contracts. See docs/PROJECTION.md. Wider syntax, declarations, PROC options and live SAS remain outstanding."
+    },
+    {
+     "level": "source-execution",
+     "gates": [
+      "numeric-projection",
+      "numeric-set",
+      "suite-numeric-rows"
+     ],
+     "scope": "DS-052/053 explicit binary64-rows-v1 composition: output selection over full static PDV and one selected numeric SET with eager selected-input validation, row/reset/retained state, exact schema/order/missing/logical text and separate numeric tolerance. Earlier marker and format contracts remain; no live SAS or exact BEST12."
     }
    ]
   },

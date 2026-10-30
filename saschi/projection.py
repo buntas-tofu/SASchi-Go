@@ -65,6 +65,23 @@ def dataset(text, keyword):
 def validate_step(step, version=2):
     """Check forged declarations before descriptors, row count or branch execution."""
     roots = step['operations']
+    if not any(op['kind'] == 'projection' for op in walk_operations(roots, all_containers=True)):
+        return None, None
+    prefix = 0
+    if any(op['kind'] == 'numeric_profile' for op in walk_operations(roots, all_containers=True)):
+        # The public path authorizes the prefix through the complete numeric
+        # validator. That validator calls only the private context helper below.
+        from .binary64 import validate_step as validate_numeric_step, ROWS_PROFILE
+        validate_numeric_step(step, version)
+        if roots[0]['args'] != {'name': ROWS_PROFILE}:
+            raise ValueError('projection numeric prefix requires the separately proved row profile')
+        prefix = 1
+    return _validate_step(step, version, prefix=prefix)
+
+
+def _validate_step(step, version=2, *, prefix=0):
+    """Projection context after the caller independently authorizes its prefix."""
+    roots = step['operations']
     found = [op for op in walk_operations(roots, all_containers=True) if op['kind'] == 'projection']
     if not found:
         return None, None
@@ -84,14 +101,14 @@ def validate_step(step, version=2):
             reads = [o for o in walk_operations(roots, all_containers=True) if o['kind'] == 'read']
             if (len(step['inputs']) != 1 or step.get('by') or step.get('where')
                     or any(root['kind'] not in ('declare', 'array_declare', 'projection')
-                           for root in roots[:position])
+                           for root in roots[prefix:position])
                     or any(o['kind'] == 'lookup' for o in walk_operations(roots, all_containers=True))
                     or len(reads) != 1 or position + 1 >= len(roots) or roots[position + 1] is not reads[0]
                     or reads[0]['args'] != {'datasets': step['inputs']} or reads[0]['line'] != op['line']):
                 raise ValueError('input projection requires one adjacent driving SET without lookup/BY/WHERE')
         else:
             outputs.append(args)
-            if args['scope'] == 'output' and (roots[0] is not op or op['line'] != step['line']):
+            if args['scope'] == 'output' and (roots[prefix] is not op or op['line'] != step['line']):
                 raise ValueError('output option projection must be first at its DATA source line')
     if len(inputs) > 1 or len(outputs) > 1:
         raise ValueError('projection permits one input option and one output selection; conflicting lists require review')

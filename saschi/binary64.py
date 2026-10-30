@@ -1,20 +1,25 @@
-"""DS-049/050/051 opt-in scalar binary64 values and logical numeric records.
+"""DS-049..053 opt-in scalar binary64 values, selection and numeric DATA rows.
 
-The profile is selected by an explicit declaration operation. Earlier plans keep
-their exact-division/product helpers and integer-only list output. Decimal output
-here is a bounded logical policy, not a physical SAS BEST12/DECIMALCONV claim.
+Profiles use explicit declaration operations. The original marker remains
+catalog-free; the row marker admits separately proved SET/projection composition.
+Earlier plans keep their exact-division/product helpers and integer-only list
+output. Decimal output is a logical policy, not a SAS BEST12/DECIMALCONV claim.
 """
 from __future__ import annotations
 
 from fractions import Fraction
+from copy import deepcopy
 import math
 import re
 import sys
 
 from sas_semantics import sas_counted_capture, sas_counted_control, sas_do_counted, sas_int
+from .projection import _validate_step as validate_projection_context
+from .values import descriptor, column_type
 
 
 PROFILE = 'binary64-v1'
+ROWS_PROFILE = 'binary64-rows-v1'
 FUNCTIONS = frozenset({'constant', 'sin', 'cos', 'tan', 'arsin', 'arcos', 'atan'})
 CALLS = FUNCTIONS | {'int'}
 LIMIT = 2147483647
@@ -207,6 +212,24 @@ def _number_descriptor(name, schema):
         raise ValueError('binary64 expressions cannot coerce character descriptors')
 
 
+def validate_input_table(table):
+    """Eager selected-input numeric validation, with no mutation of its catalog."""
+    if (not isinstance(table, dict) or not isinstance(table.get('schema'), dict)
+            or not isinstance(table.get('rows'), list)):
+        raise ValueError('binary64 SET requires a normalized numeric table')
+    schema = table['schema']
+    for name, spec in schema.items():
+        if not ordinary(name) or column_type(descriptor(spec)) != 'number':
+            raise ValueError('binary64 SET requires ordinary numeric input descriptors')
+    normalized = deepcopy(table)
+    for row in normalized['rows']:
+        if not isinstance(row, dict) or set(row) != set(schema):
+            raise ValueError('binary64 SET row must match its selected descriptor')
+        for name, value in row.items():
+            row[name] = numeric(value)
+    return normalized
+
+
 def validate_step(step, version=2, schema=None):
     """Validate the explicit profile, including literals in every inactive branch.
 
@@ -242,9 +265,10 @@ def validate_step(step, version=2, schema=None):
         raise ValueError('binary64 plan requires exactly one declaration occurrence')
     ops = step['operations']
     marker = markers[0]
+    rows_profile = marker.get('args') == {'name': ROWS_PROFILE}
     if (version != 2 or len(markers) != 1 or not ops or marker is not ops[0]
             or set(marker) != {'kind', 'line', 'args'} or type(marker['line']) is not int
-            or marker['line'] < 1 or marker['args'] != {'name': PROFILE}
+            or marker['line'] < 1 or marker['args'] not in ({'name': PROFILE}, {'name': ROWS_PROFILE})
             or not trigger):
         raise ValueError('binary64 requires one first top-level version2 declaration and new syntax')
     expected = {'kind', 'name', 'line', 'inputs', 'by', 'operations', 'nodupkey',
@@ -252,9 +276,14 @@ def validate_step(step, version=2, schema=None):
     if (set(step) != expected or step['kind'] != 'data'
             or not (ordinary(step['name']) or step['name'] == '_null_')
             or type(step['line']) is not int or step['line'] < 1
-            or step['inputs'] != [] or step['by'] != [] or step['where'] is not None
+            or not isinstance(step['inputs'], list) or len(step['inputs']) > (1 if rows_profile else 0)
+            or any(not ordinary(name) for name in step['inputs'])
+            or step['by'] != [] or step['where'] is not None
             or step['lengths'] != {} or step['nodupkey'] is not False):
-        raise ValueError('binary64 profile requires catalog-free scalar numeric DATA')
+        raise ValueError('binary64 row profile requires at most one scalar numeric SET without BY/WHERE'
+                         if rows_profile else 'binary64 profile requires catalog-free scalar numeric DATA')
+    if rows_profile and marker['line'] != step['line']:
+        raise ValueError('binary64 row declaration must share its DATA source line')
     display = step['display_names']
     if (not isinstance(display, dict) or any(not (ordinary(name) or name == '_n_') or not isinstance(shown, str)
             or shown.lower() != name for name, shown in display.items())):
@@ -380,6 +409,12 @@ def validate_step(step, version=2, schema=None):
         elif kind == 'output':
             if set(args) != {'target'} or args['target'] not in (None, step.get('name')):
                 raise ValueError('binary64 OUTPUT must target the declared DATA destination')
+        elif kind == 'projection' and rows_profile:
+            if depth:
+                raise ValueError('binary64 projection must be a top-level DATA declaration')
+        elif kind == 'read' and rows_profile:
+            if depth or active or set(args) != {'datasets'} or args['datasets'] != step['inputs'] or len(step['inputs']) != 1:
+                raise ValueError('binary64 SET requires one matching top-level driving source')
         else:
             raise ValueError('binary64 operation requires a separately proved scalar numeric composition')
 
@@ -392,6 +427,18 @@ def validate_step(step, version=2, schema=None):
         expression(initial)
     for op in ops[1:]:
         operation(op)
+    if rows_profile:
+        projections = [op for op in ops[1:] if op['kind'] == 'projection']
+        reads = [op for op in ops[1:] if op['kind'] == 'read']
+        if not projections and not reads:
+            raise ValueError('binary64 row declaration requires projection or a driving SET')
+        if len(reads) != len(step['inputs']):
+            raise ValueError('binary64 SET requires exactly one read for its declared input')
+        if reads:
+            position = next(i for i, root in enumerate(ops) if root is reads[0])
+            if any(root['kind'] not in ('declare', 'projection') for root in ops[1:position]):
+                raise ValueError('binary64 driving SET must precede executable DATA actions')
+        validate_projection_context(step, version, prefix=1)
     if not semantic_trigger:
         raise ValueError('binary64 declaration requires new syntax in executable expressions')
     if nodes > MAX_NODES:

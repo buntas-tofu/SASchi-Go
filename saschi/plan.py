@@ -19,7 +19,7 @@ from .counted import parse_control, validate_step as validate_counted_step
 from .put_mixed import validate_items as validate_mixed_put_items
 from .input_list import names_valid as input_names_valid, source_records, validate_step as validate_input_step
 from .projection import declaration as projection_declaration, dataset as projection_dataset, validate_step as validate_projection_step
-from .binary64 import PROFILE as BINARY64_PROFILE, FUNCTIONS as BINARY64_FUNCTIONS, validate_step as validate_binary64_step
+from .binary64 import PROFILE as BINARY64_PROFILE, ROWS_PROFILE as BINARY64_ROWS_PROFILE, FUNCTIONS as BINARY64_FUNCTIONS, validate_step as validate_binary64_step
 
 NAME = r"[A-Za-z_][A-Za-z0-9_]{0,31}"
 NUMBER = re.compile(r"[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?\Z")
@@ -457,6 +457,7 @@ def bind_current(node, name):
 
 def compile_plan(source: str) -> Plan:
     plan, step, context, active_do = Plan(), None, None, None
+    character_put_matches = {}
     pending_if, chain_length, pending_end = None, 0, None
     do_parents = []
     inline_pending = False
@@ -551,7 +552,9 @@ def compile_plan(source: str) -> Plan:
             except ValueError as exc:
                 reject(st, 'put', str(exc))
             else:
-                plan.matched.append(('put-character-list', 'DS-024', st.line))
+                matched = ('put-character-list', 'DS-024', st.line)
+                plan.matched.append(matched)
+                character_put_matches.setdefault(id(step), []).append((matched, all(item.kind == Kind.WORD for item in items)))
                 return Operation('put_character_list', st.line, {'items': [
                     {'kind': 'literal', 'value': item.text} if item.kind == Kind.STRING
                     else {'kind': 'variable', 'value': item.text.lower()} for item in items]})
@@ -1039,8 +1042,29 @@ def compile_plan(source: str) -> Plan:
         nodes = [node for node, _ in expression_nodes(asdict(compiled))]
         if any(node.get('kind') == 'arithmetic' and node.get('op') == '**'
                or node.get('kind') == 'call' and node.get('name') in BINARY64_FUNCTIONS for node in nodes):
-            compiled.operations.insert(0, Operation('numeric_profile', compiled.line, {'name': BINARY64_PROFILE}))
-            plan.matched.append(('binary64', 'DS-049', compiled.line))
+            composed = bool(compiled.inputs or any(op.kind == 'projection' for op in walk_operations(compiled.operations)))
+            profile = BINARY64_ROWS_PROFILE if composed else BINARY64_PROFILE
+            rule = 'DS-053' if compiled.inputs else 'DS-052' if composed else 'DS-049'
+            compiled.operations.insert(0, Operation('numeric_profile', compiled.line, {'name': profile}))
+            construct = 'numeric-set' if compiled.inputs else 'numeric-projection' if composed else 'binary64'
+            plan.matched.append((construct, rule, compiled.line))
+            if compiled.inputs:
+                # A supplied numeric descriptor resolves these names at runtime.
+                # Only the new profile changes the legacy character fallback;
+                # output-only discovery remains the separate catalog-free gate.
+                for raw in _walk_operations(compiled.operations):
+                    kind, args = (raw['kind'], raw['args']) if isinstance(raw, dict) else (raw.kind, raw.args)
+                    if kind == 'put_character_list' and all(item['kind'] == 'variable' for item in args['items']):
+                        numeric_args = {'names': [item['value'] for item in args['items']]}
+                        if isinstance(raw, dict):
+                            raw.update(kind='put_numeric_list', args=numeric_args)
+                            line = raw['line']
+                        else:
+                            raw.kind, raw.args = 'put_numeric_list', numeric_args
+                            line = raw.line
+                        plan.matched.append(('put-numeric-list', 'DS-027', line))
+                removed = {id(matched) for matched, variables_only in character_put_matches.get(id(compiled), []) if variables_only}
+                plan.matched[:] = [matched for matched in plan.matched if id(matched) not in removed]
             if any(node.get('kind') == 'call' and node.get('name') in BINARY64_FUNCTIONS for node in nodes):
                 plan.matched.append(('elementary-functions', 'DS-050', compiled.line))
             if any(op.kind == 'put_numeric_list' for op in walk_operations(compiled.operations)):
@@ -1142,13 +1166,17 @@ def compile_plan(source: str) -> Plan:
     for name in ('mdy', 'weekday'):
         plan.matched.extend(('calendar', 'DS-033', line or 1)
                             for line in function_call_lines(plan.to_dict(), name))
-    numeric_nodes = [(node, line, any(op.kind == 'numeric_profile' for op in compiled.operations))
+    numeric_nodes = [(node, line, next(('DS-053' if compiled.inputs else 'DS-052')
+                         if op.args == {'name': BINARY64_ROWS_PROFILE} else 'DS-049'
+                         for op in compiled.operations if op.kind == 'numeric_profile')
+                         if any(op.kind == 'numeric_profile' for op in compiled.operations) else None)
                      for compiled in plan.steps for node, line in expression_nodes(asdict(compiled))
                      if node.get('kind') == 'arithmetic' and node.get('op') in ('/', '*')
                      or node.get('kind') == 'call' and node.get('name') == 'int']
-    for node, line, rounded in numeric_nodes:
+    for node, line, rounded_rule in numeric_nodes:
         family, rule = (('int', 'DS-037') if node['kind'] == 'call' else
-                        ('binary64', 'DS-049') if rounded else
+                        ('numeric-set' if rounded_rule == 'DS-053' else
+                         'numeric-projection' if rounded_rule == 'DS-052' else 'binary64', rounded_rule) if rounded_rule else
                         ('multiplication', 'DS-045') if node['op'] == '*' else ('division', 'DS-036'))
         plan.matched.append((family, rule, line or 1))
     if numeric_nodes:

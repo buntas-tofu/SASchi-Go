@@ -1,7 +1,7 @@
 # Coverage reconciliation and next gate series
 
 Status: Repository/base-R planning evidence, originally reconciled at main08eaa7b
-on2026-10-27 and updated through DS-047 through DS-051 and A0. The handoff binds current acceptance.
+on2026-10-27 and updated through DS-053 and A0. The handoff binds current acceptance.
 For principal/maintainer prioritization. Counts describe this checkout and the56
 pinned sibling corpus files, not all SAS or live-SAS equivalence. Updated for
 DS-039 arrays, DS-040 DO OVER and DS-041 nested/computed counted loops after the original
@@ -11,11 +11,11 @@ Implementation and publication are not authorized by this planning exercise.
 
 ## Inventory reconciled against actual evidence
 
-The golden command registers56 fixture runners,46 translator suites and1
-synthesis runner. The current acceptance contains922 tests, zero skips,
+The golden command registers58 fixture runners,47 translator suites and1
+synthesis runner. The current acceptance contains947 tests, zero skips,
 60 faithful synthesis checks and60 naive controls. The separate1k workload
 checks total39:18 ledger and21 text. These counts have different units. Neither
-86 rulebook rules nor103 golden-command runners is a SAS capability denominator.
+88 rulebook rules nor106 golden-command runners is a SAS capability denominator.
 
 [The capability manifest](capability-manifest.json) still enumerates108 statements
 and40 data-set options. The other7 declared reference areas remain unenumerated:
@@ -58,7 +58,7 @@ The5 RULE entries and8 HUMAN-REVIEW entries retain their review boundaries.
 
 ## Unknown blockers classified
 
-The current56-file compile census has19 clean and37 blocked, with648 ticket
+The current56-file compile census has19 clean and37 blocked, with647 ticket
 occurrences. A2 resolves20 compiler tickets across the corpus. The newly compile-
 clean100_doors.sas now passes the DS-042 mixed-output whole-program proof.
 B1 resolves two further tickets and adds the complete loops_for.sas proof.
@@ -66,6 +66,8 @@ B2 adds the integer_comparison.sas proof. Total tickets fall by9;50 formerly
 unknown occurrences now resolve or receive explicit input-profile routing.
 B3 removes18 further compiler tickets and one unknown occurrence.
 B4/B5 remove37 further compiler tickets and10 unknown occurrences.
+C1/C2 removes one further composition ticket in archimedean_spiral.sas; the full
+file still needs SGPLOT and a wider trigonometric domain before execution proof.
 The remaining422 occurrences routed
 as unknown receive a primary planning category, with file, line, ticket ordinal,
 statement hash and classification basis preserved. Classification preserves every
@@ -128,6 +130,8 @@ evidence-cost ranking, not a schedule or an estimate of business demand.
 | B3, implemented in DS-045/DS-046 | Multiplication, output-only uninitialized numeric discovery and array composition | A1 | Entire unchanged sum_and_product_of_an_array.sas proof; c remains missing | High: numeric limits, missing state and output descriptors |
 | B4, implemented in DS-047/048 | KEEP/DROP statements and bounded DATA/SET selection options | Separate input/output timing profiles | Working PDV, selected descriptors and snapshots proved independently; no new whole-file claim | Medium; other declarations/options remain separate |
 | B5, implemented in DS-049/050/051 | Explicit rounded scalar arithmetic, integer power, Pi/trigonometry and logical fractional output | Separate numerical and inferred text policies | Complete unchanged series and trigonometry programs under stated repository/base-R policies | High; earlier exact arithmetic and INT refusals remain; no exact BEST12/live-SAS claim |
+| C1, implemented in DS-052 | B4 output selection with bounded rounded scalar operations | B4/B5, explicit binary64-rows-v1 marker | Original complete-PDV/selection/retained/snapshot witnesses; no new corpus proof | Medium; old binary64-v1 stays non-projecting |
+| C2, implemented in DS-053 | One selected numeric SET with the new row profile | C1 and existing SET state | Independent supplied/prior-step inputs, eager selected-value validation, row resets and retained collisions | High; INPUT/arrays/WHILE/UNTIL/BY/WHERE/MERGE/LOOKUP remain separate |
 
 A1 has reviewable sub-slices: bounded numeric array declaration/index/OF
 execution is implemented in DS-039; single-level implicit numeric DO OVER is
@@ -198,3 +202,7 @@ compiler probes, failure controls and exhaustive classification audit under
 telemetry/coverage-reconciliation-20261027/. Telemetry remains ignored and local;
 the session handoff names the final source and evidence. A compiler/classifier
 change or new corpus bytes requires a fresh census and a ranking review.
+
+The larger follow-on clusters proposed after C1/C2 remain candidate planning in
+the current session journal. They do not authorize new language families or
+promise whole-file unlocks.
