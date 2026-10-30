@@ -21,7 +21,9 @@ Status: version 0.4.0 development evidence for maintainer review, checked on
 faithful passes and catches 60/60 naive variants. Receipts bind these results to
 the recorded source and environment; live-SAS validation remains outstanding.
 
-Sixteen unmodified external programs pass complete-program checks, including
+Eighteen unmodified external programs pass complete-program repository/base-R checks.
+The two B5 programs use declared numerical tolerances and an inferred logical text
+policy; exact SAS BEST12/DECIMALCONV remains unproved. Earlier programs include
 FizzBuzz, the day-of-the-week calendar program and `loops_do_while.sas`, whose
 body-first DO UNTIL composes with a retained sum statement. `loops_while.sas`
 adds bounded division, safe INT and pre-test DO WHILE composition. The bitwise program remains

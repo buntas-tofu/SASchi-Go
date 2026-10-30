@@ -72,7 +72,7 @@ timing and option-order composition require separate witnesses.
 
 The projection gate checks six hand pins,300 constructive independent-R cases
 across all three source timing forms,26 shared refusals and four competing
-interpretations. The28-test suite covers portable-plan attacks, empty/skipped
+interpretations. The29-test suite covers portable-plan attacks, empty/skipped
 paths, metadata, arrays, state reset, input normalization, atomic failure and
 actual CLI execution. An independent R interpreter consumes every statement in
 the original25-statement `examples/projection_capture.sas`, comparing three
