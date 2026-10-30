@@ -2312,6 +2312,142 @@
         "https://support.sas.com/documentation/cdl/en/lrcon/62955/HTML/default/a000695113.htm",
         "https://support.sas.com/documentation/cdl/en/lestmtsref/63323/HTML/default/p0jcwhe1ofmb49n1xf1q2kc44b0v.htm"
       ]
+    },
+    {
+      "rule_id": "DS-047",
+      "sas_pattern": "KEEP/DROP output projection",
+      "scope": "data-step",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "Execute independently validated bounded source and serialized profiles."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent selection/state or sequential arithmetic and logical-format witnesses."
+      },
+      "required_settings": [
+        "One top-level KEEP or DROP statement selects a nonempty subset from the completed static PDV. Explicit ordinary names and ascending numbered ranges expand to1..64 unique names. The64-name cap is tool policy, not a SAS limit.",
+        "Output snapshots and descriptors preserve PDV order, metadata and values. Selected-out variables remain available to PUT, computation, retained state and explicit OUTPUT. Unknown names, conflicting declarations, unsupported lists and nested declarations refuse even on skipped or empty paths."
+      ],
+      "silent_difference_checks": [
+        "Preserve earlier gates/order, plan serialization and atomic accepted result/stdout.",
+        "Treat policy bounds and base-R evidence as such; no broad SAS equivalence claim."
+      ],
+      "validation_test": "examples/verify_projection.py; saschi.test_projection",
+      "confidence": "bounded repository/base-R evidence; no live SAS",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/lrcon/62955/HTML/default/a000695119.htm"
+      ]
+    },
+    {
+      "rule_id": "DS-048",
+      "sas_pattern": "DATA/SET KEEP=/DROP= selection options",
+      "scope": "data-step",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "Execute independently validated bounded source and serialized profiles."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent selection/state or sequential arithmetic and logical-format witnesses."
+      },
+      "required_settings": [
+        "One bounded DATA KEEP=/DROP= output option uses the output projection contract. A single driving SET KEEP=/DROP= input option filters descriptors and values before PDV discovery. Full supplied catalog validation still precedes selection and caller catalogs are never mutated.",
+        "Only fully consumed ordinary single-dataset syntax is accepted. Input selection with MERGE, initial lookup, BY or WHERE, output-option/statement conflicts, unknown names and empty selections refuse. Other declarations/options remain separate profiles."
+      ],
+      "silent_difference_checks": [
+        "Preserve earlier gates/order, plan serialization and atomic accepted result/stdout.",
+        "Treat policy bounds and base-R evidence as such; no broad SAS equivalence claim."
+      ],
+      "validation_test": "examples/verify_projection.py; saschi.test_projection",
+      "confidence": "bounded repository/base-R evidence; no live SAS",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/ledsoptsref/69751/HTML/default/p0vw9lyyxk1cxkn0zzfemrsr3t9a.htm"
+      ]
+    },
+    {
+      "rule_id": "DS-049",
+      "sas_pattern": "Explicit rounded binary64 arithmetic and integer power",
+      "scope": "data-step",
+      "equivalence_class": "APPROXIMATE",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "Execute independently validated bounded source and serialized profiles."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent selection/state or sequential arithmetic and logical-format witnesses."
+      },
+      "required_settings": [
+        "Only new power or elementary-function syntax selects a version2 binary64-v1 marker. Unmarked earlier plan shapes and exact division/multiplication/INT refusals remain unchanged. Marker shape, trigger, scope, literals and resources validate before execution, including skipped or zero-trip paths.",
+        "Catalog-free numeric scalar DATA with counted DO, IF/subset, retained sum, numeric-list PUT and OUTPUT is bounded. Operands and results require finite normal binary64 or zero, magnitude at most2147483647, or ordinary missing. Both operands validate before missing propagation. Rounded +,-,*,/ and integer powers0..32 are tool policy; zero divisor,0**0, subnormal/nonzero underflow, nonfinite, tags, bool and coercion refuse.",
+        "Exponentiation associates right to left above multiplication/division; unary signs follow SAS GroupI right-to-left ordering. Existing sequential retained sum behavior is preserved and its new-profile result is bounded. All wider compositions require separate evidence."
+      ],
+      "silent_difference_checks": [
+        "Preserve earlier gates/order, plan serialization and atomic accepted result/stdout.",
+        "Treat policy bounds and base-R evidence as such; no broad SAS equivalence claim."
+      ],
+      "validation_test": "examples/verify_binary64.py; saschi.test_binary64",
+      "confidence": "bounded repository/base-R evidence; no live SAS",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/lrcon/65287/HTML/default/p00iah2thp63bmn1lt20esag14lh.htm"
+      ]
+    },
+    {
+      "rule_id": "DS-050",
+      "sas_pattern": "Bounded CONSTANT pi and elementary trigonometry",
+      "scope": "data-step",
+      "equivalence_class": "APPROXIMATE",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "Execute independently validated bounded source and serialized profiles."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent selection/state or sequential arithmetic and logical-format witnesses."
+      },
+      "required_settings": [
+        "Only CONSTANT with the literal pi name and unary SIN/COS/TAN/ARSIN/ARCOS/ATAN are wired in the explicit binary64 profile. Trigonometric arguments/results use radians. SIN/COS inputs are within[-pi,pi], TAN within[-pi/4,pi/4], ARSIN/ARCOS within[-1,1], and ATAN within the numeric bound. These conservative domains are implementation limits.",
+        "Numeric comparisons use explicit absolute/relative epsilon policies against independent sequential base-R source/control witnesses, with exact missing/schema/order checks. Python and R may share system libm. This is not proof of independent transcendental algorithms, live SAS accuracy, or physical log fidelity."
+      ],
+      "silent_difference_checks": [
+        "Preserve earlier gates/order, plan serialization and atomic accepted result/stdout.",
+        "Treat policy bounds and base-R evidence as such; no broad SAS equivalence claim."
+      ],
+      "validation_test": "examples/verify_binary64.py; saschi.test_binary64",
+      "confidence": "bounded repository/base-R evidence; no live SAS",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000245945.htm"
+      ]
+    },
+    {
+      "rule_id": "DS-051",
+      "sas_pattern": "Bounded fractional logical numeric-list output",
+      "scope": "data-step",
+      "equivalence_class": "APPROXIMATE",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "Execute independently validated bounded source and serialized profiles."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent selection/state or sequential arithmetic and logical-format witnesses."
+      },
+      "required_settings": [
+        "Only the explicit binary64 profile selects bounded fixed-decimal logical fields within12 characters including sign, decimal point and leading zero. Fractional magnitudes are within[0.0001,1000000000); existing bounded integer and ordinary-missing fields remain. Trim trailing fractional zeros, append one blank per field and retain64 logical columns.",
+        "Refuse decimal-midpoint ambiguity, unsupported magnitude/width, formats and unproved output forms. Exact logical strings are pinned separately from numeric tolerances. This renderer is inferred tool policy with independent base-R witnesses, not an exact implementation of SAS BEST12 or DECIMALCONV environment modes. No physical SAS log claim."
+      ],
+      "silent_difference_checks": [
+        "Preserve earlier gates/order, plan serialization and atomic accepted result/stdout.",
+        "Treat policy bounds and base-R evidence as such; no broad SAS equivalence claim."
+      ],
+      "validation_test": "examples/verify_binary64.py; saschi.test_binary64",
+      "confidence": "bounded repository/base-R evidence; no live SAS",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/leforinforref/64790/HTML/default/p1fum54c93f8r0n1wrs5mrb05nzi.htm"
+      ]
     }
   ],
   "runtime_capabilities": {
@@ -2589,6 +2725,67 @@
       "r_witness": "examples/numeric_discovery.R",
       "boundary_tests": "saschi.test_numeric_composition",
       "evidence": "Separate semantic gates, independent base R, original snapshots and complete unchanged sum_and_product_of_an_array.sas source/result/stdout pins. No live SAS."
+    },
+    "projection": {
+      "rule_id": "DS-047",
+      "target": "saschi.runtime.run_plan",
+      "scope": [
+        "One top-level KEEP or DROP statement selects a nonempty subset from the completed static PDV. Explicit ordinary names and ascending numbered ranges expand to1..64 unique names. The64-name cap is tool policy, not a SAS limit.",
+        "Output snapshots and descriptors preserve PDV order, metadata and values. Selected-out variables remain available to PUT, computation, retained state and explicit OUTPUT. Unknown names, conflicting declarations, unsupported lists and nested declarations refuse even on skipped or empty paths."
+      ],
+      "validation_test": "examples/verify_projection.py",
+      "r_witness": "examples/projection.R",
+      "boundary_tests": "saschi.test_projection",
+      "evidence": "Bounded repository/base-R evidence. Exact logical output and numerical tolerance are separate; no live SAS."
+    },
+    "projection_options": {
+      "rule_id": "DS-048",
+      "target": "saschi.runtime.run_plan",
+      "scope": [
+        "One bounded DATA KEEP=/DROP= output option uses the output projection contract. A single driving SET KEEP=/DROP= input option filters descriptors and values before PDV discovery. Full supplied catalog validation still precedes selection and caller catalogs are never mutated.",
+        "Only fully consumed ordinary single-dataset syntax is accepted. Input selection with MERGE, initial lookup, BY or WHERE, output-option/statement conflicts, unknown names and empty selections refuse. Other declarations/options remain separate profiles."
+      ],
+      "validation_test": "examples/verify_projection.py",
+      "r_witness": "examples/projection.R",
+      "boundary_tests": "saschi.test_projection",
+      "evidence": "Bounded repository/base-R evidence. Exact logical output and numerical tolerance are separate; no live SAS."
+    },
+    "binary64": {
+      "rule_id": "DS-049",
+      "target": "saschi.runtime.run_plan",
+      "scope": [
+        "Only new power or elementary-function syntax selects a version2 binary64-v1 marker. Unmarked earlier plan shapes and exact division/multiplication/INT refusals remain unchanged. Marker shape, trigger, scope, literals and resources validate before execution, including skipped or zero-trip paths.",
+        "Catalog-free numeric scalar DATA with counted DO, IF/subset, retained sum, numeric-list PUT and OUTPUT is bounded. Operands and results require finite normal binary64 or zero, magnitude at most2147483647, or ordinary missing. Both operands validate before missing propagation. Rounded +,-,*,/ and integer powers0..32 are tool policy; zero divisor,0**0, subnormal/nonzero underflow, nonfinite, tags, bool and coercion refuse.",
+        "Exponentiation associates right to left above multiplication/division; unary signs follow SAS GroupI right-to-left ordering. Existing sequential retained sum behavior is preserved and its new-profile result is bounded. All wider compositions require separate evidence."
+      ],
+      "validation_test": "examples/verify_binary64.py",
+      "r_witness": "examples/binary64.R",
+      "boundary_tests": "saschi.test_binary64",
+      "evidence": "Bounded repository/base-R evidence. Exact logical output and numerical tolerance are separate; no live SAS."
+    },
+    "elementary_functions": {
+      "rule_id": "DS-050",
+      "target": "saschi.runtime.run_plan",
+      "scope": [
+        "Only CONSTANT with the literal pi name and unary SIN/COS/TAN/ARSIN/ARCOS/ATAN are wired in the explicit binary64 profile. Trigonometric arguments/results use radians. SIN/COS inputs are within[-pi,pi], TAN within[-pi/4,pi/4], ARSIN/ARCOS within[-1,1], and ATAN within the numeric bound. These conservative domains are implementation limits.",
+        "Numeric comparisons use explicit absolute/relative epsilon policies against independent sequential base-R source/control witnesses, with exact missing/schema/order checks. Python and R may share system libm. This is not proof of independent transcendental algorithms, live SAS accuracy, or physical log fidelity."
+      ],
+      "validation_test": "examples/verify_binary64.py",
+      "r_witness": "examples/binary64.R",
+      "boundary_tests": "saschi.test_binary64",
+      "evidence": "Bounded repository/base-R evidence. Exact logical output and numerical tolerance are separate; no live SAS."
+    },
+    "fractional_put": {
+      "rule_id": "DS-051",
+      "target": "saschi.runtime.run_plan",
+      "scope": [
+        "Only the explicit binary64 profile selects bounded fixed-decimal logical fields within12 characters including sign, decimal point and leading zero. Fractional magnitudes are within[0.0001,1000000000); existing bounded integer and ordinary-missing fields remain. Trim trailing fractional zeros, append one blank per field and retain64 logical columns.",
+        "Refuse decimal-midpoint ambiguity, unsupported magnitude/width, formats and unproved output forms. Exact logical strings are pinned separately from numeric tolerances. This renderer is inferred tool policy with independent base-R witnesses, not an exact implementation of SAS BEST12 or DECIMALCONV environment modes. No physical SAS log claim."
+      ],
+      "validation_test": "examples/verify_binary64.py",
+      "r_witness": "examples/binary64.R",
+      "boundary_tests": "saschi.test_binary64",
+      "evidence": "Bounded repository/base-R evidence. Exact logical output and numerical tolerance are separate; no live SAS."
     }
   }
 }

@@ -18,6 +18,8 @@ from .arrays import declaration as array_declaration, validate_step as validate_
 from .counted import parse_control, validate_step as validate_counted_step
 from .put_mixed import validate_items as validate_mixed_put_items
 from .input_list import names_valid as input_names_valid, source_records, validate_step as validate_input_step
+from .projection import declaration as projection_declaration, dataset as projection_dataset, validate_step as validate_projection_step
+from .binary64 import PROFILE as BINARY64_PROFILE, FUNCTIONS as BINARY64_FUNCTIONS, validate_step as validate_binary64_step
 
 NAME = r"[A-Za-z_][A-Za-z0-9_]{0,31}"
 NUMBER = re.compile(r"[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?\Z")
@@ -109,11 +111,31 @@ def _arithmetic_positions(text, operators='+-'):
         elif char in ")}]":
             depth -= 1
         elif char in operators and depth == 0:
+            if char == '*' and (text[index:index + 2] == '**' or index and text[index - 1] == '*'):
+                continue
             before = text[:index].rstrip()
             if not before or before[-1] in '+-/*(,':
                 continue
             if char in '+-' and re.search(r'(?<![\w.])(?:\d+(?:\.\d*)?|\.\d+)[eE]$', before):
                 continue
+            positions.append(index)
+    return positions
+
+
+def _power_positions(text):
+    """Top-level powers, split at the first for SAS right association."""
+    depth, quote, positions = 0, '', []
+    for index, char in enumerate(text):
+        if quote:
+            if char == quote:
+                quote = ''
+        elif char in "'\"":
+            quote = char
+        elif char in '({[':
+            depth += 1
+        elif char in ')}]':
+            depth -= 1
+        elif not depth and text[index:index + 2] == '**':
             positions.append(index)
     return positions
 
@@ -321,6 +343,20 @@ def expression(text, _depth=0, strict=False):
                 return {'kind': 'arithmetic', 'left': left, 'op': text[position], 'right': right}
             if strict or re.search(NAME + r'\s*[{\[]', text):
                 return None
+    powers = _power_positions(text)
+    if powers:
+        # SAS GroupI unary signs and powers evaluate right to left.
+        if text[0] in '+-':
+            child = expression(text[1:], _depth + 1, True)
+            if child is None:
+                return None
+            return child if text[0] == '+' else {'kind': 'arithmetic', 'op': '-',
+                'left': {'kind': 'number', 'value': 0.0}, 'right': child}
+        position = powers[0]
+        left = expression(text[:position], _depth + 1, True)
+        right = expression(text[position + 2:], _depth + 1, True)
+        if left is not None and right is not None:
+            return {'kind': 'arithmetic', 'op': '**', 'left': left, 'right': right}
     return None
 
 
@@ -581,6 +617,10 @@ def compile_plan(source: str) -> Plan:
                     'PUT _ALL_ supports scalar declarations, safe assignments, and named-destination OUTPUT only; SET, BY, conditions, DATA _NULL_ OUTPUT, and other operations require review'))
         if step:
             flat = list(walk_operations(step.operations))
+            try:
+                validate_projection_step(asdict(step), plan.version)
+            except ValueError as exc:
+                plan.tickets.append(Ticket(step.line, step.name, 'projection', str(exc)))
             for op in flat:
                 if op.kind == 'put_numeric_list' and 'discover' in op.args and (
                         step.inputs or any(o.kind == 'lookup' for o in step.operations)):
@@ -632,6 +672,20 @@ def compile_plan(source: str) -> Plan:
     except ParseError as exc:
         plan.tickets.append(Ticket(exc.line, "", "unterminated", str(exc)))
         return plan
+    # Bound new-profile source before recursive call parsing. Old source keeps
+    # its earlier parsing contract; quoted function-shaped text is data.
+    source_texts = [re.sub(r"'(?:[^']|'')*'|\"(?:[^\"]|\"\")*\"", '', s.text)
+                    for s in statements]
+    if any('**' in text or re.search(r'\b(?:constant|sin|cos|tan|arsin|arcos|atan)\s*\(', text, re.I)
+           for text in source_texts):
+        for statement, text in zip(statements, source_texts):
+            depth = 0
+            for char in text:
+                depth += (char == '(') - (char == ')')
+                if depth > 32:
+                    plan.tickets.append(Ticket(statement.line, 'binary64-v1', 'binary64',
+                        'binary64 source parentheses exceed the32-level policy'))
+                    return plan
     for st in statements:
         text = st.text
         if any(t.kind == Kind.DATA for t in st.tokens):
@@ -661,12 +715,16 @@ def compile_plan(source: str) -> Plan:
         construct, rule = route_statement(text, context)
         if re.match(r"^data\b", text, re.I):
             finish()
-            m = re.fullmatch(r"data\s+(" + NAME + ")", text, re.I)
-            if not m:
-                reject(st, "data-step", "DATA options or names are not supported")
+            try:
+                name, projection = projection_dataset(text, 'data')
+            except ValueError as exc:
+                reject(st, "data-step", str(exc))
                 step, context = None, None
                 continue
-            step = Step("data", m[1].lower(), st.line)
+            step = Step("data", name, st.line)
+            if projection is not None:
+                step.operations.append(Operation('projection', st.line, projection))
+                plan.matched.append(('projection-options', 'DS-048', st.line))
             plan.steps.append(step)
             context = "data"
             continue
@@ -702,7 +760,7 @@ def compile_plan(source: str) -> Plan:
             source_names_valid = all(re.fullmatch(NAME, name, re.ASCII) for name in names)
             names = [n.lower() for n in names]
             if (step.kind != 'data' or active_do is not None or not source_names_valid or not input_names_valid(names)
-                    or any(o.kind != 'declare' for o in step.operations)):
+                    or any(o.kind not in ('declare', 'projection') for o in step.operations)):
                 reject(st, 'input-list', 'one numeric INPUT with1..32 unique names must be the first top-level executable statement')
             else:
                 step.operations.append(Operation('input_list', st.line, {'names': names}))
@@ -806,12 +864,24 @@ def compile_plan(source: str) -> Plan:
                 step.by = [w.lower() for w in words]
             continue
         if re.match(r"^(set|merge)\b", text, re.I):
-            m = re.fullmatch(r"(set|merge)\s+(" + NAME + r")(?:\s+(" + NAME + "))?", text, re.I)
-            if (not m or context != "data" or step.inputs or any(o.kind not in ("lookup", "declare", "array_declare") for o in step.operations) or
+            input_projection = None
+            if re.match(r'^set\b', text, re.I):
+                try:
+                    dataset_name, input_projection = projection_dataset(text, 'set')
+                except ValueError as exc:
+                    reject(st, 'set', str(exc))
+                    continue
+                m = re.fullmatch(r'(set)\s+(' + NAME + r')(?:\s+(' + NAME + r'))?', 'set ' + dataset_name, re.I)
+            else:
+                m = re.fullmatch(r"(set|merge)\s+(" + NAME + r")(?:\s+(" + NAME + "))?", text, re.I)
+            if (not m or context != "data" or step.inputs or any(o.kind not in ("lookup", "declare", "array_declare", "projection") for o in step.operations) or
                     (m[1].lower() == "set" and m[3]) or (m[1].lower() == "merge" and not m[3])):
                 reject(st, construct, "one SET input or two MERGE inputs must precede computations")
             else:
                 step.inputs = [v.lower() for v in (m[2], m[3]) if v]
+                if input_projection is not None:
+                    append_operation(Operation('projection', st.line, input_projection))
+                    plan.matched.append(('projection-options', 'DS-048', st.line))
                 append_operation(Operation("read", st.line, {"datasets": step.inputs}))
                 if m[1].lower() == "merge":
                     step.kind = "merge"
@@ -819,6 +889,16 @@ def compile_plan(source: str) -> Plan:
             continue
         if context != "data":
             reject(st, construct, "unsupported procedure clause")
+            continue
+        if re.match(r'^(keep|drop)\b(?!\s*=)', text, re.I):
+            try:
+                if active_do is not None:
+                    raise ValueError('projection statements must be top-level DATA declarations')
+                args = projection_declaration(text)
+                append_operation(Operation('projection', st.line, args))
+                plan.matched.append(('projection-statements', 'DS-047', st.line))
+            except ValueError as exc:
+                reject(st, 'projection', str(exc))
             continue
         # Only variable occurrences establish spelling; skip statement heads
         # and function names. PUT _ALL_ uses these names without normalizing case.
@@ -854,7 +934,7 @@ def compile_plan(source: str) -> Plan:
             except ValueError:
                 width = 0
             automatic = {'_n_', '_error_', '_infile_', '_file_', '_ods_', '_page_', '_blankpage_'}
-            if (step.inputs or any(o.kind != 'declare' for o in step.operations) or
+            if (step.inputs or any(o.kind not in ('declare', 'projection') for o in step.operations) or
                     len(names) != len(set(names)) or any(name in step.lengths or name in automatic for name in names) or
                     not 1 <= width <= 32767):
                 reject(st, 'length', 'character LENGTH requires unique ordinary names before SET/computations; width 1..32767')
@@ -866,7 +946,7 @@ def compile_plan(source: str) -> Plan:
             continue
         lookup = re.fullmatch(r'if\s+_n_\s*=\s*1\s+then\s+set\s+(' + NAME + r')', text, re.I)
         if lookup:
-            if step.inputs or any(o.kind != 'declare' for o in step.operations):
+            if step.inputs or any(o.kind not in ('declare', 'projection') for o in step.operations):
                 reject(st, 'lookup', 'one initial lookup SET must precede the driving SET')
             else:
                 append_operation(Operation('lookup', st.line, {'dataset': lookup[1].lower()}))
@@ -956,6 +1036,19 @@ def compile_plan(source: str) -> Plan:
         reject(st, family if family != "unknown" else construct, "no operation for this statement")
     finish()
     for compiled in plan.steps:
+        nodes = [node for node, _ in expression_nodes(asdict(compiled))]
+        if any(node.get('kind') == 'arithmetic' and node.get('op') == '**'
+               or node.get('kind') == 'call' and node.get('name') in BINARY64_FUNCTIONS for node in nodes):
+            compiled.operations.insert(0, Operation('numeric_profile', compiled.line, {'name': BINARY64_PROFILE}))
+            plan.matched.append(('binary64', 'DS-049', compiled.line))
+            if any(node.get('kind') == 'call' and node.get('name') in BINARY64_FUNCTIONS for node in nodes):
+                plan.matched.append(('elementary-functions', 'DS-050', compiled.line))
+            if any(op.kind == 'put_numeric_list' for op in walk_operations(compiled.operations)):
+                plan.matched.append(('fractional-put', 'DS-051', compiled.line))
+        try:
+            validate_binary64_step(asdict(compiled), plan.version)
+        except ValueError as exc:
+            plan.tickets.append(Ticket(compiled.line, 'binary64-v1', 'binary64', str(exc)))
         try:
             validate_input_step(asdict(compiled))
         except ValueError as exc:
@@ -1049,11 +1142,13 @@ def compile_plan(source: str) -> Plan:
     for name in ('mdy', 'weekday'):
         plan.matched.extend(('calendar', 'DS-033', line or 1)
                             for line in function_call_lines(plan.to_dict(), name))
-    numeric_nodes = [(node, line) for node, line in expression_nodes(plan.to_dict())
+    numeric_nodes = [(node, line, any(op.kind == 'numeric_profile' for op in compiled.operations))
+                     for compiled in plan.steps for node, line in expression_nodes(asdict(compiled))
                      if node.get('kind') == 'arithmetic' and node.get('op') in ('/', '*')
                      or node.get('kind') == 'call' and node.get('name') == 'int']
-    for node, line in numeric_nodes:
+    for node, line, rounded in numeric_nodes:
         family, rule = (('int', 'DS-037') if node['kind'] == 'call' else
+                        ('binary64', 'DS-049') if rounded else
                         ('multiplication', 'DS-045') if node['op'] == '*' else ('division', 'DS-036'))
         plan.matched.append((family, rule, line or 1))
     if numeric_nodes:

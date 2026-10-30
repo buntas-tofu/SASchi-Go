@@ -6,7 +6,7 @@ not change. Each reference resolves into the current row's named variables.
 from __future__ import annotations
 
 import re
-from .functions import FUNCTIONS, LAG_FUNCTIONS, expression_nodes
+from .functions import FUNCTIONS, LAG_FUNCTIONS, BINARY64_FUNCTIONS, expression_nodes
 from .operations import walk_operations
 from .values import column_type
 from sas_semantics import (SAS_NUMERIC_ARRAY_LIMIT, sas_numeric_array_value,
@@ -15,7 +15,7 @@ from sas_semantics import (SAS_NUMERIC_ARRAY_LIMIT, sas_numeric_array_value,
 NAME = r'[a-z_][a-z0-9_]{0,31}'
 RESERVED = {'_n_', '_error_', '_all_', '_numeric_', '_character_', '_temporary_',
             '_infile_', '_file_', '_ods_', '_page_', '_blankpage_'}
-ARRAY_RESERVED = RESERVED | set(FUNCTIONS) | {
+ARRAY_RESERVED = RESERVED | (set(FUNCTIONS) - BINARY64_FUNCTIONS) | {
     'array', 'data', 'do', 'end', 'if', 'else', 'set', 'merge', 'retain',
     'length', 'output', 'where', 'run', 'quit'}
 KINDS = {'array_get', 'array_sum', 'array_current'}

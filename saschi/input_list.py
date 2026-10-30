@@ -33,10 +33,10 @@ def validate_step(step, version=2):
             or step.get('by') or step.get('where') or len(found) != 1):
         raise ValueError('numeric INPUT requires one version2 DATA inline source, without SET/BY/WHERE')
     op = found[0]
-    executable = [o for o in step['operations'] if o['kind'] != 'declare']
+    executable = [o for o in step['operations'] if o['kind'] not in ('declare', 'projection')]
     if not executable or executable[0] is not op:
         raise ValueError('numeric INPUT must be the first top-level executable statement')
-    allowed = {'declare', 'input_list', 'assign', 'round', 'sum_statement', 'if',
+    allowed = {'declare', 'projection', 'input_list', 'assign', 'round', 'sum_statement', 'if',
                'subset', 'put', 'put_literal', 'put_numeric_list', 'put_mixed_numeric', 'output'}
     if any(o['kind'] not in allowed for o in flat):
         raise ValueError('numeric INPUT supports scalar DATA actions only; arrays, loops and other input require review')

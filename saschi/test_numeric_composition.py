@@ -172,8 +172,12 @@ class NumericCompositionTests(unittest.TestCase):
             with self.subTest(kind=metadata['kind']),self.assertRaises(ValueError):run_plan(plan)
 
     def test_unsupported_operator_spellings_stay_refused(self):
-        for expression in ('2**3','2//3','2^3'):
+        for expression in ('2//3','2^3'):
             self.assertTrue(compile_plan('data d;p='+expression+';run;').blocked)
+        plan=compile_plan('data d;p=2**3;run;')
+        self.assertFalse(plan.blocked)
+        self.assertEqual(plan.to_dict()['steps'][0]['operations'][0]['args'], {'name':'binary64-v1'})
+        self.assertEqual(run_plan(plan.to_dict())['datasets']['d']['rows'], [{'p':8.}])
 
     def test_known_numeric_put_keeps_its_serialized_shape(self):
         plan=compile_plan('data d;a=1;put a;run;').to_dict()

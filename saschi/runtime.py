@@ -10,6 +10,7 @@ from .operations import walk_operations as operations
 from .values import normalize_catalog, column_type, coerce, descriptor, missing, order
 from .functions import FUNCTIONS, validate_calendar_calls, validate_sum_expression, validate_numeric_composition, validate_multiplication_profile
 from sas_semantics import sas_sum_statement, sas_do_until, sas_do_while, sas_divide, sas_multiply
+from . import binary64
 from sas_semantics import sas_numeric_array_value, sas_numeric_array_index, sas_numeric_array_add, sas_do_over
 from .arrays import validate_step as validate_array_step, contains_array, value as array_value
 from .counted import validate_step as validate_counted_step, evaluate_control
@@ -18,6 +19,7 @@ from sas_semantics import sas_put_mixed_numeric
 from .put_mixed import validate_items as validate_mixed_put_items
 from .trim_strip import is_call as is_trim_call, validate_expression as validate_trim_expression, validate_step as validate_trim_step
 from .input_list import validate_step as validate_input_step
+from .projection import validate_step as validate_projection_step, selected_names, project_table
 from sas_semantics import sas_trim_concat
 
 
@@ -288,7 +290,10 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
     tables, logs = normalize_catalog({} if catalog is None else catalog), []
     for step in plan['steps']:
         inputs, keys, ops = step['inputs'], step['by'], step['operations']
-        validate_multiplication_profile(step)
+        rounded_profile = binary64.validate_step(step, plan['version'])
+        input_projection, output_projection = validate_projection_step(step, plan['version'])
+        if not rounded_profile:
+            validate_multiplication_profile(step)
         for op in operations(ops):
             if op['kind'] == 'put_numeric_list' and 'discover' in op['args']:
                 if (plan['version'] != 2 or step['kind'] != 'data' or inputs
@@ -340,6 +345,9 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
         for name in inputs + lookups:
             if name not in tables:
                 raise ValueError(f'input dataset is missing: {name}')
+        sources = {name: tables[name] for name in inputs + lookups}
+        if input_projection is not None:
+            sources[inputs[0]] = project_table(sources[inputs[0]], input_projection)
         key = lambda row: tuple(order(row[k]) for k in keys)
         if step['kind'] == 'sort':
             table = deepcopy(tables[inputs[0]])
@@ -352,12 +360,12 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
             tables[step['name']] = table
             continue
         schema = {n: {'type': 'character', 'length': w} for n, w in step.get('lengths', {}).items()}
-        metadata = {k: deepcopy(v) for k, v in tables[inputs[0]].items() if k not in ('schema', 'rows')} if inputs else {}
+        metadata = {k: deepcopy(v) for k, v in sources[inputs[0]].items() if k not in ('schema', 'rows')} if inputs else {}
         encoding = metadata.get('encoding', 'utf-8')
         for name in lookups + inputs:
-            if tables[name].get('encoding', 'utf-8') != encoding:
+            if sources[name].get('encoding', 'utf-8') != encoding:
                 raise ValueError('mixed source encodings require explicit transcoding')
-            for col, spec in tables[name]['schema'].items():
+            for col, spec in sources[name]['schema'].items():
                 if col in schema and column_type(schema[col]) != column_type(spec):
                     raise ValueError('incompatible input column types')
                 schema.setdefault(col, deepcopy(spec))
@@ -372,7 +380,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
             # The existing MERGE witness covers ordinary numeric rows only.
             if lookups or step.get('where') or step.get('retained') or any(column_type(v) != 'number' for v in schema.values()):
                 raise ValueError('MERGE remains restricted to numeric, unfiltered inputs')
-            sides = [tables[n]['rows'] for n in inputs]
+            sides = [sources[n]['rows'] for n in inputs]
             if any(isinstance(v, dict) for side in sides for row in side for v in row.values()):
                 raise ValueError('tagged missing MERGE is outside this slice')
             for side in sides:
@@ -384,7 +392,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
             rows, _, _ = sas_merge_by(*sides, keys)
             rows = [{n: r.get(n) for n in schema} for r in rows]
         else:
-            rows = deepcopy(tables[inputs[0]]['rows']) if inputs else [{}]
+            rows = deepcopy(sources[inputs[0]]['rows']) if inputs else [{}]
         if inline_rows is not None:
             rows = inline_rows
         where = step.get('where')
@@ -392,9 +400,9 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
             if not inputs or step['kind'] != 'data':
                 raise ValueError('WHERE requires one driving SET')
             # WHERE sees driving input descriptors before PDV LENGTH changes.
-            where_schema = tables[inputs[0]]['schema']
+            where_schema = sources[inputs[0]]['schema']
             validate_string_expressions(where, where_schema)
-            if any(e['kind'] == 'automatic' or e['value'] not in tables[inputs[0]]['schema'] for e in expressions(where)):
+            if any(e['kind'] == 'automatic' or e['value'] not in sources[inputs[0]]['schema'] for e in expressions(where)):
                 raise ValueError('WHERE can reference only driving input columns')
             validate_reverse_calls(where, where_schema)
             context_error = next(substr_context_errors(where), None)
@@ -427,7 +435,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
         schema = {} if plan['version'] == 2 else schema
 
         def add_input(name):
-            for col, spec in tables[name]['schema'].items():
+            for col, spec in sources[name]['schema'].items():
                 if col in schema and column_type(schema[col]) != column_type(spec):
                     raise ValueError('incompatible input column types')
                 schema.setdefault(col, deepcopy(spec))
@@ -457,7 +465,9 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                 validate_substr_calls(payload, schema)
                 validate_bitwise_calls(payload, schema)
                 validate_lag_calls(payload, schema, direct=context == 'assignment')
-            if kind == 'declare':
+            if kind == 'numeric_profile':
+                pass  # Independently checked before all recursive schema walkers.
+            elif kind == 'declare':
                 name, spec = args['name'], args['spec']
                 if name in schema and column_type(schema[name]) != column_type(spec):
                     raise ValueError('incompatible declaration types')
@@ -608,16 +618,22 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
             elif kind == 'output':
                 if args['target'] not in (None, step['name']):
                     raise ValueError('OUTPUT target must be the declared DATA destination')
+            elif kind == 'projection':
+                continue
             else:
                 raise ValueError(f'unsupported operation: {kind}')
         validate_array_step(step, schema)
         validate_counted_step(step, schema)
+        if rounded_profile:
+            binary64.validate_step(step, plan['version'], schema)
         for op in flat:
             validate_reverse_calls(op['args'], schema)
             validate_calendar_calls(op['args'], schema)
-            validate_numeric_composition(op['args'], schema)
+            if not rounded_profile:
+                validate_numeric_composition(op['args'], schema)
             if op['kind'] == 'sum_statement':
-                validate_sum_expression(op['args']['value'], schema)
+                if not rounded_profile:
+                    validate_sum_expression(op['args']['value'], schema)
                 if column_type(schema[op['args']['name']]) != 'number':
                     raise ValueError('sum statement requires a numeric target')
             elif op['kind'] in ('do_until', 'do_while'):
@@ -667,26 +683,27 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                           'value': 'x' if column_type(s) == 'character' else None}
                          for n, s in schema.items()])
         if inputs and step['kind'] == 'data' and any(
-                column_type(schema[k]) == 'character' and schema[k]['length'] != tables[inputs[0]]['schema'][k]['length'] for k in keys):
+                column_type(schema[k]) == 'character' and schema[k]['length'] != sources[inputs[0]]['schema'][k]['length'] for k in keys):
             raise ValueError('BY key width changes require review')
         if step['kind'] == 'merge' and any(op['kind'] in ('assign', 'round') and op['args']['name'] in legacy_schema for op in flat):
             raise ValueError('MERGE input-variable reassignment requires PDV merge-event review')
         if any(schema[k] != legacy_schema[k] for k in keys):
             raise ValueError('BY key descriptor changes require review')
+        output_names = selected_names(schema, output_projection)
         # An OUTPUT anywhere in the step disables implicit output, even if skipped.
         explicit = any(op['kind'] == 'output' for op in flat)
         output, retained_values = [], {n: number(v, {}) for n, v in retained.items()}
-        input_vars = {col for n in inputs + lookups for col in tables[n]['schema']}
+        input_vars = {col for n in inputs + lookups for col in sources[n]['schema']}
         if lookups and (not inputs or step['kind'] != 'data'):
             raise ValueError('initial lookup requires one driving SET')
-        if lookups and not tables[lookups[0]]['rows']:
+        if lookups and not sources[lookups[0]]['rows']:
             rows = []  # SET EOF stops this DATA step before it can output.
         for index, input_row in enumerate(rows):
             row = {n: (' ' * spec['length'] if column_type(spec) == 'character' else None) for n, spec in schema.items()}
             row.update(deepcopy(retained_values))
             # The scoped lookup statement precedes the driving SET in source.
             if index == 0 and lookups:
-                row.update(deepcopy(tables[lookups[0]]['rows'][0]))
+                row.update(deepcopy(sources[lookups[0]]['rows'][0]))
             row.update(deepcopy(input_row))
             row = {n: coerce(v, schema[n], encoding) for n, v in row.items()}
             for name in array_members:
@@ -698,13 +715,15 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                 row['last.' + name] = float(index == len(rows)-1 or prefix(rows[index+1]) != prefix(input_row))
 
             def snapshot():
-                output.append({n: deepcopy(row[n]) for n in schema})
+                output.append({n: deepcopy(row[n]) for n in output_names})
 
             current = {}  # Internal per-row DO OVER bindings; never part of schema.
             counted_spent = 0  # Shared by A2 loops in this DATA iteration only.
 
             def sum_value(expr):
                 """Check every numeric operand before arithmetic can hide a tag/overflow."""
+                if rounded_profile:
+                    return binary64.evaluate(expr, row)
                 if arrays and contains_array(expr):
                     return array_value(expr, row, arrays, current)
                 if any(node.get('kind') == 'arithmetic' and node.get('op') == '*'
@@ -722,6 +741,16 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                 sas_sum_statement(None, value)
                 return value
 
+            def row_condition(test):
+                if not rounded_profile:
+                    return condition(test, row, schema, arrays, current)
+                resolved = {}
+                for side in ('left', 'right'):
+                    if side in test:
+                        value = binary64.evaluate(test[side], row)
+                        resolved[side] = {'kind': 'missing' if value is None else 'number', 'value': value}
+                return condition({'op': test['op'], **resolved}, row, schema)
+
             def perform(op, path):
                 nonlocal counted_spent
                 args, kind = op['args'], op['kind']
@@ -736,7 +765,8 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                         value = queue.invoke(number(expression['args'][0], row, schema), difference=family == 'dif')
                     else:
                         try:
-                            value = put_all_value(expression, row) if put_all else number(expression, row, schema, arrays, current)
+                            value = (binary64.evaluate(expression, row) if rounded_profile else
+                                     put_all_value(expression, row) if put_all else number(expression, row, schema, arrays, current))
                         except ValueError as exc:
                             if arrays and contains_array(expression):
                                 raise ValueError(f"SAS line {op['line']}: {exc}") from exc
@@ -763,6 +793,8 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                         row[args['name']] = sas_numeric_array_value(row[args['name']])
                 elif kind == 'sum_statement':
                     row[args['name']] = sas_sum_statement(row[args['name']], sum_value(args['value']))
+                    if rounded_profile:
+                        row[args['name']] = binary64.numeric(row[args['name']])
                 elif kind == 'do_over':
                     name = args['name']
                     def body(offset):
@@ -798,12 +830,12 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                         return condition({'op': test['op'], **resolved}, row, schema)
                     (sas_do_until if kind == 'do_until' else sas_do_while)(body, stop)
                 elif kind == 'if':
-                    if condition(args['condition'], row, schema, arrays, current):
+                    if row_condition(args['condition']):
                         return perform(args['operation'], path + ('operation',))
                     if 'otherwise' in args:
                         return perform(args['otherwise'], path + ('otherwise',))
                 elif kind == 'subset':
-                    return condition(args['condition'], row, schema, arrays, current)
+                    return row_condition(args['condition'])
                 elif kind == 'output':
                     snapshot()
                 elif kind == 'put_literal':
@@ -813,7 +845,8 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                                              for n, s in schema.items()]))
                 elif kind == 'put_numeric_list':
                     try:
-                        logs.append(sas_put_numeric_list([row[name] for name in args['names']]))
+                        renderer = binary64.render_numeric_list if rounded_profile else sas_put_numeric_list
+                        logs.append(renderer([row[name] for name in args['names']]))
                     except ValueError as exc:
                         raise ValueError(f"SAS line {op['line']}: {exc}") from exc
                 elif kind == 'put_mixed_numeric':
@@ -839,7 +872,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                         if isinstance(v, str): return v.rstrip(' ')
                         return format(v, '.17g')
                     logs.append(' '.join(n + '=' + render(row.get(n)) for n in args['names']))
-                elif kind not in ('lookup', 'read', 'declare', 'array_declare', 'input_list'):
+                elif kind not in ('lookup', 'read', 'declare', 'array_declare', 'input_list', 'projection', 'numeric_profile'):
                     raise ValueError(f'unsupported operation: {kind}')
                 return True
 
@@ -857,5 +890,5 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
             if completed and not explicit:
                 snapshot()
         if step['name'] != '_null_':
-            tables[step['name']] = {**metadata, 'schema': schema, 'rows': output}
+            tables[step['name']] = {**metadata, 'schema': {n: schema[n] for n in output_names}, 'rows': output}
     return {'datasets': tables, 'log': logs}
