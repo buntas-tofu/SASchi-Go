@@ -181,10 +181,15 @@ class FullConsumptionTests(unittest.TestCase):
         self.assertFalse(t.blocked)
         self.assertEqual(_run(t.code), "x=1 y=2")
 
-    def test_data_options_are_refused(self):
-        t = translate("data d (drop=x); x=1; run;")
+    def test_bounded_data_options_and_other_options_refuse(self):
+        accepted = translate("data d (drop=x); x=1; y=2; run;")
+        self.assertFalse(accepted.blocked)
+        namespace = {}
+        exec(accepted.code, namespace)
+        self.assertEqual(namespace['result'], {'datasets': {'d': {'schema': {'y':'number'}, 'rows':[{'y':2.}]}}, 'log':[]})
+        t = translate("data d (rename=(x=y)); x=1; run;")
         self.assertTrue(t.blocked)
-        self.assertTrue(any("DATA options" in tk.reason for tk in t.tickets))
+        self.assertTrue(any(tk.construct == 'data-step' for tk in t.tickets))
 
     def test_unterminated_statement_is_refused(self):
         t = translate('data _null_; x=1; put x= "suffix"')

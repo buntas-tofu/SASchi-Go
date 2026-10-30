@@ -92,6 +92,8 @@ VERIFIERS = [
     ("input-list", HERE / "examples" / "verify_input_list.py"),
     ("multiplication", HERE / "examples" / "verify_multiply.py"),
     ("numeric-discovery", HERE / "examples" / "verify_numeric_discovery.py"),
+    ("projection", HERE / "examples" / "verify_projection.py"),
+    ("binary64", HERE / "examples" / "verify_binary64.py"),
 ]
 
 # The translator suites, run as unittest modules. They carry the same weight as
@@ -143,6 +145,8 @@ SUITES = [
     ("suite-input-list", "saschi.test_input_list"),
     ("suite-numeric-composition", "saschi.test_numeric_composition"),
     ("suite-corpus-basics", "saschi.test_corpus_basics"),
+    ("suite-projection", "saschi.test_projection"),
+    ("suite-binary64", "saschi.test_binary64"),
 ]
 
 

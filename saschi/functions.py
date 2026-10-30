@@ -72,6 +72,8 @@ GATE_LAG_EXECUTION = "examples/verify_lag_execution.py"
 GATE_CALENDAR = "examples/verify_calendar.py"
 GATE_INT = "examples/verify_int.py"
 GATE_TRIM_STRIP = "examples/verify_trim_strip.py"
+BINARY64_FUNCTIONS = frozenset(('constant', 'sin', 'cos', 'tan', 'arsin', 'arcos', 'atan'))
+GATE_BINARY64 = "examples/verify_binary64.py"
 
 LAG_FUNCTIONS = {family + suffix: (family, depth)
                  for family in ("lag", "dif")
@@ -112,6 +114,7 @@ FUNCTIONS: dict[str, FunctionSpec] = {
         FunctionSpec("count", "number", GATE_COUNT, 2, 3),
         FunctionSpec("mod", "number", GATE_MOD, 2, 2),
         FunctionSpec("int", "number", GATE_INT, 1, 1),
+        *(FunctionSpec(name, "number", GATE_BINARY64, 1, 1) for name in sorted(BINARY64_FUNCTIONS)),
         *(FunctionSpec(name, "number", GATE_CALENDAR, arity, arity)
           for name, arity in SAS_CALENDAR_ARITY.items()),
         *(FunctionSpec(name, "number", GATE_BITWISE, arity, arity)

@@ -1,7 +1,7 @@
 # Coverage reconciliation and next gate series
 
 Status: Repository/base-R planning evidence, originally reconciled at main08eaa7b
-on2026-10-27 and updated through DS-045/DS-046 and A0. The handoff binds current acceptance.
+on2026-10-27 and updated through DS-047 through DS-051 and A0. The handoff binds current acceptance.
 For principal/maintainer prioritization. Counts describe this checkout and the56
 pinned sibling corpus files, not all SAS or live-SAS equivalence. Updated for
 DS-039 arrays, DS-040 DO OVER and DS-041 nested/computed counted loops after the original
@@ -11,24 +11,24 @@ Implementation and publication are not authorized by this planning exercise.
 
 ## Inventory reconciled against actual evidence
 
-The golden command registers54 fixture runners,44 translator suites and1
-synthesis runner. The current acceptance contains867 tests, zero skips,
+The golden command registers56 fixture runners,46 translator suites and1
+synthesis runner. The current acceptance contains922 tests, zero skips,
 60 faithful synthesis checks and60 naive controls. The separate1k workload
 checks total39:18 ledger and21 text. These counts have different units. Neither
-81 rulebook rules nor99 golden-command runners is a SAS capability denominator.
+86 rulebook rules nor103 golden-command runners is a SAS capability denominator.
 
 [The capability manifest](capability-manifest.json) still enumerates108 statements
 and40 data-set options. The other7 declared reference areas remain unenumerated:
 formats/informats, functions/CALL routines, system options, component objects,
 utilities, macros and procedures. Their null universes are not zero.
 
-The reconciled148 entries contain27 GATED,5 RULE,8 HUMAN-REVIEW,22 OUT-OF-SCOPE
-and86 UNASSESSED. Among GATED entries,26 have bounded source-execution evidence;
+The reconciled148 entries contain31 GATED,5 RULE,8 HUMAN-REVIEW,22 OUT-OF-SCOPE
+and82 UNASSESSED. Among GATED entries,30 have bounded source-execution evidence;
 1 has reference fixtures only: IN=. DS-039/DS-040 add bounded source-array evidence; DS-041 adds scoped counted-loop
 evidence to the existing iterative-DO entry. DS-044 promotes four bounded entries:
 INPUT, INPUT List, CARDS and DATALINES, preserving their prior assessments.
 DS-046 extends bounded source evidence on the already-GATED PUT and PUT List entries;
-no reference universe or disposition count changes. Reference universes remain unchanged. The original reconciliation below
+no reference universe or disposition count changes in that slice. DS-047/048 promote KEEP/DROP statements and KEEP=/DROP= options, preserving prior dispositions and separate input/output timing evidence. DS-049/050/051 add bounded numerical and inferred logical-text policies without enumerating any function or format universe. Reference universes remain unchanged. The original reconciliation below
 remains its historical assessment event. These are
 catalogue-entry counts, not counts of implemented features or supported forms.
 
@@ -50,22 +50,23 @@ removed. The manifest gate additionally rejects missing scopes/levels, mismatche
 evidence, duplicate entries and stale rollups. It still checks every previous
 registration, rule and universe requirement.
 
-All86 unassessed entries receive planning bins in the reproducible inventory:
+All82 unassessed entries receive planning bins in the reproducible inventory:
 29 external-environment review,13 separate-scope review,8 input records,
-12 data-set options,9 control,7 output,5 descriptor/environment and3 projection.
+10 data-set options,9 control,7 output,5 descriptor/environment and1 projection.
 These bins organize work; they do not promote dispositions or decide exclusions.
 The5 RULE entries and8 HUMAN-REVIEW entries retain their review boundaries.
 
 ## Unknown blockers classified
 
-The current56-file compile census has17 clean and39 blocked, with685 ticket
+The current56-file compile census has19 clean and37 blocked, with648 ticket
 occurrences. A2 resolves20 compiler tickets across the corpus. The newly compile-
 clean100_doors.sas now passes the DS-042 mixed-output whole-program proof.
 B1 resolves two further tickets and adds the complete loops_for.sas proof.
 B2 adds the integer_comparison.sas proof. Total tickets fall by9;50 formerly
 unknown occurrences now resolve or receive explicit input-profile routing.
 B3 removes18 further compiler tickets and one unknown occurrence.
-The remaining432 occurrences routed
+B4/B5 remove37 further compiler tickets and10 unknown occurrences.
+The remaining422 occurrences routed
 as unknown receive a primary planning category, with file, line, ticket ordinal,
 statement hash and classification basis preserved. Classification preserves every
 current compiler ticket.
@@ -77,13 +78,11 @@ current compiler ticket.
 | Input records, INPUT/INFILE and opaque inline data |3|
 | Labels, GOTO/LINK/RETURN/STOP |35|
 | Arrays and indexed writes |15|
-| KEEP/DROP projection |8|
 | External file/engine output |4|
 | Descriptor/environment statements |4|
 | Corpus prose or printed output |2|
-| Rejected DATA header follow-on diagnostics |2|
 | CALL side effects |2|
-| Total |432|
+| Total |422|
 
 The procedure subtotal includes DS2:95, OPTMODEL:76, IML:31, PRINT:9, MEANS:4,
 FCMP:3, SQL:3, SGPLOT:2, TTEST:2 and one each SORT, MULTTEST and UNIVARIATE.
@@ -99,7 +98,7 @@ unterminated tickets. They need an explicit source-boundary decision; silently
 discarding those sections would invalidate a complete unmodified-file claim.
 No sibling corpus file was changed or copied into this repository.
 
-Sixteen files now have complete-program proofs. B3 adds the entire unchanged
+Eighteen files now have complete-program repository/base-R proofs. B5 adds the unchanged sum_of_a_series.sas and trigonometric_functions.sas under explicit numerical tolerances and an inferred logical decimal text policy. These two proofs do not establish exact SAS BEST12/DECIMALCONV or physical-log equivalence. B3 adds the entire unchanged
 sum_and_product_of_an_array.sas, retaining its unassigned c as missing. A0 separately
 closes existing hello_world_text.sas and explicit comment-only no-op evidence,
 without language expansion. DS-042, DS-043 and DS-044 retain the complete
@@ -108,8 +107,7 @@ compile-clean file is bitwise_operations.sas, whose67-column output still refuse
 under the unchanged64-column PUT_ALL profile. The original
 reconciliation itself did not increase the proof count. Compile tickets also miss
 runtime limitations:
-numeric-list PUT is currently bounded integer output; division requires exact
-representability; INT has its conservative near-integer refusal band.
+earlier numeric-list PUT remains bounded integer output and earlier division requires exact representability. The new syntax explicitly selects the separately bounded binary64/text policy in docs/BINARY64.md; INT retains its conservative near-integer refusal band.
 
 ## Prioritized finite backlog
 
@@ -128,8 +126,8 @@ evidence-cost ranking, not a schedule or an estimate of business demand.
 | B1, implemented in DS-043 | Character TRIM/STRIP composition | A2 | loops_for.sas, including both DATA steps, now passes the complete unmodified-file proof | Medium: fixed-width blank/empty behavior |
 | B2, implemented in DS-044 | Numeric list INPUT and CARDS/DATALINES | Separate original input contract | integer_comparison.sas now passes the complete unmodified-file proof | High: record/row scheduling, missing/coercion and static typing |
 | B3, implemented in DS-045/DS-046 | Multiplication, output-only uninitialized numeric discovery and array composition | A1 | Entire unchanged sum_and_product_of_an_array.sas proof; c remains missing | High: numeric limits, missing state and output descriptors |
-| B4 | KEEP/DROP projection, followed by declarations/options | Separate input/output timing profiles | Broad composition value, no immediate full-file unlock claimed | Medium |
-| B5 | Fractional numeric rendering, wider arithmetic and elementary functions | Separate precision/error contracts | sum_of_a_series.sas and trigonometric_functions.sas require several additional slices | High, retain current exact-division and INT refusals until replaced by evidence |
+| B4, implemented in DS-047/048 | KEEP/DROP statements and bounded DATA/SET selection options | Separate input/output timing profiles | Working PDV, selected descriptors and snapshots proved independently; no new whole-file claim | Medium; other declarations/options remain separate |
+| B5, implemented in DS-049/050/051 | Explicit rounded scalar arithmetic, integer power, Pi/trigonometry and logical fractional output | Separate numerical and inferred text policies | Complete unchanged series and trigonometry programs under stated repository/base-R policies | High; earlier exact arithmetic and INT refusals remain; no exact BEST12/live-SAS claim |
 
 A1 has reviewable sub-slices: bounded numeric array declaration/index/OF
 execution is implemented in DS-039; single-level implicit numeric DO OVER is

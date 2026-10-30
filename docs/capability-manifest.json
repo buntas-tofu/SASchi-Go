@@ -99,26 +99,28 @@
   },
   "numeric_arrays_update": "DS-039 adds bounded source ARRAY/indexed reads and writes/SUM OF with numeric-arrays and suite-numeric-arrays plus independent R. ARRAY/Array Reference gain source evidence without disposition, rollup or universe changes. No DO OVER or new complete-program proof; no live SAS.",
   "do_over_update": "DS-040 adds bounded legacy implicit numeric DO OVER, current-element aliases and the full loops_foreach.sas proof. Evidence is attached to existing ARRAY/Array Reference/END entries. DO OVER is not a newly enumerated SAS9.4 reference entry; grouped DO remains UNASSESSED. Dispositions, rollups and universes are unchanged; no live SAS.",
-  "input_list_update": "DS-044 promotes INPUT Statement, INPUT Statement: List, CARDS Statement and DATALINES Statement for the explicitly bounded numeric inline subset. Prior dispositions are recorded per entry; all earlier evidence and every universe remain unchanged. No live SAS."
+  "input_list_update": "DS-044 promotes INPUT Statement, INPUT Statement: List, CARDS Statement and DATALINES Statement for the explicitly bounded numeric inline subset. Prior dispositions are recorded per entry; all earlier evidence and every universe remain unchanged. No live SAS.",
+  "projection_update": "DS-047/048 promote exactly KEEP/DROP statements and KEEP=/DROP= options for bounded source-execution profiles; prior dispositions retained per entry. All universes and earlier evidence remain intact. No complete external program is attributed to projection alone.",
+  "binary64_update": "DS-049/050/051 record separate rounded arithmetic, elementary function and inferred logical text policies. Function/format universes remain null. No live SAS or exact BEST12 claim."
  },
  "rollup": {
   "stmt": {
    "universe": 108,
-   "assessed": 34,
-   "gated": 26,
+   "assessed": 36,
+   "gated": 28,
    "rule": 5,
    "human_review": 1,
    "out_of_scope": 2,
-   "unassessed": 74
+   "unassessed": 72
   },
   "dso": {
    "universe": 40,
-   "assessed": 28,
-   "gated": 1,
+   "assessed": 30,
+   "gated": 3,
    "rule": 0,
    "human_review": 7,
    "out_of_scope": 20,
-   "unassessed": 12
+   "unassessed": 10
   }
  },
  "entries": [
@@ -664,10 +666,33 @@
    "category": "CAS",
    "type": "Declarative",
    "valid_in": "DATA step",
-   "disposition": "UNASSESSED",
-   "rule_ids": [],
-   "gates": [],
-   "reference_page": 79
+   "disposition": "GATED",
+   "rule_ids": [
+    "DS-047"
+   ],
+   "gates": [
+    "projection",
+    "suite-projection"
+   ],
+   "reference_page": 79,
+   "assessment_history": [
+    {
+     "date": "2026-10-29",
+     "prior_disposition": "UNASSESSED",
+     "basis": "Bounded source projection timing and independent base-R evidence."
+    }
+   ],
+   "note": "Bounded KEEP/DROP ordinary-name and numbered-range selection only. Statement/DATA output projection and single SET input selection have distinct timing contracts. See docs/PROJECTION.md. Wider syntax, declarations, PROC options and live SAS remain outstanding.",
+   "gate_evidence": [
+    {
+     "level": "source-execution",
+     "gates": [
+      "projection",
+      "suite-projection"
+     ],
+     "scope": "Bounded KEEP/DROP ordinary-name and numbered-range selection only. Statement/DATA output projection and single SET input selection have distinct timing contracts. See docs/PROJECTION.md. Wider syntax, declarations, PROC options and live SAS remain outstanding."
+    }
+   ]
   },
   {
    "entry": "END Statement",
@@ -1183,10 +1208,33 @@
    "category": "CAS",
    "type": "Declarative",
    "valid_in": "DATA step",
-   "disposition": "UNASSESSED",
-   "rule_ids": [],
-   "gates": [],
-   "reference_page": 204
+   "disposition": "GATED",
+   "rule_ids": [
+    "DS-047"
+   ],
+   "gates": [
+    "projection",
+    "suite-projection"
+   ],
+   "reference_page": 204,
+   "assessment_history": [
+    {
+     "date": "2026-10-29",
+     "prior_disposition": "UNASSESSED",
+     "basis": "Bounded source projection timing and independent base-R evidence."
+    }
+   ],
+   "note": "Bounded KEEP/DROP ordinary-name and numbered-range selection only. Statement/DATA output projection and single SET input selection have distinct timing contracts. See docs/PROJECTION.md. Wider syntax, declarations, PROC options and live SAS remain outstanding.",
+   "gate_evidence": [
+    {
+     "level": "source-execution",
+     "gates": [
+      "projection",
+      "suite-projection"
+     ],
+     "scope": "Bounded KEEP/DROP ordinary-name and numbered-range selection only. Statement/DATA output projection and single SET input selection have distinct timing contracts. See docs/PROJECTION.md. Wider syntax, declarations, PROC options and live SAS remain outstanding."
+    }
+   ]
   },
   {
    "entry": "LABEL Statement",
@@ -2085,11 +2133,33 @@
    "category": "Variable Control",
    "type": null,
    "valid_in": "DATA step and PROC steps",
-   "disposition": "UNASSESSED",
-   "rule_ids": [],
-   "gates": [],
+   "disposition": "GATED",
+   "rule_ids": [
+    "DS-048"
+   ],
+   "gates": [
+    "projection",
+    "suite-projection"
+   ],
    "reference_page": 20,
-   "note": "variable exclusion; not parsed by the translator yet; strong candidate for the next gate"
+   "note": "Bounded KEEP/DROP ordinary-name and numbered-range selection only. Statement/DATA output projection and single SET input selection have distinct timing contracts. See docs/PROJECTION.md. Wider syntax, declarations, PROC options and live SAS remain outstanding.",
+   "assessment_history": [
+    {
+     "date": "2026-10-29",
+     "prior_disposition": "UNASSESSED",
+     "basis": "Bounded source projection timing and independent base-R evidence."
+    }
+   ],
+   "gate_evidence": [
+    {
+     "level": "source-execution",
+     "gates": [
+      "projection",
+      "suite-projection"
+     ],
+     "scope": "Bounded KEEP/DROP ordinary-name and numbered-range selection only. Statement/DATA output projection and single SET input selection have distinct timing contracts. See docs/PROJECTION.md. Wider syntax, declarations, PROC options and live SAS remain outstanding."
+    }
+   ]
   },
   {
    "entry": "ENCRYPT= Data Set Option",
@@ -2240,11 +2310,33 @@
    "category": "Variable Control",
    "type": null,
    "valid_in": "DATA step and PROC steps",
-   "disposition": "UNASSESSED",
-   "rule_ids": [],
-   "gates": [],
+   "disposition": "GATED",
+   "rule_ids": [
+    "DS-048"
+   ],
+   "gates": [
+    "projection",
+    "suite-projection"
+   ],
    "reference_page": 45,
-   "note": "variable selection; not parsed by the translator yet; strong candidate for the next gate"
+   "note": "Bounded KEEP/DROP ordinary-name and numbered-range selection only. Statement/DATA output projection and single SET input selection have distinct timing contracts. See docs/PROJECTION.md. Wider syntax, declarations, PROC options and live SAS remain outstanding.",
+   "assessment_history": [
+    {
+     "date": "2026-10-29",
+     "prior_disposition": "UNASSESSED",
+     "basis": "Bounded source projection timing and independent base-R evidence."
+    }
+   ],
+   "gate_evidence": [
+    {
+     "level": "source-execution",
+     "gates": [
+      "projection",
+      "suite-projection"
+     ],
+     "scope": "Bounded KEEP/DROP ordinary-name and numbered-range selection only. Statement/DATA output projection and single SET input selection have distinct timing contracts. See docs/PROJECTION.md. Wider syntax, declarations, PROC options and live SAS remain outstanding."
+    }
+   ]
   },
   {
    "entry": "LABEL= Data Set Option",
