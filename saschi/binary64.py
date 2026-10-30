@@ -237,6 +237,10 @@ def validate_step(step, version=2, schema=None):
     without its declaration, a declaration without a trigger, or any forged
     nested/duplicate declaration refuses independently of source compilation.
     """
+    from .numeric_pipeline import validate_step as validate_pipeline
+    pipeline = validate_pipeline(step, version, schema)
+    if pipeline is not None:
+        return True
     if not isinstance(step, dict) or not isinstance(step.get('operations'), list):
         raise ValueError('binary64 validation requires a DATA-step mapping')
     markers, trigger, seen = [], False, set()

@@ -247,6 +247,28 @@ def refusal_cases(mode):
     return cases
 
 
+def pipeline_promotion_sources():
+    """Exact former frontier controls, now admitted only by the D1 marker."""
+    return ('data d(keep=a);trigger=1**1;array v{1} a;run;',
+            'data d(keep=a);trigger=1**1;a=1;do while(a<2);a=a+1;end;run;')
+
+
+def promoted_marker_boundary(source,catalog):
+    from saschi.numeric_pipeline import PROFILE as PIPELINE_PROFILE
+    from saschi.binary64 import ROWS_PROFILE
+    from examples.verify_numeric_pipeline import witnesses as pipeline_witnesses
+    assert source in pipeline_promotion_sources()
+    parsed=compile_plan(source);assert not parsed.blocked,parsed.tickets
+    plan=parsed.to_dict();assert plan['steps'][0]['operations'][0]['args']=={'name':PIPELINE_PROFILE}
+    observed=run_plan(plan,deepcopy(catalog))
+    independent=pipeline_witnesses([(source,catalog)])[0];assert independent is not None
+    assert_tree(observed,independent[0])
+    plan['steps'][0]['operations'][0]['args']['name']=ROWS_PROFILE
+    try:run_plan(plan,deepcopy(catalog))
+    except ValueError:pass
+    else:raise AssertionError('old rounded-row marker admitted a D1 composition')
+
+
 def cli_check(source,catalog,expected=None):
     with tempfile.TemporaryDirectory() as directory:
         folder=Path(directory);path=folder/'program.sas';path.write_text(source)
@@ -312,11 +334,16 @@ def main(mode='projection'):
         if index<len(pins):assert_tree(observed,pins[index][2])
         if mode=='set' and index==0:assert accounting==original_accounting(),accounting
     refusals=refusal_cases(mode);refused=batch_witness(refusals)
+    promoted=0
     for (source,catalog),witness in zip(refusals,refused):
-        try:execute(source,catalog)
-        except (ValueError,AssertionError,RuntimeError):pass
-        else:raise AssertionError(('missing refusal',source,catalog))
-        assert witness is None,('R missing refusal',source)
+        if source in pipeline_promotion_sources():
+            promoted_marker_boundary(source,catalog);promoted+=1
+        else:
+            try:execute(source,catalog)
+            except (ValueError,AssertionError,RuntimeError):pass
+            else:raise AssertionError(('missing refusal',source,catalog))
+        assert witness is None,('old-profile R missing refusal',source)
+    assert promoted==2
     source,catalog,expected=pins[0];cli_check(source,catalog,expected)
     if mode=='set':
         assert hashlib.sha256(ORIGINAL.read_bytes()).hexdigest()==SOURCE_PIN
@@ -329,7 +356,7 @@ def main(mode='projection'):
     else:cli_check('data earlier;put "EARLIER";run;'+refusals[2][0],{})
     controls=naive_controls(mode)
     print(f'VERIFIED: numeric-{mode} {len(pins)} hand source pins,{len(cases)-len(pins)} generated source/runtime/R schedules,'
-          f'{len(refusals)} shared refusals,{controls} comparator controls; exact schema/missing/order/logical text,'
+          f'{len(refusals)-promoted} shared source refusals,{promoted} old-marker/new-profile boundary controls,{controls} comparator controls; exact schema/missing/order/logical text,'
           '32-epsilon numeric budget; emitted and actual CLI evidence; no live SAS or exact BEST12 claim')
 
 

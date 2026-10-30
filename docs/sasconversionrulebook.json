@@ -2538,6 +2538,122 @@
         "https://support.sas.com/documentation/cdl/en/sqlproc/63043/HTML/default/n07kfcv1vbih8rn1k9epo45umxil.htm",
         "https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a002473683.htm"
       ]
+    },
+    {
+      "rule_id": "DS-054",
+      "sas_pattern": "Rounded arithmetic after existing bounded numeric inline INPUT",
+      "scope": "data-step",
+      "equivalence_class": "APPROXIMATE",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "Explicit numeric_pipeline validator/evaluator; old converter, exact controls and loop schedules preserved."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent complete-source record, alias and control witness; no Python plan import."
+      },
+      "required_settings": [
+        "Only executable power/Pi/trig syntax plus an actual D1 feature selects the distinct binary64-pipeline-v1 marker. Older markers and serialized forms retain their admission. One numeric INPUT uses the unchanged exact converter,80-byte/10000-record limits, first-source position, FLOWOVER/release and incomplete-EOF behavior; no input grammar widening.",
+        "Rounded scalar values retain DS-049/050 domains and DS-051 inferred logical text. Validate inactive bodies and empty-input descriptors before execution; numeric state, retained/import-name collisions and snapshots follow established DATA scheduling. No live SAS or exact BEST12 claim."
+      ],
+      "forbidden_patterns": [
+        "Wider numeric/input/control syntax without separate evidence"
+      ],
+      "silent_difference_checks": [
+        "Exact schemas, missing masks, observation multiplicity and logical records separate from numeric tolerance"
+      ],
+      "validation_test": "examples/verify_pipeline_input.py",
+      "confidence": "Bounded repository/base-R evidence; no live SAS.",
+      "sources": [
+        "docs/NUMERIC_PIPELINES.md"
+      ]
+    },
+    {
+      "rule_id": "DS-055",
+      "sas_pattern": "Rounded numeric arrays, indexed aliases, current aliases and ordered SUM OF",
+      "scope": "data-step",
+      "equivalence_class": "APPROXIMATE",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "Explicit numeric_pipeline validator/evaluator; old converter, exact controls and loop schedules preserved."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent complete-source record, alias and control witness; no Python plan import."
+      },
+      "required_settings": [
+        "Only binary64-pipeline-v1 admits rounded values/expressions with existing one-dimensional numeric array declarations and row aliases. Retain1024 declared references, declaration-before-use, overlapping row bindings, internal implicit current state and old DO OVER action/nesting restrictions.",
+        "Array SUM OF validates every member, skips ordinary missing, returns missing if all members are missing and accumulates sequentially in declaration order using bounded binary64 arithmetic. Array indices and counted controls keep earlier exact grammar/evaluators, integral bounds and resources; no rounded-control escape. Full expression/index depth shares32 levels; arithmetic/call and array-expression budgets each remain128."
+      ],
+      "forbidden_patterns": [
+        "Wider numeric/input/control syntax without separate evidence"
+      ],
+      "silent_difference_checks": [
+        "Exact schemas, missing masks, observation multiplicity and logical records separate from numeric tolerance"
+      ],
+      "validation_test": "examples/verify_pipeline_arrays.py",
+      "confidence": "Bounded repository/base-R evidence; no live SAS.",
+      "sources": [
+        "docs/NUMERIC_PIPELINES.md"
+      ]
+    },
+    {
+      "rule_id": "DS-056",
+      "sas_pattern": "Rounded scalar/indexed bodies in existing single-level WHILE and UNTIL",
+      "scope": "data-step",
+      "equivalence_class": "APPROXIMATE",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "Explicit numeric_pipeline validator/evaluator; old converter, exact controls and loop schedules preserved."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent complete-source record, alias and control witness; no Python plan import."
+      },
+      "required_settings": [
+        "Only binary64-pipeline-v1 composes old scalar numeric functions and rounded arithmetic with existing top-level single-level WHILE/UNTIL. WHILE tests before the body, UNTIL after it; ordinary missing uses established numeric predicate order/truth. Each invocation keeps its10000-body budget; no new nested or combined control syntax.",
+        "Preserve full static schema, step-wide OUTPUT suppression and lazy reached dynamic values. Literal domains, index shapes and descriptors validate even on skipped, empty or zero-trip paths. Failure publishes no accepted result or earlier buffered stdout."
+      ],
+      "forbidden_patterns": [
+        "Wider numeric/input/control syntax without separate evidence"
+      ],
+      "silent_difference_checks": [
+        "Exact schemas, missing masks, observation multiplicity and logical records separate from numeric tolerance"
+      ],
+      "validation_test": "examples/verify_pipeline_loops.py",
+      "confidence": "Bounded repository/base-R evidence; no live SAS.",
+      "sources": [
+        "docs/NUMERIC_PIPELINES.md"
+      ]
+    },
+    {
+      "rule_id": "DS-057",
+      "sas_pattern": "End-to-end bounded numeric ingestion, arrays, loops and DATA state",
+      "scope": "data-step",
+      "equivalence_class": "APPROXIMATE",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "Explicit numeric_pipeline validator/evaluator; old converter, exact controls and loop schedules preserved."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent complete-source record, alias and control witness; no Python plan import."
+      },
+      "required_settings": [
+        "Separately gate an original complete measurement stream combining numeric inline INPUT, fixed arrays, rounded reciprocal expressions, ordered SUM OF, WHILE/UNTIL, independent retained and imported sum targets, projection, earlier snapshots and second-step reset. One inline or selected numeric SET source per step; inherited SET selection validates all selected numeric inputs eagerly.",
+        "No new functions, trig domains, formatting modes, stochastic streams, lookup/BY/MERGE or third-party runtime dependencies. Independent base R interprets every source statement and control schedule. Numeric tolerance remains32 normalized epsilon units; missing masks, descriptor/row order and logical text stay exact. Optional MPFR/Hypothesis labs are not required CI dependencies."
+      ],
+      "forbidden_patterns": [
+        "Wider numeric/input/control syntax without separate evidence"
+      ],
+      "silent_difference_checks": [
+        "Exact schemas, missing masks, observation multiplicity and logical records separate from numeric tolerance"
+      ],
+      "validation_test": "examples/verify_numeric_pipeline.py",
+      "confidence": "Bounded repository/base-R evidence; no live SAS.",
+      "sources": [
+        "docs/NUMERIC_PIPELINES.md"
+      ]
     }
   ],
   "runtime_capabilities": {
@@ -2917,6 +3033,54 @@
       "r_witness": "examples/sql_create.R",
       "boundary_tests": "saschi.test_sql_create",
       "evidence": "Separate descriptor-only source/backend evidence and whole-source checks; no general SQL or physical SAS claim."
+    },
+    "pipeline_input": {
+      "rule_id": "DS-054",
+      "target": "saschi.runtime.run_plan",
+      "scope": [
+        "Only executable power/Pi/trig syntax plus an actual D1 feature selects the distinct binary64-pipeline-v1 marker. Older markers and serialized forms retain their admission. One numeric INPUT uses the unchanged exact converter,80-byte/10000-record limits, first-source position, FLOWOVER/release and incomplete-EOF behavior; no input grammar widening.",
+        "Rounded scalar values retain DS-049/050 domains and DS-051 inferred logical text. Validate inactive bodies and empty-input descriptors before execution; numeric state, retained/import-name collisions and snapshots follow established DATA scheduling. No live SAS or exact BEST12 claim."
+      ],
+      "validation_test": "examples/verify_pipeline_input.py",
+      "r_witness": "examples/numeric_pipeline.R",
+      "boundary_tests": "saschi.test_numeric_pipeline",
+      "evidence": "Distinct profile, original hand pins,120 constructive full-source cases per gate, shared refusals, nine wrong controls, emitted Python and actual CLI; no live SAS."
+    },
+    "pipeline_arrays": {
+      "rule_id": "DS-055",
+      "target": "saschi.runtime.run_plan",
+      "scope": [
+        "Only binary64-pipeline-v1 admits rounded values/expressions with existing one-dimensional numeric array declarations and row aliases. Retain1024 declared references, declaration-before-use, overlapping row bindings, internal implicit current state and old DO OVER action/nesting restrictions.",
+        "Array SUM OF validates every member, skips ordinary missing, returns missing if all members are missing and accumulates sequentially in declaration order using bounded binary64 arithmetic. Array indices and counted controls keep earlier exact grammar/evaluators, integral bounds and resources; no rounded-control escape. Full expression/index depth shares32 levels; arithmetic/call and array-expression budgets each remain128."
+      ],
+      "validation_test": "examples/verify_pipeline_arrays.py",
+      "r_witness": "examples/numeric_pipeline.R",
+      "boundary_tests": "saschi.test_numeric_pipeline",
+      "evidence": "Distinct profile, original hand pins,120 constructive full-source cases per gate, shared refusals, nine wrong controls, emitted Python and actual CLI; no live SAS."
+    },
+    "pipeline_loops": {
+      "rule_id": "DS-056",
+      "target": "saschi.runtime.run_plan",
+      "scope": [
+        "Only binary64-pipeline-v1 composes old scalar numeric functions and rounded arithmetic with existing top-level single-level WHILE/UNTIL. WHILE tests before the body, UNTIL after it; ordinary missing uses established numeric predicate order/truth. Each invocation keeps its10000-body budget; no new nested or combined control syntax.",
+        "Preserve full static schema, step-wide OUTPUT suppression and lazy reached dynamic values. Literal domains, index shapes and descriptors validate even on skipped, empty or zero-trip paths. Failure publishes no accepted result or earlier buffered stdout."
+      ],
+      "validation_test": "examples/verify_pipeline_loops.py",
+      "r_witness": "examples/numeric_pipeline.R",
+      "boundary_tests": "saschi.test_numeric_pipeline",
+      "evidence": "Distinct profile, original hand pins,120 constructive full-source cases per gate, shared refusals, nine wrong controls, emitted Python and actual CLI; no live SAS."
+    },
+    "numeric_pipeline": {
+      "rule_id": "DS-057",
+      "target": "saschi.runtime.run_plan",
+      "scope": [
+        "Separately gate an original complete measurement stream combining numeric inline INPUT, fixed arrays, rounded reciprocal expressions, ordered SUM OF, WHILE/UNTIL, independent retained and imported sum targets, projection, earlier snapshots and second-step reset. One inline or selected numeric SET source per step; inherited SET selection validates all selected numeric inputs eagerly.",
+        "No new functions, trig domains, formatting modes, stochastic streams, lookup/BY/MERGE or third-party runtime dependencies. Independent base R interprets every source statement and control schedule. Numeric tolerance remains32 normalized epsilon units; missing masks, descriptor/row order and logical text stay exact. Optional MPFR/Hypothesis labs are not required CI dependencies."
+      ],
+      "validation_test": "examples/verify_numeric_pipeline.py",
+      "r_witness": "examples/numeric_pipeline.R",
+      "boundary_tests": "saschi.test_numeric_pipeline",
+      "evidence": "Distinct profile, original hand pins,120 constructive full-source cases per gate, shared refusals, nine wrong controls, emitted Python and actual CLI; no live SAS."
     }
   }
 }

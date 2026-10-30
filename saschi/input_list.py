@@ -25,6 +25,10 @@ def source_records(raw):
 
 
 def validate_step(step, version=2):
+    from .numeric_pipeline import validate_step as validate_pipeline
+    pipeline = validate_pipeline(step, version)
+    if pipeline is not None:
+        return pipeline['inline_rows']
     flat = list(walk_operations(step['operations'], all_containers=True))
     found = [op for op in flat if op['kind'] == 'input_list']
     if not found:

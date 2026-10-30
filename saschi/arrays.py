@@ -151,6 +151,10 @@ def validate_expression(expr, arrays, schema=None, depth=0, current=None):
 
 def validate_step(step, schema=None):
     """Enforce source order and plan shape, independently of compiler admission."""
+    from .numeric_pipeline import validate_step as validate_pipeline
+    pipeline = validate_pipeline(step, schema=schema)
+    if pipeline is not None:
+        return pipeline['arrays']
     roots = step['operations']; flat = list(walk_operations(roots))
     if not any(op['kind'] in ('array_declare', 'array_set', 'array_current_set', 'do_over') or contains_array(op['args']) for op in flat) and not contains_array(step.get('where')):
         return {}

@@ -1,7 +1,7 @@
 # Coverage reconciliation and next gate series
 
 Status: Repository/base-R planning evidence, originally reconciled at main08eaa7b
-on2026-10-27 and updated through DS-053, SQL-004 and A0. The handoff binds current acceptance.
+on2026-10-27 and updated through DS-057, SQL-004 and A0. The handoff binds current acceptance.
 For principal/maintainer prioritization. Counts describe this checkout and the56
 pinned sibling corpus files, not all SAS or live-SAS equivalence. Updated for
 DS-039 arrays, DS-040 DO OVER and DS-041 nested/computed counted loops after the original
@@ -11,11 +11,11 @@ Implementation and publication are not authorized by this planning exercise.
 
 ## Inventory reconciled against actual evidence
 
-The golden command registers59 fixture runners,48 translator suites and1
-synthesis runner. The current acceptance contains970 tests, zero skips,
+The golden command registers63 fixture runners,49 translator suites and1
+synthesis runner. The current acceptance contains1003 tests, zero skips,
 60 faithful synthesis checks and60 naive controls. The separate1k workload
 checks total39:18 ledger and21 text. These counts have different units. Neither
-89 rulebook rules nor108 golden-command runners is a SAS capability denominator.
+93 rulebook rules nor113 golden-command runners is a SAS capability denominator.
 
 [The capability manifest](capability-manifest.json) still enumerates108 statements
 and40 data-set options. The other7 declared reference areas remain unenumerated:
@@ -68,6 +68,9 @@ B3 removes18 further compiler tickets and one unknown occurrence.
 B4/B5 remove37 further compiler tickets and10 unknown occurrences.
 C1/C2 removes one further composition ticket in archimedean_spiral.sas; the full
 file still needs SGPLOT and a wider trigonometric domain before execution proof.
+D1 adds bounded rounded INPUT/array/WHILE/UNTIL composition and an original
+measurement-stream proof. Its current corpus census is unchanged; no additional
+complete external program is claimed.
 SQL-004 adds the complete unchanged postal-address empty-table proof. The net
 ticket count falls by one; unsupported SQL procedures gain explicit profile
 diagnostics. Three formerly unknown SQL occurrences now route explicitly.
@@ -137,6 +140,7 @@ evidence-cost ranking, not a schedule or an estimate of business demand.
 | C1, implemented in DS-052 | B4 output selection with bounded rounded scalar operations | B4/B5, explicit binary64-rows-v1 marker | Original complete-PDV/selection/retained/snapshot witnesses; no new corpus proof | Medium; old binary64-v1 stays non-projecting |
 | C2, implemented in DS-053 | One selected numeric SET with the new row profile | C1 and existing SET state | Independent supplied/prior-step inputs, eager selected-value validation, row resets and retained collisions | High; INPUT/arrays/WHILE/UNTIL/BY/WHERE/MERGE/LOOKUP remain separate |
 | D4a, implemented in SQL-004 | Explicit CHAR descriptor-only CREATE TABLE | Bare PROC SQL, one CREATE, explicit QUIT | Complete unchanged postal-address empty-table proof, ordered descriptors and atomic destination refusals | Medium; numeric columns, queries, DML and general SQL remain separate |
+| D1, implemented in DS-054..057 | Rounded numeric INPUT, arrays and conditional loops, plus their integrated stream | Existing converter/index/control/value/text policies and explicit binary64-pipeline-v1 | Original complete measurement stream and separate component gates; no new complete corpus proof | High; broader functions, domains, control nesting and record forms remain separate |
 
 A1 has reviewable sub-slices: bounded numeric array declaration/index/OF
 execution is implemented in DS-039; single-level implicit numeric DO OVER is
