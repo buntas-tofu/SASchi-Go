@@ -111,12 +111,12 @@ options, procedures, macros and C++ remain separate contracts.
 ## Evidence and original program
 
 The separate numeric-projection gate has6 hand source pins,240 generated
-source/runtime/R schedules,7 shared refusals and6 competing comparator controls.
+source/runtime/R schedules,7 boundary controls (5 shared source refusals and2 explicit old-marker refusals) and6 competing comparator controls.
 Its hand pins cover all three output-selection forms, early and late snapshots,
 skipped static discovery and counted-loop composition.
 
 The numeric-set gate has8 hand source pins,360 generated multirow schedules,
-21 shared refusals and6 comparator controls. The hand witnesses cover empty
+21 boundary controls (19 shared source refusals and2 explicit old-marker refusals) and6 comparator controls. The hand witnesses cover empty
 input, supplied descriptors, missing replacement, scratch reset, imported sum
 targets, retained totals and counted loops per observation. Shared refusals check
 eager selected values, selected descriptor/name errors, supplied unknown PUT
@@ -159,3 +159,19 @@ does not copy sibling corpus source.
 The reference JSON pin uses sorted keys and compact separators. Actual numeric
 acceptance retains the declared tolerance; the hash does not silently replace
 that policy with universal cross-platform bit identity.
+
+
+## D1 source-boundary promotion event
+
+DS-054..057 separately route newly proved INPUT/array/WHILE/UNTIL combinations
+to binary64-pipeline-v1. The old binary64-rows-v1 marker still refuses them.
+The C1/C2 gates retain the exact former ARRAY and WHILE frontier source controls:
+independent old-profile R still refuses, independent D1 R and source/runtime now
+agree on acceptance, and forcing the same parsed plan back to the old marker
+refuses. No case was deleted or skipped. C1 retains7 boundary controls, split
+into5 shared source refusals and2 old-marker/new-profile controls. C2 retains21,
+split into19 shared source refusals and2 old-marker/new-profile controls.
+The prior source suite likewise retains its exact ARRAY, WHILE and UNTIL clauses,
+proving new-marker acceptance and old-marker refusal. Every other recorded
+unproved clause remains source-blocked. These are separately counted admission
+boundaries, not new shared source refusals or a relaxation of the older profile.

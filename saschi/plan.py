@@ -19,6 +19,7 @@ from .counted import parse_control, validate_step as validate_counted_step
 from .put_mixed import validate_items as validate_mixed_put_items
 from .input_list import names_valid as input_names_valid, source_records, validate_step as validate_input_step
 from .projection import declaration as projection_declaration, dataset as projection_dataset, validate_step as validate_projection_step
+from .numeric_pipeline import PROFILE as PIPELINE_PROFILE
 from .binary64 import PROFILE as BINARY64_PROFILE, ROWS_PROFILE as BINARY64_ROWS_PROFILE, FUNCTIONS as BINARY64_FUNCTIONS, validate_step as validate_binary64_step
 from .sql_create import parse_create as parse_sql_create, validate_step as validate_sql_create
 
@@ -459,6 +460,7 @@ def bind_current(node, name):
 def compile_plan(source: str) -> Plan:
     plan, step, context, active_do = Plan(), None, None, None
     character_put_matches = {}
+    numeric_rules = {}
     pending_if, chain_length, pending_end = None, 0, None
     do_parents = []
     inline_pending = False
@@ -799,7 +801,7 @@ def compile_plan(source: str) -> Plan:
             source_names_valid = all(re.fullmatch(NAME, name, re.ASCII) for name in names)
             names = [n.lower() for n in names]
             if (step.kind != 'data' or active_do is not None or not source_names_valid or not input_names_valid(names)
-                    or any(o.kind not in ('declare', 'projection') for o in step.operations)):
+                    or any(o.kind not in ('declare', 'projection', 'array_declare') for o in step.operations)):
                 reject(st, 'input-list', 'one numeric INPUT with1..32 unique names must be the first top-level executable statement')
             else:
                 step.operations.append(Operation('input_list', st.line, {'names': names}))
@@ -1080,11 +1082,14 @@ def compile_plan(source: str) -> Plan:
         nodes = [node for node, _ in expression_nodes(asdict(compiled))]
         if any(node.get('kind') == 'arithmetic' and node.get('op') == '**'
                or node.get('kind') == 'call' and node.get('name') in BINARY64_FUNCTIONS for node in nodes):
+            pipeline_features = {op.kind for op in walk_operations(compiled.operations)} & {'input_list','array_declare','do_over','do_while','do_until'}
             composed = bool(compiled.inputs or any(op.kind == 'projection' for op in walk_operations(compiled.operations)))
-            profile = BINARY64_ROWS_PROFILE if composed else BINARY64_PROFILE
-            rule = 'DS-053' if compiled.inputs else 'DS-052' if composed else 'DS-049'
+            profile = PIPELINE_PROFILE if pipeline_features else BINARY64_ROWS_PROFILE if composed else BINARY64_PROFILE
+            groups = ({'input'} if 'input_list' in pipeline_features else set()) | ({'arrays'} if pipeline_features & {'array_declare','do_over'} else set()) | ({'loops'} if pipeline_features & {'do_while','do_until'} else set())
+            rule = ('DS-057' if len(groups)>1 else 'DS-054' if 'input' in groups else 'DS-055' if 'arrays' in groups else 'DS-056') if pipeline_features else 'DS-053' if compiled.inputs else 'DS-052' if composed else 'DS-049'
+            numeric_rules[id(compiled)] = rule
             compiled.operations.insert(0, Operation('numeric_profile', compiled.line, {'name': profile}))
-            construct = 'numeric-set' if compiled.inputs else 'numeric-projection' if composed else 'binary64'
+            construct = {'DS-054':'pipeline-input','DS-055':'pipeline-arrays','DS-056':'pipeline-loops','DS-057':'numeric-pipeline'}.get(rule) if pipeline_features else 'numeric-set' if compiled.inputs else 'numeric-projection' if composed else 'binary64'
             plan.matched.append((construct, rule, compiled.line))
             if compiled.inputs:
                 # A supplied numeric descriptor resolves these names at runtime.
@@ -1204,16 +1209,13 @@ def compile_plan(source: str) -> Plan:
     for name in ('mdy', 'weekday'):
         plan.matched.extend(('calendar', 'DS-033', line or 1)
                             for line in function_call_lines(plan.to_dict(), name))
-    numeric_nodes = [(node, line, next(('DS-053' if compiled.inputs else 'DS-052')
-                         if op.args == {'name': BINARY64_ROWS_PROFILE} else 'DS-049'
-                         for op in compiled.operations if op.kind == 'numeric_profile')
-                         if any(op.kind == 'numeric_profile' for op in compiled.operations) else None)
+    numeric_nodes = [(node, line, numeric_rules.get(id(compiled)))
                      for compiled in plan.steps for node, line in expression_nodes(asdict(compiled))
                      if node.get('kind') == 'arithmetic' and node.get('op') in ('/', '*')
                      or node.get('kind') == 'call' and node.get('name') == 'int']
     for node, line, rounded_rule in numeric_nodes:
         family, rule = (('int', 'DS-037') if node['kind'] == 'call' else
-                        ('numeric-set' if rounded_rule == 'DS-053' else
+                        ({'DS-054':'pipeline-input','DS-055':'pipeline-arrays','DS-056':'pipeline-loops','DS-057':'numeric-pipeline'}.get(rounded_rule) if rounded_rule in ('DS-054','DS-055','DS-056','DS-057') else 'numeric-set' if rounded_rule == 'DS-053' else
                          'numeric-projection' if rounded_rule == 'DS-052' else 'binary64', rounded_rule) if rounded_rule else
                         ('multiplication', 'DS-045') if node['op'] == '*' else ('division', 'DS-036'))
         plan.matched.append((family, rule, line or 1))

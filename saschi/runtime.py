@@ -10,7 +10,7 @@ from .operations import walk_operations as operations
 from .values import normalize_catalog, column_type, coerce, descriptor, missing, order
 from .functions import FUNCTIONS, validate_calendar_calls, validate_sum_expression, validate_numeric_composition, validate_multiplication_profile
 from sas_semantics import sas_sum_statement, sas_do_until, sas_do_while, sas_divide, sas_multiply
-from . import binary64
+from . import binary64, numeric_pipeline
 from .sql_create import materialize as materialize_sql_create
 from sas_semantics import sas_numeric_array_value, sas_numeric_array_index, sas_numeric_array_add, sas_do_over
 from .arrays import validate_step as validate_array_step, contains_array, value as array_value
@@ -295,7 +295,8 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
             tables[step['name']] = table
             continue
         inputs, keys, ops = step['inputs'], step['by'], step['operations']
-        rounded_profile = binary64.validate_step(step, plan['version'])
+        pipeline = numeric_pipeline.validate_step(step, plan['version'])
+        rounded_profile = pipeline is not None or binary64.validate_step(step, plan['version'])
         input_projection, output_projection = validate_projection_step(step, plan['version'])
         if not rounded_profile:
             validate_multiplication_profile(step)
@@ -306,7 +307,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                         or any(item['kind'] == 'lookup' for item in operations(ops))):
                     raise ValueError('PUT discovery requires a catalog-free version2 DATA step')
         inline_rows = validate_input_step(step, plan['version'])
-        if inline_rows is not None:
+        if inline_rows is not None and pipeline is None:
             validate_inline_types(list(operations(ops)), None, step.get('retained', {}))
         validate_trim_step(step, plan['version'])
         # Reject malformed mixed-output plans before other expression walkers or input work.
@@ -643,7 +644,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                     validate_sum_expression(op['args']['value'], schema)
                 if column_type(schema[op['args']['name']]) != 'number':
                     raise ValueError('sum statement requires a numeric target')
-            elif op['kind'] in ('do_until', 'do_while'):
+            elif op['kind'] in ('do_until', 'do_while') and pipeline is None:
                 for side in ('left', 'right'):
                     if side in op['args']['condition']:
                         validate_sum_expression(op['args']['condition'][side], schema)
@@ -676,7 +677,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
             schema.setdefault(name, 'number')
             if column_type(schema[name]) != 'number':
                 raise ValueError('RETAIN initializers in this slice must be numeric')
-        if inline_rows is not None:
+        if inline_rows is not None and pipeline is None:
             validate_inline_types(flat, schema, retained)
         if put_all:
             display = step.get('display_names', {})
@@ -729,6 +730,8 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
 
             def sum_value(expr):
                 """Check every numeric operand before arithmetic can hide a tag/overflow."""
+                if pipeline is not None:
+                    return numeric_pipeline.evaluate(expr, row, arrays, current)
                 if rounded_profile:
                     return binary64.evaluate(expr, row)
                 if arrays and contains_array(expr):
@@ -754,7 +757,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                 resolved = {}
                 for side in ('left', 'right'):
                     if side in test:
-                        value = binary64.evaluate(test[side], row)
+                        value = numeric_pipeline.evaluate(test[side], row, arrays, current) if pipeline is not None else binary64.evaluate(test[side], row)
                         resolved[side] = {'kind': 'missing' if value is None else 'number', 'value': value}
                 return condition({'op': test['op'], **resolved}, row, schema)
 
@@ -772,7 +775,8 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                         value = queue.invoke(number(expression['args'][0], row, schema), difference=family == 'dif')
                     else:
                         try:
-                            value = (binary64.evaluate(expression, row) if rounded_profile else
+                            value = (numeric_pipeline.evaluate(expression, row, arrays, current) if pipeline is not None else
+                                     binary64.evaluate(expression, row) if rounded_profile else
                                      put_all_value(expression, row) if put_all else number(expression, row, schema, arrays, current))
                         except ValueError as exc:
                             if arrays and contains_array(expression):
@@ -786,9 +790,15 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                         row[args['name']] = sas_numeric_array_value(row[args['name']])
                 elif kind == 'array_current_set':
                     name = args['name']
-                    row[arrays[name]['names'][current[name]]] = array_value(args['value'], row, arrays, current)
+                    if pipeline is not None:
+                        numeric_pipeline.array_current_set(args, row, arrays, current)
+                    else:
+                        row[arrays[name]['names'][current[name]]] = array_value(args['value'], row, arrays, current)
                 elif kind == 'array_set':
                     try:
+                        if pipeline is not None:
+                            numeric_pipeline.array_set(args, row, arrays, current)
+                            return True
                         a = arrays[args['name']]
                         index = sas_numeric_array_index(array_value(args['index'], row, arrays, current), a['lower'], len(a['names']))
                         row[a['names'][index]] = array_value(args['value'], row, arrays, current)
@@ -832,8 +842,11 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                             perform(child, path + ('body', child_index))
                     def stop():
                         test = args['condition']
-                        resolved = {side: {'kind': 'number', 'value': sum_value(test[side])}
-                                    for side in ('left', 'right') if side in test}
+                        resolved = {}
+                        for side in ('left', 'right'):
+                            if side in test:
+                                value = sum_value(test[side])
+                                resolved[side] = {'kind': 'missing' if pipeline is not None and value is None else 'number', 'value': value}
                         return condition({'op': test['op'], **resolved}, row, schema)
                     (sas_do_until if kind == 'do_until' else sas_do_while)(body, stop)
                 elif kind == 'if':

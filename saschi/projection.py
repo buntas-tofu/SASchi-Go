@@ -72,8 +72,9 @@ def validate_step(step, version=2):
         # The public path authorizes the prefix through the complete numeric
         # validator. That validator calls only the private context helper below.
         from .binary64 import validate_step as validate_numeric_step, ROWS_PROFILE
+        from .numeric_pipeline import PROFILE as PIPELINE_PROFILE
         validate_numeric_step(step, version)
-        if roots[0]['args'] != {'name': ROWS_PROFILE}:
+        if roots[0]['args'] not in ({'name': ROWS_PROFILE}, {'name': PIPELINE_PROFILE}):
             raise ValueError('projection numeric prefix requires the separately proved row profile')
         prefix = 1
     return _validate_step(step, version, prefix=prefix)

@@ -155,7 +155,21 @@ class NumericRowsTests(unittest.TestCase):
             'merge incoming other;by key;','if _n_=1 then set config;set incoming;',
             'input x;datalines;\n1\n;\n','array a{1} x;','do while(0);x=1;end;',
             'do until(1);x=1;end;'):
-            self.assertTrue(compile_plan('data d(keep=q);'+clause+'q=1**1;run;').blocked,clause)
+            source='data d(keep=q);'+clause+'q=1**1;run;'
+            parsed=compile_plan(source)
+            if clause in ('array a{1} x;','do while(0);x=1;end;','do until(1);x=1;end;'):
+                from .numeric_pipeline import PROFILE as PIPELINE_PROFILE
+                from examples.verify_numeric_pipeline import witnesses as pipeline_witnesses
+                self.assertFalse(parsed.blocked,parsed.tickets)
+                serialized=parsed.to_dict()
+                self.assertEqual(serialized['steps'][0]['operations'][0]['args'],{'name':PIPELINE_PROFILE})
+                from examples.verify_numeric_rows import batch_witness as old_profile_witnesses
+                self.assertEqual(old_profile_witnesses([(source,{})]),[None])
+                independent=pipeline_witnesses([(source,{})])[0];self.assertIsNotNone(independent)
+                self.assertEqual(run_plan(serialized),independent[0])
+                serialized['steps'][0]['operations'][0]['args']['name']='binary64-rows-v1'
+                with self.assertRaises(ValueError):run_plan(serialized)
+            else:self.assertTrue(parsed.blocked,clause)
 
     def test_legacy_exact_arithmetic_and_text_limits_remain(self):
         for source in ('data d;q=1/3;run;','data d;q=1.1*1.1;run;'):
