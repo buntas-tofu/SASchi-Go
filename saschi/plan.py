@@ -1267,6 +1267,10 @@ def _compile_legacy_plan(source: str) -> Plan:
 
 
 def compile_plan(source: str) -> Plan:
-    from .grouped_control import compile_program
-    combined = compile_program(source, _compile_legacy_plan)
-    return _compile_legacy_plan(source) if combined is None else combined
+    from .grouped_control import compile_program as compile_control
+    from .numeric_exchange import compile_program as compile_exchange
+    def existing(text):
+        combined = compile_control(text, _compile_legacy_plan)
+        return _compile_legacy_plan(text) if combined is None else combined
+    combined = compile_exchange(source, existing)
+    return existing(source) if combined is None else combined

@@ -15,13 +15,16 @@ policies. Receipts record what passed for the source and environment tested.
 
 ## Current verification
 
-Status: version 0.4.0 development evidence for maintainer review, checked on
-2026-10-30. With the pinned Roku corpus present, `python verify_all.py` passes
-67 fixture gates, 51 suites and 1061 tests with zero skips. Synthesis adds 60/60
-faithful passes and catches 60/60 naive variants. Receipts bind these results to
-the recorded source and environment; live-SAS validation remains outstanding.
+Status: version 0.4.0 development evidence for maintainer review, updated on
+2026-10-31. The current registry contains 69 fixture gates, 52 suites and 1097
+tests. With the pinned Roku corpus present, `python verify_all.py` records the
+source-bound unified verdict. Synthesis separately checks 60 faithful cases and
+60 naive variants. The accepted entry baseline covered 67 gates, 51 suites and
+1061 tests with zero skips; current passing outcomes require a matching receipt.
+Live-SAS validation remains outstanding.
 
-Nineteen unmodified external programs pass complete-program repository/base-R checks.
+D2b adds the complete unchanged CSV-artifact program to the nineteen accepted
+entry external-program repository/base-R proofs.
 The two B5 programs use declared numerical tolerances and an inferred logical text
 policy; exact SAS BEST12/DECIMALCONV remains unproved. Earlier programs include
 FizzBuzz, the day-of-the-week calendar program and `loops_do_while.sas`, whose
@@ -89,6 +92,8 @@ D1 now composes the bounded rounded profile with numeric inline INPUT, numeric a
 
 D2a separately gates inline comma DLM/FIRSTOBS and numeric INPUT name ranges. DLM collapses empty comma spans; this profile preserves exact input conversion and FLOWOVER, and defers DSD, quoted/general CSV and numerical-pipeline composition. See [bounded comma and range input](docs/INLINE_CSV.md).
 
+D2b adds separate numeric SUM OF/PUT ranges and one caller-rooted CSV artifact. Its named ASCII/LF integer policy, complete unchanged CSV-program byte proof, exact `--expect-exports` comparison and success-only staged publication are documented in [numeric exchange](docs/NUMERIC_EXCHANGE.md). Existing result/receipt shapes remain unchanged without FILE.
+
 ## Operational workflow
 
 The typed execution workflow and C++ scalar pilot use a shared, versioned
@@ -122,7 +127,7 @@ fixed expected output and base-R evidence. Special missings retain their tags.
   sibling plus a fixture verifier (`verify_*.py`). Run any verifier directly,
   or all of them through [verify_all.py](verify_all.py).
 - [docs/sasconversionrulebook.json](docs/sasconversionrulebook.json) : the machine-consumable translation
-  rulebook. 97 rules with equivalence classes (EXACT,
+  rulebook. 99 rules with equivalence classes (EXACT,
   EQUIVALENT-WITH-SETTINGS, APPROXIMATE, NO-DIRECT-EQUIVALENT), required
   settings, forbidden patterns, and validation tests.
 - [docs/capability-manifest.json](docs/capability-manifest.json) : the coverage manifest. Enumerated entries of

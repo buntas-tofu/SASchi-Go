@@ -10,6 +10,7 @@ from .emit_py import translate as python_translate
 from .job import build_job
 from .plan import compile_plan
 from .provenance import digest, environment
+from .numeric_exchange import validate_exports
 
 
 def write_json(path, value):
@@ -40,7 +41,7 @@ def execute_job(args):
     if output.exists():
         raise ValueError(f'output directory already exists: {output}')
     source = args.source.read_text(encoding='utf-8')
-    job = build_job(source, args.inputs, args.expect)
+    job = build_job(source, args.inputs, args.expect, expect_exports=getattr(args, 'expect_exports', None))
     receipt, result = job.receipt, job.result
     output.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix='.saschi-', dir=output.parent) as temporary:
@@ -51,6 +52,13 @@ def execute_job(args):
             name = 'result.json' if receipt['accepted'] else 'observed.json'
             write_json(staging / name, result)
             receipt['result_sha256'] = digest(staging / name)
+        if receipt['accepted'] and result is not None and 'exports' in result:
+            validate_exports(result['exports'])
+            export_directory = staging / 'exports'
+            export_directory.mkdir()
+            for name, text in result['exports'].items():
+                with (export_directory / name).open('xb') as stream:
+                    stream.write(text.encode('ascii'))
         write_json(staging / 'receipt.json', receipt)
         staging.rename(output)
     print(json.dumps({'accepted': receipt['accepted'], 'receipt': str(output / 'receipt.json')}))
@@ -72,6 +80,7 @@ def main(argv=None):
     run.add_argument('source', type=Path)
     run.add_argument('--inputs', type=Path)
     run.add_argument('--expect', type=Path)
+    run.add_argument('--expect-exports', type=Path, help='compare the complete export basename-to-text map as exact UTF8 bytes')
     run.add_argument('--output', required=True, type=Path)
     tui = sub.add_parser('tui', help='open the rich console interface')
     tui.add_argument('source', nargs='?', type=Path)

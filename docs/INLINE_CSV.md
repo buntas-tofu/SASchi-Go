@@ -115,3 +115,7 @@ additive evidence; document universes and all earlier evidence remain intact.
 Original source SHA-256: e4ef1b6fc8ca978bb789acf834b2d61277a2646e1372809019aa8739c50527c2.
 Ordered result SHA-256: f66eb9179e91325ba6512bc871a66543758a6d9f1cff7af25bf5c3d97e81f735.
 Logical stdout SHA-256: 66b5baec970c71d09eda39dbd16da8501f5b173278c03d76b573ada7bdf69d31.
+
+DS-062/063 separately reuse this decoder under exchange_data for numeric SUM OF/PUT
+ranges and bounded local artifacts. This numeric-inline-v1 input profile and its
+portable shapes/refusals remain unchanged. See [numeric exchange](NUMERIC_EXCHANGE.md).
