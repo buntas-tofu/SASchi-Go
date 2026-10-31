@@ -167,7 +167,11 @@ class CountedDoTests(unittest.TestCase):
                      'length x $3','retain x 0','set a','merge a b','where x=1','put _all_',
                      'output other','file log','input x'):
             with self.subTest(body=body):
-                self.assertTrue(compile_plan('data d; do i=1 to 2; '+body+'; end; run;').blocked)
+                source='data d; do i=1 to 2; '+body+'; end; run;'
+                if body in ('leave','continue'):
+                    from .test_grouped_control import assert_promoted_source
+                    assert_promoted_source(self,source)
+                else:self.assertTrue(compile_plan(source).blocked)
 
     def test_formerly_refused_A2_controls_and_nested_body_are_now_verified(self):
         # Preserve every promoted refusal source with stronger execution assertions.

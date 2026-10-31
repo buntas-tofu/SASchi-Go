@@ -17,7 +17,7 @@ policies. Receipts record what passed for the source and environment tested.
 
 Status: version 0.4.0 development evidence for maintainer review, checked on
 2026-10-30. With the pinned Roku corpus present, `python verify_all.py` passes
-65 fixture gates, 50 suites and 1030 tests with zero skips. Synthesis adds 60/60
+67 fixture gates, 51 suites and 1061 tests with zero skips. Synthesis adds 60/60
 faithful passes and catches 60/60 naive variants. Receipts bind these results to
 the recorded source and environment; live-SAS validation remains outstanding.
 
@@ -122,7 +122,7 @@ fixed expected output and base-R evidence. Special missings retain their tags.
   sibling plus a fixture verifier (`verify_*.py`). Run any verifier directly,
   or all of them through [verify_all.py](verify_all.py).
 - [docs/sasconversionrulebook.json](docs/sasconversionrulebook.json) : the machine-consumable translation
-  rulebook. 95 rules with equivalence classes (EXACT,
+  rulebook. 97 rules with equivalence classes (EXACT,
   EQUIVALENT-WITH-SETTINGS, APPROXIMATE, NO-DIRECT-EQUIVALENT), required
   settings, forbidden patterns, and validation tests.
 - [docs/capability-manifest.json](docs/capability-manifest.json) : the coverage manifest. Enumerated entries of
@@ -449,3 +449,13 @@ dashes and no ellipses in artifacts.
 ## License
 
 MIT. See [LICENSE](LICENSE).
+
+## Bounded grouped control
+
+The [grouped-control contract](docs/GROUPED_CONTROL.md) adds a separate integer
+DATA profile for simple DO/END groups and nearest-loop LEAVE/CONTINUE. It keeps
+counted indices, WHILE/UNTIL test timing, static OUTPUT discovery and atomic
+failure explicit. Earlier profile contracts remain intact. Independent base-R
+state/event schedules, exact original-program pins and real CLI comparison
+controls provide evidence for the stated slice. INPUT/CSV, arrays, rounded
+profiles and broader control language remain separate compositions.

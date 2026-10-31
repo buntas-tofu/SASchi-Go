@@ -148,8 +148,13 @@ class DoIfTests(unittest.TestCase):
         for branch in ('if 1', 'if 1 then do; x=7; end', 'if 1 then if 0 then x=7',
                        'if 1 then do j=1 to 2; end','if 1 then set raw',
                        'if 1 then length x $3','if 1 then retain x 0','if 1 then leave','if 1 then continue'):
-            self.assertTrue(compile_plan('data d; do i=1 to 2; '+branch+'; end; run;').blocked,branch)
-        self.assertTrue(compile_plan('data d; if 1 then x=7; else do; x=9; end; run;').blocked)
+            source='data d; do i=1 to 2; '+branch+'; end; run;'
+            if branch in ('if 1 then do; x=7; end','if 1 then leave','if 1 then continue'):
+                from .test_grouped_control import assert_promoted_source
+                assert_promoted_source(self,source)
+            else:self.assertTrue(compile_plan(source).blocked,branch)
+        from .test_grouped_control import assert_promoted_source
+        assert_promoted_source(self,'data d; if 1 then x=7; else do; x=9; end; run;')
 
     def test_chain_limit_is_enforced_in_compile_and_forged_plan(self):
         chain='if 0 then x=1; '+'else if 0 then x=1; '*31+'else x=7;'
