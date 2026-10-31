@@ -18,6 +18,7 @@ from .arrays import declaration as array_declaration, validate_step as validate_
 from .counted import parse_control, validate_step as validate_counted_step
 from .put_mixed import validate_items as validate_mixed_put_items
 from .input_list import names_valid as input_names_valid, source_records, validate_step as validate_input_step
+from .input_numeric import PROFILE as INPUT_PROFILE, parse_terms as parse_input_terms, parse_infile, validate_step as validate_numeric_input_step
 from .projection import declaration as projection_declaration, dataset as projection_dataset, validate_step as validate_projection_step
 from .numeric_pipeline import PROFILE as PIPELINE_PROFILE
 from .binary64 import PROFILE as BINARY64_PROFILE, ROWS_PROFILE as BINARY64_ROWS_PROFILE, FUNCTIONS as BINARY64_FUNCTIONS, validate_step as validate_binary64_step
@@ -426,7 +427,7 @@ def put_known_types(ops):
         if kind == 'declare':
             spec = args['spec']
             known.setdefault(args['name'], spec if isinstance(spec, str) else spec['type'])
-        elif kind in ('array_declare', 'input_list'):
+        elif kind in ('array_declare', 'input_list', 'input_numeric'):
             for name in args['names']:
                 known.setdefault(name, 'number')
         elif kind == 'put_numeric_list':
@@ -461,6 +462,7 @@ def compile_plan(source: str) -> Plan:
     plan, step, context, active_do = Plan(), None, None, None
     character_put_matches = {}
     numeric_rules = {}
+    infile_configs = {}
     pending_if, chain_length, pending_end = None, 0, None
     do_parents = []
     inline_pending = False
@@ -631,6 +633,8 @@ def compile_plan(source: str) -> Plan:
                 plan.tickets.append(Ticket(step.line, step.name, 'put-all',
                     'PUT _ALL_ supports scalar declarations, safe assignments, and named-destination OUTPUT only; SET, BY, conditions, DATA _NULL_ OUTPUT, and other operations require review'))
         if step:
+            if id(step) in infile_configs and not any(o.kind == 'input_numeric' for o in step.operations):
+                plan.tickets.append(Ticket(step.line, 'INFILE', 'inline-csv', 'inline INFILE requires one following numeric INPUT and inline data block'))
             flat = list(walk_operations(step.operations))
             try:
                 validate_projection_step(asdict(step), plan.version)
@@ -689,17 +693,26 @@ def compile_plan(source: str) -> Plan:
         return plan
     # Bound new-profile source before recursive call parsing. Old source keeps
     # its earlier parsing contract; quoted function-shaped text is data.
-    source_texts = [re.sub(r"'(?:[^']|'')*'|\"(?:[^\"]|\"\")*\"", '', s.text)
+    source_texts = ['' if any(t.kind == Kind.DATA for t in s.tokens) else
+                    re.sub(r"'(?:[^']|'')*'|\"(?:[^\"]|\"\")*\"", '', s.text)
                     for s in statements]
-    if any('**' in text or re.search(r'\b(?:constant|sin|cos|tan|arsin|arcos|atan)\s*\(', text, re.I)
-           for text in source_texts):
+    numeric_input_source = any(re.match(r'^infile\b(?!\s*=)', text, re.I)
+                               or re.match(r'^input\b(?!\s*=)', text, re.I) and '-' in text
+                               for text in source_texts)
+    if numeric_input_source or any('**' in text or re.search(r'\b(?:constant|sin|cos|tan|arsin|arcos|atan)\s*\(', text, re.I)
+                                   for text in source_texts):
         for statement, text in zip(statements, source_texts):
+            if numeric_input_source and not any(t.kind == Kind.DATA for t in statement.tokens) and len(re.findall(r'[+*/-]|[A-Za-z_][A-Za-z0-9_]*\s*\(', text, re.ASCII)) > 128:
+                plan.tickets.append(Ticket(statement.line, 'numeric-inline-v1', 'input-ranges',
+                    'numeric inline source exceeds128 arithmetic/call markers per statement'))
+                return plan
             depth = 0
             for char in text:
                 depth += (char == '(') - (char == ')')
                 if depth > 32:
-                    plan.tickets.append(Ticket(statement.line, 'binary64-v1', 'binary64',
-                        'binary64 source parentheses exceed the32-level policy'))
+                    plan.tickets.append(Ticket(statement.line, 'numeric-inline-v1' if numeric_input_source else 'binary64-v1',
+                        'input-ranges' if numeric_input_source else 'binary64',
+                        'numeric source parentheses exceed the32-level policy'))
                     return plan
     for st in statements:
         text = st.text
@@ -707,7 +720,7 @@ def compile_plan(source: str) -> Plan:
             try:
                 if not inline_pending or step is None:
                     raise ValueError('inline data requires one preceding numeric INPUT and CARDS/DATALINES')
-                op, = [o for o in step.operations if o.kind == 'input_list']
+                op, = [o for o in step.operations if o.kind in ('input_list', 'input_numeric')]
                 raw, = [t for t in st.tokens if t.kind == Kind.DATA]
                 op.args.update(records=source_records(raw.text), data_line=raw.line + 1)
             except ValueError as exc:
@@ -796,20 +809,41 @@ def compile_plan(source: str) -> Plan:
         if step is None:
             reject(st, construct, "statement is outside a supported step")
             continue
+        if re.match(r'^infile\b(?!\s*=)', text, re.I):
+            try:
+                if (step.kind != 'data' or active_do is not None or id(step) in infile_configs
+                        or any(o.kind not in ('declare', 'projection') for o in step.operations)):
+                    raise ValueError('one inline INFILE must precede INPUT and all executable actions')
+                infile_configs[id(step)] = {**parse_infile(text), 'line': st.line}
+                plan.matched.append(('inline-csv', 'DS-058', st.line))
+            except ValueError as exc:
+                reject(st, 'inline-csv', str(exc))
+            continue
         if re.match(r'^input\b(?!\s*=)', text, re.I):
-            names = text.split()[1:]
-            source_names_valid = all(re.fullmatch(NAME, name, re.ASCII) for name in names)
-            names = [n.lower() for n in names]
-            if (step.kind != 'data' or active_do is not None or not source_names_valid or not input_names_valid(names)
-                    or any(o.kind not in ('declare', 'projection', 'array_declare') for o in step.operations)):
-                reject(st, 'input-list', 'one numeric INPUT with1..32 unique names must be the first top-level executable statement')
-            else:
-                step.operations.append(Operation('input_list', st.line, {'names': names}))
-                plan.matched.append(('input-list', 'DS-044', st.line))
+            try:
+                terms, names = parse_input_terms(text.split(None, 1)[1])
+                config = infile_configs.get(id(step))
+                extended = config is not None or any('-' in term for term in terms)
+                if (step.kind != 'data' or active_do is not None
+                        or any(o.kind not in ('declare', 'projection', 'array_declare') for o in step.operations)):
+                    raise ValueError('one numeric INPUT must be the first top-level executable action')
+                if extended:
+                    args = {'profile': INPUT_PROFILE, 'terms': terms, 'names': names,
+                            'delimiter': config['delimiter'] if config else ' ',
+                            'firstobs': config['firstobs'] if config else 1,
+                            'infile_line': config['line'] if config else None}
+                    step.operations.append(Operation('input_numeric', st.line, args))
+                    if any('-' in term for term in terms):
+                        plan.matched.append(('input-ranges', 'DS-059', st.line))
+                else:
+                    step.operations.append(Operation('input_list', st.line, {'names': names}))
+                    plan.matched.append(('input-list', 'DS-044', st.line))
+            except (ValueError, IndexError) as exc:
+                reject(st, 'input-list', str(exc))
             continue
         if re.fullmatch(r'(?:cards|datalines)', text, re.I):
             if (active_do is not None or step.kind != 'data'
-                    or sum(o.kind == 'input_list' for o in step.operations) != 1):
+                    or sum(o.kind in ('input_list', 'input_numeric') for o in step.operations) != 1):
                 reject(st, 'input-list', 'CARDS/DATALINES requires one preceding top-level numeric INPUT')
             else:
                 inline_pending = True
@@ -1117,6 +1151,7 @@ def compile_plan(source: str) -> Plan:
         except ValueError as exc:
             plan.tickets.append(Ticket(compiled.line, 'binary64-v1', 'binary64', str(exc)))
         try:
+            validate_numeric_input_step(asdict(compiled), plan.version)
             validate_input_step(asdict(compiled))
         except ValueError as exc:
             plan.tickets.append(Ticket(compiled.line, 'INPUT', 'input-list', str(exc)))

@@ -17,7 +17,7 @@ policies. Receipts record what passed for the source and environment tested.
 
 Status: version 0.4.0 development evidence for maintainer review, checked on
 2026-10-30. With the pinned Roku corpus present, `python verify_all.py` passes
-63 fixture gates, 49 suites and 1003 tests with zero skips. Synthesis adds 60/60
+65 fixture gates, 50 suites and 1030 tests with zero skips. Synthesis adds 60/60
 faithful passes and catches 60/60 naive variants. Receipts bind these results to
 the recorded source and environment; live-SAS validation remains outstanding.
 
@@ -87,6 +87,8 @@ Query creation, numeric columns, DML and general PROC SQL remain separate.
 
 D1 now composes the bounded rounded profile with numeric inline INPUT, numeric arrays/current aliases/ordered SUM OF, and existing WHILE/UNTIL. Four separate gates include a complete measurement-stream witness; exact indices, converter/trip limits, older markers and inferred text policies remain. See [numeric pipelines](docs/NUMERIC_PIPELINES.md).
 
+D2a separately gates inline comma DLM/FIRSTOBS and numeric INPUT name ranges. DLM collapses empty comma spans; this profile preserves exact input conversion and FLOWOVER, and defers DSD, quoted/general CSV and numerical-pipeline composition. See [bounded comma and range input](docs/INLINE_CSV.md).
+
 ## Operational workflow
 
 The typed execution workflow and C++ scalar pilot use a shared, versioned
@@ -120,7 +122,7 @@ fixed expected output and base-R evidence. Special missings retain their tags.
   sibling plus a fixture verifier (`verify_*.py`). Run any verifier directly,
   or all of them through [verify_all.py](verify_all.py).
 - [docs/sasconversionrulebook.json](docs/sasconversionrulebook.json) : the machine-consumable translation
-  rulebook. 93 rules with equivalence classes (EXACT,
+  rulebook. 95 rules with equivalence classes (EXACT,
   EQUIVALENT-WITH-SETTINGS, APPROXIMATE, NO-DIRECT-EQUIVALENT), required
   settings, forbidden patterns, and validation tests.
 - [docs/capability-manifest.json](docs/capability-manifest.json) : the coverage manifest. Enumerated entries of

@@ -168,6 +168,8 @@ CONSTRUCT_MAP: dict[str, str] = {
     "pipeline-arrays": "DS-055",
     "pipeline-loops": "DS-056",
     "numeric-pipeline": "DS-057",
+    "inline-csv": "DS-058",
+    "input-ranges": "DS-059",
     "put-all": "DS-025",
     "do-counted": "DS-026",
     "do-if": "DS-031",
@@ -243,6 +245,8 @@ CONSTRUCT_MAP: dict[str, str] = {
 # Statement-level routing: statement-start regex -> construct name.
 # Order matters: longest/most specific first.
 STATEMENT_ROUTER: list[tuple[re.Pattern, str]] = [
+    (re.compile(r'^\s*INFILE\b(?!\s*=)', re.I), 'inline-csv'),
+    (re.compile(r'^\s*INPUT\b(?!\s*=).*?[A-Za-z_][A-Za-z0-9_]*[0-9]\s*-\s*[A-Za-z_][A-Za-z0-9_]*[0-9](?=\s|;|$)', re.I | re.ASCII | re.S), 'input-ranges'),
     (re.compile(r'^\s*(?:INPUT\b(?!\s*=)|(?:CARDS|DATALINES)\s*$)', re.I), 'input-list'),
     (re.compile(r'^\s*DO\s+OVER\b', re.I), 'do-over'),
     (re.compile(r'^\s*DO\s+WHILE\b', re.I), 'do-while'),
