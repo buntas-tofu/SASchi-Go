@@ -2654,6 +2654,66 @@
       "sources": [
         "docs/NUMERIC_PIPELINES.md"
       ]
+    },
+    {
+      "rule_id": "DS-058",
+      "sas_pattern": "Bounded inline comma-delimited numeric INPUT with FIRSTOBS",
+      "scope": "data-step",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "Explicit input_numeric validation/decoding and existing scalar DATA runtime."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent bounded term/record parser and complete original-source state witness."
+      },
+      "required_settings": [
+        "Only numeric-inline-v1 input_numeric admits INFILE DATALINES/CARDS with comma DLM and optional FIRSTOBS1..10001. DLM without DSD collapses consecutive commas; default FLOWOVER assembles a complete read across physical records and releases its unread final-record suffix. Incomplete EOF discards the observation.",
+        "Preserve exact bounded decimal conversion,80-byte printable ASCII records,10000 records and1..32 expanded names. FIRSTOBS skips numeric conversion but not raw record limits. Only period supplies ordinary missing; consumed blank-only comma fields conservatively refuse. Quoted/general CSV, DSD, external I/O and new numerical pipeline composition are deferred."
+      ],
+      "forbidden_patterns": [
+        "Wider input, variable-list, control or numerical syntax without separate evidence"
+      ],
+      "silent_difference_checks": [
+        "DLM collapse versus DSD-like missing, FIRSTOBS physical records, FLOWOVER versus row padding, record release and incomplete EOF.",
+        "Exact descriptor order, missing masks, snapshots and logical text; no live SAS or general CSV claim."
+      ],
+      "validation_test": "examples/verify_inline_csv.py",
+      "confidence": "Bounded repository/base-R evidence; no live SAS.",
+      "sources": [
+        "docs/INLINE_CSV.md"
+      ]
+    },
+    {
+      "rule_id": "DS-059",
+      "sas_pattern": "Explicit numeric INPUT numbered range expansion",
+      "scope": "data-step",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "Explicit input_numeric validation/decoding and existing scalar DATA runtime."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent bounded term/record parser and complete original-source state witness."
+      },
+      "required_settings": [
+        "Only INPUT admits canonical ordinary names and ascending common-prefix numbered ranges with unpadded final-digit suffixes1..64. Expand before checking overlaps, duplicate names and the32-name cap. Terms and exact expanded names are retained and independently checked in the explicit input_numeric operation.",
+        "Plain INPUT retains its old input_list serialized form and contracts. New profile validates exact metadata, all static empty/skipped bodies and raw physical limits before execution; state, projection, snapshots and atomic result/log publication retain existing scalar INPUT behavior. PUT/SUM OF variable lists, arrays, loops and rounded-marker coexistence remain separate."
+      ],
+      "forbidden_patterns": [
+        "Wider input, variable-list, control or numerical syntax without separate evidence"
+      ],
+      "silent_difference_checks": [
+        "DLM collapse versus DSD-like missing, FIRSTOBS physical records, FLOWOVER versus row padding, record release and incomplete EOF.",
+        "Exact descriptor order, missing masks, snapshots and logical text; no live SAS or general CSV claim."
+      ],
+      "validation_test": "examples/verify_input_ranges.py",
+      "confidence": "Bounded repository/base-R evidence; no live SAS.",
+      "sources": [
+        "docs/INLINE_CSV.md"
+      ]
     }
   ],
   "runtime_capabilities": {
@@ -3081,6 +3141,30 @@
       "r_witness": "examples/numeric_pipeline.R",
       "boundary_tests": "saschi.test_numeric_pipeline",
       "evidence": "Distinct profile, original hand pins,120 constructive full-source cases per gate, shared refusals, nine wrong controls, emitted Python and actual CLI; no live SAS."
+    },
+    "inline_csv": {
+      "rule_id": "DS-058",
+      "target": "saschi.runtime.run_plan",
+      "scope": [
+        "Only numeric-inline-v1 input_numeric admits INFILE DATALINES/CARDS with comma DLM and optional FIRSTOBS1..10001. DLM without DSD collapses consecutive commas; default FLOWOVER assembles a complete read across physical records and releases its unread final-record suffix. Incomplete EOF discards the observation.",
+        "Preserve exact bounded decimal conversion,80-byte printable ASCII records,10000 records and1..32 expanded names. FIRSTOBS skips numeric conversion but not raw record limits. Only period supplies ordinary missing; consumed blank-only comma fields conservatively refuse. Quoted/general CSV, DSD, external I/O and new numerical pipeline composition are deferred."
+      ],
+      "validation_test": "examples/verify_inline_csv.py",
+      "r_witness": "examples/inline_csv.R",
+      "boundary_tests": "saschi.test_input_numeric",
+      "evidence": "Separate marked profile, hand pins, generated complete-source/runtime/R cases, shared refusals, original20-language-statement/two-opaque-block/5-read/7-snapshot witness, emitted Python and actual CLI. No earlier source-refusal promotions."
+    },
+    "input_ranges": {
+      "rule_id": "DS-059",
+      "target": "saschi.runtime.run_plan",
+      "scope": [
+        "Only INPUT admits canonical ordinary names and ascending common-prefix numbered ranges with unpadded final-digit suffixes1..64. Expand before checking overlaps, duplicate names and the32-name cap. Terms and exact expanded names are retained and independently checked in the explicit input_numeric operation.",
+        "Plain INPUT retains its old input_list serialized form and contracts. New profile validates exact metadata, all static empty/skipped bodies and raw physical limits before execution; state, projection, snapshots and atomic result/log publication retain existing scalar INPUT behavior. PUT/SUM OF variable lists, arrays, loops and rounded-marker coexistence remain separate."
+      ],
+      "validation_test": "examples/verify_input_ranges.py",
+      "r_witness": "examples/input_ranges.R",
+      "boundary_tests": "saschi.test_input_numeric",
+      "evidence": "Separate marked profile, hand pins, generated complete-source/runtime/R cases, shared refusals, original20-language-statement/two-opaque-block/5-read/7-snapshot witness, emitted Python and actual CLI. No earlier source-refusal promotions."
     }
   }
 }

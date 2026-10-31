@@ -101,6 +101,8 @@ VERIFIERS = [
     ("pipeline-arrays", HERE / "examples" / "verify_pipeline_arrays.py"),
     ("pipeline-loops", HERE / "examples" / "verify_pipeline_loops.py"),
     ("numeric-pipeline", HERE / "examples" / "verify_numeric_pipeline.py"),
+    ("inline-csv", HERE / "examples" / "verify_inline_csv.py"),
+    ("input-ranges", HERE / "examples" / "verify_input_ranges.py"),
 ]
 
 # The translator suites, run as unittest modules. They carry the same weight as
@@ -157,6 +159,7 @@ SUITES = [
     ("suite-numeric-rows", "saschi.test_numeric_rows"),
     ("suite-sql-create", "saschi.test_sql_create"),
     ("suite-numeric-pipeline", "saschi.test_numeric_pipeline"),
+    ("suite-numeric-input", "saschi.test_input_numeric"),
 ]
 
 

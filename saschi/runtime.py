@@ -20,6 +20,7 @@ from sas_semantics import sas_put_mixed_numeric
 from .put_mixed import validate_items as validate_mixed_put_items
 from .trim_strip import is_call as is_trim_call, validate_expression as validate_trim_expression, validate_step as validate_trim_step
 from .input_list import validate_step as validate_input_step
+from .input_numeric import validate_step as validate_numeric_input_step
 from .projection import validate_step as validate_projection_step, selected_names, project_table
 from sas_semantics import sas_trim_concat
 
@@ -306,7 +307,9 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                         or type(op.get('line')) is not int or op['line'] < 1
                         or any(item['kind'] == 'lookup' for item in operations(ops))):
                     raise ValueError('PUT discovery requires a catalog-free version2 DATA step')
-        inline_rows = validate_input_step(step, plan['version'])
+        inline_rows = validate_numeric_input_step(step, plan['version'])
+        if inline_rows is None:
+            inline_rows = validate_input_step(step, plan['version'])
         if inline_rows is not None and pipeline is None:
             validate_inline_types(list(operations(ops)), None, step.get('retained', {}))
         validate_trim_step(step, plan['version'])
@@ -483,7 +486,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
             elif kind == 'array_declare':
                 for name in args['names']:
                     schema.setdefault(name, deepcopy(legacy_schema.get(name, 'number')))
-            elif kind == 'input_list':
+            elif kind in ('input_list', 'input_numeric'):
                 for name in args['names']:
                     if name in schema and column_type(schema[name]) != 'number':
                         raise ValueError('numeric INPUT cannot read a character variable')
@@ -892,7 +895,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                         if isinstance(v, str): return v.rstrip(' ')
                         return format(v, '.17g')
                     logs.append(' '.join(n + '=' + render(row.get(n)) for n in args['names']))
-                elif kind not in ('lookup', 'read', 'declare', 'array_declare', 'input_list', 'projection', 'numeric_profile'):
+                elif kind not in ('lookup', 'read', 'declare', 'array_declare', 'input_list', 'input_numeric', 'projection', 'numeric_profile'):
                     raise ValueError(f'unsupported operation: {kind}')
                 return True
 

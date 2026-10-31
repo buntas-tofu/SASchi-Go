@@ -104,17 +104,18 @@
   "binary64_update": "DS-049/050/051 record separate rounded arithmetic, elementary function and inferred logical text policies. Function/format universes remain null. No live SAS or exact BEST12 claim.",
   "numeric_rows_update": "DS-052/053 extend bounded source evidence on seven already-GATED SET/projection/PUT entries. Existing dispositions, rollups, histories, reference universes and earlier gate evidence are preserved. No new whole-program proof or live SAS claim.",
   "sql_create_update": "SQL-004 adds one bounded descriptor-only PROC SQL CREATE TABLE source/backend profile. The PROC reference universe remains unenumerated; existing148 statement/data-set-option entries,dispositions,rollups and gate evidence are unchanged. No whole-SAS percentage or broader PROC SQL claim.",
-  "numeric_pipeline_update": "DS-054..057 append bounded composition evidence to already-GATED entries only; all universes, dispositions and rollups remain unchanged. See docs/NUMERIC_PIPELINES.md."
+  "numeric_pipeline_update": "DS-054..057 append bounded composition evidence to already-GATED entries only; all universes, dispositions and rollups remain unchanged. See docs/NUMERIC_PIPELINES.md.",
+  "inline_csv_update": "DS-058/059 promote only INFILE Statement from UNASSESSED to the bounded numeric inline source-execution subset. Four already-GATED INPUT/CARDS/DATALINES entries gain scoped evidence. All document universes and prior evidence remain unchanged; no general CSV or complete external-program promotion."
  },
  "rollup": {
   "stmt": {
    "universe": 108,
-   "assessed": 36,
-   "gated": 28,
+   "assessed": 37,
+   "gated": 29,
    "rule": 5,
    "human_review": 1,
    "out_of_scope": 2,
-   "unassessed": 72
+   "unassessed": 71
   },
   "dso": {
    "universe": 40,
@@ -350,14 +351,19 @@
    "rule_ids": [
     "DS-044",
     "DS-054",
-    "DS-057"
+    "DS-057",
+    "DS-058",
+    "DS-059"
    ],
    "gates": [
     "input-list",
     "suite-input-list",
     "pipeline-input",
     "numeric-pipeline",
-    "suite-numeric-pipeline"
+    "suite-numeric-pipeline",
+    "inline-csv",
+    "input-ranges",
+    "suite-numeric-input"
    ],
    "reference_page": 47,
    "assessment_history": [
@@ -385,6 +391,15 @@
       "suite-numeric-pipeline"
      ],
      "scope": "DS-054..057 separately marked binary64-pipeline-v1 composition. Existing converter, exact controls, resource/text limits and old markers remain. Full original measurement stream and independent base R prove bounded state/snapshots; no live SAS or new complete external-program claim."
+    },
+    {
+     "level": "source-execution",
+     "gates": [
+      "inline-csv",
+      "input-ranges",
+      "suite-numeric-input"
+     ],
+     "scope": "DS-058/059 numeric-inline-v1 input_numeric: bounded comma DLM/FIRSTOBS and INPUT-only numbered ranges, unchanged exact converter/physical limits/scalar state. Complete original20-language-statement/two-opaque-block/5-read/7-snapshot independent base-R witness and emitted/CLI comparisons. No DSD, quoted/general CSV, external I/O or numerical pipeline composition."
     }
    ]
   },
@@ -477,14 +492,19 @@
    "rule_ids": [
     "DS-044",
     "DS-054",
-    "DS-057"
+    "DS-057",
+    "DS-058",
+    "DS-059"
    ],
    "gates": [
     "input-list",
     "suite-input-list",
     "pipeline-input",
     "numeric-pipeline",
-    "suite-numeric-pipeline"
+    "suite-numeric-pipeline",
+    "inline-csv",
+    "input-ranges",
+    "suite-numeric-input"
    ],
    "reference_page": 61,
    "assessment_history": [
@@ -512,6 +532,15 @@
       "suite-numeric-pipeline"
      ],
      "scope": "DS-054..057 separately marked binary64-pipeline-v1 composition. Existing converter, exact controls, resource/text limits and old markers remain. Full original measurement stream and independent base R prove bounded state/snapshots; no live SAS or new complete external-program claim."
+    },
+    {
+     "level": "source-execution",
+     "gates": [
+      "inline-csv",
+      "input-ranges",
+      "suite-numeric-input"
+     ],
+     "scope": "DS-058/059 numeric-inline-v1 input_numeric: bounded comma DLM/FIRSTOBS and INPUT-only numbered ranges, unchanged exact converter/physical limits/scalar state. Complete original20-language-statement/two-opaque-block/5-read/7-snapshot independent base-R witness and emitted/CLI comparisons. No DSD, quoted/general CSV, external I/O or numerical pipeline composition."
     }
    ]
   },
@@ -1183,10 +1212,34 @@
    "category": "File-Handling",
    "type": "Executable",
    "valid_in": "DATA Step",
-   "disposition": "UNASSESSED",
-   "rule_ids": [],
-   "gates": [],
-   "reference_page": 122
+   "disposition": "GATED",
+   "rule_ids": [
+    "DS-058"
+   ],
+   "gates": [
+    "inline-csv",
+    "suite-numeric-input"
+   ],
+   "reference_page": 122,
+   "assessment_history": [
+    {
+     "previous_disposition": "UNASSESSED",
+     "previous_gates": [],
+     "previous_rule_ids": [],
+     "disposition": "GATED",
+     "reason": "DS-058 executes only numeric inline comma DLM/FIRSTOBS; wider INFILE syntax remains unassessed."
+    }
+   ],
+   "gate_evidence": [
+    {
+     "level": "source-execution",
+     "gates": [
+      "inline-csv",
+      "suite-numeric-input"
+     ],
+     "scope": "DS-058/059 numeric-inline-v1 input_numeric: bounded comma DLM/FIRSTOBS and INPUT-only numbered ranges, unchanged exact converter/physical limits/scalar state. Complete original20-language-statement/two-opaque-block/5-read/7-snapshot independent base-R witness and emitted/CLI comparisons. No DSD, quoted/general CSV, external I/O or numerical pipeline composition."
+    }
+   ]
   },
   {
    "entry": "INFORMAT Statement",
@@ -1209,14 +1262,19 @@
    "rule_ids": [
     "DS-044",
     "DS-054",
-    "DS-057"
+    "DS-057",
+    "DS-058",
+    "DS-059"
    ],
    "gates": [
     "input-list",
     "suite-input-list",
     "pipeline-input",
     "numeric-pipeline",
-    "suite-numeric-pipeline"
+    "suite-numeric-pipeline",
+    "inline-csv",
+    "input-ranges",
+    "suite-numeric-input"
    ],
    "reference_page": 165,
    "assessment_history": [
@@ -1244,6 +1302,15 @@
       "suite-numeric-pipeline"
      ],
      "scope": "DS-054..057 separately marked binary64-pipeline-v1 composition. Existing converter, exact controls, resource/text limits and old markers remain. Full original measurement stream and independent base R prove bounded state/snapshots; no live SAS or new complete external-program claim."
+    },
+    {
+     "level": "source-execution",
+     "gates": [
+      "inline-csv",
+      "input-ranges",
+      "suite-numeric-input"
+     ],
+     "scope": "DS-058/059 numeric-inline-v1 input_numeric: bounded comma DLM/FIRSTOBS and INPUT-only numbered ranges, unchanged exact converter/physical limits/scalar state. Complete original20-language-statement/two-opaque-block/5-read/7-snapshot independent base-R witness and emitted/CLI comparisons. No DSD, quoted/general CSV, external I/O or numerical pipeline composition."
     }
    ]
   },
@@ -1279,14 +1346,19 @@
    "rule_ids": [
     "DS-044",
     "DS-054",
-    "DS-057"
+    "DS-057",
+    "DS-058",
+    "DS-059"
    ],
    "gates": [
     "input-list",
     "suite-input-list",
     "pipeline-input",
     "numeric-pipeline",
-    "suite-numeric-pipeline"
+    "suite-numeric-pipeline",
+    "inline-csv",
+    "input-ranges",
+    "suite-numeric-input"
    ],
    "reference_page": 192,
    "assessment_history": [
@@ -1314,6 +1386,15 @@
       "suite-numeric-pipeline"
      ],
      "scope": "DS-054..057 separately marked binary64-pipeline-v1 composition. Existing converter, exact controls, resource/text limits and old markers remain. Full original measurement stream and independent base R prove bounded state/snapshots; no live SAS or new complete external-program claim."
+    },
+    {
+     "level": "source-execution",
+     "gates": [
+      "inline-csv",
+      "input-ranges",
+      "suite-numeric-input"
+     ],
+     "scope": "DS-058/059 numeric-inline-v1 input_numeric: bounded comma DLM/FIRSTOBS and INPUT-only numbered ranges, unchanged exact converter/physical limits/scalar state. Complete original20-language-statement/two-opaque-block/5-read/7-snapshot independent base-R witness and emitted/CLI comparisons. No DSD, quoted/general CSV, external I/O or numerical pipeline composition."
     }
    ]
   },
@@ -2969,6 +3050,21 @@
      "previous_rule_ids": [],
      "disposition": "GATED",
      "reason": "The bare RUN step terminator is compiled in data-events and suite-plan; no interactive RUN variants are claimed."
+    }
+   ]
+  },
+  {
+   "date": "2026-10-30",
+   "baseline": "c3485ccc70abf6bc0de26065308a42d45e4fa397",
+   "changes": [
+    {
+     "document": "stmt",
+     "entry": "INFILE Statement",
+     "previous_disposition": "UNASSESSED",
+     "previous_gates": [],
+     "previous_rule_ids": [],
+     "disposition": "GATED",
+     "reason": "DS-058 executes only numeric inline comma DLM/FIRSTOBS; wider INFILE syntax remains unassessed."
     }
    ]
   }
