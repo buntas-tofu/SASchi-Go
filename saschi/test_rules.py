@@ -26,8 +26,8 @@ class LoaderTests(unittest.TestCase):
     def setUp(self):
         self.rules = load_rulebook(REPO_ROOT / "docs" / "sasconversionrulebook.json")
 
-    def test_rule_count_is_97(self):
-        self.assertEqual(len(self.rules), 97)
+    def test_rule_count_is_99(self):
+        self.assertEqual(len(self.rules), 99)
         self.assertIn(f"rulebook. {len(self.rules)} rules", (REPO_ROOT / "README.md").read_text())
         self.assertIn('verify_multiply.py',self.rules['DS-045'].validation_test)
         self.assertIn('verify_numeric_discovery.py',self.rules['DS-046'].validation_test)
@@ -42,6 +42,8 @@ class LoaderTests(unittest.TestCase):
         self.assertIn('verify_input_ranges.py', self.rules['DS-059'].validation_test)
         self.assertIn('verify_grouped_control.py', self.rules['DS-060'].validation_test)
         self.assertIn('verify_loop_transfer.py', self.rules['DS-061'].validation_test)
+        self.assertIn('verify_numeric_ranges.py', self.rules['DS-062'].validation_test)
+        self.assertIn('verify_numeric_exchange.py', self.rules['DS-063'].validation_test)
         for rid, verifier in (('DS-054','verify_pipeline_input.py'),('DS-055','verify_pipeline_arrays.py'),('DS-056','verify_pipeline_loops.py'),('DS-057','verify_numeric_pipeline.py')):
             self.assertIn(verifier, self.rules[rid].validation_test)
 
@@ -51,7 +53,7 @@ class LoaderTests(unittest.TestCase):
 
     def test_family_counts(self):
         counts = family_counts(self.rules)
-        self.assertEqual(counts["DS"], 61)
+        self.assertEqual(counts["DS"], 63)
         self.assertEqual(counts["SQL"], 4)
         self.assertEqual(counts["ST"], 16)
         self.assertEqual(counts["SV"], 6)

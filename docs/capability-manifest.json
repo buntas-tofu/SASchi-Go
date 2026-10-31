@@ -106,17 +106,18 @@
   "sql_create_update": "SQL-004 adds one bounded descriptor-only PROC SQL CREATE TABLE source/backend profile. The PROC reference universe remains unenumerated; existing148 statement/data-set-option entries,dispositions,rollups and gate evidence are unchanged. No whole-SAS percentage or broader PROC SQL claim.",
   "numeric_pipeline_update": "DS-054..057 append bounded composition evidence to already-GATED entries only; all universes, dispositions and rollups remain unchanged. See docs/NUMERIC_PIPELINES.md.",
   "inline_csv_update": "DS-058/059 promote only INFILE Statement from UNASSESSED to the bounded numeric inline source-execution subset. Four already-GATED INPUT/CARDS/DATALINES entries gain scoped evidence. All document universes and prior evidence remain unchanged; no general CSV or complete external-program promotion.",
-  "grouped_control_update": "DS-060/061 promote exactly DO/LEAVE/CONTINUE statements for the separately marked bounded integer control_data slice, preserving prior assessments and all148 reference entries. Other already-GATED state/output/loop entries gain bounded composition evidence. No whole-corpus unlock, physical-log or live-SAS claim."
+  "grouped_control_update": "DS-060/061 promote exactly DO/LEAVE/CONTINUE statements for the separately marked bounded integer control_data slice, preserving prior assessments and all148 reference entries. Other already-GATED state/output/loop entries gain bounded composition evidence. No whole-corpus unlock, physical-log or live-SAS claim.",
+  "numeric_exchange_update": "DS-062/063 promote only FILE Statement for the literal caller-rooted CSV export subset; seven already-GATED input/output entries gain additive evidence. All148 identities/universes/prior assessments remain. Complete unchanged CSV-program source/R/byte/publication proof under explicit ASCII-LF/open policy, not physical SAS defaults."
  },
  "rollup": {
   "stmt": {
    "universe": 108,
-   "assessed": 40,
-   "gated": 32,
+   "assessed": 41,
+   "gated": 33,
    "rule": 5,
    "human_review": 1,
    "out_of_scope": 2,
-   "unassessed": 68
+   "unassessed": 67
   },
   "dso": {
    "universe": 40,
@@ -354,7 +355,9 @@
     "DS-054",
     "DS-057",
     "DS-058",
-    "DS-059"
+    "DS-059",
+    "DS-062",
+    "DS-063"
    ],
    "gates": [
     "input-list",
@@ -364,7 +367,10 @@
     "suite-numeric-pipeline",
     "inline-csv",
     "input-ranges",
-    "suite-numeric-input"
+    "suite-numeric-input",
+    "numeric-ranges",
+    "csv-export",
+    "suite-numeric-exchange"
    ],
    "reference_page": 47,
    "assessment_history": [
@@ -372,6 +378,91 @@
      "date": "2026-10-29",
      "prior_disposition": "UNASSESSED",
      "basis": "DS-044 bounded source execution and independent base-R witness; broader forms remain unassessed."
+    },
+    {
+     "date": "2026-10-31",
+     "previous_disposition": "GATED",
+     "previous_rule_ids": [
+      "DS-044",
+      "DS-054",
+      "DS-057",
+      "DS-058",
+      "DS-059"
+     ],
+     "previous_gates": [
+      "input-list",
+      "suite-input-list",
+      "pipeline-input",
+      "numeric-pipeline",
+      "suite-numeric-pipeline",
+      "inline-csv",
+      "input-ranges",
+      "suite-numeric-input"
+     ],
+     "disposition": "GATED",
+     "reason": "DS-062/063 separately marked bounded numeric exchange evidence; wider FILE/list/input forms remain unassessed.",
+     "previous_entry": {
+      "entry": "CARDS Statement",
+      "document": "stmt",
+      "category": "File-Handling",
+      "type": "Declarative",
+      "valid_in": "DATA step",
+      "disposition": "GATED",
+      "rule_ids": [
+       "DS-044",
+       "DS-054",
+       "DS-057",
+       "DS-058",
+       "DS-059"
+      ],
+      "gates": [
+       "input-list",
+       "suite-input-list",
+       "pipeline-input",
+       "numeric-pipeline",
+       "suite-numeric-pipeline",
+       "inline-csv",
+       "input-ranges",
+       "suite-numeric-input"
+      ],
+      "reference_page": 47,
+      "assessment_history": [
+       {
+        "date": "2026-10-29",
+        "prior_disposition": "UNASSESSED",
+        "basis": "DS-044 bounded source execution and independent base-R witness; broader forms remain unassessed."
+       }
+      ],
+      "note": "Bounded numeric inline list-input subset only. See docs/INPUT_LIST.md. Other input forms and physical SAS log validation remain outstanding.",
+      "gate_evidence": [
+       {
+        "level": "source-execution",
+        "gates": [
+         "input-list",
+         "suite-input-list"
+        ],
+        "scope": "DS-044 first top-level numeric list INPUT, opaque CARDS/DATALINES, FLOWOVER/release/EOF, bounded exact numeric conversion and scalar DATA state/output; complete integer_comparison.sas proof. No live SAS."
+       },
+       {
+        "level": "source-execution",
+        "gates": [
+         "pipeline-input",
+         "numeric-pipeline",
+         "suite-numeric-pipeline"
+        ],
+        "scope": "DS-054..057 separately marked binary64-pipeline-v1 composition. Existing converter, exact controls, resource/text limits and old markers remain. Full original measurement stream and independent base R prove bounded state/snapshots; no live SAS or new complete external-program claim."
+       },
+       {
+        "level": "source-execution",
+        "gates": [
+         "inline-csv",
+         "input-ranges",
+         "suite-numeric-input"
+        ],
+        "scope": "DS-058/059 numeric-inline-v1 input_numeric: bounded comma DLM/FIRSTOBS and INPUT-only numbered ranges, unchanged exact converter/physical limits/scalar state. Complete original20-language-statement/two-opaque-block/5-read/7-snapshot independent base-R witness and emitted/CLI comparisons. No DSD, quoted/general CSV, external I/O or numerical pipeline composition."
+       }
+      ]
+     }
     }
    ],
    "note": "Bounded numeric inline list-input subset only. See docs/INPUT_LIST.md. Other input forms and physical SAS log validation remain outstanding.",
@@ -401,6 +492,15 @@
       "suite-numeric-input"
      ],
      "scope": "DS-058/059 numeric-inline-v1 input_numeric: bounded comma DLM/FIRSTOBS and INPUT-only numbered ranges, unchanged exact converter/physical limits/scalar state. Complete original20-language-statement/two-opaque-block/5-read/7-snapshot independent base-R witness and emitted/CLI comparisons. No DSD, quoted/general CSV, external I/O or numerical pipeline composition."
+    },
+    {
+     "level": "source-execution",
+     "gates": [
+      "numeric-ranges",
+      "csv-export",
+      "suite-numeric-exchange"
+     ],
+     "scope": "DS-062/063 bounded-numeric-exchange-v1 exchange_data: numeric SUM OF/PUT ranges and one literal comma FILE buffer. Existing exact input/numeric/missing policies, separate ASCII-LF byte/open policy, complete first-party and unchanged CSV-program base-R/source/runtime/emitted/actual-CLI proofs, exact export comparator and staged success-only publication. No supplied-catalog R transport, general CSV, arbitrary host paths, formats or live SAS."
     }
    ]
   },
@@ -511,7 +611,9 @@
     "DS-054",
     "DS-057",
     "DS-058",
-    "DS-059"
+    "DS-059",
+    "DS-062",
+    "DS-063"
    ],
    "gates": [
     "input-list",
@@ -521,7 +623,10 @@
     "suite-numeric-pipeline",
     "inline-csv",
     "input-ranges",
-    "suite-numeric-input"
+    "suite-numeric-input",
+    "numeric-ranges",
+    "csv-export",
+    "suite-numeric-exchange"
    ],
    "reference_page": 61,
    "assessment_history": [
@@ -529,6 +634,91 @@
      "date": "2026-10-29",
      "prior_disposition": "UNASSESSED",
      "basis": "DS-044 bounded source execution and independent base-R witness; broader forms remain unassessed."
+    },
+    {
+     "date": "2026-10-31",
+     "previous_disposition": "GATED",
+     "previous_rule_ids": [
+      "DS-044",
+      "DS-054",
+      "DS-057",
+      "DS-058",
+      "DS-059"
+     ],
+     "previous_gates": [
+      "input-list",
+      "suite-input-list",
+      "pipeline-input",
+      "numeric-pipeline",
+      "suite-numeric-pipeline",
+      "inline-csv",
+      "input-ranges",
+      "suite-numeric-input"
+     ],
+     "disposition": "GATED",
+     "reason": "DS-062/063 separately marked bounded numeric exchange evidence; wider FILE/list/input forms remain unassessed.",
+     "previous_entry": {
+      "entry": "DATALINES Statement",
+      "document": "stmt",
+      "category": "File-Handling",
+      "type": "Declarative",
+      "valid_in": "DATA step",
+      "disposition": "GATED",
+      "rule_ids": [
+       "DS-044",
+       "DS-054",
+       "DS-057",
+       "DS-058",
+       "DS-059"
+      ],
+      "gates": [
+       "input-list",
+       "suite-input-list",
+       "pipeline-input",
+       "numeric-pipeline",
+       "suite-numeric-pipeline",
+       "inline-csv",
+       "input-ranges",
+       "suite-numeric-input"
+      ],
+      "reference_page": 61,
+      "assessment_history": [
+       {
+        "date": "2026-10-29",
+        "prior_disposition": "UNASSESSED",
+        "basis": "DS-044 bounded source execution and independent base-R witness; broader forms remain unassessed."
+       }
+      ],
+      "note": "Bounded numeric inline list-input subset only. See docs/INPUT_LIST.md. Other input forms and physical SAS log validation remain outstanding.",
+      "gate_evidence": [
+       {
+        "level": "source-execution",
+        "gates": [
+         "input-list",
+         "suite-input-list"
+        ],
+        "scope": "DS-044 first top-level numeric list INPUT, opaque CARDS/DATALINES, FLOWOVER/release/EOF, bounded exact numeric conversion and scalar DATA state/output; complete integer_comparison.sas proof. No live SAS."
+       },
+       {
+        "level": "source-execution",
+        "gates": [
+         "pipeline-input",
+         "numeric-pipeline",
+         "suite-numeric-pipeline"
+        ],
+        "scope": "DS-054..057 separately marked binary64-pipeline-v1 composition. Existing converter, exact controls, resource/text limits and old markers remain. Full original measurement stream and independent base R prove bounded state/snapshots; no live SAS or new complete external-program claim."
+       },
+       {
+        "level": "source-execution",
+        "gates": [
+         "inline-csv",
+         "input-ranges",
+         "suite-numeric-input"
+        ],
+        "scope": "DS-058/059 numeric-inline-v1 input_numeric: bounded comma DLM/FIRSTOBS and INPUT-only numbered ranges, unchanged exact converter/physical limits/scalar state. Complete original20-language-statement/two-opaque-block/5-read/7-snapshot independent base-R witness and emitted/CLI comparisons. No DSD, quoted/general CSV, external I/O or numerical pipeline composition."
+       }
+      ]
+     }
     }
    ],
    "note": "Bounded numeric inline list-input subset only. See docs/INPUT_LIST.md. Other input forms and physical SAS log validation remain outstanding.",
@@ -558,6 +748,15 @@
       "suite-numeric-input"
      ],
      "scope": "DS-058/059 numeric-inline-v1 input_numeric: bounded comma DLM/FIRSTOBS and INPUT-only numbered ranges, unchanged exact converter/physical limits/scalar state. Complete original20-language-statement/two-opaque-block/5-read/7-snapshot independent base-R witness and emitted/CLI comparisons. No DSD, quoted/general CSV, external I/O or numerical pipeline composition."
+    },
+    {
+     "level": "source-execution",
+     "gates": [
+      "numeric-ranges",
+      "csv-export",
+      "suite-numeric-exchange"
+     ],
+     "scope": "DS-062/063 bounded-numeric-exchange-v1 exchange_data: numeric SUM OF/PUT ranges and one literal comma FILE buffer. Existing exact input/numeric/missing policies, separate ASCII-LF byte/open policy, complete first-party and unchanged CSV-program base-R/source/runtime/emitted/actual-CLI proofs, exact export comparator and staged success-only publication. No supplied-catalog R transport, general CSV, arbitrary host paths, formats or live SAS."
     }
    ]
   },
@@ -1016,10 +1215,46 @@
    "category": "CAS",
    "type": "Executable",
    "valid_in": "DATA step",
-   "disposition": "UNASSESSED",
-   "rule_ids": [],
-   "gates": [],
-   "reference_page": 85
+   "disposition": "GATED",
+   "rule_ids": [
+    "DS-063"
+   ],
+   "gates": [
+    "csv-export",
+    "suite-numeric-exchange"
+   ],
+   "reference_page": 85,
+   "gate_evidence": [
+    {
+     "level": "source-execution",
+     "gates": [
+      "csv-export",
+      "suite-numeric-exchange"
+     ],
+     "scope": "DS-062/063 bounded-numeric-exchange-v1 exchange_data: numeric SUM OF/PUT ranges and one literal comma FILE buffer. Existing exact input/numeric/missing policies, separate ASCII-LF byte/open policy, complete first-party and unchanged CSV-program base-R/source/runtime/emitted/actual-CLI proofs, exact export comparator and staged success-only publication. No supplied-catalog R transport, general CSV, arbitrary host paths, formats or live SAS."
+    }
+   ],
+   "assessment_history": [
+    {
+     "date": "2026-10-31",
+     "previous_disposition": "UNASSESSED",
+     "previous_rule_ids": [],
+     "previous_gates": [],
+     "disposition": "GATED",
+     "reason": "DS-062/063 separately marked bounded numeric exchange evidence; wider FILE/list/input forms remain unassessed.",
+     "previous_entry": {
+      "entry": "FILE Statement",
+      "document": "stmt",
+      "category": "CAS",
+      "type": "Executable",
+      "valid_in": "DATA step",
+      "disposition": "UNASSESSED",
+      "rule_ids": [],
+      "gates": [],
+      "reference_page": 85
+     }
+    }
+   ]
   },
   {
    "entry": "FILENAME Statement",
@@ -1329,11 +1564,16 @@
    "valid_in": "DATA Step",
    "disposition": "GATED",
    "rule_ids": [
-    "DS-058"
+    "DS-058",
+    "DS-062",
+    "DS-063"
    ],
    "gates": [
     "inline-csv",
-    "suite-numeric-input"
+    "suite-numeric-input",
+    "numeric-ranges",
+    "csv-export",
+    "suite-numeric-exchange"
    ],
    "reference_page": 122,
    "assessment_history": [
@@ -1343,6 +1583,54 @@
      "previous_rule_ids": [],
      "disposition": "GATED",
      "reason": "DS-058 executes only numeric inline comma DLM/FIRSTOBS; wider INFILE syntax remains unassessed."
+    },
+    {
+     "date": "2026-10-31",
+     "previous_disposition": "GATED",
+     "previous_rule_ids": [
+      "DS-058"
+     ],
+     "previous_gates": [
+      "inline-csv",
+      "suite-numeric-input"
+     ],
+     "disposition": "GATED",
+     "reason": "DS-062/063 separately marked bounded numeric exchange evidence; wider FILE/list/input forms remain unassessed.",
+     "previous_entry": {
+      "entry": "INFILE Statement",
+      "document": "stmt",
+      "category": "File-Handling",
+      "type": "Executable",
+      "valid_in": "DATA Step",
+      "disposition": "GATED",
+      "rule_ids": [
+       "DS-058"
+      ],
+      "gates": [
+       "inline-csv",
+       "suite-numeric-input"
+      ],
+      "reference_page": 122,
+      "assessment_history": [
+       {
+        "previous_disposition": "UNASSESSED",
+        "previous_gates": [],
+        "previous_rule_ids": [],
+        "disposition": "GATED",
+        "reason": "DS-058 executes only numeric inline comma DLM/FIRSTOBS; wider INFILE syntax remains unassessed."
+       }
+      ],
+      "gate_evidence": [
+       {
+        "level": "source-execution",
+        "gates": [
+         "inline-csv",
+         "suite-numeric-input"
+        ],
+        "scope": "DS-058/059 numeric-inline-v1 input_numeric: bounded comma DLM/FIRSTOBS and INPUT-only numbered ranges, unchanged exact converter/physical limits/scalar state. Complete original20-language-statement/two-opaque-block/5-read/7-snapshot independent base-R witness and emitted/CLI comparisons. No DSD, quoted/general CSV, external I/O or numerical pipeline composition."
+       }
+      ]
+     }
     }
    ],
    "gate_evidence": [
@@ -1353,6 +1641,15 @@
       "suite-numeric-input"
      ],
      "scope": "DS-058/059 numeric-inline-v1 input_numeric: bounded comma DLM/FIRSTOBS and INPUT-only numbered ranges, unchanged exact converter/physical limits/scalar state. Complete original20-language-statement/two-opaque-block/5-read/7-snapshot independent base-R witness and emitted/CLI comparisons. No DSD, quoted/general CSV, external I/O or numerical pipeline composition."
+    },
+    {
+     "level": "source-execution",
+     "gates": [
+      "numeric-ranges",
+      "csv-export",
+      "suite-numeric-exchange"
+     ],
+     "scope": "DS-062/063 bounded-numeric-exchange-v1 exchange_data: numeric SUM OF/PUT ranges and one literal comma FILE buffer. Existing exact input/numeric/missing policies, separate ASCII-LF byte/open policy, complete first-party and unchanged CSV-program base-R/source/runtime/emitted/actual-CLI proofs, exact export comparator and staged success-only publication. No supplied-catalog R transport, general CSV, arbitrary host paths, formats or live SAS."
     }
    ]
   },
@@ -1379,7 +1676,9 @@
     "DS-054",
     "DS-057",
     "DS-058",
-    "DS-059"
+    "DS-059",
+    "DS-062",
+    "DS-063"
    ],
    "gates": [
     "input-list",
@@ -1389,7 +1688,10 @@
     "suite-numeric-pipeline",
     "inline-csv",
     "input-ranges",
-    "suite-numeric-input"
+    "suite-numeric-input",
+    "numeric-ranges",
+    "csv-export",
+    "suite-numeric-exchange"
    ],
    "reference_page": 165,
    "assessment_history": [
@@ -1397,6 +1699,91 @@
      "date": "2026-10-29",
      "prior_disposition": "UNASSESSED",
      "basis": "DS-044 bounded source execution and independent base-R witness; broader forms remain unassessed."
+    },
+    {
+     "date": "2026-10-31",
+     "previous_disposition": "GATED",
+     "previous_rule_ids": [
+      "DS-044",
+      "DS-054",
+      "DS-057",
+      "DS-058",
+      "DS-059"
+     ],
+     "previous_gates": [
+      "input-list",
+      "suite-input-list",
+      "pipeline-input",
+      "numeric-pipeline",
+      "suite-numeric-pipeline",
+      "inline-csv",
+      "input-ranges",
+      "suite-numeric-input"
+     ],
+     "disposition": "GATED",
+     "reason": "DS-062/063 separately marked bounded numeric exchange evidence; wider FILE/list/input forms remain unassessed.",
+     "previous_entry": {
+      "entry": "INPUT Statement",
+      "document": "stmt",
+      "category": "File-Handling",
+      "type": "Executable",
+      "valid_in": "DATA step",
+      "disposition": "GATED",
+      "rule_ids": [
+       "DS-044",
+       "DS-054",
+       "DS-057",
+       "DS-058",
+       "DS-059"
+      ],
+      "gates": [
+       "input-list",
+       "suite-input-list",
+       "pipeline-input",
+       "numeric-pipeline",
+       "suite-numeric-pipeline",
+       "inline-csv",
+       "input-ranges",
+       "suite-numeric-input"
+      ],
+      "reference_page": 165,
+      "assessment_history": [
+       {
+        "date": "2026-10-29",
+        "prior_disposition": "UNASSESSED",
+        "basis": "DS-044 bounded source execution and independent base-R witness; broader forms remain unassessed."
+       }
+      ],
+      "note": "Bounded numeric inline list-input subset only. See docs/INPUT_LIST.md. Other input forms and physical SAS log validation remain outstanding.",
+      "gate_evidence": [
+       {
+        "level": "source-execution",
+        "gates": [
+         "input-list",
+         "suite-input-list"
+        ],
+        "scope": "DS-044 first top-level numeric list INPUT, opaque CARDS/DATALINES, FLOWOVER/release/EOF, bounded exact numeric conversion and scalar DATA state/output; complete integer_comparison.sas proof. No live SAS."
+       },
+       {
+        "level": "source-execution",
+        "gates": [
+         "pipeline-input",
+         "numeric-pipeline",
+         "suite-numeric-pipeline"
+        ],
+        "scope": "DS-054..057 separately marked binary64-pipeline-v1 composition. Existing converter, exact controls, resource/text limits and old markers remain. Full original measurement stream and independent base R prove bounded state/snapshots; no live SAS or new complete external-program claim."
+       },
+       {
+        "level": "source-execution",
+        "gates": [
+         "inline-csv",
+         "input-ranges",
+         "suite-numeric-input"
+        ],
+        "scope": "DS-058/059 numeric-inline-v1 input_numeric: bounded comma DLM/FIRSTOBS and INPUT-only numbered ranges, unchanged exact converter/physical limits/scalar state. Complete original20-language-statement/two-opaque-block/5-read/7-snapshot independent base-R witness and emitted/CLI comparisons. No DSD, quoted/general CSV, external I/O or numerical pipeline composition."
+       }
+      ]
+     }
     }
    ],
    "note": "Bounded numeric inline list-input subset only. See docs/INPUT_LIST.md. Other input forms and physical SAS log validation remain outstanding.",
@@ -1426,6 +1813,15 @@
       "suite-numeric-input"
      ],
      "scope": "DS-058/059 numeric-inline-v1 input_numeric: bounded comma DLM/FIRSTOBS and INPUT-only numbered ranges, unchanged exact converter/physical limits/scalar state. Complete original20-language-statement/two-opaque-block/5-read/7-snapshot independent base-R witness and emitted/CLI comparisons. No DSD, quoted/general CSV, external I/O or numerical pipeline composition."
+    },
+    {
+     "level": "source-execution",
+     "gates": [
+      "numeric-ranges",
+      "csv-export",
+      "suite-numeric-exchange"
+     ],
+     "scope": "DS-062/063 bounded-numeric-exchange-v1 exchange_data: numeric SUM OF/PUT ranges and one literal comma FILE buffer. Existing exact input/numeric/missing policies, separate ASCII-LF byte/open policy, complete first-party and unchanged CSV-program base-R/source/runtime/emitted/actual-CLI proofs, exact export comparator and staged success-only publication. No supplied-catalog R transport, general CSV, arbitrary host paths, formats or live SAS."
     }
    ]
   },
@@ -1463,7 +1859,9 @@
     "DS-054",
     "DS-057",
     "DS-058",
-    "DS-059"
+    "DS-059",
+    "DS-062",
+    "DS-063"
    ],
    "gates": [
     "input-list",
@@ -1473,7 +1871,10 @@
     "suite-numeric-pipeline",
     "inline-csv",
     "input-ranges",
-    "suite-numeric-input"
+    "suite-numeric-input",
+    "numeric-ranges",
+    "csv-export",
+    "suite-numeric-exchange"
    ],
    "reference_page": 192,
    "assessment_history": [
@@ -1481,6 +1882,91 @@
      "date": "2026-10-29",
      "prior_disposition": "UNASSESSED",
      "basis": "DS-044 bounded source execution and independent base-R witness; broader forms remain unassessed."
+    },
+    {
+     "date": "2026-10-31",
+     "previous_disposition": "GATED",
+     "previous_rule_ids": [
+      "DS-044",
+      "DS-054",
+      "DS-057",
+      "DS-058",
+      "DS-059"
+     ],
+     "previous_gates": [
+      "input-list",
+      "suite-input-list",
+      "pipeline-input",
+      "numeric-pipeline",
+      "suite-numeric-pipeline",
+      "inline-csv",
+      "input-ranges",
+      "suite-numeric-input"
+     ],
+     "disposition": "GATED",
+     "reason": "DS-062/063 separately marked bounded numeric exchange evidence; wider FILE/list/input forms remain unassessed.",
+     "previous_entry": {
+      "entry": "INPUT Statement: List",
+      "document": "stmt",
+      "category": "File-Handling",
+      "type": "Executable",
+      "valid_in": "DATA step",
+      "disposition": "GATED",
+      "rule_ids": [
+       "DS-044",
+       "DS-054",
+       "DS-057",
+       "DS-058",
+       "DS-059"
+      ],
+      "gates": [
+       "input-list",
+       "suite-input-list",
+       "pipeline-input",
+       "numeric-pipeline",
+       "suite-numeric-pipeline",
+       "inline-csv",
+       "input-ranges",
+       "suite-numeric-input"
+      ],
+      "reference_page": 192,
+      "assessment_history": [
+       {
+        "date": "2026-10-29",
+        "prior_disposition": "UNASSESSED",
+        "basis": "DS-044 bounded source execution and independent base-R witness; broader forms remain unassessed."
+       }
+      ],
+      "note": "Bounded numeric inline list-input subset only. See docs/INPUT_LIST.md. Other input forms and physical SAS log validation remain outstanding.",
+      "gate_evidence": [
+       {
+        "level": "source-execution",
+        "gates": [
+         "input-list",
+         "suite-input-list"
+        ],
+        "scope": "DS-044 first top-level numeric list INPUT, opaque CARDS/DATALINES, FLOWOVER/release/EOF, bounded exact numeric conversion and scalar DATA state/output; complete integer_comparison.sas proof. No live SAS."
+       },
+       {
+        "level": "source-execution",
+        "gates": [
+         "pipeline-input",
+         "numeric-pipeline",
+         "suite-numeric-pipeline"
+        ],
+        "scope": "DS-054..057 separately marked binary64-pipeline-v1 composition. Existing converter, exact controls, resource/text limits and old markers remain. Full original measurement stream and independent base R prove bounded state/snapshots; no live SAS or new complete external-program claim."
+       },
+       {
+        "level": "source-execution",
+        "gates": [
+         "inline-csv",
+         "input-ranges",
+         "suite-numeric-input"
+        ],
+        "scope": "DS-058/059 numeric-inline-v1 input_numeric: bounded comma DLM/FIRSTOBS and INPUT-only numbered ranges, unchanged exact converter/physical limits/scalar state. Complete original20-language-statement/two-opaque-block/5-read/7-snapshot independent base-R witness and emitted/CLI comparisons. No DSD, quoted/general CSV, external I/O or numerical pipeline composition."
+       }
+      ]
+     }
     }
    ],
    "note": "Bounded numeric inline list-input subset only. See docs/INPUT_LIST.md. Other input forms and physical SAS log validation remain outstanding.",
@@ -1510,6 +1996,15 @@
       "suite-numeric-input"
      ],
      "scope": "DS-058/059 numeric-inline-v1 input_numeric: bounded comma DLM/FIRSTOBS and INPUT-only numbered ranges, unchanged exact converter/physical limits/scalar state. Complete original20-language-statement/two-opaque-block/5-read/7-snapshot independent base-R witness and emitted/CLI comparisons. No DSD, quoted/general CSV, external I/O or numerical pipeline composition."
+    },
+    {
+     "level": "source-execution",
+     "gates": [
+      "numeric-ranges",
+      "csv-export",
+      "suite-numeric-exchange"
+     ],
+     "scope": "DS-062/063 bounded-numeric-exchange-v1 exchange_data: numeric SUM OF/PUT ranges and one literal comma FILE buffer. Existing exact input/numeric/missing policies, separate ASCII-LF byte/open policy, complete first-party and unchanged CSV-program base-R/source/runtime/emitted/actual-CLI proofs, exact export comparator and staged success-only publication. No supplied-catalog R transport, general CSV, arbitrary host paths, formats or live SAS."
     }
    ]
   },
@@ -1970,7 +2465,9 @@
     "DS-053",
     "DS-057",
     "DS-060",
-    "DS-061"
+    "DS-061",
+    "DS-062",
+    "DS-063"
    ],
    "gates": [
     "put-literal",
@@ -1992,7 +2489,10 @@
     "suite-numeric-pipeline",
     "grouped-do",
     "loop-transfer",
-    "suite-grouped-control"
+    "suite-grouped-control",
+    "numeric-ranges",
+    "csv-export",
+    "suite-numeric-exchange"
    ],
    "reference_page": 265,
    "note": "Bounded logical records of quoted literals and ordinary unformatted nonblank character variables: printable ASCII, at most 64 columns including variable separators, documented spacing and quote decoding. Blank fields, numeric output, attached formats, special controls, literal adjacency/comment-only separation, FILE, pointers, macros, and C++ require review. Named-list output has a separate entry. DS-025 adds bounded scalar PUT _ALL_: ordered named PDV fields, ordinary numeric missing and conservative BEST12 integers, _ERROR_=0 and _N_=1. No general error-flag or physical SAS log equivalence. DS-027 separately gates source-order known numeric variables: ordinary missing and finite integers with magnitude at most 99999999999, one following separator per field, at most 64 logical columns. Types and attached formats are validated even on empty or filtered SET input; mixed numeric items, unknown/descriptor-only variables, fractions, special missing output, formats, controls, and C++ retain refusals. DS-042 separately gates literal/known numeric-variable mixtures in DATA, simple IF and counted loops. Preserve literal blanks and numeric following separators, ordinary missing and bounded integers within64 logical columns. See docs/MIXED_PUT.md; other profiles retain their contracts. DS-046 separately gates output-only ordinary numeric discovery for catalog-free DATA numeric-list PUT; prior output contracts remain separate. See docs/NUMERIC_COMPOSITION.md. DS-052/053 add the separately gated rounded numeric row/projection composition in docs/NUMERIC_ROWS.md.",
@@ -2052,6 +2552,161 @@
       "suite-grouped-control"
      ],
      "scope": "Separate bounded-control-v1 integer control_data composition. Earlier profile admission/value/text contracts are preserved; groups/transfers, static empty discovery and atomic state/OUTPUT/SET/PUT behavior are separately validated. No new numeric helpers or live-SAS claim."
+    },
+    {
+     "level": "source-execution",
+     "gates": [
+      "numeric-ranges",
+      "csv-export",
+      "suite-numeric-exchange"
+     ],
+     "scope": "DS-062/063 bounded-numeric-exchange-v1 exchange_data: numeric SUM OF/PUT ranges and one literal comma FILE buffer. Existing exact input/numeric/missing policies, separate ASCII-LF byte/open policy, complete first-party and unchanged CSV-program base-R/source/runtime/emitted/actual-CLI proofs, exact export comparator and staged success-only publication. No supplied-catalog R transport, general CSV, arbitrary host paths, formats or live SAS."
+    }
+   ],
+   "assessment_history": [
+    {
+     "date": "2026-10-31",
+     "previous_disposition": "GATED",
+     "previous_rule_ids": [
+      "DS-023",
+      "DS-024",
+      "DS-025",
+      "DS-027",
+      "DS-042",
+      "DS-046",
+      "DS-052",
+      "DS-053",
+      "DS-057",
+      "DS-060",
+      "DS-061"
+     ],
+     "previous_gates": [
+      "put-literal",
+      "suite-put",
+      "put-character-list",
+      "suite-put-list",
+      "put-all",
+      "suite-put-all",
+      "put-numeric-list",
+      "suite-put-numeric",
+      "put-mixed-numeric",
+      "suite-put-mixed-numeric",
+      "numeric-discovery",
+      "suite-numeric-composition",
+      "numeric-projection",
+      "numeric-set",
+      "suite-numeric-rows",
+      "numeric-pipeline",
+      "suite-numeric-pipeline",
+      "grouped-do",
+      "loop-transfer",
+      "suite-grouped-control"
+     ],
+     "disposition": "GATED",
+     "reason": "DS-062/063 separately marked bounded numeric exchange evidence; wider FILE/list/input forms remain unassessed.",
+     "previous_entry": {
+      "entry": "PUT Statement",
+      "document": "stmt",
+      "category": "CAS",
+      "type": "Executable",
+      "valid_in": "DATA step",
+      "disposition": "GATED",
+      "rule_ids": [
+       "DS-023",
+       "DS-024",
+       "DS-025",
+       "DS-027",
+       "DS-042",
+       "DS-046",
+       "DS-052",
+       "DS-053",
+       "DS-057",
+       "DS-060",
+       "DS-061"
+      ],
+      "gates": [
+       "put-literal",
+       "suite-put",
+       "put-character-list",
+       "suite-put-list",
+       "put-all",
+       "suite-put-all",
+       "put-numeric-list",
+       "suite-put-numeric",
+       "put-mixed-numeric",
+       "suite-put-mixed-numeric",
+       "numeric-discovery",
+       "suite-numeric-composition",
+       "numeric-projection",
+       "numeric-set",
+       "suite-numeric-rows",
+       "numeric-pipeline",
+       "suite-numeric-pipeline",
+       "grouped-do",
+       "loop-transfer",
+       "suite-grouped-control"
+      ],
+      "reference_page": 265,
+      "note": "Bounded logical records of quoted literals and ordinary unformatted nonblank character variables: printable ASCII, at most 64 columns including variable separators, documented spacing and quote decoding. Blank fields, numeric output, attached formats, special controls, literal adjacency/comment-only separation, FILE, pointers, macros, and C++ require review. Named-list output has a separate entry. DS-025 adds bounded scalar PUT _ALL_: ordered named PDV fields, ordinary numeric missing and conservative BEST12 integers, _ERROR_=0 and _N_=1. No general error-flag or physical SAS log equivalence. DS-027 separately gates source-order known numeric variables: ordinary missing and finite integers with magnitude at most 99999999999, one following separator per field, at most 64 logical columns. Types and attached formats are validated even on empty or filtered SET input; mixed numeric items, unknown/descriptor-only variables, fractions, special missing output, formats, controls, and C++ retain refusals. DS-042 separately gates literal/known numeric-variable mixtures in DATA, simple IF and counted loops. Preserve literal blanks and numeric following separators, ordinary missing and bounded integers within64 logical columns. See docs/MIXED_PUT.md; other profiles retain their contracts. DS-046 separately gates output-only ordinary numeric discovery for catalog-free DATA numeric-list PUT; prior output contracts remain separate. See docs/NUMERIC_COMPOSITION.md. DS-052/053 add the separately gated rounded numeric row/projection composition in docs/NUMERIC_ROWS.md.",
+      "gate_evidence": [
+       {
+        "level": "source-execution",
+        "gates": [
+         "put-literal",
+         "suite-put",
+         "put-character-list",
+         "suite-put-list",
+         "put-all",
+         "suite-put-all",
+         "put-numeric-list",
+         "suite-put-numeric"
+        ],
+        "scope": "Separate bounded literal, character, numeric-name-list and PUT _ALL_ profiles; mixed literal/numeric, file output and wider lines remain boundaries."
+       },
+       {
+        "level": "source-execution",
+        "gates": [
+         "put-mixed-numeric",
+         "suite-put-mixed-numeric"
+        ],
+        "scope": "DS-042 bounded mixed literal/numeric PUT with source-order type evidence, descriptor/width validation and atomic output. Original snapshots and complete unmodified100_doors.sas source/result/stdout proof with independent base R; no live SAS."
+       },
+       {
+        "level": "source-execution",
+        "gates": [
+         "numeric-discovery",
+         "suite-numeric-composition"
+        ],
+        "scope": "DS-046 version2 catalog-free numeric-list PUT discovery, ordinary-missing PDV state, source order, static schemas and unchanged output formatting. Complete sum_and_product_of_an_array.sas proof; no live SAS."
+       },
+       {
+        "level": "source-execution",
+        "gates": [
+         "numeric-projection",
+         "numeric-set",
+         "suite-numeric-rows"
+        ],
+        "scope": "DS-052/053 explicit binary64-rows-v1 composition: output selection over full static PDV and one selected numeric SET with eager selected-input validation, row/reset/retained state, exact schema/order/missing/logical text and separate numeric tolerance. Earlier marker and format contracts remain; no live SAS or exact BEST12."
+       },
+       {
+        "level": "source-execution",
+        "gates": [
+         "numeric-pipeline",
+         "suite-numeric-pipeline"
+        ],
+        "scope": "DS-054..057 separately marked binary64-pipeline-v1 composition. Existing converter, exact controls, resource/text limits and old markers remain. Full original measurement stream and independent base R prove bounded state/snapshots; no live SAS or new complete external-program claim."
+       },
+       {
+        "level": "source-execution",
+        "gates": [
+         "grouped-do",
+         "loop-transfer",
+         "suite-grouped-control"
+        ],
+        "scope": "Separate bounded-control-v1 integer control_data composition. Earlier profile admission/value/text contracts are preserved; groups/transfers, static empty discovery and atomic state/OUTPUT/SET/PUT behavior are separately validated. No new numeric helpers or live-SAS claim."
+       }
+      ]
+     }
     }
    ]
   },
@@ -2093,7 +2748,9 @@
     "DS-053",
     "DS-057",
     "DS-060",
-    "DS-061"
+    "DS-061",
+    "DS-062",
+    "DS-063"
    ],
    "gates": [
     "put-literal",
@@ -2111,7 +2768,10 @@
     "suite-numeric-pipeline",
     "grouped-do",
     "loop-transfer",
-    "suite-grouped-control"
+    "suite-grouped-control",
+    "numeric-ranges",
+    "csv-export",
+    "suite-numeric-exchange"
    ],
    "reference_page": 296,
    "note": "Bounded logical records of quoted literals and ordinary unformatted nonblank character variables: printable ASCII, at most 64 columns including variable separators, documented spacing and quote decoding. Blank fields, numeric output, attached formats, special controls, literal adjacency/comment-only separation, FILE, pointers, macros, and C++ require review. Named-list output has a separate entry. DS-027 separately gates source-order known numeric variables: ordinary missing and finite integers with magnitude at most 99999999999, one following separator per field, at most 64 logical columns. Types and attached formats are validated even on empty or filtered SET input; mixed numeric items, unknown/descriptor-only variables, fractions, special missing output, formats, controls, and C++ retain refusals. DS-046 separately gates output-only ordinary numeric discovery for catalog-free DATA numeric-list PUT; prior output contracts remain separate. See docs/NUMERIC_COMPOSITION.md. DS-052/053 add the separately gated rounded numeric row/projection composition in docs/NUMERIC_ROWS.md.",
@@ -2161,6 +2821,139 @@
       "suite-grouped-control"
      ],
      "scope": "Separate bounded-control-v1 integer control_data composition. Earlier profile admission/value/text contracts are preserved; groups/transfers, static empty discovery and atomic state/OUTPUT/SET/PUT behavior are separately validated. No new numeric helpers or live-SAS claim."
+    },
+    {
+     "level": "source-execution",
+     "gates": [
+      "numeric-ranges",
+      "csv-export",
+      "suite-numeric-exchange"
+     ],
+     "scope": "DS-062/063 bounded-numeric-exchange-v1 exchange_data: numeric SUM OF/PUT ranges and one literal comma FILE buffer. Existing exact input/numeric/missing policies, separate ASCII-LF byte/open policy, complete first-party and unchanged CSV-program base-R/source/runtime/emitted/actual-CLI proofs, exact export comparator and staged success-only publication. No supplied-catalog R transport, general CSV, arbitrary host paths, formats or live SAS."
+    }
+   ],
+   "assessment_history": [
+    {
+     "date": "2026-10-31",
+     "previous_disposition": "GATED",
+     "previous_rule_ids": [
+      "DS-023",
+      "DS-024",
+      "DS-027",
+      "DS-046",
+      "DS-052",
+      "DS-053",
+      "DS-057",
+      "DS-060",
+      "DS-061"
+     ],
+     "previous_gates": [
+      "put-literal",
+      "suite-put",
+      "put-character-list",
+      "suite-put-list",
+      "put-numeric-list",
+      "suite-put-numeric",
+      "numeric-discovery",
+      "suite-numeric-composition",
+      "numeric-projection",
+      "numeric-set",
+      "suite-numeric-rows",
+      "numeric-pipeline",
+      "suite-numeric-pipeline",
+      "grouped-do",
+      "loop-transfer",
+      "suite-grouped-control"
+     ],
+     "disposition": "GATED",
+     "reason": "DS-062/063 separately marked bounded numeric exchange evidence; wider FILE/list/input forms remain unassessed.",
+     "previous_entry": {
+      "entry": "PUT Statement: List",
+      "document": "stmt",
+      "category": "CAS",
+      "type": "Executable",
+      "valid_in": "DATA step",
+      "disposition": "GATED",
+      "rule_ids": [
+       "DS-023",
+       "DS-024",
+       "DS-027",
+       "DS-046",
+       "DS-052",
+       "DS-053",
+       "DS-057",
+       "DS-060",
+       "DS-061"
+      ],
+      "gates": [
+       "put-literal",
+       "suite-put",
+       "put-character-list",
+       "suite-put-list",
+       "put-numeric-list",
+       "suite-put-numeric",
+       "numeric-discovery",
+       "suite-numeric-composition",
+       "numeric-projection",
+       "numeric-set",
+       "suite-numeric-rows",
+       "numeric-pipeline",
+       "suite-numeric-pipeline",
+       "grouped-do",
+       "loop-transfer",
+       "suite-grouped-control"
+      ],
+      "reference_page": 296,
+      "note": "Bounded logical records of quoted literals and ordinary unformatted nonblank character variables: printable ASCII, at most 64 columns including variable separators, documented spacing and quote decoding. Blank fields, numeric output, attached formats, special controls, literal adjacency/comment-only separation, FILE, pointers, macros, and C++ require review. Named-list output has a separate entry. DS-027 separately gates source-order known numeric variables: ordinary missing and finite integers with magnitude at most 99999999999, one following separator per field, at most 64 logical columns. Types and attached formats are validated even on empty or filtered SET input; mixed numeric items, unknown/descriptor-only variables, fractions, special missing output, formats, controls, and C++ retain refusals. DS-046 separately gates output-only ordinary numeric discovery for catalog-free DATA numeric-list PUT; prior output contracts remain separate. See docs/NUMERIC_COMPOSITION.md. DS-052/053 add the separately gated rounded numeric row/projection composition in docs/NUMERIC_ROWS.md.",
+      "gate_evidence": [
+       {
+        "level": "source-execution",
+        "gates": [
+         "put-literal",
+         "suite-put",
+         "put-character-list",
+         "suite-put-list",
+         "put-numeric-list",
+         "suite-put-numeric"
+        ],
+        "scope": "Bounded literal/character and separately numeric variable-list output; not arbitrary SAS list output."
+       },
+       {
+        "level": "source-execution",
+        "gates": [
+         "numeric-discovery",
+         "suite-numeric-composition"
+        ],
+        "scope": "DS-046 version2 catalog-free numeric-list PUT discovery, ordinary-missing PDV state, source order, static schemas and unchanged output formatting. Complete sum_and_product_of_an_array.sas proof; no live SAS."
+       },
+       {
+        "level": "source-execution",
+        "gates": [
+         "numeric-projection",
+         "numeric-set",
+         "suite-numeric-rows"
+        ],
+        "scope": "DS-052/053 explicit binary64-rows-v1 composition: output selection over full static PDV and one selected numeric SET with eager selected-input validation, row/reset/retained state, exact schema/order/missing/logical text and separate numeric tolerance. Earlier marker and format contracts remain; no live SAS or exact BEST12."
+       },
+       {
+        "level": "source-execution",
+        "gates": [
+         "numeric-pipeline",
+         "suite-numeric-pipeline"
+        ],
+        "scope": "DS-054..057 separately marked binary64-pipeline-v1 composition. Existing converter, exact controls, resource/text limits and old markers remain. Full original measurement stream and independent base R prove bounded state/snapshots; no live SAS or new complete external-program claim."
+       },
+       {
+        "level": "source-execution",
+        "gates": [
+         "grouped-do",
+         "loop-transfer",
+         "suite-grouped-control"
+        ],
+        "scope": "Separate bounded-control-v1 integer control_data composition. Earlier profile admission/value/text contracts are preserved; groups/transfers, static empty discovery and atomic state/OUTPUT/SET/PUT behavior are separately validated. No new numeric helpers or live-SAS claim."
+       }
+      ]
+     }
     }
    ]
   },
@@ -3386,6 +4179,69 @@
      },
      "disposition": "GATED",
      "reason": "DS-060/061 separately marked bounded integer control_data source execution and independent base-R event/state evidence; broader language forms remain unassessed."
+    }
+   ]
+  },
+  {
+   "date": "2026-10-31",
+   "baseline": "57bab1b9dafd7abebfc96f29b455283c9a14bc38",
+   "method": "Implementation inference with separate complete-source base-R and exact export/publication gates; no whole-language claim.",
+   "changes": [
+    {
+     "document": "stmt",
+     "entry": "CARDS Statement",
+     "previous_disposition": "GATED",
+     "disposition": "GATED",
+     "reason": "One explicitly bounded export subset or additive composition evidence; no reference universe change."
+    },
+    {
+     "document": "stmt",
+     "entry": "DATALINES Statement",
+     "previous_disposition": "GATED",
+     "disposition": "GATED",
+     "reason": "One explicitly bounded export subset or additive composition evidence; no reference universe change."
+    },
+    {
+     "document": "stmt",
+     "entry": "FILE Statement",
+     "previous_disposition": "UNASSESSED",
+     "disposition": "GATED",
+     "reason": "One explicitly bounded export subset or additive composition evidence; no reference universe change."
+    },
+    {
+     "document": "stmt",
+     "entry": "INFILE Statement",
+     "previous_disposition": "GATED",
+     "disposition": "GATED",
+     "reason": "One explicitly bounded export subset or additive composition evidence; no reference universe change."
+    },
+    {
+     "document": "stmt",
+     "entry": "INPUT Statement",
+     "previous_disposition": "GATED",
+     "disposition": "GATED",
+     "reason": "One explicitly bounded export subset or additive composition evidence; no reference universe change."
+    },
+    {
+     "document": "stmt",
+     "entry": "INPUT Statement: List",
+     "previous_disposition": "GATED",
+     "disposition": "GATED",
+     "reason": "One explicitly bounded export subset or additive composition evidence; no reference universe change."
+    },
+    {
+     "document": "stmt",
+     "entry": "PUT Statement",
+     "previous_disposition": "GATED",
+     "disposition": "GATED",
+     "reason": "One explicitly bounded export subset or additive composition evidence; no reference universe change."
+    },
+    {
+     "document": "stmt",
+     "entry": "PUT Statement: List",
+     "previous_disposition": "GATED",
+     "disposition": "GATED",
+     "reason": "One explicitly bounded export subset or additive composition evidence; no reference universe change."
     }
    ]
   }

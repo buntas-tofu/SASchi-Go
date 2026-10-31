@@ -172,6 +172,8 @@ CONSTRUCT_MAP: dict[str, str] = {
     "input-ranges": "DS-059",
     "grouped-do": "DS-060",
     "loop-transfer": "DS-061",
+    "numeric-ranges": "DS-062",
+    "csv-export": "DS-063",
     "put-all": "DS-025",
     "do-counted": "DS-026",
     "do-if": "DS-031",
@@ -247,6 +249,8 @@ CONSTRUCT_MAP: dict[str, str] = {
 # Statement-level routing: statement-start regex -> construct name.
 # Order matters: longest/most specific first.
 STATEMENT_ROUTER: list[tuple[re.Pattern, str]] = [
+    (re.compile(r'^\s*FILE\b(?!\s*=)', re.I | re.ASCII), 'csv-export'),
+    (re.compile(r'^\s*(?:PUT\s+|[A-Za-z_][A-Za-z0-9_]{0,31}\s*=\s*SUM\s*\(\s*OF\s+)[A-Za-z_][A-Za-z0-9_]*[0-9]\s*-\s*[A-Za-z_][A-Za-z0-9_]*[0-9](?=\s|;|\)|$)', re.I | re.ASCII), 'numeric-ranges'),
     (re.compile(r'^\s*INFILE\b(?!\s*=)', re.I), 'inline-csv'),
     (re.compile(r'^\s*INPUT\b(?!\s*=).*?[A-Za-z_][A-Za-z0-9_]*[0-9]\s*-\s*[A-Za-z_][A-Za-z0-9_]*[0-9](?=\s|;|$)', re.I | re.ASCII | re.S), 'input-ranges'),
     (re.compile(r'^\s*(?:INPUT\b(?!\s*=)|(?:CARDS|DATALINES)\s*$)', re.I), 'input-list'),

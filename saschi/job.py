@@ -21,6 +21,8 @@ from .plan import Plan, compile_plan
 from .parser import ParseError
 from .provenance import environment, implementation_hashes
 from .runtime import run_plan
+from .numeric_exchange import (read_expected_exports, exports_equal, export_manifest,
+                               EXPORT_CONTRACT, COMPARISON_CONTRACT)
 
 
 @dataclass
@@ -71,7 +73,7 @@ def _read_expected(path: Path) -> tuple[object, str]:
 
 
 def build_job(source: str, inputs: "Path | None" = None, expect: "Path | None" = None,
-              target: str = "python") -> Job:
+              target: str = "python", *, expect_exports: "Path | None" = None) -> Job:
     """Run one program through the full treatment and return every artifact."""
     plan = compile_plan(source)
     translation = (python_translate if target == 'python' else cpp_translate)(source)
@@ -87,6 +89,12 @@ def build_job(source: str, inputs: "Path | None" = None, expect: "Path | None" =
                'tickets': [vars(t) for t in plan.tickets], 'accepted': False,
                'comparison': 'not requested', 'comparison_contract': 'typed-exact-values-ordered-rows-and-columns-metadata-v1'}
     receipt['completeness'] = _completeness_record(source, plan, target, receipt['ts_utc'])
+    export_program = any(step.kind == 'exchange_data' and any(op.kind == 'file_select' for op in step.operations) for step in plan.steps)
+    if export_program or expect_exports is not None:
+        receipt['export_comparison'] = 'not requested'
+        receipt['export_comparison_contract'] = COMPARISON_CONTRACT
+        if export_program:
+            receipt['export_contract'] = EXPORT_CONTRACT
     result, code = None, 2 if plan.blocked else 1
     try:
         if plan.blocked:
@@ -96,6 +104,15 @@ def build_job(source: str, inputs: "Path | None" = None, expect: "Path | None" =
         receipt['input_sha256'] = hashlib.sha256(input_bytes).hexdigest() if input_bytes is not None else None
         result = run_plan(plan.to_dict(), catalog)
         del input_bytes, catalog
+        if 'exports' in result:
+            receipt['exports'] = export_manifest(result['exports'])
+        if expect_exports is not None:
+            receipt['export_comparison'] = 'failed'
+            expected_exports, checksum = read_expected_exports(expect_exports)
+            receipt['expected_exports_sha256'] = checksum
+            if not exports_equal(result.get('exports', {}), expected_exports):
+                raise ValueError('expected export artifact names or exact UTF8 bytes differ')
+            receipt['export_comparison'] = 'passed'
         if expect:
             expected, expected_sha256 = _read_expected(expect)
             receipt['expected_sha256'] = expected_sha256

@@ -290,7 +290,28 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
     if plan['tickets'] and not allow_partial:
         raise RuntimeError('saschi: blocked translation. Nothing from this program was executed.')
     tables, logs = normalize_catalog({} if catalog is None else catalog), []
+    from .numeric_exchange import validate_step as validate_exchange, execute_step as execute_exchange, refuse_legacy as refuse_exchange
+    exports = {}
+    export_destinations = 0
+    for candidate in plan['steps']:
+        if candidate.get('kind') == 'exchange_data':
+            if plan['tickets']:
+                raise ValueError('numeric exchange requires a complete unticketed program')
+            context = validate_exchange(candidate, plan['version'])
+            export_destinations += context['file'] is not None
+        else:
+            refuse_exchange(candidate.get('operations', []))
+    if export_destinations > 1:
+        raise ValueError('one export destination per program is the bounded profile')
     for step in plan['steps']:
+        if step.get('kind') == 'exchange_data':
+            table, exchange_logs, buffers = execute_exchange(step, plan['version'])
+            if table is not None:
+                tables[step['name']] = table
+            logs.extend(exchange_logs)
+            if buffers is not None:
+                exports.update(buffers)
+            continue
         from .grouped_control import execute_step as execute_control_step, refuse_legacy
         if step.get('kind') == 'control_data':
             table, control_logs = execute_control_step(step, tables, plan['version'])
@@ -922,4 +943,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                 snapshot()
         if step['name'] != '_null_':
             tables[step['name']] = {**metadata, 'schema': {n: schema[n] for n in output_names}, 'rows': output}
-    return {'datasets': tables, 'log': logs}
+    result = {'datasets': tables, 'log': logs}
+    if exports:
+        result['exports'] = exports
+    return result

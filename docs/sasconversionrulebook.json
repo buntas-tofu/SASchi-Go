@@ -2782,6 +2782,76 @@
         "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000289377.htm",
         "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000202782.htm"
       ]
+    },
+    {
+      "rule_id": "DS-062",
+      "sas_pattern": "Bounded numeric numbered lists in whole SUM OF assignments and PUT",
+      "scope": "data-step",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "Separate numeric_exchange validator/executor and opt-in job artifact comparator; legacy paths unchanged."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent complete-source scanner, decimal decoder, dyadic exact arithmetic and FILE/INPUT/PUT scheduler; no Python plans or supplied-catalog normalization."
+      },
+      "required_settings": [
+        "Only version2 exchange_data with first exchange_profile bounded-numeric-exchange-v1 admits new numeric SUM OF/PUT ranges or FILE. Actual new syntax is required. Earlier source profiles, serialized plans and result/receipt shapes remain unchanged. One optional inline numeric INPUT reuses earlier space/comma/FIRSTOBS/FLOWOVER/release/EOF conversion and raw record limits; no SET, character variables, arrays, loops, rounded functions or new numeric domain.",
+        "Expand canonical ordinary numeric names and ascending common-prefix unpadded numbered suffixes1..64 before duplicates, overlaps and the64-name list cap. INPUT retains32 names. List references require preceding numeric descriptors. SUM OF is a complete unparenthesized assignment RHS only, ignores ordinary missing, returns missing if all are missing and checks exact ordered partials with unchanged bounded helpers.",
+        "No-FILE PUT retains the existing numeric-list trailing blank. CSV PUT uses comma separators without a trailing comma, ordinary missing period, existing whole-number domain and64-byte records. Literal headers retain quoted literal semantics. Fractions/default BEST12/DECIMALCONV, DSD, explicit formats, character quoting and physical SAS-platform equivalence remain outside this profile.",
+        "FILE is one unconditional literal .csv basename prefix before INPUT and other executable actions. One export destination per program; no paths, device names, append, filerefs or network. Explicit repository policy opens an empty pure buffer before an unsuccessful INPUT; headers execute only after a complete read. The same FILE does not truncate prior records on the terminal EOF attempt.",
+        "Runtime returns pure basename-to-text exports only when FILE is present. ascii-lf-integer-csv-v1 specifies printable ASCII LF records and final LF. --expect-exports compares the complete basename set and exact UTF8 bytes, separately from unchanged dataset --expect. Only accepted CLI jobs stage physical files under the new job exports directory and publish together by one rename. Failure publishes no accepted export file or buffered logical stdout.",
+        "Validate exact portable fields, source ordering, descriptor/resource/static domains even on skipped/empty paths. Preserve64 PDV columns,1024 operations,128 expression/list nodes,32 levels,10000 observations/emitted records and1000000 step events. Caller plans/catalogs are private; inherited unused-catalog normalization remains unchanged and outside the empty-catalog R witness scope."
+      ],
+      "forbidden_patterns": [
+        "Older or forged profile admission; nested/predicate SUM OF, SET, arrays, loops, rounded/new numerical domains, arbitrary output paths or physical SAS-default claims"
+      ],
+      "silent_difference_checks": [
+        "Exact descriptor/row/log order, missing and retained state, source/read-attempt/FILE/write accounting, exact bytes/names/newline, whole-job failed publication"
+      ],
+      "validation_test": "examples/verify_numeric_ranges.py",
+      "confidence": "Bounded repository/base-R and actual CLI evidence; explicit export byte/open policy, no live SAS or physical default-format claim.",
+      "sources": [
+        "docs/NUMERIC_EXCHANGE.md",
+        "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000171874.htm",
+        "https://support.sas.com/kb/24/596.html"
+      ]
+    },
+    {
+      "rule_id": "DS-063",
+      "sas_pattern": "Bounded local FILE buffers and exact artifact comparison/publication",
+      "scope": "data-step",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "Separate numeric_exchange validator/executor and opt-in job artifact comparator; legacy paths unchanged."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent complete-source scanner, decimal decoder, dyadic exact arithmetic and FILE/INPUT/PUT scheduler; no Python plans or supplied-catalog normalization."
+      },
+      "required_settings": [
+        "Only version2 exchange_data with first exchange_profile bounded-numeric-exchange-v1 admits new numeric SUM OF/PUT ranges or FILE. Actual new syntax is required. Earlier source profiles, serialized plans and result/receipt shapes remain unchanged. One optional inline numeric INPUT reuses earlier space/comma/FIRSTOBS/FLOWOVER/release/EOF conversion and raw record limits; no SET, character variables, arrays, loops, rounded functions or new numeric domain.",
+        "Expand canonical ordinary numeric names and ascending common-prefix unpadded numbered suffixes1..64 before duplicates, overlaps and the64-name list cap. INPUT retains32 names. List references require preceding numeric descriptors. SUM OF is a complete unparenthesized assignment RHS only, ignores ordinary missing, returns missing if all are missing and checks exact ordered partials with unchanged bounded helpers.",
+        "No-FILE PUT retains the existing numeric-list trailing blank. CSV PUT uses comma separators without a trailing comma, ordinary missing period, existing whole-number domain and64-byte records. Literal headers retain quoted literal semantics. Fractions/default BEST12/DECIMALCONV, DSD, explicit formats, character quoting and physical SAS-platform equivalence remain outside this profile.",
+        "FILE is one unconditional literal .csv basename prefix before INPUT and other executable actions. One export destination per program; no paths, device names, append, filerefs or network. Explicit repository policy opens an empty pure buffer before an unsuccessful INPUT; headers execute only after a complete read. The same FILE does not truncate prior records on the terminal EOF attempt.",
+        "Runtime returns pure basename-to-text exports only when FILE is present. ascii-lf-integer-csv-v1 specifies printable ASCII LF records and final LF. --expect-exports compares the complete basename set and exact UTF8 bytes, separately from unchanged dataset --expect. Only accepted CLI jobs stage physical files under the new job exports directory and publish together by one rename. Failure publishes no accepted export file or buffered logical stdout.",
+        "Validate exact portable fields, source ordering, descriptor/resource/static domains even on skipped/empty paths. Preserve64 PDV columns,1024 operations,128 expression/list nodes,32 levels,10000 observations/emitted records and1000000 step events. Caller plans/catalogs are private; inherited unused-catalog normalization remains unchanged and outside the empty-catalog R witness scope."
+      ],
+      "forbidden_patterns": [
+        "Older or forged profile admission; nested/predicate SUM OF, SET, arrays, loops, rounded/new numerical domains, arbitrary output paths or physical SAS-default claims"
+      ],
+      "silent_difference_checks": [
+        "Exact descriptor/row/log order, missing and retained state, source/read-attempt/FILE/write accounting, exact bytes/names/newline, whole-job failed publication"
+      ],
+      "validation_test": "examples/verify_numeric_exchange.py",
+      "confidence": "Bounded repository/base-R and actual CLI evidence; explicit export byte/open policy, no live SAS or physical default-format claim.",
+      "sources": [
+        "docs/NUMERIC_EXCHANGE.md",
+        "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000171874.htm",
+        "https://support.sas.com/kb/24/596.html"
+      ]
     }
   ],
   "runtime_capabilities": {
@@ -3261,6 +3331,38 @@
       "r_witness": "examples/grouped_control.R",
       "boundary_tests": "saschi.test_grouped_control",
       "evidence": "Separate group and transfer gates with complete-source base-R event schedules, pinned original/hand truth, generated/refusal controls, exact comparators and actual CLI/emitted/atomic execution. No complete external-program proof or live-SAS claim."
+    },
+    "numeric_ranges": {
+      "rule_id": "DS-062",
+      "target": "saschi.runtime.run_plan",
+      "scope": [
+        "Only version2 exchange_data with first exchange_profile bounded-numeric-exchange-v1 admits new numeric SUM OF/PUT ranges or FILE. Actual new syntax is required. Earlier source profiles, serialized plans and result/receipt shapes remain unchanged. One optional inline numeric INPUT reuses earlier space/comma/FIRSTOBS/FLOWOVER/release/EOF conversion and raw record limits; no SET, character variables, arrays, loops, rounded functions or new numeric domain.",
+        "Expand canonical ordinary numeric names and ascending common-prefix unpadded numbered suffixes1..64 before duplicates, overlaps and the64-name list cap. INPUT retains32 names. List references require preceding numeric descriptors. SUM OF is a complete unparenthesized assignment RHS only, ignores ordinary missing, returns missing if all are missing and checks exact ordered partials with unchanged bounded helpers.",
+        "No-FILE PUT retains the existing numeric-list trailing blank. CSV PUT uses comma separators without a trailing comma, ordinary missing period, existing whole-number domain and64-byte records. Literal headers retain quoted literal semantics. Fractions/default BEST12/DECIMALCONV, DSD, explicit formats, character quoting and physical SAS-platform equivalence remain outside this profile.",
+        "FILE is one unconditional literal .csv basename prefix before INPUT and other executable actions. One export destination per program; no paths, device names, append, filerefs or network. Explicit repository policy opens an empty pure buffer before an unsuccessful INPUT; headers execute only after a complete read. The same FILE does not truncate prior records on the terminal EOF attempt.",
+        "Runtime returns pure basename-to-text exports only when FILE is present. ascii-lf-integer-csv-v1 specifies printable ASCII LF records and final LF. --expect-exports compares the complete basename set and exact UTF8 bytes, separately from unchanged dataset --expect. Only accepted CLI jobs stage physical files under the new job exports directory and publish together by one rename. Failure publishes no accepted export file or buffered logical stdout.",
+        "Validate exact portable fields, source ordering, descriptor/resource/static domains even on skipped/empty paths. Preserve64 PDV columns,1024 operations,128 expression/list nodes,32 levels,10000 observations/emitted records and1000000 step events. Caller plans/catalogs are private; inherited unused-catalog normalization remains unchanged and outside the empty-catalog R witness scope."
+      ],
+      "validation_test": "examples/verify_numeric_ranges.py",
+      "r_witness": "examples/numeric_ranges.R",
+      "boundary_tests": "saschi.test_numeric_exchange",
+      "evidence": "Separate component gates, first-party whole-source hand pins, generated/refusal controls, exact ordered comparisons, emitted pure buffers and actual CLI atomic export comparisons. Complete unchanged csv_data_manipulation.sas source/byte proof under the named repository contract."
+    },
+    "csv_export": {
+      "rule_id": "DS-063",
+      "target": "saschi.runtime.run_plan",
+      "scope": [
+        "Only version2 exchange_data with first exchange_profile bounded-numeric-exchange-v1 admits new numeric SUM OF/PUT ranges or FILE. Actual new syntax is required. Earlier source profiles, serialized plans and result/receipt shapes remain unchanged. One optional inline numeric INPUT reuses earlier space/comma/FIRSTOBS/FLOWOVER/release/EOF conversion and raw record limits; no SET, character variables, arrays, loops, rounded functions or new numeric domain.",
+        "Expand canonical ordinary numeric names and ascending common-prefix unpadded numbered suffixes1..64 before duplicates, overlaps and the64-name list cap. INPUT retains32 names. List references require preceding numeric descriptors. SUM OF is a complete unparenthesized assignment RHS only, ignores ordinary missing, returns missing if all are missing and checks exact ordered partials with unchanged bounded helpers.",
+        "No-FILE PUT retains the existing numeric-list trailing blank. CSV PUT uses comma separators without a trailing comma, ordinary missing period, existing whole-number domain and64-byte records. Literal headers retain quoted literal semantics. Fractions/default BEST12/DECIMALCONV, DSD, explicit formats, character quoting and physical SAS-platform equivalence remain outside this profile.",
+        "FILE is one unconditional literal .csv basename prefix before INPUT and other executable actions. One export destination per program; no paths, device names, append, filerefs or network. Explicit repository policy opens an empty pure buffer before an unsuccessful INPUT; headers execute only after a complete read. The same FILE does not truncate prior records on the terminal EOF attempt.",
+        "Runtime returns pure basename-to-text exports only when FILE is present. ascii-lf-integer-csv-v1 specifies printable ASCII LF records and final LF. --expect-exports compares the complete basename set and exact UTF8 bytes, separately from unchanged dataset --expect. Only accepted CLI jobs stage physical files under the new job exports directory and publish together by one rename. Failure publishes no accepted export file or buffered logical stdout.",
+        "Validate exact portable fields, source ordering, descriptor/resource/static domains even on skipped/empty paths. Preserve64 PDV columns,1024 operations,128 expression/list nodes,32 levels,10000 observations/emitted records and1000000 step events. Caller plans/catalogs are private; inherited unused-catalog normalization remains unchanged and outside the empty-catalog R witness scope."
+      ],
+      "validation_test": "examples/verify_numeric_exchange.py",
+      "r_witness": "examples/numeric_exchange.R",
+      "boundary_tests": "saschi.test_numeric_exchange",
+      "evidence": "Separate component gates, first-party whole-source hand pins, generated/refusal controls, exact ordered comparisons, emitted pure buffers and actual CLI atomic export comparisons. Complete unchanged csv_data_manipulation.sas source/byte proof under the named repository contract."
     }
   }
 }

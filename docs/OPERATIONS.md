@@ -56,6 +56,14 @@ instead of `result.json`. Unsupported source produces tickets and a failed
 receipt without executing the plan. Exit codes are 0 for success, 1 for an
 execution/comparison/environment error, and 2 for unsupported translation.
 
+D2b export jobs can add `--expect-exports expected-exports.json`, a complete
+basename-to-text map checked as exact UTF-8 bytes. Accepted files publish only
+under the new job directory's `exports/` child, in the same atomic staging
+transaction. Pure runtime/emitted results expose buffers; they write no host
+path. Legacy jobs keep their result and receipt shapes. See
+[the numeric exchange contract](NUMERIC_EXCHANGE.md) for destination, byte,
+empty-file and failed-publication policies.
+
 Job JSON keeps its existing indentation, key order, ASCII escaping and final
 newline, so result hashes still identify the same bytes. The writer validates
 serializability before opening its destination, then streams the document instead
@@ -79,7 +87,8 @@ explicit OUTPUT snapshots, simple WHERE/IF predicates, retained numeric state,
 initial lookup SET, character byte widths, and typed metadata. That document
 specifies syntax, catalog descriptors, comparisons, and remaining review cases.
 Unsupported source still produces tickets; data-dependent incompatibilities
-produce a failed execution receipt. Inline data is preserved but not executed.
+produce a failed execution receipt. Named bounded numeric INPUT profiles execute
+inline records; broader inline forms remain refused.
 Partial API execution remains inspection-only and is not exposed by the CLI.
 
 ## Shared plan and additional backends
