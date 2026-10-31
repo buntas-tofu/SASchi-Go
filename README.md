@@ -16,15 +16,16 @@ policies. Receipts record what passed for the source and environment tested.
 ## Current verification
 
 Status: version 0.4.0 development evidence for maintainer review, updated on
-2026-10-31. The current registry contains 69 fixture gates, 52 suites and 1097
+2026-10-31. The current registry contains 71 fixture gates, 53 suites and 1129
 tests. With the pinned Roku corpus present, `python verify_all.py` records the
 source-bound unified verdict. Synthesis separately checks 60 faithful cases and
-60 naive variants. The accepted entry baseline covered 67 gates, 51 suites and
-1061 tests with zero skips; current passing outcomes require a matching receipt.
+60 naive variants. The accepted entry baseline covered 69 gates, 52 suites and
+1097 tests with zero skips; current passing outcomes require a matching receipt.
 Live-SAS validation remains outstanding.
 
-D2b adds the complete unchanged CSV-artifact program to the nineteen accepted
-entry external-program repository/base-R proofs.
+D2b accepted twenty complete external-program repository/base-R proofs, including
+the unchanged CSV-artifact program. D3b adds a full-source gate for both unchanged
+steps of `flow_control_structures.sas`, including caller state and logical output.
 The two B5 programs use declared numerical tolerances and an inferred logical text
 policy; exact SAS BEST12/DECIMALCONV remains unproved. Earlier programs include
 FizzBuzz, the day-of-the-week calendar program and `loops_do_while.sas`, whose
@@ -127,7 +128,7 @@ fixed expected output and base-R evidence. Special missings retain their tags.
   sibling plus a fixture verifier (`verify_*.py`). Run any verifier directly,
   or all of them through [verify_all.py](verify_all.py).
 - [docs/sasconversionrulebook.json](docs/sasconversionrulebook.json) : the machine-consumable translation
-  rulebook. 99 rules with equivalence classes (EXACT,
+  rulebook. 101 rules with equivalence classes (EXACT,
   EQUIVALENT-WITH-SETTINGS, APPROXIMATE, NO-DIRECT-EQUIVALENT), required
   settings, forbidden patterns, and validation tests.
 - [docs/capability-manifest.json](docs/capability-manifest.json) : the coverage manifest. Enumerated entries of
@@ -464,3 +465,13 @@ failure explicit. Earlier profile contracts remain intact. Independent base-R
 state/event schedules, exact original-program pins and real CLI comparison
 controls provide evidence for the stated slice. INPUT/CSV, arrays, rounded
 profiles and broader control language remain separate compositions.
+
+
+Bounded scalar flow now has separate [DS-064/065 profiles](docs/SCALAR_FLOW.md):
+local labels/GOTO/STOP, then one-caller LINK/RETURN with existing numeric INPUT,
+integer MOD and loops. The original three-step source and complete unchanged
+`flow_control_structures.sas` compare full state, logical text and hand/R events,
+including actual CLI/emitted execution. The separate flow and export profiles
+compose across DATA steps in either order; the one-FILE program limit remains
+explicit even with intervening flow steps. Broader call graphs,
+structured-body jumps and no-INPUT explicit unlinked RETURN remain separate.

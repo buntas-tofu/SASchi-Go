@@ -1,7 +1,7 @@
 # Coverage reconciliation and next gate series
 
 Status: Repository/base-R planning evidence, originally reconciled at main08eaa7b
-on2026-10-27 and updated through DS-063, SQL-004 and A0. The handoff binds current acceptance.
+on2026-10-27 and updated through DS-065, SQL-004 and A0. The handoff binds current acceptance.
 For principal/maintainer prioritization. Counts describe this checkout and the56
 pinned sibling corpus files, not all SAS or live-SAS equivalence. Updated for
 DS-039 arrays, DS-040 DO OVER and DS-041 nested/computed counted loops after the original
@@ -11,19 +11,19 @@ Implementation and publication are not authorized by this planning exercise.
 
 ## Inventory reconciled against actual evidence
 
-The golden command registers69 fixture runners,52 translator suites and1
-synthesis runner. The registry contains1097 tests; the source-bound receipt records skips and passing outcomes. The accepted entry contained1061 tests, zero skips,
+The golden command registers71 fixture runners,53 translator suites and1
+synthesis runner. The registry contains1129 tests; the source-bound receipt records skips and passing outcomes. The accepted entry contained1097 tests, zero skips,
 60 faithful synthesis checks and60 naive controls. The separate1k workload
 checks total39:18 ledger and21 text. These counts have different units. Neither
-99 rulebook rules nor122 golden-command runners is a SAS capability denominator.
+101 rulebook rules nor125 golden-command runners is a SAS capability denominator.
 
 [The capability manifest](capability-manifest.json) still enumerates108 statements
 and40 data-set options. The other7 declared reference areas remain unenumerated:
 formats/informats, functions/CALL routines, system options, component objects,
 utilities, macros and procedures. Their null universes are not zero.
 
-The reconciled148 entries contain36 GATED,5 RULE,8 HUMAN-REVIEW,22 OUT-OF-SCOPE
-and77 UNASSESSED. Among GATED entries,35 have bounded source-execution evidence;
+The reconciled148 entries contain41 GATED,5 RULE,8 HUMAN-REVIEW,22 OUT-OF-SCOPE
+and72 UNASSESSED. Among GATED entries,40 have bounded source-execution evidence;
 1 has reference fixtures only: IN=. DS-039/DS-040 add bounded source-array evidence; DS-041 adds scoped counted-loop
 evidence to the existing iterative-DO entry. DS-044 promotes four bounded entries:
 INPUT, INPUT List, CARDS and DATALINES, preserving their prior assessments.
@@ -36,7 +36,9 @@ reconciliation below remains its historical assessment event. These are
 catalogue-entry counts, not counts of implemented features or supported forms.
 DS-062/063 promote only FILE for the literal caller-rooted CSV export subset,
 with additive evidence on seven already-GATED input/output entries. The exact
-ASCII/LF/open policy is separate from physical SAS defaults.
+ASCII/LF/open policy is separate from physical SAS defaults. DS-064/065 promote
+exactly GOTO,statement labels,LINK,RETURN and STOP for bounded scalar flow,
+preserving all earlier assessments. Descriptive LABEL remains unassessed.
 
 | Entry | Previous | Reconciled | Evidence and remaining boundary |
 | --- | --- | --- | --- |
@@ -59,15 +61,15 @@ removed. The manifest gate additionally rejects missing scopes/levels, mismatche
 evidence, duplicate entries and stale rollups. It still checks every previous
 registration, rule and universe requirement.
 
-All77 unassessed entries receive planning bins in the reproducible inventory:
+All72 unassessed entries receive planning bins in the reproducible inventory:
 28 external-environment review,13 separate-scope review,7 input records,
-10 data-set options,6 control,7 output,5 descriptor/environment and1 projection.
+10 data-set options,1 control,7 output,5 descriptor/environment and1 projection.
 These bins organize work; they do not promote dispositions or decide exclusions.
 The5 RULE entries and8 HUMAN-REVIEW entries retain their review boundaries.
 
 ## Unknown blockers classified
 
-The current56-file compile census has21 clean and35 blocked, with616 ticket
+The current56-file compile census has22 clean and34 blocked, with546 ticket
 occurrences. A2 resolves20 compiler tickets across the corpus. The newly compile-
 clean100_doors.sas now passes the DS-042 mixed-output whole-program proof.
 B1 resolves two further tickets and adds the complete loops_for.sas proof.
@@ -88,31 +90,37 @@ The compile-clean and complete-program proof counts remain unchanged; general CS
 export and broader input forms are still separate contracts.
 D3a changes the census by18 further tickets and4 unknown occurrences. These
 are diagnostic measurements: accepted bounded forms and whole-step refusal
-consolidation both affect the count. Labels/GOTO/LINK/RETURN remain unsupported;
+consolidation both affect the count. At that D3a landing, labels/GOTO/LINK/RETURN remained unsupported;
 the lower unstructured-control count does not establish those capabilities.
 Compile-clean files remain20 and complete external proofs remain19.
 D2b resolves the three CSV-program tickets and adds its complete unchanged
 source/R/export/CLI proof. Two further raw ticket reductions consolidate the
 still-refused write-float program; send-email and write-float FILE diagnostics
-route explicitly. Neither refused program becomes an execution proof. Current
+route explicitly. Neither refused program becomes an execution proof. At that landing,
 compile-clean files total21 and complete external proofs total20.
-The remaining409 occurrences routed
+D3b resolves the flow program's9 tickets and adds its complete two-step proof.
+Three still-refused programs consolidate32,21 and11 tickets into one bounded
+whole-step refusal each. Other route changes do not make their unsupported
+arrays,Boolean or numeric domains executable. The net70-ticket and48-unknown
+reductions are diagnostic measurements. Current compile-clean files total22;
+complete external proofs total21 when the source-bound full gates pass.
+The remaining361 occurrences routed
 as unknown receive a primary planning category, with file, line, ticket ordinal,
 statement hash and classification basis preserved. Classification preserves every
 current compiler ticket.
 
 | Primary category for unknown tickets | Occurrences |
 | --- | ---: |
-| Procedure backend/clauses |225|
-| Macro body, invocation or unresolved reference |129|
+| Procedure backend/clauses |224|
+| Macro body, invocation or unresolved reference |128|
 | Input records, INPUT/INFILE and opaque inline data |0|
-| Labels, GOTO/LINK/RETURN/STOP |31|
-| Arrays and indexed writes |15|
+| Labels, GOTO/LINK/RETURN/STOP |0|
+| Arrays and indexed writes |0|
 | External file/engine output |1|
 | Descriptor/environment statements |4|
 | Corpus prose or printed output |2|
 | CALL side effects |2|
-| Total |409|
+| Total |361|
 
 The procedure subtotal includes DS2:95, OPTMODEL:76, IML:31, PRINT:9, MEANS:4,
 FCMP:3, SGPLOT:2, TTEST:2 and one each SORT, MULTTEST and UNIVARIATE.
@@ -128,7 +136,7 @@ unterminated tickets. They need an explicit source-boundary decision; silently
 discarding those sections would invalidate a complete unmodified-file claim.
 No sibling corpus file was changed or copied into this repository.
 
-Twenty files now have complete-program repository/base-R proofs. B5 adds the unchanged sum_of_a_series.sas and trigonometric_functions.sas under explicit numerical tolerances and an inferred logical decimal text policy. These two proofs do not establish exact SAS BEST12/DECIMALCONV or physical-log equivalence. B3 adds the entire unchanged
+Twenty-one files have complete-program repository/base-R proofs when the current source-bound full gates pass. B5 adds the unchanged sum_of_a_series.sas and trigonometric_functions.sas under explicit numerical tolerances and an inferred logical decimal text policy. These two proofs do not establish exact SAS BEST12/DECIMALCONV or physical-log equivalence. B3 adds the entire unchanged
 sum_and_product_of_an_array.sas, retaining its unassigned c as missing. A0 separately
 closes existing hello_world_text.sas and explicit comment-only no-op evidence,
 without language expansion. DS-042, DS-043 and DS-044 retain the complete
@@ -200,7 +208,7 @@ procedure execution need separately scoped backends and evidence. The existing
 statistical/reference fixtures do not authorize source execution of those PROCs.
 CALL memory access, random streams, external file engines and email need explicit
 state, reproducibility or side-effect contracts. Preserve their current refusal
-paths while defining that work. GOTO/LINK/RETURN, broader grouped-control forms
+paths while defining that work. GOTO/LINK/RETURN beyond DS-064/065, broader grouped-control forms
 and validation string/ASCII functions remain later composition work. DS-060/061
 only cover the explicitly bounded integer group and transfer profile.
 
@@ -241,3 +249,20 @@ change or new corpus bytes requires a fresh census and a ranking review.
 Further language families and broader forms remain candidate planning in the
 current session journal. Catalogue and diagnostic counts do not promise whole-file
 unlocks.
+
+
+## D3b scalar flow evidence
+
+DS-064/065 add separately marked bounded local labels/GOTO/STOP and one-caller
+LINK/RETURN with existing exact numeric INPUT, integer MOD and loops. See
+[the scalar-flow contract](SCALAR_FLOW.md). Both complete unchanged steps of
+flow_control_structures.sas compare against hand and independent full-source R,
+including58 logical records and698 events,emitted execution and actual CLI.
+The original31-statement three-step fixture proves record reset,retained state,
+caller resumption,STOP publication and full ordered output. The exact previous
+STOP-in-group refusal remains an old-profile/compiler/R negative alongside its
+new-profile positive. No broader numeric,Boolean,array,stochastic,structured-jump
+or recursive-call contract is inferred. The current census above separates the
+new complete proof from diagnostic consolidation on programs still refused.
+Root integration also checks exact exports/state in both profile orders and
+retains the whole-program one-FILE refusal across intervening flow steps.
