@@ -76,11 +76,8 @@ class ScalarRegressionTests(unittest.TestCase):
         self.assertTrue(compile_plan('x=1;').blocked)
 
     def test_unsupported_unit_cannot_execute_or_print(self):
-        translated = translate('data d; x=1; if 0 then do; x=2; end; put x=; run;')
-        output = io.StringIO()
-        with contextlib.redirect_stdout(output), self.assertRaises(RuntimeError):
-            exec(translated.code, {})
-        self.assertEqual(output.getvalue(), '')
+        from .test_grouped_control import assert_promoted_source
+        assert_promoted_source(self,'data d; x=1; if 0 then do; x=2; end; put x=; run;')
 
 
 class DatasetTests(unittest.TestCase):

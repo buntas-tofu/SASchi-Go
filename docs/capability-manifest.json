@@ -105,17 +105,18 @@
   "numeric_rows_update": "DS-052/053 extend bounded source evidence on seven already-GATED SET/projection/PUT entries. Existing dispositions, rollups, histories, reference universes and earlier gate evidence are preserved. No new whole-program proof or live SAS claim.",
   "sql_create_update": "SQL-004 adds one bounded descriptor-only PROC SQL CREATE TABLE source/backend profile. The PROC reference universe remains unenumerated; existing148 statement/data-set-option entries,dispositions,rollups and gate evidence are unchanged. No whole-SAS percentage or broader PROC SQL claim.",
   "numeric_pipeline_update": "DS-054..057 append bounded composition evidence to already-GATED entries only; all universes, dispositions and rollups remain unchanged. See docs/NUMERIC_PIPELINES.md.",
-  "inline_csv_update": "DS-058/059 promote only INFILE Statement from UNASSESSED to the bounded numeric inline source-execution subset. Four already-GATED INPUT/CARDS/DATALINES entries gain scoped evidence. All document universes and prior evidence remain unchanged; no general CSV or complete external-program promotion."
+  "inline_csv_update": "DS-058/059 promote only INFILE Statement from UNASSESSED to the bounded numeric inline source-execution subset. Four already-GATED INPUT/CARDS/DATALINES entries gain scoped evidence. All document universes and prior evidence remain unchanged; no general CSV or complete external-program promotion.",
+  "grouped_control_update": "DS-060/061 promote exactly DO/LEAVE/CONTINUE statements for the separately marked bounded integer control_data slice, preserving prior assessments and all148 reference entries. Other already-GATED state/output/loop entries gain bounded composition evidence. No whole-corpus unlock, physical-log or live-SAS claim."
  },
  "rollup": {
   "stmt": {
    "universe": 108,
-   "assessed": 37,
-   "gated": 29,
+   "assessed": 40,
+   "gated": 32,
    "rule": 5,
    "human_review": 1,
    "out_of_scope": 2,
-   "unassessed": 71
+   "unassessed": 68
   },
   "dso": {
    "universe": 40,
@@ -454,10 +455,26 @@
    "category": "CAS",
    "type": "Executable",
    "valid_in": "DATA step",
-   "disposition": "UNASSESSED",
-   "rule_ids": [],
-   "gates": [],
-   "reference_page": 48
+   "disposition": "GATED",
+   "rule_ids": [
+    "DS-061"
+   ],
+   "gates": [
+    "loop-transfer",
+    "suite-grouped-control"
+   ],
+   "reference_page": 48,
+   "gate_evidence": [
+    {
+     "level": "source-execution",
+     "gates": [
+      "loop-transfer",
+      "suite-grouped-control"
+     ],
+     "scope": "Only control_data/bounded-control-v1. Scalar integer/missing DATA, optional selected numeric SET, grouped IF/ELSE, nearest counted/WHILE/UNTIL transfers, bounded static/empty/OUTPUT/state/event scheduling. See docs/GROUPED_CONTROL.md. No INPUT/arrays/rounded composition, labels or live SAS."
+    }
+   ],
+   "note": "DS-060/061 prove this explicitly marked bounded grouped-control slice. Prior dispositions and helper-only rationale remain in assessment_history. Broader statement forms remain outside the gate."
   },
   {
    "entry": "DATA Statement",
@@ -607,19 +624,33 @@
    "category": "CAS",
    "type": "Executable",
    "valid_in": "DATA step",
-   "disposition": "UNASSESSED",
+   "disposition": "GATED",
    "rule_ids": [
-    "DS-016"
+    "DS-016",
+    "DS-060"
    ],
-   "gates": [],
+   "gates": [
+    "grouped-do",
+    "suite-grouped-control"
+   ],
    "reference_page": 70,
    "related_evidence": {
     "gates": [
      "arrays"
     ],
-    "scope": "arrays proves array helpers; bare grouped DO source remains refused and has no independent grouped-control fixture."
+    "scope": "Historical adjacent array-helper evidence, separate from the new grouped-control source gate."
    },
-   "note": "arrays proves array helpers; bare grouped DO source remains refused and has no independent grouped-control fixture. Prior assessment preserved in assessment_history; related evidence is not a gate for this entry."
+   "note": "DS-060/061 prove this explicitly marked bounded grouped-control slice. Prior dispositions and helper-only rationale remain in assessment_history. Broader statement forms remain outside the gate.",
+   "gate_evidence": [
+    {
+     "level": "source-execution",
+     "gates": [
+      "grouped-do",
+      "suite-grouped-control"
+     ],
+     "scope": "Only control_data/bounded-control-v1. Scalar integer/missing DATA, optional selected numeric SET, grouped IF/ELSE, nearest counted/WHILE/UNTIL transfers, bounded static/empty/OUTPUT/state/event scheduling. See docs/GROUPED_CONTROL.md. No INPUT/arrays/rounded composition, labels or live SAS."
+    }
+   ]
   },
   {
    "entry": "DO Statement: Iterative",
@@ -631,13 +662,18 @@
    "rule_ids": [
     "DS-016",
     "DS-026",
-    "DS-041"
+    "DS-041",
+    "DS-060",
+    "DS-061"
    ],
    "gates": [
     "do-counted",
     "suite-do-counted",
     "counted-nested",
-    "suite-counted-nested"
+    "suite-counted-nested",
+    "grouped-do",
+    "loop-transfer",
+    "suite-grouped-control"
    ],
    "reference_page": 72,
    "note": "DS-026 preserves single-level signed-integer-literal controls and its existing plan contract. DS-041 adds captured integer-expression controls and at most8 counted levels with distinct protected indices and10000 aggregate A2 iterations per DATA row. Conditional/grouped/combined loops, LAG/DIF in A2, general body declarations/input, DATA _NULL_ OUTPUT, PUT _ALL_, MERGE and C++ remain deferred. See docs/COUNTED_LOOPS.md. Existing DS-016 helper evidence remains separate.",
@@ -657,6 +693,15 @@
       "suite-counted-nested"
      ],
      "scope": "DS-041 captured integer controls, bounded counted nesting, row aliases/schema/OUTPUT scheduling and atomic refusals. Original complete-program source/result/stdout pins and independent base R; no new full corpus or live-SAS claim."
+    },
+    {
+     "level": "source-execution",
+     "gates": [
+      "grouped-do",
+      "loop-transfer",
+      "suite-grouped-control"
+     ],
+     "scope": "Separate bounded-control-v1 integer control_data composition. Earlier profile admission/value/text contracts are preserved; groups/transfers, static empty discovery and atomic state/OUTPUT/SET/PUT behavior are separately validated. No new numeric helpers or live-SAS claim."
     }
    ],
    "related_evidence": {
@@ -677,14 +722,19 @@
     "DS-016",
     "DS-035",
     "DS-056",
-    "DS-057"
+    "DS-057",
+    "DS-060",
+    "DS-061"
    ],
    "gates": [
     "do-until",
     "suite-do-until",
     "pipeline-loops",
     "numeric-pipeline",
-    "suite-numeric-pipeline"
+    "suite-numeric-pipeline",
+    "grouped-do",
+    "loop-transfer",
+    "suite-grouped-control"
    ],
    "reference_page": 76,
    "note": "single-level body-first numeric predicate loop, at most10000 body executions per invocation; fixed tool budget, no nesting or LAG/DIF; repository/base-R evidence, no live SAS",
@@ -705,6 +755,15 @@
       "suite-numeric-pipeline"
      ],
      "scope": "DS-054..057 separately marked binary64-pipeline-v1 composition. Existing converter, exact controls, resource/text limits and old markers remain. Full original measurement stream and independent base R prove bounded state/snapshots; no live SAS or new complete external-program claim."
+    },
+    {
+     "level": "source-execution",
+     "gates": [
+      "grouped-do",
+      "loop-transfer",
+      "suite-grouped-control"
+     ],
+     "scope": "Separate bounded-control-v1 integer control_data composition. Earlier profile admission/value/text contracts are preserved; groups/transfers, static empty discovery and atomic state/OUTPUT/SET/PUT behavior are separately validated. No new numeric helpers or live-SAS claim."
     }
    ],
    "related_evidence": {
@@ -725,14 +784,19 @@
     "DS-016",
     "DS-038",
     "DS-056",
-    "DS-057"
+    "DS-057",
+    "DS-060",
+    "DS-061"
    ],
    "gates": [
     "do-while",
     "suite-do-while",
     "pipeline-loops",
     "numeric-pipeline",
-    "suite-numeric-pipeline"
+    "suite-numeric-pipeline",
+    "grouped-do",
+    "loop-transfer",
+    "suite-grouped-control"
    ],
    "reference_page": 78,
    "note": "Single-level DATA-step numeric pre-test. False/missing truth permits zero trips. Fixed10000-body budget per invocation; false after body10000 succeeds, true there refuses before body10001. _N_ advances per outer DATA row. Entire-step OUTPUT discovery suppresses implicit output even on skipped/zero-trip paths. Nested/combined loop forms stay deferred; other recorded counted/UNTIL/array evidence remains separate.",
@@ -753,6 +817,15 @@
       "suite-numeric-pipeline"
      ],
      "scope": "DS-054..057 separately marked binary64-pipeline-v1 composition. Existing converter, exact controls, resource/text limits and old markers remain. Full original measurement stream and independent base R prove bounded state/snapshots; no live SAS or new complete external-program claim."
+    },
+    {
+     "level": "source-execution",
+     "gates": [
+      "grouped-do",
+      "loop-transfer",
+      "suite-grouped-control"
+     ],
+     "scope": "Separate bounded-control-v1 integer control_data composition. Earlier profile admission/value/text contracts are preserved; groups/transfers, static empty discovery and atomic state/OUTPUT/SET/PUT behavior are separately validated. No new numeric helpers or live-SAS claim."
     }
    ],
    "related_evidence": {
@@ -773,7 +846,9 @@
     "DS-047",
     "DS-052",
     "DS-053",
-    "DS-057"
+    "DS-057",
+    "DS-060",
+    "DS-061"
    ],
    "gates": [
     "projection",
@@ -782,7 +857,10 @@
     "numeric-set",
     "suite-numeric-rows",
     "numeric-pipeline",
-    "suite-numeric-pipeline"
+    "suite-numeric-pipeline",
+    "grouped-do",
+    "loop-transfer",
+    "suite-grouped-control"
    ],
    "reference_page": 79,
    "assessment_history": [
@@ -818,6 +896,15 @@
       "suite-numeric-pipeline"
      ],
      "scope": "DS-054..057 separately marked binary64-pipeline-v1 composition. Existing converter, exact controls, resource/text limits and old markers remain. Full original measurement stream and independent base R prove bounded state/snapshots; no live SAS or new complete external-program claim."
+    },
+    {
+     "level": "source-execution",
+     "gates": [
+      "grouped-do",
+      "loop-transfer",
+      "suite-grouped-control"
+     ],
+     "scope": "Separate bounded-control-v1 integer control_data composition. Earlier profile admission/value/text contracts are preserved; groups/transfers, static empty discovery and atomic state/OUTPUT/SET/PUT behavior are separately validated. No new numeric helpers or live-SAS claim."
     }
    ]
   },
@@ -833,7 +920,9 @@
     "DS-026",
     "DS-035",
     "DS-038",
-    "DS-040"
+    "DS-040",
+    "DS-060",
+    "DS-061"
    ],
    "gates": [
     "do-counted",
@@ -843,7 +932,10 @@
     "do-while",
     "suite-do-while",
     "do-over",
-    "suite-do-over"
+    "suite-do-over",
+    "grouped-do",
+    "loop-transfer",
+    "suite-grouped-control"
    ],
    "reference_page": 81,
    "note": "Single-level DATA-step numeric pre-test. False/missing truth permits zero trips. Fixed10000-body budget per invocation; false after body10000 succeeds, true there refuses before body10001. _N_ advances per outer DATA row. Entire-step OUTPUT discovery suppresses implicit output even on skipped/zero-trip paths. Nested/combined loop forms stay deferred; other recorded counted/UNTIL/array evidence remains separate. DS-040 implicit DO OVER is separately scoped in docs/DO_OVER.md.",
@@ -867,6 +959,15 @@
       "suite-do-over"
      ],
      "scope": "DS-040 single-level legacy implicit numeric DO OVER with current-element row aliases, fresh internal state, static schema/OUTPUT discovery and atomic failures. Whole loops_foreach.sas source/result/stdout pins and independent base R. Explicit controls, named indices, shared-current arrays, nested loops and wider array forms remain refused."
+    },
+    {
+     "level": "source-execution",
+     "gates": [
+      "grouped-do",
+      "loop-transfer",
+      "suite-grouped-control"
+     ],
+     "scope": "Separate bounded-control-v1 integer control_data composition. Earlier profile admission/value/text contracts are preserved; groups/transfers, static empty discovery and atomic state/OUTPUT/SET/PUT behavior are separately validated. No new numeric helpers or live-SAS claim."
     }
    ],
    "related_evidence": {
@@ -1168,11 +1269,16 @@
    "disposition": "GATED",
    "rule_ids": [
     "DS-005",
-    "DS-031"
+    "DS-031",
+    "DS-060",
+    "DS-061"
    ],
    "gates": [
     "missarith",
-    "do-if"
+    "do-if",
+    "grouped-do",
+    "loop-transfer",
+    "suite-grouped-control"
    ],
    "reference_page": 120,
    "gate_evidence": [
@@ -1189,6 +1295,15 @@
       "do-if"
      ],
      "scope": "First-true simple-action IF/ELSE chains with static schema discovery; no THEN DO groups, labels or arbitrary actions."
+    },
+    {
+     "level": "source-execution",
+     "gates": [
+      "grouped-do",
+      "loop-transfer",
+      "suite-grouped-control"
+     ],
+     "scope": "Separate bounded-control-v1 integer control_data composition. Earlier profile admission/value/text contracts are preserved; groups/transfers, static empty discovery and atomic state/OUTPUT/SET/PUT behavior are separately validated. No new numeric helpers or live-SAS claim."
     }
    ]
   },
@@ -1420,7 +1535,9 @@
     "DS-047",
     "DS-052",
     "DS-053",
-    "DS-057"
+    "DS-057",
+    "DS-060",
+    "DS-061"
    ],
    "gates": [
     "projection",
@@ -1429,7 +1546,10 @@
     "numeric-set",
     "suite-numeric-rows",
     "numeric-pipeline",
-    "suite-numeric-pipeline"
+    "suite-numeric-pipeline",
+    "grouped-do",
+    "loop-transfer",
+    "suite-grouped-control"
    ],
    "reference_page": 204,
    "assessment_history": [
@@ -1465,6 +1585,15 @@
       "suite-numeric-pipeline"
      ],
      "scope": "DS-054..057 separately marked binary64-pipeline-v1 composition. Existing converter, exact controls, resource/text limits and old markers remain. Full original measurement stream and independent base R prove bounded state/snapshots; no live SAS or new complete external-program claim."
+    },
+    {
+     "level": "source-execution",
+     "gates": [
+      "grouped-do",
+      "loop-transfer",
+      "suite-grouped-control"
+     ],
+     "scope": "Separate bounded-control-v1 integer control_data composition. Earlier profile admission/value/text contracts are preserved; groups/transfers, static empty discovery and atomic state/OUTPUT/SET/PUT behavior are separately validated. No new numeric helpers or live-SAS claim."
     }
    ]
   },
@@ -1503,10 +1632,26 @@
    "category": "CAS",
    "type": "Executable",
    "valid_in": "DATA step",
-   "disposition": "UNASSESSED",
-   "rule_ids": [],
-   "gates": [],
-   "reference_page": 214
+   "disposition": "GATED",
+   "rule_ids": [
+    "DS-061"
+   ],
+   "gates": [
+    "loop-transfer",
+    "suite-grouped-control"
+   ],
+   "reference_page": 214,
+   "gate_evidence": [
+    {
+     "level": "source-execution",
+     "gates": [
+      "loop-transfer",
+      "suite-grouped-control"
+     ],
+     "scope": "Only control_data/bounded-control-v1. Scalar integer/missing DATA, optional selected numeric SET, grouped IF/ELSE, nearest counted/WHILE/UNTIL transfers, bounded static/empty/OUTPUT/state/event scheduling. See docs/GROUPED_CONTROL.md. No INPUT/arrays/rounded composition, labels or live SAS."
+    }
+   ],
+   "note": "DS-060/061 prove this explicitly marked bounded grouped-control slice. Prior dispositions and helper-only rationale remain in assessment_history. Broader statement forms remain outside the gate."
   },
   {
    "entry": "LENGTH Statement",
@@ -1755,12 +1900,17 @@
    "valid_in": "DATA step",
    "disposition": "GATED",
    "rule_ids": [
-    "DS-057"
+    "DS-057",
+    "DS-060",
+    "DS-061"
    ],
    "gates": [
     "data-events",
     "numeric-pipeline",
-    "suite-numeric-pipeline"
+    "suite-numeric-pipeline",
+    "grouped-do",
+    "loop-transfer",
+    "suite-grouped-control"
    ],
    "reference_page": 261,
    "note": "explicit OUTPUT snapshots pinned in the events family",
@@ -1779,6 +1929,15 @@
       "suite-numeric-pipeline"
      ],
      "scope": "DS-054..057 separately marked binary64-pipeline-v1 composition. Existing converter, exact controls, resource/text limits and old markers remain. Full original measurement stream and independent base R prove bounded state/snapshots; no live SAS or new complete external-program claim."
+    },
+    {
+     "level": "source-execution",
+     "gates": [
+      "grouped-do",
+      "loop-transfer",
+      "suite-grouped-control"
+     ],
+     "scope": "Separate bounded-control-v1 integer control_data composition. Earlier profile admission/value/text contracts are preserved; groups/transfers, static empty discovery and atomic state/OUTPUT/SET/PUT behavior are separately validated. No new numeric helpers or live-SAS claim."
     }
    ]
   },
@@ -1809,7 +1968,9 @@
     "DS-046",
     "DS-052",
     "DS-053",
-    "DS-057"
+    "DS-057",
+    "DS-060",
+    "DS-061"
    ],
    "gates": [
     "put-literal",
@@ -1828,7 +1989,10 @@
     "numeric-set",
     "suite-numeric-rows",
     "numeric-pipeline",
-    "suite-numeric-pipeline"
+    "suite-numeric-pipeline",
+    "grouped-do",
+    "loop-transfer",
+    "suite-grouped-control"
    ],
    "reference_page": 265,
    "note": "Bounded logical records of quoted literals and ordinary unformatted nonblank character variables: printable ASCII, at most 64 columns including variable separators, documented spacing and quote decoding. Blank fields, numeric output, attached formats, special controls, literal adjacency/comment-only separation, FILE, pointers, macros, and C++ require review. Named-list output has a separate entry. DS-025 adds bounded scalar PUT _ALL_: ordered named PDV fields, ordinary numeric missing and conservative BEST12 integers, _ERROR_=0 and _N_=1. No general error-flag or physical SAS log equivalence. DS-027 separately gates source-order known numeric variables: ordinary missing and finite integers with magnitude at most 99999999999, one following separator per field, at most 64 logical columns. Types and attached formats are validated even on empty or filtered SET input; mixed numeric items, unknown/descriptor-only variables, fractions, special missing output, formats, controls, and C++ retain refusals. DS-042 separately gates literal/known numeric-variable mixtures in DATA, simple IF and counted loops. Preserve literal blanks and numeric following separators, ordinary missing and bounded integers within64 logical columns. See docs/MIXED_PUT.md; other profiles retain their contracts. DS-046 separately gates output-only ordinary numeric discovery for catalog-free DATA numeric-list PUT; prior output contracts remain separate. See docs/NUMERIC_COMPOSITION.md. DS-052/053 add the separately gated rounded numeric row/projection composition in docs/NUMERIC_ROWS.md.",
@@ -1879,6 +2043,15 @@
       "suite-numeric-pipeline"
      ],
      "scope": "DS-054..057 separately marked binary64-pipeline-v1 composition. Existing converter, exact controls, resource/text limits and old markers remain. Full original measurement stream and independent base R prove bounded state/snapshots; no live SAS or new complete external-program claim."
+    },
+    {
+     "level": "source-execution",
+     "gates": [
+      "grouped-do",
+      "loop-transfer",
+      "suite-grouped-control"
+     ],
+     "scope": "Separate bounded-control-v1 integer control_data composition. Earlier profile admission/value/text contracts are preserved; groups/transfers, static empty discovery and atomic state/OUTPUT/SET/PUT behavior are separately validated. No new numeric helpers or live-SAS claim."
     }
    ]
   },
@@ -1918,7 +2091,9 @@
     "DS-046",
     "DS-052",
     "DS-053",
-    "DS-057"
+    "DS-057",
+    "DS-060",
+    "DS-061"
    ],
    "gates": [
     "put-literal",
@@ -1933,7 +2108,10 @@
     "numeric-set",
     "suite-numeric-rows",
     "numeric-pipeline",
-    "suite-numeric-pipeline"
+    "suite-numeric-pipeline",
+    "grouped-do",
+    "loop-transfer",
+    "suite-grouped-control"
    ],
    "reference_page": 296,
    "note": "Bounded logical records of quoted literals and ordinary unformatted nonblank character variables: printable ASCII, at most 64 columns including variable separators, documented spacing and quote decoding. Blank fields, numeric output, attached formats, special controls, literal adjacency/comment-only separation, FILE, pointers, macros, and C++ require review. Named-list output has a separate entry. DS-027 separately gates source-order known numeric variables: ordinary missing and finite integers with magnitude at most 99999999999, one following separator per field, at most 64 logical columns. Types and attached formats are validated even on empty or filtered SET input; mixed numeric items, unknown/descriptor-only variables, fractions, special missing output, formats, controls, and C++ retain refusals. DS-046 separately gates output-only ordinary numeric discovery for catalog-free DATA numeric-list PUT; prior output contracts remain separate. See docs/NUMERIC_COMPOSITION.md. DS-052/053 add the separately gated rounded numeric row/projection composition in docs/NUMERIC_ROWS.md.",
@@ -1974,6 +2152,15 @@
       "suite-numeric-pipeline"
      ],
      "scope": "DS-054..057 separately marked binary64-pipeline-v1 composition. Existing converter, exact controls, resource/text limits and old markers remain. Full original measurement stream and independent base R prove bounded state/snapshots; no live SAS or new complete external-program claim."
+    },
+    {
+     "level": "source-execution",
+     "gates": [
+      "grouped-do",
+      "loop-transfer",
+      "suite-grouped-control"
+     ],
+     "scope": "Separate bounded-control-v1 integer control_data composition. Earlier profile admission/value/text contracts are preserved; groups/transfers, static empty discovery and atomic state/OUTPUT/SET/PUT behavior are separately validated. No new numeric helpers or live-SAS claim."
     }
    ]
   },
@@ -2081,7 +2268,9 @@
    "disposition": "GATED",
    "rule_ids": [
     "DS-006",
-    "DS-057"
+    "DS-057",
+    "DS-060",
+    "DS-061"
    ],
    "gates": [
     "bygroup",
@@ -2089,7 +2278,10 @@
     "sum-statement",
     "suite-sum-statement",
     "numeric-pipeline",
-    "suite-numeric-pipeline"
+    "suite-numeric-pipeline",
+    "grouped-do",
+    "loop-transfer",
+    "suite-grouped-control"
    ],
    "reference_page": 319,
    "note": "numeric RETAIN pinned in the events and bygroup families",
@@ -2117,6 +2309,15 @@
       "suite-numeric-pipeline"
      ],
      "scope": "DS-054..057 separately marked binary64-pipeline-v1 composition. Existing converter, exact controls, resource/text limits and old markers remain. Full original measurement stream and independent base R prove bounded state/snapshots; no live SAS or new complete external-program claim."
+    },
+    {
+     "level": "source-execution",
+     "gates": [
+      "grouped-do",
+      "loop-transfer",
+      "suite-grouped-control"
+     ],
+     "scope": "Separate bounded-control-v1 integer control_data composition. Earlier profile admission/value/text contracts are preserved; groups/transfers, static empty discovery and atomic state/OUTPUT/SET/PUT behavior are separately validated. No new numeric helpers or live-SAS claim."
     }
    ]
   },
@@ -2198,7 +2399,9 @@
    "rule_ids": [
     "DS-001",
     "DS-053",
-    "DS-057"
+    "DS-057",
+    "DS-060",
+    "DS-061"
    ],
    "gates": [
     "data-events",
@@ -2208,7 +2411,10 @@
     "numeric-set",
     "suite-numeric-rows",
     "numeric-pipeline",
-    "suite-numeric-pipeline"
+    "suite-numeric-pipeline",
+    "grouped-do",
+    "loop-transfer",
+    "suite-grouped-control"
    ],
    "reference_page": 331,
    "note": "concatenation rule; no dedicated fixture DS-052/053 add the separately gated rounded numeric row/projection composition in docs/NUMERIC_ROWS.md.",
@@ -2238,6 +2444,15 @@
       "suite-numeric-pipeline"
      ],
      "scope": "DS-054..057 separately marked binary64-pipeline-v1 composition. Existing converter, exact controls, resource/text limits and old markers remain. Full original measurement stream and independent base R prove bounded state/snapshots; no live SAS or new complete external-program claim."
+    },
+    {
+     "level": "source-execution",
+     "gates": [
+      "grouped-do",
+      "loop-transfer",
+      "suite-grouped-control"
+     ],
+     "scope": "Separate bounded-control-v1 integer control_data composition. Earlier profile admission/value/text contracts are preserved; groups/transfers, static empty discovery and atomic state/OUTPUT/SET/PUT behavior are separately validated. No new numeric helpers or live-SAS claim."
     }
    ]
   },
@@ -2467,7 +2682,9 @@
     "DS-048",
     "DS-052",
     "DS-053",
-    "DS-057"
+    "DS-057",
+    "DS-060",
+    "DS-061"
    ],
    "gates": [
     "projection",
@@ -2476,7 +2693,10 @@
     "numeric-set",
     "suite-numeric-rows",
     "numeric-pipeline",
-    "suite-numeric-pipeline"
+    "suite-numeric-pipeline",
+    "grouped-do",
+    "loop-transfer",
+    "suite-grouped-control"
    ],
    "reference_page": 20,
    "note": "Bounded KEEP/DROP ordinary-name and numbered-range selection only. Statement/DATA output projection and single SET input selection have distinct timing contracts. See docs/PROJECTION.md. Wider syntax, declarations, PROC options and live SAS remain outstanding. DS-052/053 add the separately gated rounded numeric row/projection composition in docs/NUMERIC_ROWS.md.",
@@ -2512,6 +2732,15 @@
       "suite-numeric-pipeline"
      ],
      "scope": "DS-054..057 separately marked binary64-pipeline-v1 composition. Existing converter, exact controls, resource/text limits and old markers remain. Full original measurement stream and independent base R prove bounded state/snapshots; no live SAS or new complete external-program claim."
+    },
+    {
+     "level": "source-execution",
+     "gates": [
+      "grouped-do",
+      "loop-transfer",
+      "suite-grouped-control"
+     ],
+     "scope": "Separate bounded-control-v1 integer control_data composition. Earlier profile admission/value/text contracts are preserved; groups/transfers, static empty discovery and atomic state/OUTPUT/SET/PUT behavior are separately validated. No new numeric helpers or live-SAS claim."
     }
    ]
   },
@@ -2669,7 +2898,9 @@
     "DS-048",
     "DS-052",
     "DS-053",
-    "DS-057"
+    "DS-057",
+    "DS-060",
+    "DS-061"
    ],
    "gates": [
     "projection",
@@ -2678,7 +2909,10 @@
     "numeric-set",
     "suite-numeric-rows",
     "numeric-pipeline",
-    "suite-numeric-pipeline"
+    "suite-numeric-pipeline",
+    "grouped-do",
+    "loop-transfer",
+    "suite-grouped-control"
    ],
    "reference_page": 45,
    "note": "Bounded KEEP/DROP ordinary-name and numbered-range selection only. Statement/DATA output projection and single SET input selection have distinct timing contracts. See docs/PROJECTION.md. Wider syntax, declarations, PROC options and live SAS remain outstanding. DS-052/053 add the separately gated rounded numeric row/projection composition in docs/NUMERIC_ROWS.md.",
@@ -2714,6 +2948,15 @@
       "suite-numeric-pipeline"
      ],
      "scope": "DS-054..057 separately marked binary64-pipeline-v1 composition. Existing converter, exact controls, resource/text limits and old markers remain. Full original measurement stream and independent base R prove bounded state/snapshots; no live SAS or new complete external-program claim."
+    },
+    {
+     "level": "source-execution",
+     "gates": [
+      "grouped-do",
+      "loop-transfer",
+      "suite-grouped-control"
+     ],
+     "scope": "Separate bounded-control-v1 integer control_data composition. Earlier profile admission/value/text contracts are preserved; groups/transfers, static empty discovery and atomic state/OUTPUT/SET/PUT behavior are separately validated. No new numeric helpers or live-SAS claim."
     }
    ]
   },
@@ -3065,6 +3308,84 @@
      "previous_rule_ids": [],
      "disposition": "GATED",
      "reason": "DS-058 executes only numeric inline comma DLM/FIRSTOBS; wider INFILE syntax remains unassessed."
+    }
+   ]
+  },
+  {
+   "date": "2026-10-30",
+   "baseline": "c3485ccc70abf6bc0de26065308a42d45e4fa397",
+   "method": "Implementation inference backed by separately registered source/base-R event gates; not a whole-language assessment.",
+   "changes": [
+    {
+     "document": "stmt",
+     "entry": "CONTINUE Statement",
+     "previous_disposition": "UNASSESSED",
+     "previous_rule_ids": [],
+     "previous_gates": [],
+     "previous_entry": {
+      "entry": "CONTINUE Statement",
+      "document": "stmt",
+      "category": "CAS",
+      "type": "Executable",
+      "valid_in": "DATA step",
+      "disposition": "UNASSESSED",
+      "rule_ids": [],
+      "gates": [],
+      "reference_page": 48
+     },
+     "disposition": "GATED",
+     "reason": "DS-060/061 separately marked bounded integer control_data source execution and independent base-R event/state evidence; broader language forms remain unassessed."
+    },
+    {
+     "document": "stmt",
+     "entry": "DO Statement",
+     "previous_disposition": "UNASSESSED",
+     "previous_rule_ids": [
+      "DS-016"
+     ],
+     "previous_gates": [],
+     "previous_entry": {
+      "entry": "DO Statement",
+      "document": "stmt",
+      "category": "CAS",
+      "type": "Executable",
+      "valid_in": "DATA step",
+      "disposition": "UNASSESSED",
+      "rule_ids": [
+       "DS-016"
+      ],
+      "gates": [],
+      "reference_page": 70,
+      "related_evidence": {
+       "gates": [
+        "arrays"
+       ],
+       "scope": "arrays proves array helpers; bare grouped DO source remains refused and has no independent grouped-control fixture."
+      },
+      "note": "arrays proves array helpers; bare grouped DO source remains refused and has no independent grouped-control fixture. Prior assessment preserved in assessment_history; related evidence is not a gate for this entry."
+     },
+     "disposition": "GATED",
+     "reason": "DS-060/061 separately marked bounded integer control_data source execution and independent base-R event/state evidence; broader language forms remain unassessed."
+    },
+    {
+     "document": "stmt",
+     "entry": "LEAVE Statement",
+     "previous_disposition": "UNASSESSED",
+     "previous_rule_ids": [],
+     "previous_gates": [],
+     "previous_entry": {
+      "entry": "LEAVE Statement",
+      "document": "stmt",
+      "category": "CAS",
+      "type": "Executable",
+      "valid_in": "DATA step",
+      "disposition": "UNASSESSED",
+      "rule_ids": [],
+      "gates": [],
+      "reference_page": 214
+     },
+     "disposition": "GATED",
+     "reason": "DS-060/061 separately marked bounded integer control_data source execution and independent base-R event/state evidence; broader language forms remain unassessed."
     }
    ]
   }

@@ -291,6 +291,14 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
         raise RuntimeError('saschi: blocked translation. Nothing from this program was executed.')
     tables, logs = normalize_catalog({} if catalog is None else catalog), []
     for step in plan['steps']:
+        from .grouped_control import execute_step as execute_control_step, refuse_legacy
+        if step.get('kind') == 'control_data':
+            table, control_logs = execute_control_step(step, tables, plan['version'])
+            if table is not None:
+                tables[step['name']] = table
+            logs.extend(control_logs)
+            continue
+        refuse_legacy(step.get('operations', []))
         if step.get('kind') == 'sql_create':
             table = materialize_sql_create(step, tables, plan['version'])
             tables[step['name']] = table

@@ -202,7 +202,11 @@ class CountedNestedTests(unittest.TestCase):
         for body in ('do while(1); end;', 'do until(1); end;', 'do over a; end;',
                      'leave;', 'continue;', 'set raw;', 'retain x 0;', 'put _all_;',
                      'if 1 then do j=1 to 2; end;', 'x=lag(i);'):
-            self.blocked('n=2; do i=1 to n; '+body+' end;')
+            body_source='n=2; do i=1 to n; '+body+' end;'
+            if body in ('leave;','continue;'):
+                from .test_grouped_control import assert_promoted_source
+                assert_promoted_source(self,'data d; '+body_source+' run;')
+            else:self.blocked(body_source)
         self.blocked('do while(1); do i=1 to 2; end; end;')
         self.blocked('do i=1 to 2 while(1); end;')
 

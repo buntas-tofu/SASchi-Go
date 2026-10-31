@@ -102,6 +102,10 @@ class BlockedProgramTests(unittest.TestCase):
     def test_unsupported_shapes_block_and_cannot_execute(self):
         for name, source in self.UNSUPPORTED.items():
             with self.subTest(shape=name):
+                if name == 'if/do':
+                    from .test_grouped_control import assert_promoted_source
+                    assert_promoted_source(self,source)
+                    continue
                 t = translate(source)
                 self.assertTrue(t.tickets, f"{name}: expected a ticket")
                 self.assertTrue(t.blocked, f"{name}: expected blocked")
@@ -124,12 +128,8 @@ class BlockedProgramTests(unittest.TestCase):
                          [{'stop': 2., 'i': 3., 'x': 2.}])
 
     def test_a_blocked_unit_prints_nothing(self):
-        t = translate(self.UNSUPPORTED["if/do"])
-        buf = io.StringIO()
-        with contextlib.redirect_stdout(buf):
-            with self.assertRaises(RuntimeError):
-                exec(compile(t.code, "blocked.py", "exec"), {})
-        self.assertEqual("", buf.getvalue())
+        from .test_grouped_control import assert_promoted_source
+        assert_promoted_source(self,self.UNSUPPORTED["if/do"])
 
     def test_a_program_that_tickets_everywhere_still_compiles(self):
         # A body of nothing but comments is not a body, so the inert function
@@ -141,17 +141,23 @@ class BlockedProgramTests(unittest.TestCase):
         compile(t.code, "blocked.py", "exec")
 
     def test_inspection_mode_is_runnable_and_marked(self):
+        from .test_grouped_control import assert_promoted_source
+        assert_promoted_source(self,self.UNSUPPORTED["if/do"])
         t = translate(self.UNSUPPORTED["if/do"], allow_partial=True)
-        self.assertTrue(t.blocked)
-        self.assertIn("# PARTIAL", t.code)
-        self.assertNotIn("# BLOCKED", t.code)
+        self.assertFalse(t.blocked)
+        self.assertNotIn("# PARTIAL", t.code)
         buf = io.StringIO()
-        with contextlib.redirect_stdout(buf):
-            exec(compile(t.code, "partial.py", "exec"), {})
-        # The partial body runs, and this asserts what that costs: the IF is
-        # gone and its body executed unconditionally. This is why the mode is
-        # marked and why it is not the default.
-        self.assertEqual("x=2", buf.getvalue().strip())
+        with contextlib.redirect_stdout(buf):exec(compile(t.code, "complete.py", "exec"), {})
+        self.assertEqual("x=1",buf.getvalue().strip())
+        # Preserve the exact promoted prefix and separately require a still
+        # unsupported tail to keep inspection mode marked and runnable.
+        partial = translate(self.UNSUPPORTED["if/do"] + " %mend;", allow_partial=True)
+        self.assertTrue(partial.blocked)
+        self.assertIn("# PARTIAL",partial.code)
+        self.assertNotIn("# BLOCKED",partial.code)
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):exec(compile(partial.code,"partial.py","exec"),{})
+        self.assertEqual("x=1",buf.getvalue().strip())
 
     def test_plain_program_is_not_blocked(self):
         t = translate("data d; x = 1.5; run;")

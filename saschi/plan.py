@@ -458,7 +458,7 @@ def bind_current(node, name):
             bind_current(child, name)
 
 
-def compile_plan(source: str) -> Plan:
+def _compile_legacy_plan(source: str) -> Plan:
     plan, step, context, active_do = Plan(), None, None, None
     character_put_matches = {}
     numeric_rules = {}
@@ -1264,3 +1264,9 @@ def compile_plan(source: str) -> Plan:
             if count > 128:
                 plan.tickets.append(Ticket(compiled.line, 'expression', 'division', 'numeric composition exceeds the128-node step policy'))
     return plan
+
+
+def compile_plan(source: str) -> Plan:
+    from .grouped_control import compile_program
+    combined = compile_program(source, _compile_legacy_plan)
+    return _compile_legacy_plan(source) if combined is None else combined

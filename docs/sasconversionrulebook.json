@@ -2714,6 +2714,74 @@
       "sources": [
         "docs/INLINE_CSV.md"
       ]
+    },
+    {
+      "rule_id": "DS-060",
+      "sas_pattern": "Simple grouped DO/END and IF/ELSE groups under separate bounded integer control",
+      "scope": "data-step",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "Separate control_data validator/executor; existing numeric and legacy profile contracts remain unchanged."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent complete-source grammar, generic catalog transport, state/snapshot and event scheduler."
+      },
+      "required_settings": [
+        "Only exact version2 control_data steps with first control_profile bounded-control-v1 admit grouped DO and transfers. Preserve every older profile and Step field shape. Require an actual group or transfer, ordinary ASCII names, integer or ordinary-missing operands/results within2147483647, and no new numerical function/domain. One selected numeric SET is optional; INPUT/CSV/arrays/DO OVER/rounded profiles remain separate.",
+        "Simple groups and IF branches propagate distinct LEAVE/CONTINUE signals to the nearest iterative loop. LEAVE preserves the current counted index and bypasses increment/test; counted CONTINUE increments, WHILE CONTINUE reaches the top test and UNTIL CONTINUE reaches the bottom test. No conditional iterative statement, labels or GOTO/LINK/RETURN/STOP extension.",
+        "Validate every static body/descriptor/index-write/transfer ownership including skipped, empty and zero-trip paths. Preserve full-PDV discovery and step-wide explicit OUTPUT suppression. Counted nesting stays8 with distinct indices and no own-index control references; each entry reserves full planned trips against10000 per DATA observation. WHILE/UNTIL retain10000 executed bodies per invocation.",
+        "Bound combined IF/group/loop depth32, expanded operations1024, arithmetic nodes128, expression levels32, PDV columns1..64, selected input observations10000, output/log records10000 per step and scheduled events1000000 per step. Reached increments/results stay in the integer value domain. Caller catalogs/plans are private; failure publishes no accepted result or buffered stdout."
+      ],
+      "forbidden_patterns": [
+        "Unmarked or older-profile groups/transfers; labels, GOTO, LINK, RETURN, STOP, new Boolean or numerical syntax without separate evidence"
+      ],
+      "silent_difference_checks": [
+        "Exact descriptors/order/missing values, state, snapshots, logical text and event traces; inherited generic unselected catalog values preserved separately"
+      ],
+      "validation_test": "examples/verify_grouped_control.py",
+      "confidence": "Bounded repository/base-R event and source evidence; no live SAS or physical-log claim.",
+      "sources": [
+        "docs/GROUPED_CONTROL.md",
+        "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000201276.htm",
+        "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000289377.htm",
+        "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000202782.htm"
+      ]
+    },
+    {
+      "rule_id": "DS-061",
+      "sas_pattern": "Nearest-loop LEAVE/CONTINUE with counted and conditional-loop timing",
+      "scope": "data-step",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "Separate control_data validator/executor; existing numeric and legacy profile contracts remain unchanged."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent complete-source grammar, generic catalog transport, state/snapshot and event scheduler."
+      },
+      "required_settings": [
+        "Only exact version2 control_data steps with first control_profile bounded-control-v1 admit grouped DO and transfers. Preserve every older profile and Step field shape. Require an actual group or transfer, ordinary ASCII names, integer or ordinary-missing operands/results within2147483647, and no new numerical function/domain. One selected numeric SET is optional; INPUT/CSV/arrays/DO OVER/rounded profiles remain separate.",
+        "Simple groups and IF branches propagate distinct LEAVE/CONTINUE signals to the nearest iterative loop. LEAVE preserves the current counted index and bypasses increment/test; counted CONTINUE increments, WHILE CONTINUE reaches the top test and UNTIL CONTINUE reaches the bottom test. No conditional iterative statement, labels or GOTO/LINK/RETURN/STOP extension.",
+        "Validate every static body/descriptor/index-write/transfer ownership including skipped, empty and zero-trip paths. Preserve full-PDV discovery and step-wide explicit OUTPUT suppression. Counted nesting stays8 with distinct indices and no own-index control references; each entry reserves full planned trips against10000 per DATA observation. WHILE/UNTIL retain10000 executed bodies per invocation.",
+        "Bound combined IF/group/loop depth32, expanded operations1024, arithmetic nodes128, expression levels32, PDV columns1..64, selected input observations10000, output/log records10000 per step and scheduled events1000000 per step. Reached increments/results stay in the integer value domain. Caller catalogs/plans are private; failure publishes no accepted result or buffered stdout."
+      ],
+      "forbidden_patterns": [
+        "Unmarked or older-profile groups/transfers; labels, GOTO, LINK, RETURN, STOP, new Boolean or numerical syntax without separate evidence"
+      ],
+      "silent_difference_checks": [
+        "Exact descriptors/order/missing values, state, snapshots, logical text and event traces; inherited generic unselected catalog values preserved separately"
+      ],
+      "validation_test": "examples/verify_loop_transfer.py",
+      "confidence": "Bounded repository/base-R event and source evidence; no live SAS or physical-log claim.",
+      "sources": [
+        "docs/GROUPED_CONTROL.md",
+        "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000201276.htm",
+        "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000289377.htm",
+        "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000202782.htm"
+      ]
     }
   ],
   "runtime_capabilities": {
@@ -3165,6 +3233,34 @@
       "r_witness": "examples/input_ranges.R",
       "boundary_tests": "saschi.test_input_numeric",
       "evidence": "Separate marked profile, hand pins, generated complete-source/runtime/R cases, shared refusals, original20-language-statement/two-opaque-block/5-read/7-snapshot witness, emitted Python and actual CLI. No earlier source-refusal promotions."
+    },
+    "grouped_do": {
+      "rule_id": "DS-060",
+      "target": "saschi.runtime.run_plan",
+      "scope": [
+        "Only exact version2 control_data steps with first control_profile bounded-control-v1 admit grouped DO and transfers. Preserve every older profile and Step field shape. Require an actual group or transfer, ordinary ASCII names, integer or ordinary-missing operands/results within2147483647, and no new numerical function/domain. One selected numeric SET is optional; INPUT/CSV/arrays/DO OVER/rounded profiles remain separate.",
+        "Simple groups and IF branches propagate distinct LEAVE/CONTINUE signals to the nearest iterative loop. LEAVE preserves the current counted index and bypasses increment/test; counted CONTINUE increments, WHILE CONTINUE reaches the top test and UNTIL CONTINUE reaches the bottom test. No conditional iterative statement, labels or GOTO/LINK/RETURN/STOP extension.",
+        "Validate every static body/descriptor/index-write/transfer ownership including skipped, empty and zero-trip paths. Preserve full-PDV discovery and step-wide explicit OUTPUT suppression. Counted nesting stays8 with distinct indices and no own-index control references; each entry reserves full planned trips against10000 per DATA observation. WHILE/UNTIL retain10000 executed bodies per invocation.",
+        "Bound combined IF/group/loop depth32, expanded operations1024, arithmetic nodes128, expression levels32, PDV columns1..64, selected input observations10000, output/log records10000 per step and scheduled events1000000 per step. Reached increments/results stay in the integer value domain. Caller catalogs/plans are private; failure publishes no accepted result or buffered stdout."
+      ],
+      "validation_test": "examples/verify_grouped_control.py",
+      "r_witness": "examples/grouped_control.R",
+      "boundary_tests": "saschi.test_grouped_control",
+      "evidence": "Separate group and transfer gates with complete-source base-R event schedules, pinned original/hand truth, generated/refusal controls, exact comparators and actual CLI/emitted/atomic execution. No complete external-program proof or live-SAS claim."
+    },
+    "loop_transfer": {
+      "rule_id": "DS-061",
+      "target": "saschi.runtime.run_plan",
+      "scope": [
+        "Only exact version2 control_data steps with first control_profile bounded-control-v1 admit grouped DO and transfers. Preserve every older profile and Step field shape. Require an actual group or transfer, ordinary ASCII names, integer or ordinary-missing operands/results within2147483647, and no new numerical function/domain. One selected numeric SET is optional; INPUT/CSV/arrays/DO OVER/rounded profiles remain separate.",
+        "Simple groups and IF branches propagate distinct LEAVE/CONTINUE signals to the nearest iterative loop. LEAVE preserves the current counted index and bypasses increment/test; counted CONTINUE increments, WHILE CONTINUE reaches the top test and UNTIL CONTINUE reaches the bottom test. No conditional iterative statement, labels or GOTO/LINK/RETURN/STOP extension.",
+        "Validate every static body/descriptor/index-write/transfer ownership including skipped, empty and zero-trip paths. Preserve full-PDV discovery and step-wide explicit OUTPUT suppression. Counted nesting stays8 with distinct indices and no own-index control references; each entry reserves full planned trips against10000 per DATA observation. WHILE/UNTIL retain10000 executed bodies per invocation.",
+        "Bound combined IF/group/loop depth32, expanded operations1024, arithmetic nodes128, expression levels32, PDV columns1..64, selected input observations10000, output/log records10000 per step and scheduled events1000000 per step. Reached increments/results stay in the integer value domain. Caller catalogs/plans are private; failure publishes no accepted result or buffered stdout."
+      ],
+      "validation_test": "examples/verify_loop_transfer.py",
+      "r_witness": "examples/grouped_control.R",
+      "boundary_tests": "saschi.test_grouped_control",
+      "evidence": "Separate group and transfer gates with complete-source base-R event schedules, pinned original/hand truth, generated/refusal controls, exact comparators and actual CLI/emitted/atomic execution. No complete external-program proof or live-SAS claim."
     }
   }
 }

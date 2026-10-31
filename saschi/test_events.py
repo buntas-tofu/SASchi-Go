@@ -93,7 +93,11 @@ class EventTests(unittest.TestCase):
                    'data d; if _n_=1 then set a; run;', 'data d; _n_=5; run;',
                    'data d; x=1; set a; run;']
         for source in sources:
-            with self.subTest(source=source): self.assertTrue(compile_plan(source).blocked)
+            with self.subTest(source=source):
+                if source == 'data d; if 1 then do; x=2; end; run;':
+                    from .test_grouped_control import assert_promoted_source
+                    assert_promoted_source(self,source)
+                else:self.assertTrue(compile_plan(source).blocked)
         for body in ('output', 'if 1 then x=2', 'retain x 0', 'x=_n_', 'put _n_=', 'x=.A', "x='ab'", 'x=x+1'):
             with self.subTest(body=body): self.assertTrue(cpp_translate(f'data _null_; {body}; run;').blocked)
 

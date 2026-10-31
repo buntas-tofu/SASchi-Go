@@ -1,7 +1,7 @@
 # Coverage reconciliation and next gate series
 
 Status: Repository/base-R planning evidence, originally reconciled at main08eaa7b
-on2026-10-27 and updated through DS-059, SQL-004 and A0. The handoff binds current acceptance.
+on2026-10-27 and updated through DS-061, SQL-004 and A0. The handoff binds current acceptance.
 For principal/maintainer prioritization. Counts describe this checkout and the56
 pinned sibling corpus files, not all SAS or live-SAS equivalence. Updated for
 DS-039 arrays, DS-040 DO OVER and DS-041 nested/computed counted loops after the original
@@ -11,25 +11,27 @@ Implementation and publication are not authorized by this planning exercise.
 
 ## Inventory reconciled against actual evidence
 
-The golden command registers65 fixture runners,50 translator suites and1
-synthesis runner. The current acceptance contains1030 tests, zero skips,
+The golden command registers67 fixture runners,51 translator suites and1
+synthesis runner. The current acceptance contains1061 tests, zero skips,
 60 faithful synthesis checks and60 naive controls. The separate1k workload
 checks total39:18 ledger and21 text. These counts have different units. Neither
-95 rulebook rules nor116 golden-command runners is a SAS capability denominator.
+97 rulebook rules nor119 golden-command runners is a SAS capability denominator.
 
 [The capability manifest](capability-manifest.json) still enumerates108 statements
 and40 data-set options. The other7 declared reference areas remain unenumerated:
 formats/informats, functions/CALL routines, system options, component objects,
 utilities, macros and procedures. Their null universes are not zero.
 
-The reconciled148 entries contain32 GATED,5 RULE,8 HUMAN-REVIEW,22 OUT-OF-SCOPE
-and81 UNASSESSED. Among GATED entries,31 have bounded source-execution evidence;
+The reconciled148 entries contain35 GATED,5 RULE,8 HUMAN-REVIEW,22 OUT-OF-SCOPE
+and78 UNASSESSED. Among GATED entries,34 have bounded source-execution evidence;
 1 has reference fixtures only: IN=. DS-039/DS-040 add bounded source-array evidence; DS-041 adds scoped counted-loop
 evidence to the existing iterative-DO entry. DS-044 promotes four bounded entries:
 INPUT, INPUT List, CARDS and DATALINES, preserving their prior assessments.
 DS-046 extends bounded source evidence on the already-GATED PUT and PUT List entries;
 no reference universe or disposition count changes in that slice. DS-047/048 promote KEEP/DROP statements and KEEP=/DROP= options, preserving prior dispositions and separate input/output timing evidence. DS-049/050/051 add bounded numerical and inferred logical-text policies without enumerating any function or format universe. Reference universes remain unchanged. DS-058 promotes only INFILE for the bounded inline comma/FIRSTOBS profile;
-DS-059 adds INPUT range evidence to already-GATED entries. The original
+DS-059 adds INPUT range evidence to already-GATED entries. DS-060/061 promote
+only bounded grouped DO, LEAVE and CONTINUE, preserving older assessments and
+all prior gate evidence. The original
 reconciliation below remains its historical assessment event. These are
 catalogue-entry counts, not counts of implemented features or supported forms.
 
@@ -42,6 +44,9 @@ catalogue-entry counts, not counts of implemented features or supported forms.
 | Plain DO | GATED | UNASSESSED | arrays proves helpers; grouped DO source is refused |
 | LABEL= data-set option | GATED | UNASSESSED | data-set labels survive transport; LABEL= source option is refused |
 
+The Plain DO row records the original reconciliation. DS-060 now supplies
+separate source evidence for its bounded integer group profile.
+
 The previous assessments and cited gates remain in manifest assessment history
 and related evidence. Every surviving GATED entry now declares its evidence
 level, registered gates and bounded scope. Existing array reference evidence is
@@ -51,15 +56,15 @@ removed. The manifest gate additionally rejects missing scopes/levels, mismatche
 evidence, duplicate entries and stale rollups. It still checks every previous
 registration, rule and universe requirement.
 
-All81 unassessed entries receive planning bins in the reproducible inventory:
+All78 unassessed entries receive planning bins in the reproducible inventory:
 29 external-environment review,13 separate-scope review,7 input records,
-10 data-set options,9 control,7 output,5 descriptor/environment and1 projection.
+10 data-set options,6 control,7 output,5 descriptor/environment and1 projection.
 These bins organize work; they do not promote dispositions or decide exclusions.
 The5 RULE entries and8 HUMAN-REVIEW entries retain their review boundaries.
 
 ## Unknown blockers classified
 
-The current56-file compile census has20 clean and36 blocked, with639 ticket
+The current56-file compile census has20 clean and36 blocked, with621 ticket
 occurrences. A2 resolves20 compiler tickets across the corpus. The newly compile-
 clean100_doors.sas now passes the DS-042 mixed-output whole-program proof.
 B1 resolves two further tickets and adds the complete loops_for.sas proof.
@@ -70,7 +75,7 @@ B4/B5 remove37 further compiler tickets and10 unknown occurrences.
 C1/C2 removes one further composition ticket in archimedean_spiral.sas; the full
 file still needs SGPLOT and a wider trigonometric domain before execution proof.
 D1 adds bounded rounded INPUT/array/WHILE/UNTIL composition and an original
-measurement-stream proof. Its current corpus census is unchanged; no additional
+measurement-stream proof. Its corpus census was unchanged at that landing; no additional
 complete external program is claimed.
 SQL-004 adds the complete unchanged postal-address empty-table proof. The net
 ticket count falls by one; unsupported SQL procedures gain explicit profile
@@ -78,7 +83,12 @@ diagnostics. Three formerly unknown SQL occurrences now route explicitly.
 D2a removes7 further tickets and routes3 formerly unknown input occurrences.
 The compile-clean and complete-program proof counts remain unchanged; general CSV
 export and broader input forms are still separate contracts.
-The remaining416 occurrences routed
+D3a changes the census by18 further tickets and4 unknown occurrences. These
+are diagnostic measurements: accepted bounded forms and whole-step refusal
+consolidation both affect the count. Labels/GOTO/LINK/RETURN remain unsupported;
+the lower unstructured-control count does not establish those capabilities.
+Compile-clean files remain20 and complete external proofs remain19.
+The remaining412 occurrences routed
 as unknown receive a primary planning category, with file, line, ticket ordinal,
 statement hash and classification basis preserved. Classification preserves every
 current compiler ticket.
@@ -88,13 +98,13 @@ current compiler ticket.
 | Procedure backend/clauses |225|
 | Macro body, invocation or unresolved reference |129|
 | Input records, INPUT/INFILE and opaque inline data |0|
-| Labels, GOTO/LINK/RETURN/STOP |35|
+| Labels, GOTO/LINK/RETURN/STOP |31|
 | Arrays and indexed writes |15|
 | External file/engine output |4|
 | Descriptor/environment statements |4|
 | Corpus prose or printed output |2|
 | CALL side effects |2|
-| Total |416|
+| Total |412|
 
 The procedure subtotal includes DS2:95, OPTMODEL:76, IML:31, PRINT:9, MEANS:4,
 FCMP:3, SGPLOT:2, TTEST:2 and one each SORT, MULTTEST and UNIVARIATE.
@@ -146,6 +156,7 @@ evidence-cost ranking, not a schedule or an estimate of business demand.
 | D4a, implemented in SQL-004 | Explicit CHAR descriptor-only CREATE TABLE | Bare PROC SQL, one CREATE, explicit QUIT | Complete unchanged postal-address empty-table proof, ordered descriptors and atomic destination refusals | Medium; numeric columns, queries, DML and general SQL remain separate |
 | D1, implemented in DS-054..057 | Rounded numeric INPUT, arrays and conditional loops, plus their integrated stream | Existing converter/index/control/value/text policies and explicit binary64-pipeline-v1 | Original complete measurement stream and separate component gates; no new complete corpus proof | High; broader functions, domains, control nesting and record forms remain separate |
 | D2a, implemented in DS-058/059 | Inline comma DLM/FIRSTOBS and numeric INPUT ranges | Existing exact converter and scalar INPUT scheduling | Original complete source with5reads/7snapshots, independent R, generated cases and separate comparison controls; no new whole-file corpus proof | High; DSD, quoted/general CSV, external files and rounded/array/loop composition remain separate |
+| D3a, implemented in DS-060/061 | Numeric DO groups and bounded LEAVE/CONTINUE | Separate integer control_data profile and earlier loop/control limits | Original57-statement/172-event source and independent R prove state/snapshot/transfer scheduling;11 exact prior-source promotions; no new complete corpus proof | High; zero-PDV output, INPUT/array/rounded composition, labels and broader control remain separate |
 
 A1 has reviewable sub-slices: bounded numeric array declaration/index/OF
 execution is implemented in DS-039; single-level implicit numeric DO OVER is
@@ -180,8 +191,9 @@ procedure execution need separately scoped backends and evidence. The existing
 statistical/reference fixtures do not authorize source execution of those PROCs.
 CALL memory access, random streams, external file engines and email need explicit
 state, reproducibility or side-effect contracts. Preserve their current refusal
-paths while defining that work. GOTO/LINK/RETURN, grouped control and validation
-string/ASCII functions remain later composition work, not hidden parts of A1-A3.
+paths while defining that work. GOTO/LINK/RETURN, broader grouped-control forms
+and validation string/ASCII functions remain later composition work. DS-060/061
+only cover the explicitly bounded integer group and transfer profile.
 
 Reference enumeration is a separate planning lane: functions/CALL routines and
 formats/informats first, then macros/procedures/options/component objects and
