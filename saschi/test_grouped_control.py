@@ -409,7 +409,10 @@ class GroupedControlTests(unittest.TestCase):
         for text in ('data d;x=1;do;x=sin(0);end;run;','data d;array a{1}x;do;x=1;end;run;',
                      'data d;input x;do;x=1;end;datalines;\n1\n;\nrun;',
                      'data d;x=1;do;goto label;end;run;', 'data d;x=1;do;stop;end;run;'):
-            self.assertTrue(compile_plan(text).blocked,text)
+            if text=='data d;x=1;do;stop;end;run;':
+                from examples.verify_scalar_jump import assert_stop_promotion
+                assert_stop_promotion(self,text)
+            else:self.assertTrue(compile_plan(text).blocked,text)
         source='data _null_;x=1;do;put x;end;run;';self.assertFalse(compile_plan(source).blocked)
         self.assertTrue(cpp_translate(source).blocked)
 

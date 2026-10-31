@@ -304,6 +304,14 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
     if export_destinations > 1:
         raise ValueError('one export destination per program is the bounded profile')
     for step in plan['steps']:
+        from .flow_control import execute_step as execute_flow_step, refuse_legacy as refuse_flow_legacy
+        if step.get('kind') == 'flow_data':
+            table, flow_logs = execute_flow_step(step, tables, plan['version'])
+            if table is not None:
+                tables[step['name']] = table
+            logs.extend(flow_logs)
+            continue
+        refuse_flow_legacy(step.get('operations', []))
         if step.get('kind') == 'exchange_data':
             table, exchange_logs, buffers = execute_exchange(step, plan['version'])
             if table is not None:

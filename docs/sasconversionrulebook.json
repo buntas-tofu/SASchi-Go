@@ -2852,6 +2852,80 @@
         "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000171874.htm",
         "https://support.sas.com/kb/24/596.html"
       ]
+    },
+    {
+      "rule_id": "DS-064",
+      "sas_pattern": "Local top-level labels, bounded GOTO and successful STOP",
+      "scope": "data-step",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "Separate flow_data validator and program-counter executor; existing profiles unchanged."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent complete-source parser, input decoder, caller analysis and event/state scheduler."
+      },
+      "required_settings": [
+        "Require exact version2 flow_data and first flow_profile marker. scalar-jump-v1 admits local labels/GOTO/STOP; scalar-link-v1 additionally identifies actual LINK/RETURN or INPUT/integer-MOD composition with a flow trigger. Earlier profiles and serialized shapes remain unchanged.",
+        "Labels are unique ordinary ASCII top-level targets in a separate namespace from PDV. GOTO/LINK are top-level or direct IF actions, outside groups/iterative bodies. STOP/RETURN propagate through groups/loops and bypass later increments/tests. Undefined, duplicate and cross-step targets refuse statically.",
+        "One LINK destination, no LINK in its target region, bounded static caller analysis and one active runtime frame. Active RETURN and implicit step-end RETURN resume the caller without PDV reset. Unlinked RETURN with INPUT completes the observation and advances input; statically reachable explicit unlinked RETURN without INPUT conservatively refuses under recorded decision01.",
+        "INPUT retains the existing exact decoder and complete physical-record shape; eager integer validation includes consumed incomplete-EOF values. No jump reexecutes INPUT. Numeric operands/results are ordinary missing or integers within2147483647; plus/minus/multiply and existing integer MOD only. No new Boolean, arrays, stochastic, SET, rounded or general input scope.",
+        "Enforce PDV1..64, labels64, operations1024, mixed containers32, expressions32/nodes128, raw nodes20000/depth256, caller states20000, executed instructions100000, events1000000, snapshots/log records10000 and logical width64. Preserve independent counted8/shared10000 and conditional10000 budgets. Failure publishes no accepted result/stdout; STOP preserves earlier successful output and permits later steps."
+      ],
+      "forbidden_patterns": [
+        "Nested/recursive LINK graphs, jumps into or from structured bodies, broader numeric/Boolean/input/array/stochastic scope"
+      ],
+      "silent_difference_checks": [
+        "Exact ordered descriptors, values, missing, snapshots, logical records, caller/input/loop events and atomic publication"
+      ],
+      "validation_test": "examples/verify_scalar_jump.py",
+      "confidence": "Bounded repository/base-R source evidence; no live SAS or physical-log claim.",
+      "sources": [
+        "docs/SCALAR_FLOW.md",
+        "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000204328.htm",
+        "https://support.sas.com/documentation/cdl/en/lestmtsref/63323/HTML/default/p04lue2yzjvc8xn1603l5kqlw62d.htm",
+        "https://support.sas.com/documentation/cdl/en/lestmtsref/63323/HTML/default/n132s7tapddkc8n1my90ekgo4v0q.htm",
+        "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000201969.htm",
+        "https://support.sas.com/documentation/cdl/en/lestmtsref/63323/HTML/default/p02jy612cym9oxn10i19cbewlrdf.htm"
+      ]
+    },
+    {
+      "rule_id": "DS-065",
+      "sas_pattern": "One-caller LINK/RETURN with exact numeric INPUT, integer MOD and bounded loops",
+      "scope": "data-step",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "Separate flow_data validator and program-counter executor; existing profiles unchanged."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent complete-source parser, input decoder, caller analysis and event/state scheduler."
+      },
+      "required_settings": [
+        "Require exact version2 flow_data and first flow_profile marker. scalar-jump-v1 admits local labels/GOTO/STOP; scalar-link-v1 additionally identifies actual LINK/RETURN or INPUT/integer-MOD composition with a flow trigger. Earlier profiles and serialized shapes remain unchanged.",
+        "Labels are unique ordinary ASCII top-level targets in a separate namespace from PDV. GOTO/LINK are top-level or direct IF actions, outside groups/iterative bodies. STOP/RETURN propagate through groups/loops and bypass later increments/tests. Undefined, duplicate and cross-step targets refuse statically.",
+        "One LINK destination, no LINK in its target region, bounded static caller analysis and one active runtime frame. Active RETURN and implicit step-end RETURN resume the caller without PDV reset. Unlinked RETURN with INPUT completes the observation and advances input; statically reachable explicit unlinked RETURN without INPUT conservatively refuses under recorded decision01.",
+        "INPUT retains the existing exact decoder and complete physical-record shape; eager integer validation includes consumed incomplete-EOF values. No jump reexecutes INPUT. Numeric operands/results are ordinary missing or integers within2147483647; plus/minus/multiply and existing integer MOD only. No new Boolean, arrays, stochastic, SET, rounded or general input scope.",
+        "Enforce PDV1..64, labels64, operations1024, mixed containers32, expressions32/nodes128, raw nodes20000/depth256, caller states20000, executed instructions100000, events1000000, snapshots/log records10000 and logical width64. Preserve independent counted8/shared10000 and conditional10000 budgets. Failure publishes no accepted result/stdout; STOP preserves earlier successful output and permits later steps."
+      ],
+      "forbidden_patterns": [
+        "Nested/recursive LINK graphs, jumps into or from structured bodies, broader numeric/Boolean/input/array/stochastic scope"
+      ],
+      "silent_difference_checks": [
+        "Exact ordered descriptors, values, missing, snapshots, logical records, caller/input/loop events and atomic publication"
+      ],
+      "validation_test": "examples/verify_scalar_link.py",
+      "confidence": "Bounded repository/base-R source evidence; no live SAS or physical-log claim.",
+      "sources": [
+        "docs/SCALAR_FLOW.md",
+        "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000204328.htm",
+        "https://support.sas.com/documentation/cdl/en/lestmtsref/63323/HTML/default/p04lue2yzjvc8xn1603l5kqlw62d.htm",
+        "https://support.sas.com/documentation/cdl/en/lestmtsref/63323/HTML/default/n132s7tapddkc8n1my90ekgo4v0q.htm",
+        "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000201969.htm",
+        "https://support.sas.com/documentation/cdl/en/lestmtsref/63323/HTML/default/p02jy612cym9oxn10i19cbewlrdf.htm"
+      ]
     }
   ],
   "runtime_capabilities": {
@@ -3363,6 +3437,36 @@
       "r_witness": "examples/numeric_exchange.R",
       "boundary_tests": "saschi.test_numeric_exchange",
       "evidence": "Separate component gates, first-party whole-source hand pins, generated/refusal controls, exact ordered comparisons, emitted pure buffers and actual CLI atomic export comparisons. Complete unchanged csv_data_manipulation.sas source/byte proof under the named repository contract."
+    },
+    "scalar_jump": {
+      "rule_id": "DS-064",
+      "target": "saschi.runtime.run_plan",
+      "scope": [
+        "Require exact version2 flow_data and first flow_profile marker. scalar-jump-v1 admits local labels/GOTO/STOP; scalar-link-v1 additionally identifies actual LINK/RETURN or INPUT/integer-MOD composition with a flow trigger. Earlier profiles and serialized shapes remain unchanged.",
+        "Labels are unique ordinary ASCII top-level targets in a separate namespace from PDV. GOTO/LINK are top-level or direct IF actions, outside groups/iterative bodies. STOP/RETURN propagate through groups/loops and bypass later increments/tests. Undefined, duplicate and cross-step targets refuse statically.",
+        "One LINK destination, no LINK in its target region, bounded static caller analysis and one active runtime frame. Active RETURN and implicit step-end RETURN resume the caller without PDV reset. Unlinked RETURN with INPUT completes the observation and advances input; statically reachable explicit unlinked RETURN without INPUT conservatively refuses under recorded decision01.",
+        "INPUT retains the existing exact decoder and complete physical-record shape; eager integer validation includes consumed incomplete-EOF values. No jump reexecutes INPUT. Numeric operands/results are ordinary missing or integers within2147483647; plus/minus/multiply and existing integer MOD only. No new Boolean, arrays, stochastic, SET, rounded or general input scope.",
+        "Enforce PDV1..64, labels64, operations1024, mixed containers32, expressions32/nodes128, raw nodes20000/depth256, caller states20000, executed instructions100000, events1000000, snapshots/log records10000 and logical width64. Preserve independent counted8/shared10000 and conditional10000 budgets. Failure publishes no accepted result/stdout; STOP preserves earlier successful output and permits later steps."
+      ],
+      "validation_test": "examples/verify_scalar_jump.py",
+      "r_witness": "examples/flow_control.R",
+      "boundary_tests": "saschi.test_flow_control",
+      "evidence": "Original complete three-step hand source and independent full-source R, generated/refusal cases, exact state/text/trace comparisons, actual CLI/emitted and atomic controls. Complete unchanged flow_control_structures.sas proof belongs to scalar-link after both steps compare."
+    },
+    "scalar_link": {
+      "rule_id": "DS-065",
+      "target": "saschi.runtime.run_plan",
+      "scope": [
+        "Require exact version2 flow_data and first flow_profile marker. scalar-jump-v1 admits local labels/GOTO/STOP; scalar-link-v1 additionally identifies actual LINK/RETURN or INPUT/integer-MOD composition with a flow trigger. Earlier profiles and serialized shapes remain unchanged.",
+        "Labels are unique ordinary ASCII top-level targets in a separate namespace from PDV. GOTO/LINK are top-level or direct IF actions, outside groups/iterative bodies. STOP/RETURN propagate through groups/loops and bypass later increments/tests. Undefined, duplicate and cross-step targets refuse statically.",
+        "One LINK destination, no LINK in its target region, bounded static caller analysis and one active runtime frame. Active RETURN and implicit step-end RETURN resume the caller without PDV reset. Unlinked RETURN with INPUT completes the observation and advances input; statically reachable explicit unlinked RETURN without INPUT conservatively refuses under recorded decision01.",
+        "INPUT retains the existing exact decoder and complete physical-record shape; eager integer validation includes consumed incomplete-EOF values. No jump reexecutes INPUT. Numeric operands/results are ordinary missing or integers within2147483647; plus/minus/multiply and existing integer MOD only. No new Boolean, arrays, stochastic, SET, rounded or general input scope.",
+        "Enforce PDV1..64, labels64, operations1024, mixed containers32, expressions32/nodes128, raw nodes20000/depth256, caller states20000, executed instructions100000, events1000000, snapshots/log records10000 and logical width64. Preserve independent counted8/shared10000 and conditional10000 budgets. Failure publishes no accepted result/stdout; STOP preserves earlier successful output and permits later steps."
+      ],
+      "validation_test": "examples/verify_scalar_link.py",
+      "r_witness": "examples/flow_control.R",
+      "boundary_tests": "saschi.test_flow_control",
+      "evidence": "Original complete three-step hand source and independent full-source R, generated/refusal cases, exact state/text/trace comparisons, actual CLI/emitted and atomic controls. Complete unchanged flow_control_structures.sas proof belongs to scalar-link after both steps compare."
     }
   }
 }
