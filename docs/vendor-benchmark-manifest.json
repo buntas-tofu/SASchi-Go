@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "status": "Pinned external vendor benchmark identity for repository/base-R verification. Explicit preparation verifies acquisition; only the registered whole-source gate establishes a program proof. No live-SAS or physical report-layout claim.",
+  "programs": [
+    {
+      "id": "sas-code-examples-sorted-copy-v1",
+      "repository": "sassoftware/sas-code-examples",
+      "commit": "579e057f90cd699f744fd6a1c8acaf9243f7ff67",
+      "license_identifier": "Apache-2.0",
+      "source": {
+        "path": "By Syntax/SORT Procedure/1_Create a sorted copy of a table.sas",
+        "bytes": 1896,
+        "sha256": "33ca0b33fb43b9cefe27c8879e204bfbe7ee0fe675769ec266bf9c5ed75d77c5",
+        "git_blob_sha1": "c34878292c4827fcca52420ed20829abfca0e4d0"
+      },
+      "license": {
+        "path": "LICENSE",
+        "bytes": 11357,
+        "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+        "git_blob_sha1": "261eeb9e9f8b2b4b0d119366dda99c6fd7d35c64"
+      }
+    }
+  ]
+}

@@ -1324,3 +1324,27 @@ def compile_plan(source: str) -> Plan:
     from .procedures import compile_program
     combined = compile_program(source, _compile_before_procedures)
     return _compile_before_procedures(source) if combined is None else combined
+
+
+_compile_before_character_input = compile_plan
+
+
+def compile_plan(source: str) -> Plan:
+    from .character_input import compile_program
+    combined = compile_program(source, _compile_before_character_input)
+    return _compile_before_character_input(source) if combined is None else combined
+
+
+_compile_before_mixed_reports = compile_plan
+
+
+def compile_plan(source: str) -> Plan:
+    from .mixed_reports import compile_program, validate_program
+    combined = compile_program(source, _compile_before_mixed_reports)
+    plan = _compile_before_mixed_reports(source) if combined is None else combined
+    if not plan.blocked and any(step.kind == 'character_data' for step in plan.steps):
+        try:
+            validate_program(plan.to_dict())
+        except (ValueError, KeyError, TypeError, RecursionError) as error:
+            plan.tickets.append(Ticket(1, 'character/report program', 'character-input', str(error)))
+    return plan

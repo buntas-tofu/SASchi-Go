@@ -230,24 +230,28 @@ def record_pass(source: str, plan, *, file: str = "<source>",
     from the other side, which is what makes the two counts a cross-check.
     """
     from .parser import Kind, split_statements
-    from .rules import route_function, route_statement
+    from .rules import route_function, route_statement, character_report_routes
 
     statements = split_statements(source)
+    source_routes = character_report_routes(source, statements)
     cat = Catalog()
     statement_rows = []
     function_rows = []
     procedure_context = None
-    for st in statements:
+    for index, st in enumerate(statements):
         opaque = any(token.kind is Kind.DATA for token in st.tokens)
         if not opaque and re.match(r'^\s*(?:data|proc)\b(?!\s*=)', st.text, re.I | re.ASCII):
             procedure_context = None
-        construct, rule_id = route_statement(st.text, 'opaque' if opaque else procedure_context)
+        construct, rule_id = (('unknown', '') if opaque else
+                              source_routes.get(index) or route_statement(st.text, procedure_context))
         if not opaque and construct in ('proc-means', 'proc-print') and re.match(r'^\s*proc\s', st.text, re.I | re.ASCII):
             procedure_context = construct
         if not opaque and st.text.strip().lower() in ('run', 'quit'):
             procedure_context = None
         statement_rows.append(
             (st.line, st.text, construct, rule_id, bool(st.terminated)))
+        if opaque:
+            continue
         masked = _mask_strings(st.text)
         seen: set[str] = set()
         for m in _FUNC_CALL_RE.finditer(masked):

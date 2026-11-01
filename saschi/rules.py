@@ -179,6 +179,9 @@ CONSTRUCT_MAP: dict[str, str] = {
     "numeric-sqrt": "DS-066",
     "numeric-log": "DS-067",
     "rounded-sum": "DS-068",
+    "character-input": "DS-069",
+    "mixed-print": "ST-019",
+    "logical-title": "ST-020",
     "proc-means": "ST-017",
     "proc-print": "ST-018",
     "put-all": "DS-025",
@@ -390,6 +393,71 @@ def route_statement(statement: str, context: str | None = None) -> tuple[str, st
             rule_id = CONSTRUCT_MAP.get(construct, "")
             return construct, rule_id
     return "unknown", ""
+
+
+def character_report_routes(source, statements):
+    """Classify validated source spans, independently of the compiled Plan.
+
+    Source syntax validators are shared with compilation. Independent hand/R
+    lexers provide the separate whole-program statement-accounting cross-check.
+    Indices keep distinct statements on the same physical line distinct.
+    """
+    from .character_input import _parse_block
+    from .mixed_reports import parse_title, parse_print
+    routes = {}
+    position = 0
+    while position < len(statements):
+        statement = statements[position]
+        if (any(token.kind is Kind.DATA for token in statement.tokens)
+                or re.match(r'^data\s', statement.text, re.I | re.ASCII) is None):
+            position += 1
+            continue
+        end = position + 1
+        while end < len(statements):
+            current = statements[end]
+            if not any(token.kind is Kind.DATA for token in current.tokens):
+                if current.text.lower() == 'run':
+                    end += 1
+                    break
+                if re.match(r'^(?:data|proc)(?:\s|$)', current.text, re.I | re.ASCII):
+                    break
+            end += 1
+        try:
+            _parse_block(statements[position:end], source)
+        except (ValueError, TypeError, KeyError):
+            pass
+        else:
+            for index in range(position,end):
+                if not any(token.kind is Kind.DATA for token in statements[index].tokens):
+                    routes[index] = ('character-input', CONSTRUCT_MAP['character-input'])
+        position = end
+    if not routes:
+        return routes
+    position, active = 0, False
+    while position < len(statements):
+        statement = statements[position]
+        if any(token.kind is Kind.DATA for token in statement.tokens):
+            position += 1
+            continue
+        text = statement.text
+        try:
+            if not active and re.match(r'^title(?:\s|$)', text, re.I | re.ASCII):
+                parse_title(statement)
+                routes[position] = ('logical-title', CONSTRUCT_MAP['logical-title'])
+            elif not active and re.match(r'^proc\s+print\b', text, re.I | re.ASCII):
+                parse_print(statements[position:position+2])
+                for index in (position,position+1):
+                    routes[index] = ('mixed-print', CONSTRUCT_MAP['mixed-print'])
+                position += 2
+                continue
+        except (ValueError, TypeError, KeyError):
+            pass
+        if re.match(r'^(?:data|proc)(?:\s|$)', text, re.I | re.ASCII):
+            active = True
+        if text.lower() in ('run','quit'):
+            active = False
+        position += 1
+    return routes
 
 
 def route_function(call: str) -> tuple[str, str]:

@@ -1,29 +1,33 @@
 # Coverage reconciliation and next gate series
 
 Status: Repository/base-R planning evidence, originally reconciled at main08eaa7b
-on2026-10-27 and updated through DS-068, ST-017/018, SQL-004 and A0. The handoff binds current acceptance.
+on2026-10-27 and updated through DS-069, ST-017/018/019/020, SQL-004 and A0.
+Current character/report registrations await the source-bound full receipt. The handoff binds acceptance.
 For principal/maintainer prioritization. Counts describe this checkout and the56
 pinned sibling corpus files, not all SAS or live-SAS equivalence. Updated for
 DS-039 arrays, DS-040 DO OVER and DS-041 nested/computed counted loops after the original
 reconciliation. Rankings,
 diagnostic categories and projected unlocks are explicitly analyst inferences.
-Implementation and publication are not authorized by this planning exercise.
+This document does not authorize additional implementation or publication scope.
 
 ## Inventory reconciled against actual evidence
 
-The golden command registers76 fixture runners,55 translator suites and1
-synthesis runner. The registry contains1197 tests; the source-bound receipt records skips and passing outcomes. The accepted entry contained1129 tests, zero skips,
-60 faithful synthesis checks and60 naive controls. The separate1k workload
-checks total39:18 ledger and21 text. These counts have different units. Neither
-106 rulebook rules nor132 golden-command runners is a SAS capability denominator.
+The golden command registers80 fixture runners,58 translator suites and1
+synthesis runner. The unittest loader discovers1271 tests; these are registration
+counts, not passing outcomes. A source-bound full receipt records actual skips and
+results. Accepted cluster entry main7c1113b contained76 fixtures,55 suites and1197
+tests with zero skips,60 faithful synthesis checks and60 naive controls. The
+separate1k workload checks total39:18 ledger and21 text. These counts have
+different units. Neither109 rulebook rules nor139 golden-command runners is a
+SAS capability denominator.
 
 [The capability manifest](capability-manifest.json) still enumerates108 statements
 and40 data-set options. The other7 declared reference areas remain unenumerated:
 formats/informats, functions/CALL routines, system options, component objects,
 utilities, macros and procedures. Their null universes are not zero.
 
-The reconciled148 entries contain41 GATED,5 RULE,8 HUMAN-REVIEW,22 OUT-OF-SCOPE
-and72 UNASSESSED. Among GATED entries,40 have bounded source-execution evidence;
+The current148-entry manifest records43 GATED,5 RULE,8 HUMAN-REVIEW,22 OUT-OF-SCOPE
+and70 UNASSESSED. Among GATED entries,42 have bounded source-execution evidence;
 1 has reference fixtures only: IN=. DS-039/DS-040 add bounded source-array evidence; DS-041 adds scoped counted-loop
 evidence to the existing iterative-DO entry. DS-044 promotes four bounded entries:
 INPUT, INPUT List, CARDS and DATALINES, preserving their prior assessments.
@@ -39,6 +43,10 @@ with additive evidence on seven already-GATED input/output entries. The exact
 ASCII/LF/open policy is separate from physical SAS defaults. DS-064/065 promote
 exactly GOTO,statement labels,LINK,RETURN and STOP for bounded scalar flow,
 preserving all earlier assessments. Descriptive LABEL remains unassessed.
+DS-069 and ST-019/020 add separately bounded character records and titled mixed
+reports. Only DATALINES4 and TITLE move from UNASSESSED to GATED, with their prior
+assessments retained. These current manifest registrations require final full
+verification; the148 identities and all7 null reference universes are unchanged.
 
 | Entry | Previous | Reconciled | Evidence and remaining boundary |
 | --- | --- | --- | --- |
@@ -61,16 +69,20 @@ removed. The manifest gate additionally rejects missing scopes/levels, mismatche
 evidence, duplicate entries and stale rollups. It still checks every previous
 registration, rule and universe requirement.
 
-All72 unassessed entries receive planning bins in the reproducible inventory:
+The historical72-entry unassessed snapshot had these planning bins:
 28 external-environment review,13 separate-scope review,7 input records,
 10 data-set options,1 control,7 output,5 descriptor/environment and1 projection.
-These bins organize work; they do not promote dispositions or decide exclusions.
+The current70-entry manifest derives28 external-environment review,13 separate-scope
+review,6 input records,10 data-set options,1 control,7 output,4 descriptor/environment
+and1 projection. These bins organize work; they do not promote dispositions or
+decide exclusions.
 The5 RULE entries and8 HUMAN-REVIEW entries retain their review boundaries.
 
 ## Unknown blockers classified
 
-The current joined56-file compile census has22 clean and34 blocked, with534 ticket
-occurrences. A2 resolves20 compiler tickets across the corpus. The newly compile-
+The latest accepted56-file compile census at cluster entry main7c1113b has22
+clean and34 blocked, with534 ticket occurrences. This is the accepted diagnostic
+baseline; the changed tree requires a fresh source-bound full receipt and census. A2 resolves20 compiler tickets across the corpus. The newly compile-
 clean100_doors.sas now passes the DS-042 mixed-output whole-program proof.
 B1 resolves two further tickets and adds the complete loops_for.sas proof.
 B2 adds the integer_comparison.sas proof. Total tickets fall by9;50 formerly
@@ -112,7 +124,7 @@ occurrences through bounded procedure admission and context-specific refusal
 accounting. Compile-clean files remain22 and complete external proofs remain21;
 no additional corpus execution is claimed. These counts come from the joined
 source census, not the procedure gate count.
-The remaining348 occurrences routed
+In that accepted census,the remaining348 occurrences routed
 as unknown receive a primary planning category, with file, line, ticket ordinal,
 statement hash and classification basis preserved. Classification preserves every
 current compiler ticket.
@@ -156,6 +168,17 @@ reconciliation itself did not increase the proof count. Compile tickets also mis
 runtime limitations:
 earlier numeric-list PUT remains bounded integer output and earlier division requires exact representability. The new syntax explicitly selects the separately bounded binary64/text policy in docs/BINARY64.md; INT retains its conservative near-integer refusal band.
 
+## Separate vendor benchmark
+
+The registered vendor benchmark contains1 pinned Apache-2.0 program, identified
+by repository commit,path,source/license hashes and Git blob IDs in
+[its manifest](vendor-benchmark-manifest.json). Its source stays in an explicitly
+prepared external cache. The complete sorted-copy gate requires both typed
+datasets and the375/402-byte logical reports to match independent hand/base-R,
+runtime,emitted and actual CLI evidence. Acceptance of the1 vendor program is
+pending the current source-bound full receipt. It is separate from the unchanged
+21 accepted Roku proofs and56 pinned Roku files; the denominators are not combined.
+
 ## Prioritized finite backlog
 
 Inference: prioritize a coherent DATA-step composition series that reuses the
@@ -185,6 +208,13 @@ evidence-cost ranking, not a schedule or an estimate of business demand.
 | D3a, implemented in DS-060/061 | Numeric DO groups and bounded LEAVE/CONTINUE | Separate integer control_data profile and earlier loop/control limits | Original57-statement/172-event source and independent R prove state/snapshot/transfer scheduling;11 exact prior-source promotions; no new complete corpus proof | High; zero-PDV output, INPUT/array/rounded composition, labels and broader control remain separate |
 | D2b, implemented in DS-062/063 | Numeric SUM OF/PUT ranges and one caller-rooted CSV artifact | Separate exchange_data profile, unchanged decoder/exact helpers and explicit ASCII/LF/open policy | Complete unchanged csv_data_manipulation.sas proof plus original25-statement state/export witness; exact CLI artifact comparison and atomic staging | High; arbitrary paths, DSD, formats and physical SAS defaults remain separate |
 | D3b, implemented in DS-064/065 | Local scalar labels/GOTO/STOP and bounded one-caller LINK/RETURN | Separate flow_data profiles, numeric INPUT, exact integer MOD and existing loop limits | Both unchanged flow_control_structures.sas steps pass complete hand/R/runtime/emitted/CLI proof with 58 logical records and 698 events; original 31-statement state fixture and cross-profile export controls | High; broader calls, structured-body jumps, Boolean/array/numeric domains and no-INPUT unlinked RETURN remain separate |
+| NEXT-CHAR-REPORT, implemented pending full acceptance in DS-069/ST-019/020 | Character/numeric unquoted DSD,DATALINES4 and two default mixed reports with literal TITLE set/reset | Separate character-records-v1,mixed-print-v1 and logical-title-v1; existing ascending SORT | Original hand/R/state/report gates and a separate pinned vendor sorted-copy benchmark; no additional Roku proof | High; quoted CSV,custom informats,broader reports and physical SAS/ODS layout remain separate |
+
+Analyst inference only: after the current cluster is accepted, NEXT-BITWISE may
+be a separate narrow67-column logical-output contract; it must preserve existing
+64-column refusals. INFORMAT/custom INVALUE and pointer INPUT are later work with
+new conversion and report oracles. Neither is included in the current character
+records/report profile or authorized by this backlog.
 
 A1 has reviewable sub-slices: bounded numeric array declaration/index/OF
 execution is implemented in DS-039; single-level implicit numeric DO OVER is
@@ -243,7 +273,12 @@ current source inventory, all corpus hashes, every diagnostic and the receipt
 source. It explicitly reports whether that receipt matches the current files.
 Run the golden command first when obtaining acceptance for a changed tree:
 
+Prepare the pinned external vendor cache explicitly before the golden command.
+Verification is offline and fails on missing or corrupt cache bytes; acquisition
+is not an implicit verification fallback.
+
 ```bash
+python tools/prepare_vendor_sources.py
 python verify_all.py
 python tools/coverage_inventory.py --corpus ../saschi-roku/corpus \
   --receipt telemetry/verify/receipt_SELECTED.json \
@@ -289,3 +324,17 @@ NOINHERIT metadata and separate logical PRINT text/artifact comparison. See
 actual passing registry counts require the current source-bound full receipt.
 The procedure reference universe and all148 existing catalogue entries remain
 unchanged. No additional whole-corpus proof is attributed to this slice.
+
+
+## Character records and mixed report evidence
+
+DS-069 admits the separate strict unquoted printable-ASCII character/numeric
+record profile with DATALINES4. ST-019/020 add default mixed columns,observation
+numbers and literal TITLE set/reset through a separately bounded logical report
+policy. See [the character/report contract](CHARACTER_REPORTS.md). The two
+print artifacts retain immutable snapshots and exact text comparison. Existing
+numeric-print-v1 remains one PRINT and print.txt; older numeric INPUT profiles
+retain their refusals. This adds4 fixture registrations and3 suites including
+external-source preparation/benchmark checks; passing outcomes remain the job of
+the current source-bound full receipt. No native SAS/ODS layout,general CSV or
+custom informat contract is inferred.

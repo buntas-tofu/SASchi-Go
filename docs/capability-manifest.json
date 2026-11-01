@@ -110,17 +110,18 @@
     "numeric_exchange_update": "DS-062/063 promote only FILE Statement for the literal caller-rooted CSV export subset; seven already-GATED input/output entries gain additive evidence. All148 identities/universes/prior assessments remain. Complete unchanged CSV-program source/R/byte/publication proof under explicit ASCII-LF/open policy, not physical SAS defaults.",
     "scalar_flow_update": "DS-064/065 promote exactly GOTO,statement labels,LINK,RETURN and STOP for separate bounded integer flow_data profiles. Prior assessment snapshots, all148 identities, reference universes and earlier gate evidence remain intact. One complete unchanged flow corpus proof requires both full steps. No live SAS or physical-log claim.",
     "numeric_math_update": "DS-066..068 separately marked binary64-math-v1: bounded SQRT/natural LOG and eager ordered argument SUM over earlier exact INPUT/selected SET, arrays, loops, retention and projection. Independent complete original measurement source, finite base-R/Decimal90 evidence and actual CLI. Earlier markers, controls, registries and semantic helpers remain unchanged; no new reference-universe disposition or complete external-program claim.",
-    "bounded_procedures_update": "ST-017/018 add explicitly bounded MEANS OUTPUT and logical PRINT source gates and independent complete-source R. The procedure reference universe remains unenumerated; all148 statement/data-set-option entries,dispositions,rollups and earlier evidence remain unchanged. No new whole-corpus proof or physical/live-SAS claim."
+    "bounded_procedures_update": "ST-017/018 add explicitly bounded MEANS OUTPUT and logical PRINT source gates and independent complete-source R. The procedure reference universe remains unenumerated; all148 statement/data-set-option entries,dispositions,rollups and earlier evidence remain unchanged. No new whole-corpus proof or physical/live-SAS claim.",
+    "character_reports_update": "DS-069/ST-019/ST-020 promote only DATALINES4/TITLE for separately marked bounded character-record input and titled mixed logical reports. INPUT/List/INFILE gain additive scoped evidence. All148 identities,existing histories/reference universes and old profiles remain; one pinned vendor SORT benchmark is separate from the unchanged21/56 Roku proof inventory. No live SAS or physical layout claim."
   },
   "rollup": {
     "stmt": {
       "universe": 108,
-      "assessed": 46,
-      "gated": 38,
+      "assessed": 48,
+      "gated": 40,
       "rule": 5,
       "human_review": 1,
       "out_of_scope": 2,
-      "unassessed": 62
+      "unassessed": 60
     },
     "dso": {
       "universe": 40,
@@ -803,10 +804,48 @@
       "category": "File-Handling",
       "type": "Declarative",
       "valid_in": "DATA step",
-      "disposition": "UNASSESSED",
-      "rule_ids": [],
-      "gates": [],
-      "reference_page": 63
+      "disposition": "GATED",
+      "rule_ids": [
+        "DS-069"
+      ],
+      "gates": [
+        "character-input",
+        "suite-character-input",
+        "vendor-sorted-copy"
+      ],
+      "reference_page": 63,
+      "assessment_history": [
+        {
+          "date": "2026-11-01",
+          "previous_disposition": "UNASSESSED",
+          "previous_rule_ids": [],
+          "previous_gates": [],
+          "disposition": "GATED",
+          "reason": "Separate bounded character/report source gates and unchanged pinned vendor SORT benchmark under explicit repository policies; broader forms remain unassessed.",
+          "previous_entry": {
+            "entry": "DATALINES4 Statement",
+            "document": "stmt",
+            "category": "File-Handling",
+            "type": "Declarative",
+            "valid_in": "DATA step",
+            "disposition": "UNASSESSED",
+            "rule_ids": [],
+            "gates": [],
+            "reference_page": 63
+          }
+        }
+      ],
+      "gate_evidence": [
+        {
+          "level": "source-execution",
+          "gates": [
+            "character-input",
+            "suite-character-input",
+            "vendor-sorted-copy"
+          ],
+          "scope": "DS-069 character-records-v1: strict unquoted ASCII comma records with at least one colon character informat,DATALINES4,exact physical field counts,typed padded characters and unchanged exact numeric conversion. Source/runtime/emitted/base-R/CLI and forged/empty/atomic controls; old numeric profiles remain strict. No general DSD CSV,FLOWOVER,truncation,external input or live SAS."
+        }
+      ]
     },
     {
       "entry": "DELETE Statement",
@@ -1687,14 +1726,18 @@
       "rule_ids": [
         "DS-058",
         "DS-062",
-        "DS-063"
+        "DS-063",
+        "DS-069"
       ],
       "gates": [
         "inline-csv",
         "suite-numeric-input",
         "numeric-ranges",
         "csv-export",
-        "suite-numeric-exchange"
+        "suite-numeric-exchange",
+        "character-input",
+        "suite-character-input",
+        "vendor-sorted-copy"
       ],
       "reference_page": 122,
       "assessment_history": [
@@ -1771,6 +1814,15 @@
             "suite-numeric-exchange"
           ],
           "scope": "DS-062/063 bounded-numeric-exchange-v1 exchange_data: numeric SUM OF/PUT ranges and one literal comma FILE buffer. Existing exact input/numeric/missing policies, separate ASCII-LF byte/open policy, complete first-party and unchanged CSV-program base-R/source/runtime/emitted/actual-CLI proofs, exact export comparator and staged success-only publication. No supplied-catalog R transport, general CSV, arbitrary host paths, formats or live SAS."
+        },
+        {
+          "level": "source-execution",
+          "gates": [
+            "character-input",
+            "suite-character-input",
+            "vendor-sorted-copy"
+          ],
+          "scope": "DS-069 character-records-v1: strict unquoted ASCII comma records with at least one colon character informat,DATALINES4,exact physical field counts,typed padded characters and unchanged exact numeric conversion. Source/runtime/emitted/base-R/CLI and forged/empty/atomic controls; old numeric profiles remain strict. No general DSD CSV,FLOWOVER,truncation,external input or live SAS."
         }
       ]
     },
@@ -1802,7 +1854,8 @@
         "DS-063",
         "DS-066",
         "DS-067",
-        "DS-068"
+        "DS-068",
+        "DS-069"
       ],
       "gates": [
         "input-list",
@@ -1819,7 +1872,10 @@
         "numeric-sqrt",
         "numeric-log",
         "rounded-sum",
-        "suite-numeric-math"
+        "suite-numeric-math",
+        "character-input",
+        "suite-character-input",
+        "vendor-sorted-copy"
       ],
       "reference_page": 165,
       "assessment_history": [
@@ -1960,6 +2016,15 @@
             "suite-numeric-math"
           ],
           "scope": "DS-066..068 separately marked binary64-math-v1: bounded SQRT/natural LOG and eager ordered argument SUM over earlier exact INPUT/selected SET, arrays, loops, retention and projection. Independent complete original measurement source, finite base-R/Decimal90 evidence and actual CLI. Earlier markers, controls, registries and semantic helpers remain unchanged; no new reference-universe disposition or complete external-program claim."
+        },
+        {
+          "level": "source-execution",
+          "gates": [
+            "character-input",
+            "suite-character-input",
+            "vendor-sorted-copy"
+          ],
+          "scope": "DS-069 character-records-v1: strict unquoted ASCII comma records with at least one colon character informat,DATALINES4,exact physical field counts,typed padded characters and unchanged exact numeric conversion. Source/runtime/emitted/base-R/CLI and forged/empty/atomic controls; old numeric profiles remain strict. No general DSD CSV,FLOWOVER,truncation,external input or live SAS."
         }
       ]
     },
@@ -1999,7 +2064,8 @@
         "DS-058",
         "DS-059",
         "DS-062",
-        "DS-063"
+        "DS-063",
+        "DS-069"
       ],
       "gates": [
         "input-list",
@@ -2012,7 +2078,10 @@
         "suite-numeric-input",
         "numeric-ranges",
         "csv-export",
-        "suite-numeric-exchange"
+        "suite-numeric-exchange",
+        "character-input",
+        "suite-character-input",
+        "vendor-sorted-copy"
       ],
       "reference_page": 192,
       "assessment_history": [
@@ -2143,6 +2212,15 @@
             "suite-numeric-exchange"
           ],
           "scope": "DS-062/063 bounded-numeric-exchange-v1 exchange_data: numeric SUM OF/PUT ranges and one literal comma FILE buffer. Existing exact input/numeric/missing policies, separate ASCII-LF byte/open policy, complete first-party and unchanged CSV-program base-R/source/runtime/emitted/actual-CLI proofs, exact export comparator and staged success-only publication. No supplied-catalog R transport, general CSV, arbitrary host paths, formats or live SAS."
+        },
+        {
+          "level": "source-execution",
+          "gates": [
+            "character-input",
+            "suite-character-input",
+            "vendor-sorted-copy"
+          ],
+          "scope": "DS-069 character-records-v1: strict unquoted ASCII comma records with at least one colon character informat,DATALINES4,exact physical field counts,typed padded characters and unchanged exact numeric conversion. Source/runtime/emitted/base-R/CLI and forged/empty/atomic controls; old numeric profiles remain strict. No general DSD CSV,FLOWOVER,truncation,external input or live SAS."
         }
       ]
     },
@@ -3628,10 +3706,50 @@
       "category": "File-Handling",
       "type": "Executable",
       "valid_in": "DATA step",
-      "disposition": "UNASSESSED",
-      "rule_ids": [],
-      "gates": [],
-      "reference_page": 350
+      "disposition": "GATED",
+      "rule_ids": [
+        "ST-020"
+      ],
+      "gates": [
+        "logical-title",
+        "mixed-print",
+        "suite-mixed-reports",
+        "vendor-sorted-copy"
+      ],
+      "reference_page": 350,
+      "assessment_history": [
+        {
+          "date": "2026-11-01",
+          "previous_disposition": "UNASSESSED",
+          "previous_rule_ids": [],
+          "previous_gates": [],
+          "disposition": "GATED",
+          "reason": "Separate bounded character/report source gates and unchanged pinned vendor SORT benchmark under explicit repository policies; broader forms remain unassessed.",
+          "previous_entry": {
+            "entry": "TITLE Statement",
+            "document": "stmt",
+            "category": "File-Handling",
+            "type": "Executable",
+            "valid_in": "DATA step",
+            "disposition": "UNASSESSED",
+            "rule_ids": [],
+            "gates": [],
+            "reference_page": 350
+          }
+        }
+      ],
+      "gate_evidence": [
+        {
+          "level": "source-execution",
+          "gates": [
+            "logical-title",
+            "mixed-print",
+            "suite-mixed-reports",
+            "vendor-sorted-copy"
+          ],
+          "scope": "ST-020 logical-title-v1 and ST-019 mixed-print-v1: literal TITLE set/reset persists across the separately proved character DATA/SORT family; default mixed reports include reset observation numbers and immutable title snapshots under explicit ascii-titled-mixed-integer-v1 bytes. Exact dataset/report comparator and accepted-only publication controls. No physical SAS/ODS or general TITLE/PRINT claim."
+        }
+      ]
     },
     {
       "entry": "UPDATE Statement",

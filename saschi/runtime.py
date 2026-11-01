@@ -289,10 +289,20 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
         raise ValueError('unsupported plan version')
     if plan['tickets'] and not allow_partial:
         raise RuntimeError('saschi: blocked translation. Nothing from this program was executed.')
+    from .mixed_reports import (validate_program as validate_mixed_program,
+                                execute_title, execute_print as execute_mixed_print,
+                                validate_reports as validate_mixed_reports)
+    from .character_input import (execute_step as execute_character_input,
+                                  refuse_legacy as refuse_character_input)
+    mixed_context = validate_mixed_program(plan, catalog)
+    for candidate in plan['steps']:
+        if candidate.get('kind') != 'character_data':
+            refuse_character_input(candidate)
     from .procedures import validate_program as validate_procedures, execute_means, execute_print
     validate_procedures(plan)
     tables, logs = normalize_catalog({} if catalog is None else catalog), []
     reports = {}
+    title, print_ordinal = None, 0
     from .numeric_exchange import validate_step as validate_exchange, execute_step as execute_exchange, refuse_legacy as refuse_exchange
     exports = {}
     export_destinations = 0
@@ -307,6 +317,21 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
     if export_destinations > 1:
         raise ValueError('one export destination per program is the bounded profile')
     for step in plan['steps']:
+        if step.get('kind') == 'character_data':
+            table, input_logs = execute_character_input(step, tables, plan['version'])
+            tables[step['name']] = table
+            logs.extend(input_logs)
+            continue
+        if step.get('kind') == 'report_title':
+            title = execute_title(step, plan['version'])
+            continue
+        if step.get('kind') == 'mixed_print':
+            print_ordinal += 1
+            new_reports = execute_mixed_print(step, tables, title, print_ordinal, plan['version'])
+            if set(new_reports) & set(reports):
+                raise ValueError('logical report artifact names cannot overwrite earlier snapshots')
+            reports.update(new_reports)
+            continue
         if step.get('kind') == 'proc_means':
             tables[step['name']] = execute_means(step, tables, plan['version'])
             continue
@@ -965,5 +990,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
     if exports:
         result['exports'] = exports
     if reports:
+        if mixed_context is not None:
+            validate_mixed_reports(reports)
         result['reports'] = reports
     return result

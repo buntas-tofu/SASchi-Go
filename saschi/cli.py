@@ -11,7 +11,7 @@ from .job import build_job
 from .plan import compile_plan
 from .provenance import digest, environment
 from .numeric_exchange import validate_exports
-from .report_artifacts import validate_reports
+from .report_artifacts import validate_reports, report_manifest, REPORT_CONTRACT
 
 
 def write_json(path, value):
@@ -62,7 +62,11 @@ def execute_job(args):
                 with (export_directory / name).open('xb') as stream:
                     stream.write(text.encode('ascii'))
         if receipt['accepted'] and result is not None and 'reports' in result:
-            validate_reports(result['reports'])
+            contract = receipt.get('report_contract', REPORT_CONTRACT)
+            if contract == REPORT_CONTRACT:
+                validate_reports(result['reports'])
+            else:
+                report_manifest(result['reports'], contract=contract)
             report_directory = staging / 'reports'
             report_directory.mkdir()
             for name, text in result['reports'].items():

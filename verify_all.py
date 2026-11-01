@@ -114,6 +114,10 @@ VERIFIERS = [
     ("rounded-sum", HERE / "examples" / "verify_rounded_sum.py"),
     ("proc-means", HERE / "examples" / "verify_means_output.py"),
     ("proc-print", HERE / "examples" / "verify_print_report.py"),
+    ("character-input", HERE / "examples" / "verify_character_input.py"),
+    ("mixed-print", HERE / "examples" / "verify_mixed_print.py"),
+    ("logical-title", HERE / "examples" / "verify_logical_title.py"),
+    ("vendor-sorted-copy", HERE / "examples" / "verify_vendor_sorted_copy.py"),
 ]
 
 # The translator suites, run as unittest modules. They carry the same weight as
@@ -176,6 +180,9 @@ SUITES = [
     ("suite-flow-control", "saschi.test_flow_control"),
     ("suite-numeric-math", "saschi.test_numeric_math"),
     ("suite-procedures", "saschi.test_procedures"),
+    ("suite-character-input", "saschi.test_character_input"),
+    ("suite-mixed-reports", "saschi.test_mixed_reports"),
+    ("suite-vendor-sources", "tools.test_vendor_sources"),
 ]
 
 

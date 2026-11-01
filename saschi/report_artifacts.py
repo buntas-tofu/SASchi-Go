@@ -5,6 +5,7 @@ import re
 
 REPORT_BASENAME = 'print.txt'
 REPORT_CONTRACT = 'numeric-space-fixed12-v1'
+MIXED_REPORT_CONTRACT = 'ascii-titled-mixed-integer-v1'
 REPORT_COMPARISON_CONTRACT = 'exact-basename-set-utf8-bytes-v1'
 MAX_REPORT_BYTES = 417056
 
@@ -25,14 +26,20 @@ def validate_reports(reports):
     return reports
 
 
-def report_manifest(reports):
-    validate_reports(reports)
+def report_manifest(reports, *, contract=REPORT_CONTRACT):
+    if contract == REPORT_CONTRACT:
+        validate_reports(reports)
+    elif contract == MIXED_REPORT_CONTRACT:
+        from .mixed_reports import validate_reports as validate_mixed_reports
+        validate_mixed_reports(reports)
+    else:
+        raise ValueError('unknown logical report contract')
     return {name: {'sha256': hashlib.sha256(text.encode('ascii')).hexdigest(),
                    'bytes': len(text), 'records': text.count('\n')}
             for name, text in reports.items()}
 
 
-def read_expected_reports(path):
+def read_expected_reports(path, *, contract=REPORT_CONTRACT):
     def pairs(items):
         result = {}
         for key, value in items:
@@ -42,14 +49,22 @@ def read_expected_reports(path):
         return result
     def constant(value):
         raise ValueError('invalid expected report JSON constant')
+    if contract not in (REPORT_CONTRACT, MIXED_REPORT_CONTRACT):
+        raise ValueError('unknown expected report contract')
+    maximum = 2097152 if contract == MIXED_REPORT_CONTRACT else 1048576
     raw = path.read_bytes()
-    if len(raw) > 1048576:
+    if len(raw) > maximum:
+        if contract == MIXED_REPORT_CONTRACT:
+            raise ValueError('expected mixed report manifest exceeds two MiB')
         raise ValueError('expected report manifest exceeds one MiB')
     try:
         value = json.loads(raw, object_pairs_hook=pairs, parse_constant=constant)
     except (UnicodeError, json.JSONDecodeError, RecursionError) as exc:
         raise ValueError('expected reports require bounded valid JSON text') from exc
-    if type(value) is not dict or len(value) != 1:
+    if (contract == MIXED_REPORT_CONTRACT and
+            (type(value) is not dict or not 1 <= len(value) <= 2)):
+        raise ValueError('expected mixed reports require one or two basename-to-text entries')
+    if contract == REPORT_CONTRACT and (type(value) is not dict or len(value) != 1):
         raise ValueError('expected reports require one complete basename-to-text map')
     for name, text in value.items():
         if (type(name) is not str or not name.isascii() or not 5 <= len(name) <= 64

@@ -458,5 +458,46 @@ class LogicalReportJobTests(unittest.TestCase):
             self.assertFalse((output / 'exports').exists())
 
 
+class ReportContractBoundaryTests(unittest.TestCase):
+    def test_two_reports_require_explicit_new_reader_contract(self):
+        from .report_artifacts import read_expected_reports, MIXED_REPORT_CONTRACT
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory)/'reports.json'
+            expected = {'print_01.txt':'obs word\n1 "A"\n','print_02.txt':'obs word\n1 "B"\n'}
+            path.write_text(json.dumps(expected))
+            with self.assertRaisesRegex(ValueError,'one complete'):
+                read_expected_reports(path)
+            self.assertEqual(read_expected_reports(path,contract=MIXED_REPORT_CONTRACT)[0],expected)
+
+    def test_expected_reader_limits_preserve_old_default(self):
+        from .report_artifacts import read_expected_reports, MIXED_REPORT_CONTRACT
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory)/'reports.json'
+            value = b'{"print.txt":"x"}'
+            path.write_bytes(value + b' '*(1048577-len(value)))
+            with self.assertRaisesRegex(ValueError,'one MiB'):
+                read_expected_reports(path)
+            self.assertEqual(read_expected_reports(path,contract=MIXED_REPORT_CONTRACT)[0],{'print.txt':'x'})
+            path.write_bytes(value + b' '*(2097153-len(value)))
+            with self.assertRaisesRegex(ValueError,'two MiB'):
+                read_expected_reports(path,contract=MIXED_REPORT_CONTRACT)
+
+    def test_manifest_dispatch_is_explicit_and_unknown_contract_refuses(self):
+        from .report_artifacts import report_manifest, MIXED_REPORT_CONTRACT, read_expected_reports
+        reports = {'print_01.txt':'obs word\n1 "A"\n'}
+        with self.assertRaises(ValueError): report_manifest(reports)
+        self.assertEqual(report_manifest(reports,contract=MIXED_REPORT_CONTRACT)['print_01.txt']['bytes'],15)
+        with self.assertRaisesRegex(ValueError,'unknown'): report_manifest(reports,contract='future')
+        with self.assertRaisesRegex(ValueError,'unknown'): read_expected_reports(Path('/absent'),contract='future')
+
+    def test_new_expected_reader_refuses_duplicates_and_excess_entries(self):
+        from .report_artifacts import read_expected_reports, MIXED_REPORT_CONTRACT
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory)/'reports.json'
+            for raw in ('{"a.txt":"x","a.txt":"y"}','{"a.txt":"x","b.txt":"y","c.txt":"z"}'):
+                path.write_text(raw)
+                with self.assertRaises(ValueError):read_expected_reports(path,contract=MIXED_REPORT_CONTRACT)
+
+
 if __name__ == '__main__':
     unittest.main()

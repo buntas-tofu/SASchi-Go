@@ -24,7 +24,7 @@ from .runtime import run_plan
 from .numeric_exchange import (read_expected_exports, exports_equal, export_manifest,
                                EXPORT_CONTRACT, COMPARISON_CONTRACT)
 from .report_artifacts import (read_expected_reports, reports_equal, report_manifest,
-                               REPORT_CONTRACT, REPORT_COMPARISON_CONTRACT)
+                               REPORT_CONTRACT, MIXED_REPORT_CONTRACT, REPORT_COMPARISON_CONTRACT)
 
 
 @dataclass
@@ -98,12 +98,14 @@ def build_job(source: str, inputs: "Path | None" = None, expect: "Path | None" =
         receipt['export_comparison_contract'] = COMPARISON_CONTRACT
         if export_program:
             receipt['export_contract'] = EXPORT_CONTRACT
-    report_program = any(step.kind == 'proc_print' for step in plan.steps)
+    mixed_report_program = any(step.kind == 'mixed_print' for step in plan.steps)
+    report_program = mixed_report_program or any(step.kind == 'proc_print' for step in plan.steps)
+    report_contract = MIXED_REPORT_CONTRACT if mixed_report_program else REPORT_CONTRACT
     if report_program or expect_reports is not None:
         receipt['report_comparison'] = 'not requested'
         receipt['report_comparison_contract'] = REPORT_COMPARISON_CONTRACT
         if report_program:
-            receipt['report_contract'] = REPORT_CONTRACT
+            receipt['report_contract'] = report_contract
     result, code = None, 2 if plan.blocked else 1
     try:
         if plan.blocked:
@@ -116,7 +118,7 @@ def build_job(source: str, inputs: "Path | None" = None, expect: "Path | None" =
         if 'exports' in result:
             receipt['exports'] = export_manifest(result['exports'])
         if 'reports' in result:
-            receipt['reports'] = report_manifest(result['reports'])
+            receipt['reports'] = report_manifest(result['reports'], contract=report_contract)
         if expect_exports is not None:
             receipt['export_comparison'] = 'failed'
             expected_exports, checksum = read_expected_exports(expect_exports)
@@ -126,7 +128,7 @@ def build_job(source: str, inputs: "Path | None" = None, expect: "Path | None" =
             receipt['export_comparison'] = 'passed'
         if expect_reports is not None:
             receipt['report_comparison'] = 'failed'
-            expected_reports, checksum = read_expected_reports(expect_reports)
+            expected_reports, checksum = read_expected_reports(expect_reports, contract=report_contract)
             receipt['expected_reports_sha256'] = checksum
             if not reports_equal(result.get('reports', {}), expected_reports):
                 raise ValueError('expected report artifact names or exact UTF8 bytes differ')
