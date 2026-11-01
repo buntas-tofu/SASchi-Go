@@ -289,7 +289,10 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
         raise ValueError('unsupported plan version')
     if plan['tickets'] and not allow_partial:
         raise RuntimeError('saschi: blocked translation. Nothing from this program was executed.')
+    from .procedures import validate_program as validate_procedures, execute_means, execute_print
+    validate_procedures(plan)
     tables, logs = normalize_catalog({} if catalog is None else catalog), []
+    reports = {}
     from .numeric_exchange import validate_step as validate_exchange, execute_step as execute_exchange, refuse_legacy as refuse_exchange
     exports = {}
     export_destinations = 0
@@ -304,6 +307,12 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
     if export_destinations > 1:
         raise ValueError('one export destination per program is the bounded profile')
     for step in plan['steps']:
+        if step.get('kind') == 'proc_means':
+            tables[step['name']] = execute_means(step, tables, plan['version'])
+            continue
+        if step.get('kind') == 'proc_print':
+            reports.update(execute_print(step, tables, plan['version']))
+            continue
         from .flow_control import execute_step as execute_flow_step, refuse_legacy as refuse_flow_legacy
         if step.get('kind') == 'flow_data':
             table, flow_logs = execute_flow_step(step, tables, plan['version'])
@@ -955,4 +964,6 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
     result = {'datasets': tables, 'log': logs}
     if exports:
         result['exports'] = exports
+    if reports:
+        result['reports'] = reports
     return result

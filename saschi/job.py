@@ -23,6 +23,8 @@ from .provenance import environment, implementation_hashes
 from .runtime import run_plan
 from .numeric_exchange import (read_expected_exports, exports_equal, export_manifest,
                                EXPORT_CONTRACT, COMPARISON_CONTRACT)
+from .report_artifacts import (read_expected_reports, reports_equal, report_manifest,
+                               REPORT_CONTRACT, REPORT_COMPARISON_CONTRACT)
 
 
 @dataclass
@@ -73,7 +75,8 @@ def _read_expected(path: Path) -> tuple[object, str]:
 
 
 def build_job(source: str, inputs: "Path | None" = None, expect: "Path | None" = None,
-              target: str = "python", *, expect_exports: "Path | None" = None) -> Job:
+              target: str = "python", *, expect_exports: "Path | None" = None,
+              expect_reports: "Path | None" = None) -> Job:
     """Run one program through the full treatment and return every artifact."""
     plan = compile_plan(source)
     translation = (python_translate if target == 'python' else cpp_translate)(source)
@@ -95,6 +98,12 @@ def build_job(source: str, inputs: "Path | None" = None, expect: "Path | None" =
         receipt['export_comparison_contract'] = COMPARISON_CONTRACT
         if export_program:
             receipt['export_contract'] = EXPORT_CONTRACT
+    report_program = any(step.kind == 'proc_print' for step in plan.steps)
+    if report_program or expect_reports is not None:
+        receipt['report_comparison'] = 'not requested'
+        receipt['report_comparison_contract'] = REPORT_COMPARISON_CONTRACT
+        if report_program:
+            receipt['report_contract'] = REPORT_CONTRACT
     result, code = None, 2 if plan.blocked else 1
     try:
         if plan.blocked:
@@ -106,6 +115,8 @@ def build_job(source: str, inputs: "Path | None" = None, expect: "Path | None" =
         del input_bytes, catalog
         if 'exports' in result:
             receipt['exports'] = export_manifest(result['exports'])
+        if 'reports' in result:
+            receipt['reports'] = report_manifest(result['reports'])
         if expect_exports is not None:
             receipt['export_comparison'] = 'failed'
             expected_exports, checksum = read_expected_exports(expect_exports)
@@ -113,6 +124,13 @@ def build_job(source: str, inputs: "Path | None" = None, expect: "Path | None" =
             if not exports_equal(result.get('exports', {}), expected_exports):
                 raise ValueError('expected export artifact names or exact UTF8 bytes differ')
             receipt['export_comparison'] = 'passed'
+        if expect_reports is not None:
+            receipt['report_comparison'] = 'failed'
+            expected_reports, checksum = read_expected_reports(expect_reports)
+            receipt['expected_reports_sha256'] = checksum
+            if not reports_equal(result.get('reports', {}), expected_reports):
+                raise ValueError('expected report artifact names or exact UTF8 bytes differ')
+            receipt['report_comparison'] = 'passed'
         if expect:
             expected, expected_sha256 = _read_expected(expect)
             receipt['expected_sha256'] = expected_sha256

@@ -289,5 +289,174 @@ with tempfile.TemporaryDirectory() as td:
                     self.assertEqual(list(root.glob('.saschi-*')), [])
 
 
+class LogicalReportJobTests(unittest.TestCase):
+    """Reports opt into exact comparison and share the job publication boundary."""
+    source = 'proc print data=raw noobs; var x; run;'
+    inputs = {'raw': {'schema': {'x': 'number'}, 'rows': [{'x': 1}, {'x': 2}]}}
+    reports = {'print.txt': 'x\n1\n2\n'}
+
+    def files(self, directory, reports=None, expected=None):
+        directory = Path(directory)
+        ip = directory / 'input.json'
+        rp = directory / 'reports.json'
+        ep = directory / 'expected.json'
+        ip.write_text(json.dumps(self.inputs))
+        rp.write_text(json.dumps(self.reports if reports is None else reports))
+        ep.write_text(json.dumps(self.inputs if expected is None else expected))
+        return ip, ep, rp
+
+    def test_dataset_and_report_comparators_are_independent_and_exact(self):
+        with tempfile.TemporaryDirectory() as td:
+            ip, ep, rp = self.files(td)
+            job = build_job(self.source, ip, ep, 'python', expect_reports=rp)
+            self.assertEqual(job.code, 0, job.receipt)
+            self.assertEqual(job.result['reports'], self.reports)
+            self.assertEqual(job.receipt['comparison'], 'passed')
+            self.assertEqual(job.receipt['report_comparison'], 'passed')
+            for report in ({'other.txt': self.reports['print.txt']},
+                           {'print.txt': 'x\n2\n1\n'}, {'print.txt': 'x\n1\n2'},
+                           {'print.txt': 'x\n1.0\n2\n'}, {'print.txt': 'x\r\n1\r\n2\r\n'}):
+                rp.write_text(json.dumps(report))
+                wrong = build_job(self.source, ip, ep, expect_reports=rp)
+                self.assertEqual(wrong.code, 1)
+                self.assertEqual(wrong.receipt['report_comparison'], 'failed')
+                self.assertEqual(wrong.result['reports'], self.reports)
+            rp.write_text(json.dumps(self.reports))
+            ep.write_text(json.dumps({'raw': {'schema': {'x': 'number'}, 'rows': [{'x': True}, {'x': 2}]}}))
+            wrong = build_job(self.source, ip, ep, expect_reports=rp)
+            self.assertEqual(wrong.code, 1)
+            self.assertEqual(wrong.receipt['report_comparison'], 'passed')
+            self.assertEqual(wrong.receipt['comparison'], 'failed')
+
+    def test_report_reader_rejects_unsafe_and_malformed_maps(self):
+        from .report_artifacts import read_expected_reports
+        cases = [b'{', b'[]', b'{}', b'null', b'NaN', b'\xff',
+                 b'{"print.txt":"a","print.txt":"b"}',
+                 b'{"../print.txt":"x"}', b'{"CON.txt":"x"}',
+                 b'{"a/b.txt":"x"}', b'{"print.txt":false}',
+                 b'{"print.txt":"\\ud800"}', b' ' * 1048577]
+        with tempfile.TemporaryDirectory() as td:
+            path = Path(td) / 'expected.json'
+            for payload in cases:
+                with self.subTest(payload=repr(payload[:80])):
+                    path.write_bytes(payload)
+                    with self.assertRaises(ValueError):
+                        read_expected_reports(path)
+            path.write_text(json.dumps({'other.txt': 'wrong but safe\n'}))
+            self.assertEqual(read_expected_reports(path)[0], {'other.txt': 'wrong but safe\n'})
+
+    def test_cli_publishes_reports_only_on_complete_acceptance(self):
+        with tempfile.TemporaryDirectory() as td:
+            directory = Path(td)
+            ip, ep, rp = self.files(directory)
+            source = directory / 'program.sas'
+            source.write_text(self.source)
+            for name, report, expected, code in (
+                    ('good', self.reports, self.inputs, 0),
+                    ('wrong-report', {'print.txt': 'wrong\n'}, self.inputs, 1),
+                    ('wrong-data', self.reports, {'raw': {'schema': {'x': 'number'}, 'rows': []}}, 1)):
+                rp.write_text(json.dumps(report)); ep.write_text(json.dumps(expected))
+                out = directory / name
+                with contextlib.redirect_stdout(io.StringIO()):
+                    actual = cli.main(['run', str(source), '--inputs', str(ip), '--expect', str(ep),
+                                       '--expect-reports', str(rp), '--output', str(out)])
+                self.assertEqual(actual, code)
+                self.assertEqual((out / 'reports/print.txt').exists(), code == 0)
+                self.assertEqual((out / 'result.json').exists(), code == 0)
+                self.assertEqual((out / 'observed.json').exists(), code != 0)
+                if code == 0:
+                    self.assertEqual((out / 'reports/print.txt').read_bytes(), b'x\n1\n2\n')
+
+    def test_report_write_and_job_rename_failures_publish_nothing(self):
+        with tempfile.TemporaryDirectory() as td:
+            directory = Path(td)
+            ip, ep, rp = self.files(directory)
+            source = directory / 'program.sas'; source.write_text(self.source)
+            original = Path.open
+            def fail_report(path, *args, **kwargs):
+                if path.name == 'print.txt':
+                    raise OSError('injected report write failure')
+                return original(path, *args, **kwargs)
+            for name, context in [('write', patch.object(Path, 'open', fail_report)),
+                                  ('rename', patch.object(Path, 'rename', side_effect=OSError('injected rename failure')))]:
+                output = directory / name
+                with context, contextlib.redirect_stdout(io.StringIO()):
+                    code = cli.main(['run', str(source), '--inputs', str(ip), '--expect', str(ep),
+                                     '--expect-reports', str(rp), '--output', str(output)])
+                self.assertEqual(code, 1)
+                self.assertFalse(output.exists())
+                self.assertEqual(list(directory.glob('.saschi-*')), [])
+
+    def test_old_program_result_and_receipt_have_no_report_fields(self):
+        job = build_job('data d;x=1;run;', None, None, 'python')
+        self.assertEqual(job.code, 0)
+        self.assertNotIn('reports', job.result)
+        self.assertFalse(any('report' in key for key in job.receipt))
+
+    def test_export_and_report_comparison_failures_share_publication_boundary(self):
+        source_text = ('data exported; file "values.csv" dlm=","; input x; put x; '
+                       'datalines;\n1\n2\n;\nrun;\n' + self.source)
+        with tempfile.TemporaryDirectory() as td:
+            directory = Path(td)
+            ip, ep, rp = self.files(directory)
+            source = directory / 'program.sas'; source.write_text(source_text)
+            xp = directory / 'exports.json'
+            for name, report, exports, code in (
+                    ('good', self.reports, {'values.csv': '1\n2\n'}, 0),
+                    ('bad-report', {'print.txt': 'wrong\n'}, {'values.csv': '1\n2\n'}, 1),
+                    ('bad-export', self.reports, {'values.csv': 'wrong\n'}, 1)):
+                rp.write_text(json.dumps(report)); xp.write_text(json.dumps(exports))
+                output = directory / name
+                with contextlib.redirect_stdout(io.StringIO()):
+                    actual = cli.main(['run', str(source), '--inputs', str(ip), '--expect-reports', str(rp),
+                                       '--expect-exports', str(xp), '--output', str(output)])
+                self.assertEqual(actual, code)
+                self.assertEqual((output / 'reports').exists(), code == 0)
+                self.assertEqual((output / 'exports').exists(), code == 0)
+                self.assertEqual((output / 'result.json').exists(), code == 0)
+
+    def test_later_execution_failure_withholds_report_and_export_buffers(self):
+        source_text = (self.source + 'data exported; file "values.csv" dlm=","; input x; put x; '
+                       'datalines;\n1\n;\nrun;\n'
+                       'data bad;set absent;run;')
+        with tempfile.TemporaryDirectory() as td:
+            directory = Path(td); ip, ep, rp = self.files(directory)
+            source = directory / 'program.sas'; source.write_text(source_text)
+            out = directory / 'failed'
+            with contextlib.redirect_stdout(io.StringIO()):
+                code = cli.main(['run', str(source), '--inputs', str(ip), '--output', str(out)])
+            self.assertNotEqual(code, 0)
+            self.assertFalse((out / 'reports').exists())
+            self.assertFalse((out / 'exports').exists())
+            self.assertFalse((out / 'result.json').exists())
+
+    def test_deep_report_manifest_produces_a_rejected_job_receipt(self):
+        from .report_artifacts import read_expected_reports
+        with tempfile.TemporaryDirectory() as td:
+            directory = Path(td); ip, ep, rp = self.files(directory)
+            rp.write_text('{"print.txt":' + '[' * 10000 + '0' + ']' * 10000 + '}')
+            self.assertLess(rp.stat().st_size, 1048576)
+            with self.assertRaises(ValueError):
+                read_expected_reports(rp)
+            job = build_job(self.source, ip, expect_reports=rp)
+            self.assertEqual(job.code, 1)
+            self.assertFalse(job.receipt['accepted'])
+            self.assertEqual(job.receipt['report_comparison'], 'failed')
+            self.assertEqual(job.result['reports'], self.reports)
+            source = directory / 'program.sas'; source.write_text(self.source)
+            output = directory / 'failed'
+            with contextlib.redirect_stdout(io.StringIO()):
+                code = cli.main(['run', str(source), '--inputs', str(ip),
+                                 '--expect-reports', str(rp), '--output', str(output)])
+            self.assertEqual(code, 1)
+            receipt = json.loads((output / 'receipt.json').read_text())
+            self.assertFalse(receipt['accepted'])
+            self.assertEqual(receipt['report_comparison'], 'failed')
+            self.assertTrue((output / 'observed.json').is_file())
+            self.assertFalse((output / 'result.json').exists())
+            self.assertFalse((output / 'reports').exists())
+            self.assertFalse((output / 'exports').exists())
+
+
 if __name__ == '__main__':
     unittest.main()

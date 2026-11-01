@@ -3028,6 +3028,82 @@
         "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000245953.htm",
         "https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/p07c8e0ktns1c7n1vtowjev5g724.htm"
       ]
+    },
+    {
+      "rule_id": "ST-017",
+      "sas_pattern": "Bounded grouped PROC MEANS OUTPUT with explicit DF moments",
+      "scope": "stat-proc",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "Separate strict procedure parser/validator/executor and named logical artifact policy."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent complete-source procedure grammar,group schedule,exact sufficient statistics and logical report; no Python plan read."
+      },
+      "required_settings": [
+        "Exact version2 proc_means Step,one same-kind operation with grouped-integer-means-df-v1; DATA=,NOPRINT,VARDEF=DF,BY,VAR,explicit N/NMISS/MEAN/VAR aliases,OUTPUT /NOINHERIT and RUN all fully consumed and terminated.",
+        "One distinct unformatted numeric BY and analysis variable,ordinary missing or integers within1000 and at most1000 rows; eager selected descriptor/value validation even for empty input. Require ascending BY; missing BY is its own first group.",
+        "No CLASS: _TYPE_=0,_FREQ_=all group rows,N=nonmissing analysis values,NMISS=missing analysis values. Exact integer S,Q,nQ,S*S bounded by1e12; binary64 final divisions mean=S/n and variance=(nQ-S*S)/(n(n-1)). Missing mean atn0,missing variance atn0/1.",
+        "Fresh output destination only; unique aliases outside BY/_TYPE_/_FREQ_. BY descriptor copied after generic normalization; generated numeric length8 descriptors have no label/format keys; output table has only schema/rows. Empty input retains complete schema and zero rows under explicit repository policy.",
+        "Existing SORT source/helpers remain unchanged. CLASS,WEIGHT,FREQ,NOTSORTED,DESCENDING,quantiles,STD/other statistics,formats,ODS and new numeric domains remain refused. The mathematical procedure algorithm is repository policy,not SAS bitwise equivalence."
+      ],
+      "forbidden_patterns": [
+        "Any unlisted procedure option,statement,selected numeric domain or physical-output assumption"
+      ],
+      "silent_difference_checks": [
+        "Ordered typed schemas/rows/metadata,missing counts,DF divisor,source statements/group events,exact report names/text and whole-job atomic publication"
+      ],
+      "validation_test": "examples/verify_means_output.py",
+      "confidence": "Bounded repository and independent base-R evidence; no live SAS or physical/default-format equivalence.",
+      "sources": [
+        "docs/PROCEDURES.md",
+        "https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a000146729.htm",
+        "https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a000146730.htm",
+        "https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a000146734.htm",
+        "https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a002473538.htm",
+        "https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a002291718.htm",
+        "https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a000064125.htm"
+      ]
+    },
+    {
+      "rule_id": "ST-018",
+      "sas_pattern": "Bounded numeric PROC PRINT logical report and atomic artifact comparison",
+      "scope": "stat-proc",
+      "equivalence_class": "APPROXIMATE",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "Separate strict procedure parser/validator/executor and named logical artifact policy."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent complete-source procedure grammar,group schedule,exact sufficient statistics and logical report; no Python plan read."
+      },
+      "required_settings": [
+        "Exact version2 proc_print Step,one same-kind operation with numeric-print-v1; explicit DATA=,NOOBS,ordered VAR names and RUN,all terminated; one PRINT per complete program across every profile join.",
+        "One to32 unique unformatted numeric selected columns and at most1000 rows; descriptor/type/format checks run on empty input. Per-field existing binary64 numeric/formatter bounds and exact16ULP decimal-midpoint refusals remain unchanged.",
+        "Named numeric-space-fixed12-v1: fixed print.txt,lowercase name header,one ASCII space between fields,LF after every record,no edge spaces; empty table is header-only. Header<=1055,body<=415,total<=417056 bytes and<=1001 records. This replaces physical SAS layout under an explicit logical report policy.",
+        "Optional reports channel only with PRINT; no-PRINT result/receipt shape and old typed --expect unchanged. --expect-reports compares complete basename set and exact UTF8 bytes independently from datasets/exports. Whole-job accepted-only staging publishes reports/exports/result/receipt together.",
+        "Late execution,comparison,write or rename failure publishes no accepted reports/exports/result. Labels as headings,formatted/character output,observation numbers,SUM/BY/ID,ODS,pages,arbitrary report names/paths and general PROC PRINT remain deferred."
+      ],
+      "forbidden_patterns": [
+        "Any unlisted procedure option,statement,selected numeric domain or physical-output assumption"
+      ],
+      "silent_difference_checks": [
+        "Ordered typed schemas/rows/metadata,missing counts,DF divisor,source statements/group events,exact report names/text and whole-job atomic publication"
+      ],
+      "validation_test": "examples/verify_print_report.py",
+      "confidence": "Bounded repository and independent base-R evidence; no live SAS or physical/default-format equivalence.",
+      "sources": [
+        "docs/PROCEDURES.md",
+        "https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a000146729.htm",
+        "https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a000146730.htm",
+        "https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a000146734.htm",
+        "https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a002473538.htm",
+        "https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a002291718.htm",
+        "https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a000064125.htm"
+      ]
     }
   ],
   "runtime_capabilities": {
@@ -3614,6 +3690,14 @@
       "r_witness": "examples/rounded_sum.R",
       "boundary_tests": "saschi.test_numeric_math",
       "evidence": "Separate hand/generated/refusal gates, Decimal90 targets, original whole measurement pipeline, emitted/actual CLI, exact older-source promotion controls; no new complete external-program claim."
+    },
+    "proc_means": {
+      "rule_id": "ST-017",
+      "scope": "Explicit one-BY/one-VAR grouped integer N/NMISS/MEAN/VAR OUTPUT under bounded repository DF arithmetic and metadata policy."
+    },
+    "proc_print": {
+      "rule_id": "ST-018",
+      "scope": "Optional exact logical report channel under numeric-space-fixed12-v1; general SAS PRINT/ODS layout is not reproduced."
     }
   }
 }

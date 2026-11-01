@@ -1,7 +1,7 @@
 # Coverage reconciliation and next gate series
 
 Status: Repository/base-R planning evidence, originally reconciled at main08eaa7b
-on2026-10-27 and updated through DS-068, SQL-004 and A0. The handoff binds current acceptance.
+on2026-10-27 and updated through DS-068, ST-017/018, SQL-004 and A0. The handoff binds current acceptance.
 For principal/maintainer prioritization. Counts describe this checkout and the56
 pinned sibling corpus files, not all SAS or live-SAS equivalence. Updated for
 DS-039 arrays, DS-040 DO OVER and DS-041 nested/computed counted loops after the original
@@ -11,11 +11,11 @@ Implementation and publication are not authorized by this planning exercise.
 
 ## Inventory reconciled against actual evidence
 
-The golden command registers74 fixture runners,54 translator suites and1
-synthesis runner. The registry contains1156 tests; the source-bound receipt records skips and passing outcomes. The accepted entry contained1129 tests, zero skips,
+The golden command registers76 fixture runners,55 translator suites and1
+synthesis runner. The registry contains1197 tests; the source-bound receipt records skips and passing outcomes. The accepted entry contained1129 tests, zero skips,
 60 faithful synthesis checks and60 naive controls. The separate1k workload
 checks total39:18 ledger and21 text. These counts have different units. Neither
-104 rulebook rules nor129 golden-command runners is a SAS capability denominator.
+106 rulebook rules nor132 golden-command runners is a SAS capability denominator.
 
 [The capability manifest](capability-manifest.json) still enumerates108 statements
 and40 data-set options. The other7 declared reference areas remain unenumerated:
@@ -69,7 +69,7 @@ The5 RULE entries and8 HUMAN-REVIEW entries retain their review boundaries.
 
 ## Unknown blockers classified
 
-The current56-file compile census has22 clean and34 blocked, with543 ticket
+The current joined56-file compile census has22 clean and34 blocked, with534 ticket
 occurrences. A2 resolves20 compiler tickets across the corpus. The newly compile-
 clean100_doors.sas now passes the DS-042 mixed-output whole-program proof.
 B1 resolves two further tickets and adds the complete loops_for.sas proof.
@@ -104,17 +104,22 @@ whole-step refusal each. Other route changes do not make their unsupported
 arrays,Boolean or numeric domains executable. The net70-ticket and48-unknown
 reductions are diagnostic measurements. Current compile-clean files total22;
 complete external proofs total21 when the source-bound full gates pass.
-D1b removes three further diagnostics while leaving361 unknown occurrences,
-22 compile-clean files and21 complete external proofs unchanged. The numerical
+At the D1b landing, three further diagnostics were removed while361 unknown occurrences,
+22 compile-clean files and21 complete external proofs remained unchanged. The numerical
 workflow is an original witness, not an additional corpus completion.
-The remaining361 occurrences routed
+The joined D4b census removes nine further diagnostics and thirteen unknown
+occurrences through bounded procedure admission and context-specific refusal
+accounting. Compile-clean files remain22 and complete external proofs remain21;
+no additional corpus execution is claimed. These counts come from the joined
+source census, not the procedure gate count.
+The remaining348 occurrences routed
 as unknown receive a primary planning category, with file, line, ticket ordinal,
 statement hash and classification basis preserved. Classification preserves every
 current compiler ticket.
 
 | Primary category for unknown tickets | Occurrences |
 | --- | ---: |
-| Procedure backend/clauses |224|
+| Procedure backend/clauses |211|
 | Macro body, invocation or unresolved reference |128|
 | Input records, INPUT/INFILE and opaque inline data |0|
 | Labels, GOTO/LINK/RETURN/STOP |0|
@@ -123,9 +128,9 @@ current compiler ticket.
 | Descriptor/environment statements |4|
 | Corpus prose or printed output |2|
 | CALL side effects |2|
-| Total |361|
+| Total |348|
 
-The procedure subtotal includes DS2:95, OPTMODEL:76, IML:31, PRINT:9, MEANS:4,
+The procedure subtotal includes DS2:94, OPTMODEL:76, IML:31,
 FCMP:3, SGPLOT:2, TTEST:2 and one each SORT, MULTTEST and UNIVARIATE.
 These are diagnostic occurrences under lexical ownership, including cascading
 clauses, not independent missing procedures or implementation estimates. Macro
@@ -173,6 +178,7 @@ evidence-cost ranking, not a schedule or an estimate of business demand.
 | C1, implemented in DS-052 | B4 output selection with bounded rounded scalar operations | B4/B5, explicit binary64-rows-v1 marker | Original complete-PDV/selection/retained/snapshot witnesses; no new corpus proof | Medium; old binary64-v1 stays non-projecting |
 | C2, implemented in DS-053 | One selected numeric SET with the new row profile | C1 and existing SET state | Independent supplied/prior-step inputs, eager selected-value validation, row resets and retained collisions | High; INPUT/arrays/WHILE/UNTIL/BY/WHERE/MERGE/LOOKUP remain separate |
 | D4a, implemented in SQL-004 | Explicit CHAR descriptor-only CREATE TABLE | Bare PROC SQL, one CREATE, explicit QUIT | Complete unchanged postal-address empty-table proof, ordered descriptors and atomic destination refusals | Medium; numeric columns, queries, DML and general SQL remain separate |
+| D4b, implemented in ST-017/018 | Existing ascending SORT plus bounded grouped MEANS OUTPUT and logical PRINT | Explicit grouped-integer-means-df-v1 and numeric-print-v1 contracts, exact selected integer domain and numeric-space-fixed12-v1 report | Original whole procedure source and segmented math-to-SORT/MEANS/PRINT composition, independent base R, exact report comparison and whole-job atomic publication | High; wider statistics/domains/CLASS/WEIGHT/ODS and physical SAS layout remain separate |
 | D1, implemented in DS-054..057 | Rounded numeric INPUT, arrays and conditional loops, plus their integrated stream | Existing converter/index/control/value/text policies and explicit binary64-pipeline-v1 | Original complete measurement stream and separate component gates; no new complete corpus proof | High; broader functions, domains, control nesting and record forms remain separate |
 | D1b, implemented in DS-066..068 | SQRT, natural LOG and rounded argument-list SUM | Separate binary64-math-v1 marker; existing input, array, index, control and text policies | Original complete measurement pipeline with independent R, six ordered snapshots, retained missing state and a fresh-step reset; no new corpus proof | High; invalid-domain diagnostics, broader functions, RNG and additional profile composition remain separate |
 | D2a, implemented in DS-058/059 | Inline comma DLM/FIRSTOBS and numeric INPUT ranges | Existing exact converter and scalar INPUT scheduling | Original complete source with5reads/7snapshots, independent R, generated cases and separate comparison controls; no new whole-file corpus proof | High; DSD, quoted/general CSV, external files and rounded/array/loop composition remain separate |
@@ -271,3 +277,15 @@ or recursive-call contract is inferred. The current census above separates the
 new complete proof from diagnostic consolidation on programs still refused.
 Root integration also checks exact exports/state in both profile orders and
 retains the whole-program one-FILE refusal across intervening flow steps.
+
+
+## D4b bounded procedure evidence
+
+ST-017/018 add a supplied/prior-step numeric SORT/MEANS OUTPUT/PRINT workflow.
+Existing ascending SORT remains unchanged. The new explicit one-BY/one-VAR DF
+statistics policy uses bounded exact integer sufficient statistics, fresh
+NOINHERIT metadata and separate logical PRINT text/artifact comparison. See
+[the procedure contract](PROCEDURES.md). Two gates and one source suite are added;
+actual passing registry counts require the current source-bound full receipt.
+The procedure reference universe and all148 existing catalogue entries remain
+unchanged. No additional whole-corpus proof is attributed to this slice.
