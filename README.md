@@ -16,11 +16,11 @@ policies. Receipts record what passed for the source and environment tested.
 ## Current verification
 
 Status: version 0.4.0 development evidence for maintainer review, updated on
-2026-11-01. The current registry contains 80 fixture gates, 58 suites and 1271
-tests. With the pinned Roku corpus present, `python verify_all.py` records the
+2026-11-01. The current registry contains 86 fixture gates and62 suites. The full receipt
+records the discovered tests and their outcomes. With the pinned Roku corpus present, `python verify_all.py` records the
 source-bound unified verdict. Synthesis separately checks 60 faithful cases and
-60 naive variants. The accepted entry baseline covered 71 gates, 53 suites and
-1129 tests with zero skips; current passing outcomes require a matching receipt.
+60 naive variants. The accepted entry main9d36 covered80 gates,58 suites and
+1271 tests with zero skips; current passing outcomes require a matching receipt.
 Live-SAS validation remains outstanding.
 
 D2b accepted twenty complete external-program repository/base-R proofs, including
@@ -112,6 +112,15 @@ hand/base-R gate. Vendor sources use explicit external cache preparation; this
 benchmark is separate from the21 Roku whole-program proofs. The previous numeric
 PRINT contract and64-column PUT_ALL limit remain intact.
 
+[Explicit bitwise output and informat reports](docs/INFORMAT_REPORTS.md) adds
+`--output-contract bitwise-put-all-67-v1` while preserving the old default64-byte
+refusal. Its unchanged Roku target requires that explicit selection. A separate
+whole-program gate covers the pinned official INVALUE example, including custom
+numeric definitions, absolute pointer input, procedure-local labelled PRINT and
+default MEANS. Both logical reports preserve local TITLE state. The two vendor
+benchmarks stay separate from the Roku inventory; current full receipts bind
+acceptance. No live SAS or physical-output equivalence is claimed.
+
 ## Operational workflow
 
 The typed execution workflow and C++ scalar pilot use a shared, versioned
@@ -145,7 +154,7 @@ fixed expected output and base-R evidence. Special missings retain their tags.
   sibling plus a fixture verifier (`verify_*.py`). Run any verifier directly,
   or all of them through [verify_all.py](verify_all.py).
 - [docs/sasconversionrulebook.json](docs/sasconversionrulebook.json) : the machine-consumable translation
-  rulebook. 109 rules with equivalence classes (EXACT,
+  rulebook. 115 rules with equivalence classes (EXACT,
   EQUIVALENT-WITH-SETTINGS, APPROXIMATE, NO-DIRECT-EQUIVALENT), required
   settings, forbidden patterns, and validation tests.
 - [docs/capability-manifest.json](docs/capability-manifest.json) : the coverage manifest. Enumerated entries of

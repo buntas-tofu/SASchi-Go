@@ -43,7 +43,9 @@ def execute_job(args):
         raise ValueError(f'output directory already exists: {output}')
     source = args.source.read_text(encoding='utf-8')
     job = build_job(source, args.inputs, args.expect, expect_exports=getattr(args, 'expect_exports', None),
-                    expect_reports=getattr(args, 'expect_reports', None))
+                    expect_reports=getattr(args, 'expect_reports', None),
+                    expect_log=getattr(args, 'expect_log', None),
+                    **({} if getattr(args, 'output_contract', None) is None else {'output_contract': args.output_contract}))
     receipt, result = job.receipt, job.result
     output.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix='.saschi-', dir=output.parent) as temporary:
@@ -88,14 +90,17 @@ def main(argv=None):
     translate = sub.add_parser('translate', help='emit a checked target or a blocked inspection artifact')
     translate.add_argument('source', type=Path)
     translate.add_argument('--target', choices=('python', 'cpp'), default='python')
-    translate.add_argument('--output', required=True, type=Path)
+    translate.add_argument('--output', '--o', '--ou', '--out', '--outp', '--outpu', required=True, type=Path)
     run = sub.add_parser('run', help='execute a bounded typed dataset workflow and write a receipt')
     run.add_argument('source', type=Path)
     run.add_argument('--inputs', type=Path)
     run.add_argument('--expect', type=Path)
     run.add_argument('--expect-exports', type=Path, help='compare the complete export basename-to-text map as exact UTF8 bytes')
     run.add_argument('--expect-reports', type=Path, help='compare the complete logical report basename-to-text map as exact UTF8 bytes')
-    run.add_argument('--output', required=True, type=Path)
+    run.add_argument('--expect-log', type=Path, help='compare the exact ordered logical log record list')
+    run.add_argument('--output', '--o', '--ou', '--out', '--outp', '--outpu', required=True, type=Path)
+    for command in (inspect, translate, run):
+        command.add_argument('--output-contract', help='select an explicit bounded output policy')
     tui = sub.add_parser('tui', help='open the rich console interface')
     tui.add_argument('source', nargs='?', type=Path)
     showcase = sub.add_parser('showcase', help='render a job as a self-contained showcase document')
@@ -114,12 +119,14 @@ def main(argv=None):
         if args.command == 'doctor':
             return doctor()
         if args.command == 'inspect':
-            plan = compile_plan(args.source.read_text(encoding='utf-8'))
+            plan = compile_plan(args.source.read_text(encoding='utf-8'),
+                                **({} if args.output_contract is None else {'output_contract': args.output_contract}))
             print(json.dumps(plan.to_dict(), indent=2, allow_nan=False))
             return 2 if plan.blocked else 0
         if args.command == 'translate':
             source = args.source.read_text(encoding='utf-8')
-            translation = (python_translate if args.target == 'python' else cpp_translate)(source)
+            translation = (python_translate if args.target == 'python' else cpp_translate)(source,
+                **({} if args.output_contract is None else {'output_contract': args.output_contract}))
             args.output.parent.mkdir(parents=True, exist_ok=True)
             # Exclusive creation protects an existing source or generated program.
             with args.output.open('x') as handle:

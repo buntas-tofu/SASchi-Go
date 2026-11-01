@@ -289,6 +289,16 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
         raise ValueError('unsupported plan version')
     if plan['tickets'] and not allow_partial:
         raise RuntimeError('saschi: blocked translation. Nothing from this program was executed.')
+    from .formatted_program import validate_program as validate_formatted, run_program as run_formatted
+    if validate_formatted(plan, catalog) is not None:
+        return run_formatted(plan, catalog)
+    from .bitwise_output import KIND as BITWISE_KIND, execute_step as execute_bitwise, refuse_legacy as refuse_bitwise
+    if any(type(step) is dict and step.get('kind') == BITWISE_KIND for step in plan['steps']):
+        if (type(plan.get('version')) is not int or plan['version'] != 2 or plan['tickets']
+                or len(plan['steps']) != 1 or catalog is not None and (type(catalog) is not dict or catalog)):
+            raise ValueError('bitwise67 requires one complete version2 Step and an empty initial catalog')
+        return execute_bitwise(plan['steps'][0], version=plan['version'])
+    refuse_bitwise(plan)
     from .mixed_reports import (validate_program as validate_mixed_program,
                                 execute_title, execute_print as execute_mixed_print,
                                 validate_reports as validate_mixed_reports)

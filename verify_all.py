@@ -118,6 +118,12 @@ VERIFIERS = [
     ("mixed-print", HERE / "examples" / "verify_mixed_print.py"),
     ("logical-title", HERE / "examples" / "verify_logical_title.py"),
     ("vendor-sorted-copy", HERE / "examples" / "verify_vendor_sorted_copy.py"),
+    ("bitwise-output", HERE / "examples" / "verify_bitwise_output.py"),
+    ("numeric-invalue", HERE / "examples" / "verify_numeric_invalue.py"),
+    ("formatted-input", HERE / "examples" / "verify_formatted_input.py"),
+    ("labelled-print", HERE / "examples" / "verify_labelled_print.py"),
+    ("default-means", HERE / "examples" / "verify_default_means.py"),
+    ("vendor-invalue", HERE / "examples" / "verify_vendor_invalue.py"),
 ]
 
 # The translator suites, run as unittest modules. They carry the same weight as
@@ -183,6 +189,10 @@ SUITES = [
     ("suite-character-input", "saschi.test_character_input"),
     ("suite-mixed-reports", "saschi.test_mixed_reports"),
     ("suite-vendor-sources", "tools.test_vendor_sources"),
+    ("suite-bitwise-output", "saschi.test_bitwise_output"),
+    ("suite-formatted-input", "saschi.test_formatted_input"),
+    ("suite-informat-reports", "saschi.test_informat_reports"),
+    ("suite-formatted-program", "saschi.test_formatted_program"),
 ]
 
 

@@ -13,8 +13,8 @@ class Translation:
     plan: dict = field(default_factory=dict)
 
 
-def translate(source: str, allow_partial: bool = False) -> Translation:
-    parsed = compile_plan(source)
+def translate(source: str, allow_partial: bool = False, *, output_contract=None) -> Translation:
+    parsed = compile_plan(source) if output_contract is None else compile_plan(source, output_contract=output_contract)
     plan = parsed.to_dict()
     lines = [
         "# SASchi plan version 2, Python target.",

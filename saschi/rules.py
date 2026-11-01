@@ -139,6 +139,12 @@ def load_rulebook(path: Optional[Path] = None) -> dict[str, Rule]:
 # ---------------------------------------------------------------------------
 
 CONSTRUCT_MAP: dict[str, str] = {
+    "bitwise-output": "DS-070",
+    "numeric-invalue": "DS-071",
+    "formatted-input": "DS-072",
+    "labelled-print": "ST-021",
+    "default-means": "ST-022",
+    "informat-title": "ST-023",
     # Gated data-step families (fixture gates exist or land with Track B/C).
     "round": "DS-012",
     "mod-int": "DS-013",
@@ -402,6 +408,10 @@ def character_report_routes(source, statements):
     lexers provide the separate whole-program statement-accounting cross-check.
     Indices keep distinct statements on the same physical line distinct.
     """
+    from .formatted_program import source_steps
+    _, _, formatted_routes, selected = source_steps(source, statements)
+    if selected:
+        return formatted_routes
     from .character_input import _parse_block
     from .mixed_reports import parse_title, parse_print
     routes = {}

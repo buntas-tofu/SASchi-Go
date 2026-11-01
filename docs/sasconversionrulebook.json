@@ -3203,6 +3203,175 @@
       "sources": [
         "https://support.sas.com/documentation/cdl/en/lestmtsref/63323/HTML/default/p10gcmrmf83iaxn1ilrx4pra969n.htm"
       ]
+    },
+    {
+      "rule_id": "DS-070",
+      "sas_pattern": "Explicit bitwise uint32 DATA _NULL_ diagnostic record with67-byte policy",
+      "scope": "data-step",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "Separate source parser,exact portable validator and bounded executor under the named profile. Earlier profiles remain strict."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent source-reading R witness with ordered descriptors,values and exact logical text;no Python plan or expected data input."
+      },
+      "required_settings": [
+        "Explicit output_contract bitwise-put-all-67-v1 only. One exact version2 bitwise_data Step,1..64 assignments,1..16 prior-defined ordinary variables,at least one existing bitwise call and one final put_all_67. Finite uint32 values only. Expressions depth32,total128 nodes. Preserve first-source spellings and ordered values with exact automatic tail/trailing separator,at most67 bytes excluding LF. Old default64 helper/source/runtime refusal remains unchanged. Empty initial catalog; C++ refuses.",
+        "Validate complete explicit bitwise family before execution. Hidden markers,invalid domains/ordered shapes and cyclic portable containers refuse. Failures publish no accepted partial output. The separate formatted whole-family bounds are documented in docs/INFORMAT_REPORTS.md."
+      ],
+      "forbidden_patterns": [
+        "Unlisted syntax,broader domains,implicit profile promotion or native SAS physical-output claims"
+      ],
+      "silent_difference_checks": [
+        "Ordered complete descriptors/rows,exact logical text,whole-source accounting,independent hand/R and actualCLI comparator/atomic controls."
+      ],
+      "validation_test": "examples/verify_bitwise_output.py",
+      "confidence": "Bounded repository/base-R contract evidence;no live SAS,whole-language or physical-output equivalence.",
+      "sources": []
+    },
+    {
+      "rule_id": "DS-071",
+      "sas_pattern": "Bounded job-local numeric literal INVALUE definitions",
+      "scope": "data-step",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "Separate source parser,exact portable validator and bounded executor under the named profile. Earlier profiles remain strict."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent source-reading R witness with ordered descriptors,values and exact logical text;no Python plan or expected data input."
+      },
+      "required_settings": [
+        "Exact version2 informat_definition/numeric_invalue/numeric-invalue-literals-v1. Bare PROC FORMAT,one INVALUE,RUN;1..8 unique prior definitions per job. Custom eval or usr_ names at most31 ending nondigit;1..32 exact-case printableASCII nonblank literal keys of1..32 bytes without outer spaces,quotes or macro markers,mapped to strict integers[-1000,1000]. Width derives from longest key. Lookup removes only right padding; unmatched finite integral numeric tokens use unchanged converter. Blank/missing/invalid tokens refuse atomically. No general catalog or built-in informat enumeration.",
+        "Whole formatted family requires at most64Steps,8definitions,8fresh producers,32titles,onePRINT and oneMEANS. Validate all definitions,values and descriptors eagerly. Hidden markers and cyclic portable containers refuse;failures publish no accepted partial artifacts. See docs/INFORMAT_REPORTS.md."
+      ],
+      "forbidden_patterns": [
+        "Unlisted syntax,broader domains,implicit profile promotion or native SAS physical-output claims"
+      ],
+      "silent_difference_checks": [
+        "Ordered complete descriptors/rows,exact logical text,whole-source accounting,independent hand/R and actualCLI comparator/atomic controls."
+      ],
+      "validation_test": "examples/verify_numeric_invalue.py",
+      "confidence": "Bounded repository/base-R contract evidence;no live SAS,whole-language or physical-output equivalence.",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/proc/65145/HTML/default/p1pmw90bl3jzgdn1w4202kclxtho.htm",
+        "https://support.sas.com/documentation/cdl/en/proc/65145/HTML/default/n1c8ieaatjgzf7n1cz9becgqyf5q.htm"
+      ]
+    },
+    {
+      "rule_id": "DS-072",
+      "sas_pattern": "Bounded absolute-pointer mixed character/custom numeric INPUT",
+      "scope": "data-step",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "Separate source parser,exact portable validator and bounded executor under the named profile. Earlier profiles remain strict."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent source-reading R witness with ordered descriptors,values and exact logical text;no Python plan or expected data input."
+      },
+      "required_settings": [
+        "Exact version2 formatted_data/formatted_input/formatted-records-v1 and empty initial catalog. Fresh named DATA,one INPUT,DATALINES,opaque physical cards,standalone unindented semicolon,RUN. First simple-list character field storage8;later explicit@1..80 and $w.width1..32 or prior custom numeric informat. At least one custom read.2..32 unique ordinary fields,0..1000 printableASCII records at most80bytes,no quote/semicolon. Fixed spans physically present;no flowover/padding past record. $w trims leading blanks,period-only to blank,pads storage. First period-only simple-list token conservatively refuses. Plain schema/rows only,no persisted informat/format/label.",
+        "Whole formatted family requires at most64Steps,8definitions,8fresh producers,32titles,onePRINT and oneMEANS. Validate all definitions,values and descriptors eagerly. Hidden markers and cyclic portable containers refuse;failures publish no accepted partial artifacts. See docs/INFORMAT_REPORTS.md."
+      ],
+      "forbidden_patterns": [
+        "Unlisted syntax,broader domains,implicit profile promotion or native SAS physical-output claims"
+      ],
+      "silent_difference_checks": [
+        "Ordered complete descriptors/rows,exact logical text,whole-source accounting,independent hand/R and actualCLI comparator/atomic controls."
+      ],
+      "validation_test": "examples/verify_formatted_input.py",
+      "confidence": "Bounded repository/base-R contract evidence;no live SAS,whole-language or physical-output equivalence.",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/leforinforref/63324/HTML/default/n1v0ez0x2x99qdn15797taed37ji.htm"
+      ]
+    },
+    {
+      "rule_id": "ST-021",
+      "sas_pattern": "Procedure-local labelled NOOBS mixed logical PRINT",
+      "scope": "procedure-or-global-statement",
+      "equivalence_class": "APPROXIMATE",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "Separate source parser,exact portable validator and bounded executor under the named profile. Earlier profiles remain strict."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent source-reading R witness with ordered descriptors,values and exact logical text;no Python plan or expected data input."
+      },
+      "required_settings": [
+        "Exact version2 labelled_print/labelled-print-v1 in the formatted whole family. PROC PRINT DATA=name LABEL NOOBS,one LABEL statement,RUN.1..32 unique known-column labels,1..64 printableASCII nonblank bytes,no macro markers. Procedure-local labels never modify descriptors or later MEANS names. Header JSON-quotes label/name tokens;char values JSON-quoted after right-padding removal,integer/period numeric tokens,no observation numbers. Named ascii-informat-reports-v1,print_01.txt. Independent caps1000rows/32cols/1055header/415row/417056total. No SAS/ODS physical-layout claim.",
+        "Whole formatted family requires at most64Steps,8definitions,8fresh producers,32titles,onePRINT and oneMEANS. Validate all definitions,values and descriptors eagerly. Hidden markers and cyclic portable containers refuse;failures publish no accepted partial artifacts. See docs/INFORMAT_REPORTS.md."
+      ],
+      "forbidden_patterns": [
+        "Unlisted syntax,broader domains,implicit profile promotion or native SAS physical-output claims"
+      ],
+      "silent_difference_checks": [
+        "Ordered complete descriptors/rows,exact logical text,whole-source accounting,independent hand/R and actualCLI comparator/atomic controls."
+      ],
+      "validation_test": "examples/verify_labelled_print.py",
+      "confidence": "Bounded repository/base-R contract evidence;no live SAS,whole-language or physical-output equivalence.",
+      "sources": []
+    },
+    {
+      "rule_id": "ST-022",
+      "sas_pattern": "Default displayed MEANS logical statistics without output dataset",
+      "scope": "procedure-or-global-statement",
+      "equivalence_class": "APPROXIMATE",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "Separate source parser,exact portable validator and bounded executor under the named profile. Earlier profiles remain strict."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent source-reading R witness with ordered descriptors,values and exact logical text;no Python plan or expected data input."
+      },
+      "required_settings": [
+        "Exact version2 default_means/default-means-v1 in formatted whole family. PROC MEANS DATA=name,RUN only;all1..8 numeric columns in descriptor order. Original numeric cells strict finite integers[-1000,1000] or ordinary missing,no tags/bools/fractions. N/MEAN/STD/MIN/MAX,DF;mean from exact rational sums,STD exact rational sample variance and integer-square midpoint. Fixed8 half-away tokens,negativezero normalized,cap14. Empty statistics period,N<2STDperiod. Named means_01.txt/title persistence;no output statistics dataset or general PROC options.",
+        "Whole formatted family requires at most64Steps,8definitions,8fresh producers,32titles,onePRINT and oneMEANS. Validate all definitions,values and descriptors eagerly. Hidden markers and cyclic portable containers refuse;failures publish no accepted partial artifacts. See docs/INFORMAT_REPORTS.md."
+      ],
+      "forbidden_patterns": [
+        "Unlisted syntax,broader domains,implicit profile promotion or native SAS physical-output claims"
+      ],
+      "silent_difference_checks": [
+        "Ordered complete descriptors/rows,exact logical text,whole-source accounting,independent hand/R and actualCLI comparator/atomic controls."
+      ],
+      "validation_test": "examples/verify_default_means.py",
+      "confidence": "Bounded repository/base-R contract evidence;no live SAS,whole-language or physical-output equivalence.",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a000146729.htm"
+      ]
+    },
+    {
+      "rule_id": "ST-023",
+      "sas_pattern": "Literal TITLE state in the formatted logical report family",
+      "scope": "procedure-or-global-statement",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "Separate source parser,exact portable validator and bounded executor under the named profile. Earlier profiles remain strict."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent source-reading R witness with ordered descriptors,values and exact logical text;no Python plan or expected data input."
+      },
+      "required_settings": [
+        "Distinct exact version2 informat_title/informat-title-v1 only in a complete formatted program. One1..128 printableASCII nonspace literal/no&% sets,or bare TITLE resets. Preserve literal spaces and fresh local state per run,persist through both labelled PRINT/default MEANS,at most32titles. Named logical report prefix TITLE:,no physical/session/SAS layout claim.",
+        "Whole formatted family requires at most64Steps,8definitions,8fresh producers,32titles,onePRINT and oneMEANS. Validate all definitions,values and descriptors eagerly. Hidden markers and cyclic portable containers refuse;failures publish no accepted partial artifacts. See docs/INFORMAT_REPORTS.md."
+      ],
+      "forbidden_patterns": [
+        "Unlisted syntax,broader domains,implicit profile promotion or native SAS physical-output claims"
+      ],
+      "silent_difference_checks": [
+        "Ordered complete descriptors/rows,exact logical text,whole-source accounting,independent hand/R and actualCLI comparator/atomic controls."
+      ],
+      "validation_test": "examples/verify_labelled_print.py",
+      "confidence": "Bounded repository/base-R contract evidence;no live SAS,whole-language or physical-output equivalence.",
+      "sources": []
     }
   ],
   "runtime_capabilities": {
@@ -3843,6 +4012,72 @@
       "r_witness": "examples/logical_title.R",
       "boundary_tests": "saschi.test_mixed_reports",
       "evidence": "Separate bounded source/runtime/emitted/base-R and actual CLI gates. The pinned complete vendor SORT benchmark is separately attributed to vendor-sorted-copy,never to the21/56 Roku inventory; no live SAS or physical layout claim."
+    },
+    "bitwise_output": {
+      "rule_id": "DS-070",
+      "target": "saschi.runtime.run_plan",
+      "scope": [
+        "Explicit output_contract bitwise-put-all-67-v1 only. One exact version2 bitwise_data Step,1..64 assignments,1..16 prior-defined ordinary variables,at least one existing bitwise call and one final put_all_67. Finite uint32 values only. Expressions depth32,total128 nodes. Preserve first-source spellings and ordered values with exact automatic tail/trailing separator,at most67 bytes excluding LF. Old default64 helper/source/runtime refusal remains unchanged. Empty initial catalog; C++ refuses."
+      ],
+      "validation_test": "examples/verify_bitwise_output.py",
+      "r_witness": "examples/bitwise_output.R",
+      "boundary_tests": "saschi.test_bitwise_output",
+      "evidence": "Separate original hand/generated/refusal/source/runtime/emitted/actualCLI gates plus complete pinned whole-program witness. Claim applies only when current full gates pass."
+    },
+    "numeric_invalue": {
+      "rule_id": "DS-071",
+      "target": "saschi.runtime.run_plan",
+      "scope": [
+        "Exact version2 informat_definition/numeric_invalue/numeric-invalue-literals-v1. Bare PROC FORMAT,one INVALUE,RUN;1..8 unique prior definitions per job. Custom eval or usr_ names at most31 ending nondigit;1..32 exact-case printableASCII nonblank literal keys of1..32 bytes without outer spaces,quotes or macro markers,mapped to strict integers[-1000,1000]. Width derives from longest key. Lookup removes only right padding; unmatched finite integral numeric tokens use unchanged converter. Blank/missing/invalid tokens refuse atomically. No general catalog or built-in informat enumeration."
+      ],
+      "validation_test": "examples/verify_numeric_invalue.py",
+      "r_witness": "examples/numeric_invalue.R",
+      "boundary_tests": "saschi.test_formatted_input",
+      "evidence": "Separate original hand/generated/refusal/source/runtime/emitted/actualCLI gates plus complete pinned whole-program witness. Claim applies only when current full gates pass."
+    },
+    "formatted_input": {
+      "rule_id": "DS-072",
+      "target": "saschi.runtime.run_plan",
+      "scope": [
+        "Exact version2 formatted_data/formatted_input/formatted-records-v1 and empty initial catalog. Fresh named DATA,one INPUT,DATALINES,opaque physical cards,standalone unindented semicolon,RUN. First simple-list character field storage8;later explicit@1..80 and $w.width1..32 or prior custom numeric informat. At least one custom read.2..32 unique ordinary fields,0..1000 printableASCII records at most80bytes,no quote/semicolon. Fixed spans physically present;no flowover/padding past record. $w trims leading blanks,period-only to blank,pads storage. First period-only simple-list token conservatively refuses. Plain schema/rows only,no persisted informat/format/label."
+      ],
+      "validation_test": "examples/verify_formatted_input.py",
+      "r_witness": "examples/formatted_input.R",
+      "boundary_tests": "saschi.test_formatted_input",
+      "evidence": "Separate original hand/generated/refusal/source/runtime/emitted/actualCLI gates plus complete pinned whole-program witness. Claim applies only when current full gates pass."
+    },
+    "labelled_print": {
+      "rule_id": "ST-021",
+      "target": "saschi.runtime.run_plan",
+      "scope": [
+        "Exact version2 labelled_print/labelled-print-v1 in the formatted whole family. PROC PRINT DATA=name LABEL NOOBS,one LABEL statement,RUN.1..32 unique known-column labels,1..64 printableASCII nonblank bytes,no macro markers. Procedure-local labels never modify descriptors or later MEANS names. Header JSON-quotes label/name tokens;char values JSON-quoted after right-padding removal,integer/period numeric tokens,no observation numbers. Named ascii-informat-reports-v1,print_01.txt. Independent caps1000rows/32cols/1055header/415row/417056total. No SAS/ODS physical-layout claim."
+      ],
+      "validation_test": "examples/verify_labelled_print.py",
+      "r_witness": "examples/labelled_print.R",
+      "boundary_tests": "saschi.test_informat_reports",
+      "evidence": "Separate original hand/generated/refusal/source/runtime/emitted/actualCLI gates plus complete pinned whole-program witness. Claim applies only when current full gates pass."
+    },
+    "default_means": {
+      "rule_id": "ST-022",
+      "target": "saschi.runtime.run_plan",
+      "scope": [
+        "Exact version2 default_means/default-means-v1 in formatted whole family. PROC MEANS DATA=name,RUN only;all1..8 numeric columns in descriptor order. Original numeric cells strict finite integers[-1000,1000] or ordinary missing,no tags/bools/fractions. N/MEAN/STD/MIN/MAX,DF;mean from exact rational sums,STD exact rational sample variance and integer-square midpoint. Fixed8 half-away tokens,negativezero normalized,cap14. Empty statistics period,N<2STDperiod. Named means_01.txt/title persistence;no output statistics dataset or general PROC options."
+      ],
+      "validation_test": "examples/verify_default_means.py",
+      "r_witness": "examples/default_means.R",
+      "boundary_tests": "saschi.test_informat_reports",
+      "evidence": "Separate original hand/generated/refusal/source/runtime/emitted/actualCLI gates plus complete pinned whole-program witness. Claim applies only when current full gates pass."
+    },
+    "informat_title": {
+      "rule_id": "ST-023",
+      "target": "saschi.runtime.run_plan",
+      "scope": [
+        "Distinct exact version2 informat_title/informat-title-v1 only in a complete formatted program. One1..128 printableASCII nonspace literal/no&% sets,or bare TITLE resets. Preserve literal spaces and fresh local state per run,persist through both labelled PRINT/default MEANS,at most32titles. Named logical report prefix TITLE:,no physical/session/SAS layout claim."
+      ],
+      "validation_test": "examples/verify_labelled_print.py",
+      "r_witness": "examples/informat_reports.R",
+      "boundary_tests": "saschi.test_informat_reports",
+      "evidence": "Separate original hand/generated/refusal/source/runtime/emitted/actualCLI gates plus complete pinned whole-program witness. Claim applies only when current full gates pass."
     }
   }
 }

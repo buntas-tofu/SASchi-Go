@@ -1286,6 +1286,8 @@ def _compile_legacy_body(source: str) -> Plan:
     return plan
 
 
+
+
 def _compile_legacy_plan(source: str) -> Plan:
     from .numeric_math import parser_scope
     with parser_scope(source):
@@ -1348,3 +1350,16 @@ def compile_plan(source: str) -> Plan:
         except (ValueError, KeyError, TypeError, RecursionError) as error:
             plan.tickets.append(Ticket(1, 'character/report program', 'character-input', str(error)))
     return plan
+
+
+_compile_before_formatted_program = compile_plan
+
+
+def compile_plan(source: str, *, output_contract=None) -> Plan:
+    if output_contract is not None:
+        from .bitwise_output import PROFILE, compile_program
+        if type(output_contract) is not str or output_contract != PROFILE:
+            return Plan(tickets=[Ticket(1, 'output contract', 'bitwise-output', 'unknown explicit output contract')])
+        return compile_program(source, _compile_before_formatted_program)
+    from .formatted_program import compile_program
+    return compile_program(source, _compile_before_formatted_program)
