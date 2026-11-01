@@ -16,11 +16,11 @@ policies. Receipts record what passed for the source and environment tested.
 ## Current verification
 
 Status: version 0.4.0 development evidence for maintainer review, updated on
-2026-10-31. The current registry contains 71 fixture gates, 53 suites and 1129
+2026-10-31. The current registry contains 74 fixture gates, 54 suites and 1156
 tests. With the pinned Roku corpus present, `python verify_all.py` records the
 source-bound unified verdict. Synthesis separately checks 60 faithful cases and
-60 naive variants. The accepted entry baseline covered 69 gates, 52 suites and
-1097 tests with zero skips; current passing outcomes require a matching receipt.
+60 naive variants. The accepted entry baseline covered 71 gates, 53 suites and
+1129 tests with zero skips; current passing outcomes require a matching receipt.
 Live-SAS validation remains outstanding.
 
 D2b accepted twenty complete external-program repository/base-R proofs, including
@@ -91,6 +91,8 @@ Query creation, numeric columns, DML and general PROC SQL remain separate.
 
 D1 now composes the bounded rounded profile with numeric inline INPUT, numeric arrays/current aliases/ordered SUM OF, and existing WHILE/UNTIL. Four separate gates include a complete measurement-stream witness; exact indices, converter/trip limits, older markers and inferred text policies remain. See [numeric pipelines](docs/NUMERIC_PIPELINES.md).
 
+D1b separately gates bounded SQRT, natural LOG and ordered argument-list SUM in a new numeric profile. The original complete measurement stream, prior-profile negatives and numerical/text limits are documented in [numeric math](docs/NUMERIC_MATH.md). This adds no complete external-program claim.
+
 D2a separately gates inline comma DLM/FIRSTOBS and numeric INPUT name ranges. DLM collapses empty comma spans; this profile preserves exact input conversion and FLOWOVER, and defers DSD, quoted/general CSV and numerical-pipeline composition. See [bounded comma and range input](docs/INLINE_CSV.md).
 
 D2b adds separate numeric SUM OF/PUT ranges and one caller-rooted CSV artifact. Its named ASCII/LF integer policy, complete unchanged CSV-program byte proof, exact `--expect-exports` comparison and success-only staged publication are documented in [numeric exchange](docs/NUMERIC_EXCHANGE.md). Existing result/receipt shapes remain unchanged without FILE.
@@ -128,7 +130,7 @@ fixed expected output and base-R evidence. Special missings retain their tags.
   sibling plus a fixture verifier (`verify_*.py`). Run any verifier directly,
   or all of them through [verify_all.py](verify_all.py).
 - [docs/sasconversionrulebook.json](docs/sasconversionrulebook.json) : the machine-consumable translation
-  rulebook. 101 rules with equivalence classes (EXACT,
+  rulebook. 104 rules with equivalence classes (EXACT,
   EQUIVALENT-WITH-SETTINGS, APPROXIMATE, NO-DIRECT-EQUIVALENT), required
   settings, forbidden patterns, and validation tests.
 - [docs/capability-manifest.json](docs/capability-manifest.json) : the coverage manifest. Enumerated entries of

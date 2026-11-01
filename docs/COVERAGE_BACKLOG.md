@@ -1,7 +1,7 @@
 # Coverage reconciliation and next gate series
 
 Status: Repository/base-R planning evidence, originally reconciled at main08eaa7b
-on2026-10-27 and updated through DS-065, SQL-004 and A0. The handoff binds current acceptance.
+on2026-10-27 and updated through DS-068, SQL-004 and A0. The handoff binds current acceptance.
 For principal/maintainer prioritization. Counts describe this checkout and the56
 pinned sibling corpus files, not all SAS or live-SAS equivalence. Updated for
 DS-039 arrays, DS-040 DO OVER and DS-041 nested/computed counted loops after the original
@@ -11,11 +11,11 @@ Implementation and publication are not authorized by this planning exercise.
 
 ## Inventory reconciled against actual evidence
 
-The golden command registers71 fixture runners,53 translator suites and1
-synthesis runner. The registry contains1129 tests; the source-bound receipt records skips and passing outcomes. The accepted entry contained1097 tests, zero skips,
+The golden command registers74 fixture runners,54 translator suites and1
+synthesis runner. The registry contains1156 tests; the source-bound receipt records skips and passing outcomes. The accepted entry contained1129 tests, zero skips,
 60 faithful synthesis checks and60 naive controls. The separate1k workload
 checks total39:18 ledger and21 text. These counts have different units. Neither
-101 rulebook rules nor125 golden-command runners is a SAS capability denominator.
+104 rulebook rules nor129 golden-command runners is a SAS capability denominator.
 
 [The capability manifest](capability-manifest.json) still enumerates108 statements
 and40 data-set options. The other7 declared reference areas remain unenumerated:
@@ -69,7 +69,7 @@ The5 RULE entries and8 HUMAN-REVIEW entries retain their review boundaries.
 
 ## Unknown blockers classified
 
-The current56-file compile census has22 clean and34 blocked, with546 ticket
+The current56-file compile census has22 clean and34 blocked, with543 ticket
 occurrences. A2 resolves20 compiler tickets across the corpus. The newly compile-
 clean100_doors.sas now passes the DS-042 mixed-output whole-program proof.
 B1 resolves two further tickets and adds the complete loops_for.sas proof.
@@ -104,6 +104,9 @@ whole-step refusal each. Other route changes do not make their unsupported
 arrays,Boolean or numeric domains executable. The net70-ticket and48-unknown
 reductions are diagnostic measurements. Current compile-clean files total22;
 complete external proofs total21 when the source-bound full gates pass.
+D1b removes three further diagnostics while leaving361 unknown occurrences,
+22 compile-clean files and21 complete external proofs unchanged. The numerical
+workflow is an original witness, not an additional corpus completion.
 The remaining361 occurrences routed
 as unknown receive a primary planning category, with file, line, ticket ordinal,
 statement hash and classification basis preserved. Classification preserves every
@@ -171,9 +174,11 @@ evidence-cost ranking, not a schedule or an estimate of business demand.
 | C2, implemented in DS-053 | One selected numeric SET with the new row profile | C1 and existing SET state | Independent supplied/prior-step inputs, eager selected-value validation, row resets and retained collisions | High; INPUT/arrays/WHILE/UNTIL/BY/WHERE/MERGE/LOOKUP remain separate |
 | D4a, implemented in SQL-004 | Explicit CHAR descriptor-only CREATE TABLE | Bare PROC SQL, one CREATE, explicit QUIT | Complete unchanged postal-address empty-table proof, ordered descriptors and atomic destination refusals | Medium; numeric columns, queries, DML and general SQL remain separate |
 | D1, implemented in DS-054..057 | Rounded numeric INPUT, arrays and conditional loops, plus their integrated stream | Existing converter/index/control/value/text policies and explicit binary64-pipeline-v1 | Original complete measurement stream and separate component gates; no new complete corpus proof | High; broader functions, domains, control nesting and record forms remain separate |
+| D1b, implemented in DS-066..068 | SQRT, natural LOG and rounded argument-list SUM | Separate binary64-math-v1 marker; existing input, array, index, control and text policies | Original complete measurement pipeline with independent R, six ordered snapshots, retained missing state and a fresh-step reset; no new corpus proof | High; invalid-domain diagnostics, broader functions, RNG and additional profile composition remain separate |
 | D2a, implemented in DS-058/059 | Inline comma DLM/FIRSTOBS and numeric INPUT ranges | Existing exact converter and scalar INPUT scheduling | Original complete source with5reads/7snapshots, independent R, generated cases and separate comparison controls; no new whole-file corpus proof | High; DSD, quoted/general CSV, external files and rounded/array/loop composition remain separate |
 | D3a, implemented in DS-060/061 | Numeric DO groups and bounded LEAVE/CONTINUE | Separate integer control_data profile and earlier loop/control limits | Original57-statement/172-event source and independent R prove state/snapshot/transfer scheduling;11 exact prior-source promotions; no new complete corpus proof | High; zero-PDV output, INPUT/array/rounded composition, labels and broader control remain separate |
 | D2b, implemented in DS-062/063 | Numeric SUM OF/PUT ranges and one caller-rooted CSV artifact | Separate exchange_data profile, unchanged decoder/exact helpers and explicit ASCII/LF/open policy | Complete unchanged csv_data_manipulation.sas proof plus original25-statement state/export witness; exact CLI artifact comparison and atomic staging | High; arbitrary paths, DSD, formats and physical SAS defaults remain separate |
+| D3b, implemented in DS-064/065 | Local scalar labels/GOTO/STOP and bounded one-caller LINK/RETURN | Separate flow_data profiles, numeric INPUT, exact integer MOD and existing loop limits | Both unchanged flow_control_structures.sas steps pass complete hand/R/runtime/emitted/CLI proof with 58 logical records and 698 events; original 31-statement state fixture and cross-profile export controls | High; broader calls, structured-body jumps, Boolean/array/numeric domains and no-INPUT unlinked RETURN remain separate |
 
 A1 has reviewable sub-slices: bounded numeric array declaration/index/OF
 execution is implemented in DS-039; single-level implicit numeric DO OVER is
@@ -258,7 +263,7 @@ LINK/RETURN with existing exact numeric INPUT, integer MOD and loops. See
 [the scalar-flow contract](SCALAR_FLOW.md). Both complete unchanged steps of
 flow_control_structures.sas compare against hand and independent full-source R,
 including58 logical records and698 events,emitted execution and actual CLI.
-The original31-statement three-step fixture proves record reset,retained state,
+The original 31-statement three-step fixture proves record reset,retained state,
 caller resumption,STOP publication and full ordered output. The exact previous
 STOP-in-group refusal remains an old-profile/compiler/R negative alongside its
 new-profile positive. No broader numeric,Boolean,array,stochastic,structured-jump

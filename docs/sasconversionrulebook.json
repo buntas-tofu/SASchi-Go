@@ -2926,6 +2926,108 @@
         "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000201969.htm",
         "https://support.sas.com/documentation/cdl/en/lestmtsref/63323/HTML/default/p02jy612cym9oxn10i19cbewlrdf.htm"
       ]
+    },
+    {
+      "rule_id": "DS-066",
+      "sas_pattern": "SQRT in the separately marked bounded numeric math profile",
+      "scope": "data-step",
+      "equivalence_class": "APPROXIMATE",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "Profile-local numeric_math validator/evaluator over unchanged numerical pipeline controls."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent complete-source R parser, state interpreter and base numeric functions."
+      },
+      "required_settings": [
+        "Require exact version2 DATA and first numeric_profile binary64-math-v1. Actual SQRT/LOG, or scalar argument SUM with a rounded arithmetic/function trigger in the same executable step selects this profile. Plain legacy SUM and all older profile/array/function registries remain unchanged.",
+        "SQRT accepts ordinary missing or nonnegative bounded normal/zero binary64. LOG accepts ordinary missing or positive bounded normal binary64 and uses the natural logarithm. Static invalid literal domains refuse even on dead, empty and zero-trip paths; reached dynamic invalid values refuse atomically instead of simulating SAS missing-with-diagnostic behavior.",
+        "SUM accepts1..1024 eagerly validated arguments, ignores ordinary missing, returns missing when all arguments are missing, and accumulates left to right with bounded rounded binary64 partials. No vectorized reassociation, cancellation rescue or global helper change. Existing array SUM OF is unchanged.",
+        "Reuse only the proved numeric pipeline DATA/one inline exact INPUT or selected numeric SET, arrays/active aliases, prior counted/WHILE/UNTIL nesting, retention, projection, snapshots and numeric text. Exact subscripts and counted controls do not gain new functions. Existing node128/depth32/operations1024, converter, trip, column, event and output limits remain.",
+        "Preserve old plan/result/receipt shapes,149 semantic helpers/reference bytes, legal sqrt/log array names and unmarked/old-marker refusals. No comma input, FILE, scalar-flow, new trig/RNG/macros/domains, formatting or runtime dependencies. Python/R agreement uses32 normalized epsilon units with exact missing/schema/row/text comparisons; no live SAS claim."
+      ],
+      "forbidden_patterns": [
+        "Global function/array registry widening; old-marker admission; unsupported new domains or side effects"
+      ],
+      "silent_difference_checks": [
+        "Exact missing/descriptors/order/snapshots/logical records; bounded rounded function values and ordered SUM partials"
+      ],
+      "validation_test": "examples/verify_numeric_sqrt.py",
+      "confidence": "Finite repository/base-R source evidence plus Decimal90 targets; no live SAS or physical-log claim.",
+      "sources": [
+        "docs/NUMERIC_MATH.md",
+        "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000245950.htm",
+        "https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/p07c8e0ktns1c7n1vtowjev5g724.htm"
+      ]
+    },
+    {
+      "rule_id": "DS-067",
+      "sas_pattern": "LOG in the separately marked bounded numeric math profile",
+      "scope": "data-step",
+      "equivalence_class": "APPROXIMATE",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "Profile-local numeric_math validator/evaluator over unchanged numerical pipeline controls."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent complete-source R parser, state interpreter and base numeric functions."
+      },
+      "required_settings": [
+        "Require exact version2 DATA and first numeric_profile binary64-math-v1. Actual SQRT/LOG, or scalar argument SUM with a rounded arithmetic/function trigger in the same executable step selects this profile. Plain legacy SUM and all older profile/array/function registries remain unchanged.",
+        "SQRT accepts ordinary missing or nonnegative bounded normal/zero binary64. LOG accepts ordinary missing or positive bounded normal binary64 and uses the natural logarithm. Static invalid literal domains refuse even on dead, empty and zero-trip paths; reached dynamic invalid values refuse atomically instead of simulating SAS missing-with-diagnostic behavior.",
+        "SUM accepts1..1024 eagerly validated arguments, ignores ordinary missing, returns missing when all arguments are missing, and accumulates left to right with bounded rounded binary64 partials. No vectorized reassociation, cancellation rescue or global helper change. Existing array SUM OF is unchanged.",
+        "Reuse only the proved numeric pipeline DATA/one inline exact INPUT or selected numeric SET, arrays/active aliases, prior counted/WHILE/UNTIL nesting, retention, projection, snapshots and numeric text. Exact subscripts and counted controls do not gain new functions. Existing node128/depth32/operations1024, converter, trip, column, event and output limits remain.",
+        "Preserve old plan/result/receipt shapes,149 semantic helpers/reference bytes, legal sqrt/log array names and unmarked/old-marker refusals. No comma input, FILE, scalar-flow, new trig/RNG/macros/domains, formatting or runtime dependencies. Python/R agreement uses32 normalized epsilon units with exact missing/schema/row/text comparisons; no live SAS claim."
+      ],
+      "forbidden_patterns": [
+        "Global function/array registry widening; old-marker admission; unsupported new domains or side effects"
+      ],
+      "silent_difference_checks": [
+        "Exact missing/descriptors/order/snapshots/logical records; bounded rounded function values and ordered SUM partials"
+      ],
+      "validation_test": "examples/verify_numeric_log.py",
+      "confidence": "Finite repository/base-R source evidence plus Decimal90 targets; no live SAS or physical-log claim.",
+      "sources": [
+        "docs/NUMERIC_MATH.md",
+        "https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/p0urbseuxrkrlyn1tr04y30nt25s.htm",
+        "https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/p07c8e0ktns1c7n1vtowjev5g724.htm"
+      ]
+    },
+    {
+      "rule_id": "DS-068",
+      "sas_pattern": "Rounded argument-list SUM in the separately marked bounded numeric math profile",
+      "scope": "data-step",
+      "equivalence_class": "APPROXIMATE",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "Profile-local numeric_math validator/evaluator over unchanged numerical pipeline controls."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent complete-source R parser, state interpreter and base numeric functions."
+      },
+      "required_settings": [
+        "Require exact version2 DATA and first numeric_profile binary64-math-v1. Actual SQRT/LOG, or scalar argument SUM with a rounded arithmetic/function trigger in the same executable step selects this profile. Plain legacy SUM and all older profile/array/function registries remain unchanged.",
+        "SQRT accepts ordinary missing or nonnegative bounded normal/zero binary64. LOG accepts ordinary missing or positive bounded normal binary64 and uses the natural logarithm. Static invalid literal domains refuse even on dead, empty and zero-trip paths; reached dynamic invalid values refuse atomically instead of simulating SAS missing-with-diagnostic behavior.",
+        "SUM accepts1..1024 eagerly validated arguments, ignores ordinary missing, returns missing when all arguments are missing, and accumulates left to right with bounded rounded binary64 partials. No vectorized reassociation, cancellation rescue or global helper change. Existing array SUM OF is unchanged.",
+        "Reuse only the proved numeric pipeline DATA/one inline exact INPUT or selected numeric SET, arrays/active aliases, prior counted/WHILE/UNTIL nesting, retention, projection, snapshots and numeric text. Exact subscripts and counted controls do not gain new functions. Existing node128/depth32/operations1024, converter, trip, column, event and output limits remain.",
+        "Preserve old plan/result/receipt shapes,149 semantic helpers/reference bytes, legal sqrt/log array names and unmarked/old-marker refusals. No comma input, FILE, scalar-flow, new trig/RNG/macros/domains, formatting or runtime dependencies. Python/R agreement uses32 normalized epsilon units with exact missing/schema/row/text comparisons; no live SAS claim."
+      ],
+      "forbidden_patterns": [
+        "Global function/array registry widening; old-marker admission; unsupported new domains or side effects"
+      ],
+      "silent_difference_checks": [
+        "Exact missing/descriptors/order/snapshots/logical records; bounded rounded function values and ordered SUM partials"
+      ],
+      "validation_test": "examples/verify_rounded_sum.py",
+      "confidence": "Finite repository/base-R source evidence plus Decimal90 targets; no live SAS or physical-log claim.",
+      "sources": [
+        "docs/NUMERIC_MATH.md",
+        "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000245953.htm",
+        "https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/p07c8e0ktns1c7n1vtowjev5g724.htm"
+      ]
     }
   ],
   "runtime_capabilities": {
@@ -3467,6 +3569,51 @@
       "r_witness": "examples/flow_control.R",
       "boundary_tests": "saschi.test_flow_control",
       "evidence": "Original complete three-step hand source and independent full-source R, generated/refusal cases, exact state/text/trace comparisons, actual CLI/emitted and atomic controls. Complete unchanged flow_control_structures.sas proof belongs to scalar-link after both steps compare."
+    },
+    "numeric_sqrt": {
+      "rule_id": "DS-066",
+      "target": "saschi.runtime.run_plan",
+      "scope": [
+        "Require exact version2 DATA and first numeric_profile binary64-math-v1. Actual SQRT/LOG, or scalar argument SUM with a rounded arithmetic/function trigger in the same executable step selects this profile. Plain legacy SUM and all older profile/array/function registries remain unchanged.",
+        "SQRT accepts ordinary missing or nonnegative bounded normal/zero binary64. LOG accepts ordinary missing or positive bounded normal binary64 and uses the natural logarithm. Static invalid literal domains refuse even on dead, empty and zero-trip paths; reached dynamic invalid values refuse atomically instead of simulating SAS missing-with-diagnostic behavior.",
+        "SUM accepts1..1024 eagerly validated arguments, ignores ordinary missing, returns missing when all arguments are missing, and accumulates left to right with bounded rounded binary64 partials. No vectorized reassociation, cancellation rescue or global helper change. Existing array SUM OF is unchanged.",
+        "Reuse only the proved numeric pipeline DATA/one inline exact INPUT or selected numeric SET, arrays/active aliases, prior counted/WHILE/UNTIL nesting, retention, projection, snapshots and numeric text. Exact subscripts and counted controls do not gain new functions. Existing node128/depth32/operations1024, converter, trip, column, event and output limits remain.",
+        "Preserve old plan/result/receipt shapes,149 semantic helpers/reference bytes, legal sqrt/log array names and unmarked/old-marker refusals. No comma input, FILE, scalar-flow, new trig/RNG/macros/domains, formatting or runtime dependencies. Python/R agreement uses32 normalized epsilon units with exact missing/schema/row/text comparisons; no live SAS claim."
+      ],
+      "validation_test": "examples/verify_numeric_sqrt.py",
+      "r_witness": "examples/numeric_sqrt.R",
+      "boundary_tests": "saschi.test_numeric_math",
+      "evidence": "Separate hand/generated/refusal gates, Decimal90 targets, original whole measurement pipeline, emitted/actual CLI, exact older-source promotion controls; no new complete external-program claim."
+    },
+    "numeric_log": {
+      "rule_id": "DS-067",
+      "target": "saschi.runtime.run_plan",
+      "scope": [
+        "Require exact version2 DATA and first numeric_profile binary64-math-v1. Actual SQRT/LOG, or scalar argument SUM with a rounded arithmetic/function trigger in the same executable step selects this profile. Plain legacy SUM and all older profile/array/function registries remain unchanged.",
+        "SQRT accepts ordinary missing or nonnegative bounded normal/zero binary64. LOG accepts ordinary missing or positive bounded normal binary64 and uses the natural logarithm. Static invalid literal domains refuse even on dead, empty and zero-trip paths; reached dynamic invalid values refuse atomically instead of simulating SAS missing-with-diagnostic behavior.",
+        "SUM accepts1..1024 eagerly validated arguments, ignores ordinary missing, returns missing when all arguments are missing, and accumulates left to right with bounded rounded binary64 partials. No vectorized reassociation, cancellation rescue or global helper change. Existing array SUM OF is unchanged.",
+        "Reuse only the proved numeric pipeline DATA/one inline exact INPUT or selected numeric SET, arrays/active aliases, prior counted/WHILE/UNTIL nesting, retention, projection, snapshots and numeric text. Exact subscripts and counted controls do not gain new functions. Existing node128/depth32/operations1024, converter, trip, column, event and output limits remain.",
+        "Preserve old plan/result/receipt shapes,149 semantic helpers/reference bytes, legal sqrt/log array names and unmarked/old-marker refusals. No comma input, FILE, scalar-flow, new trig/RNG/macros/domains, formatting or runtime dependencies. Python/R agreement uses32 normalized epsilon units with exact missing/schema/row/text comparisons; no live SAS claim."
+      ],
+      "validation_test": "examples/verify_numeric_log.py",
+      "r_witness": "examples/numeric_log.R",
+      "boundary_tests": "saschi.test_numeric_math",
+      "evidence": "Separate hand/generated/refusal gates, Decimal90 targets, original whole measurement pipeline, emitted/actual CLI, exact older-source promotion controls; no new complete external-program claim."
+    },
+    "rounded_sum": {
+      "rule_id": "DS-068",
+      "target": "saschi.runtime.run_plan",
+      "scope": [
+        "Require exact version2 DATA and first numeric_profile binary64-math-v1. Actual SQRT/LOG, or scalar argument SUM with a rounded arithmetic/function trigger in the same executable step selects this profile. Plain legacy SUM and all older profile/array/function registries remain unchanged.",
+        "SQRT accepts ordinary missing or nonnegative bounded normal/zero binary64. LOG accepts ordinary missing or positive bounded normal binary64 and uses the natural logarithm. Static invalid literal domains refuse even on dead, empty and zero-trip paths; reached dynamic invalid values refuse atomically instead of simulating SAS missing-with-diagnostic behavior.",
+        "SUM accepts1..1024 eagerly validated arguments, ignores ordinary missing, returns missing when all arguments are missing, and accumulates left to right with bounded rounded binary64 partials. No vectorized reassociation, cancellation rescue or global helper change. Existing array SUM OF is unchanged.",
+        "Reuse only the proved numeric pipeline DATA/one inline exact INPUT or selected numeric SET, arrays/active aliases, prior counted/WHILE/UNTIL nesting, retention, projection, snapshots and numeric text. Exact subscripts and counted controls do not gain new functions. Existing node128/depth32/operations1024, converter, trip, column, event and output limits remain.",
+        "Preserve old plan/result/receipt shapes,149 semantic helpers/reference bytes, legal sqrt/log array names and unmarked/old-marker refusals. No comma input, FILE, scalar-flow, new trig/RNG/macros/domains, formatting or runtime dependencies. Python/R agreement uses32 normalized epsilon units with exact missing/schema/row/text comparisons; no live SAS claim."
+      ],
+      "validation_test": "examples/verify_rounded_sum.py",
+      "r_witness": "examples/rounded_sum.R",
+      "boundary_tests": "saschi.test_numeric_math",
+      "evidence": "Separate hand/generated/refusal gates, Decimal90 targets, original whole measurement pipeline, emitted/actual CLI, exact older-source promotion controls; no new complete external-program claim."
     }
   }
 }

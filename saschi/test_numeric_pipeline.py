@@ -220,7 +220,13 @@ class NumericPipelineSourceTests(unittest.TestCase):
 
     def test_no_new_function_or_domain_or_loop_nesting_is_admitted(self):
         for body in ('x=sqrt(4);','x=log(2);','x=sin(4);','do while(0);do until(1);end;end;'):
-            with self.assertRaises((ValueError,AssertionError)):execute(inline_source(['1'],body=body))
+            source=inline_source(['1'],body=body)
+            if body in ('x=sqrt(4);','x=log(2);'):
+                from examples.verify_numeric_math import promotion_control
+                value=2. if body=='x=sqrt(4);' else .6931471805599453
+                promotion_control(source,{'datasets':{'d':{'schema':{'x':'number','trigger':'number'},'rows':[{'x':value,'trigger':1.}]}},'log':[]})
+            else:
+                with self.assertRaises((ValueError,AssertionError)):execute(source)
 
     def test_R_word_comparators_never_split_truth_identifiers(self):
         prefix='data d;array a{1} x;trigger=1**1;'
