@@ -179,6 +179,8 @@ CONSTRUCT_MAP: dict[str, str] = {
     "numeric-sqrt": "DS-066",
     "numeric-log": "DS-067",
     "rounded-sum": "DS-068",
+    "proc-means": "ST-017",
+    "proc-print": "ST-018",
     "put-all": "DS-025",
     "do-counted": "DS-026",
     "do-if": "DS-031",
@@ -254,6 +256,8 @@ CONSTRUCT_MAP: dict[str, str] = {
 # Statement-level routing: statement-start regex -> construct name.
 # Order matters: longest/most specific first.
 STATEMENT_ROUTER: list[tuple[re.Pattern, str]] = [
+    (re.compile(r'^\s*PROC\s+MEANS\s+DATA\s*=\s*[A-Za-z_][A-Za-z0-9_]{0,31}\s+NOPRINT\s+VARDEF\s*=\s*DF\s*;?\s*$', re.I | re.ASCII), 'proc-means'),
+    (re.compile(r'^\s*PROC\s+PRINT\s+DATA\s*=\s*[A-Za-z_][A-Za-z0-9_]{0,31}\s+NOOBS\s*;?\s*$', re.I | re.ASCII), 'proc-print'),
     (re.compile(r'^\s*FILE\b(?!\s*=)', re.I | re.ASCII), 'csv-export'),
     (re.compile(r'^\s*(?:PUT\s+|[A-Za-z_][A-Za-z0-9_]{0,31}\s*=\s*SUM\s*\(\s*OF\s+)[A-Za-z_][A-Za-z0-9_]*[0-9]\s*-\s*[A-Za-z_][A-Za-z0-9_]*[0-9](?=\s|;|\)|$)', re.I | re.ASCII), 'numeric-ranges'),
     (re.compile(r'^\s*INFILE\b(?!\s*=)', re.I), 'inline-csv'),
@@ -338,6 +342,25 @@ def route_statement(statement: str, context: str | None = None) -> tuple[str, st
     Unroutable statements return ("unknown", ""); the caller decides
     whether that is a ticket or a pass-through (v1: ticket).
     """
+    # Only recognized source headers establish these contexts. No Plan data
+    # or global VAR/OUTPUT route can manufacture a procedure classification.
+    if context in ('proc-means', 'proc-print'):
+        text = statement.strip().removesuffix(';').strip()
+        name = r'[A-Za-z_][A-Za-z0-9_]{0,31}'
+        if re.fullmatch(r'run', text, re.I | re.ASCII):
+            return context, CONSTRUCT_MAP[context]
+        if context == 'proc-means':
+            if re.fullmatch(r'(?:by|var)\s+' + name, text, re.I | re.ASCII):
+                return context, CONSTRUCT_MAP[context]
+            output = re.fullmatch(r'output\s+out\s*=\s*' + name + r'\s+(.+)\s*/\s*noinherit', text, re.I | re.ASCII)
+            if output:
+                pattern = r'(n|nmiss|mean|var)\s*=\s*' + name
+                statistics = re.findall(pattern, output[1], re.I | re.ASCII)
+                if (len(statistics) == 4 and set(map(str.lower, statistics)) == {'n','nmiss','mean','var'}
+                        and not re.sub(pattern, '', output[1], flags=re.I | re.ASCII).strip()):
+                    return context, CONSTRUCT_MAP[context]
+        elif re.fullmatch(r'var\s+' + name + r'(?:\s+' + name + r'){0,31}', text, re.I | re.ASCII):
+            return context, CONSTRUCT_MAP[context]
     # SQL clauses arrive separately after statement splitting.
     if context == "sql" and re.match(r"^\s*(select|create|insert|update|delete)\b", statement, re.I):
         if INTO_MACRO_HINT.search(statement):
@@ -356,6 +379,8 @@ def route_statement(statement: str, context: str | None = None) -> tuple[str, st
                          re.fullmatch(r'[A-Za-z_][A-Za-z0-9_]{0,31}', item.text) for item in items):
             return 'put-character-list', CONSTRUCT_MAP['put-character-list']
     for rx, construct in STATEMENT_ROUTER:
+        if context == "opaque" and construct in ("proc-means", "proc-print"):
+            continue
         if rx.search(statement):
             if construct == "sql-general":
                 if INTO_MACRO_HINT.search(statement):

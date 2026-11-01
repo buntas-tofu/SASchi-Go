@@ -16,7 +16,7 @@ policies. Receipts record what passed for the source and environment tested.
 ## Current verification
 
 Status: version 0.4.0 development evidence for maintainer review, updated on
-2026-10-31. The current registry contains 74 fixture gates, 54 suites and 1156
+2026-10-31. The current registry contains 76 fixture gates, 55 suites and 1197
 tests. With the pinned Roku corpus present, `python verify_all.py` records the
 source-bound unified verdict. Synthesis separately checks 60 faithful cases and
 60 naive variants. The accepted entry baseline covered 71 gates, 53 suites and
@@ -97,6 +97,14 @@ D2a separately gates inline comma DLM/FIRSTOBS and numeric INPUT name ranges. DL
 
 D2b adds separate numeric SUM OF/PUT ranges and one caller-rooted CSV artifact. Its named ASCII/LF integer policy, complete unchanged CSV-program byte proof, exact `--expect-exports` comparison and success-only staged publication are documented in [numeric exchange](docs/NUMERIC_EXCHANGE.md). Existing result/receipt shapes remain unchanged without FILE.
 
+[D4b grouped statistics and logical reports](docs/PROCEDURES.md) reuses existing
+SORT and adds explicit NOPRINT/VARDEF=DF/NOINHERIT MEANS OUTPUT plus one bounded
+numeric PRINT. Integer sufficient-statistic arithmetic, fresh metadata and the
+numeric-space-fixed12-v1 report are named repository policies. Exact report
+comparison and accepted-only publication are separate from DATA logs and exports.
+The original complete supplied-data workflow has independent base-R evidence;
+no new external-program or native SAS page-layout proof is claimed.
+
 ## Operational workflow
 
 The typed execution workflow and C++ scalar pilot use a shared, versioned
@@ -130,7 +138,7 @@ fixed expected output and base-R evidence. Special missings retain their tags.
   sibling plus a fixture verifier (`verify_*.py`). Run any verifier directly,
   or all of them through [verify_all.py](verify_all.py).
 - [docs/sasconversionrulebook.json](docs/sasconversionrulebook.json) : the machine-consumable translation
-  rulebook. 104 rules with equivalence classes (EXACT,
+  rulebook. 106 rules with equivalence classes (EXACT,
   EQUIVALENT-WITH-SETTINGS, APPROXIMATE, NO-DIRECT-EQUIVALENT), required
   settings, forbidden patterns, and validation tests.
 - [docs/capability-manifest.json](docs/capability-manifest.json) : the coverage manifest. Enumerated entries of

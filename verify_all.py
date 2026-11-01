@@ -112,6 +112,8 @@ VERIFIERS = [
     ("numeric-sqrt", HERE / "examples" / "verify_numeric_sqrt.py"),
     ("numeric-log", HERE / "examples" / "verify_numeric_log.py"),
     ("rounded-sum", HERE / "examples" / "verify_rounded_sum.py"),
+    ("proc-means", HERE / "examples" / "verify_means_output.py"),
+    ("proc-print", HERE / "examples" / "verify_print_report.py"),
 ]
 
 # The translator suites, run as unittest modules. They carry the same weight as
@@ -173,6 +175,7 @@ SUITES = [
     ("suite-numeric-exchange", "saschi.test_numeric_exchange"),
     ("suite-flow-control", "saschi.test_flow_control"),
     ("suite-numeric-math", "saschi.test_numeric_math"),
+    ("suite-procedures", "saschi.test_procedures"),
 ]
 
 

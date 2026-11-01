@@ -11,6 +11,7 @@ from .job import build_job
 from .plan import compile_plan
 from .provenance import digest, environment
 from .numeric_exchange import validate_exports
+from .report_artifacts import validate_reports
 
 
 def write_json(path, value):
@@ -41,7 +42,8 @@ def execute_job(args):
     if output.exists():
         raise ValueError(f'output directory already exists: {output}')
     source = args.source.read_text(encoding='utf-8')
-    job = build_job(source, args.inputs, args.expect, expect_exports=getattr(args, 'expect_exports', None))
+    job = build_job(source, args.inputs, args.expect, expect_exports=getattr(args, 'expect_exports', None),
+                    expect_reports=getattr(args, 'expect_reports', None))
     receipt, result = job.receipt, job.result
     output.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix='.saschi-', dir=output.parent) as temporary:
@@ -58,6 +60,13 @@ def execute_job(args):
             export_directory.mkdir()
             for name, text in result['exports'].items():
                 with (export_directory / name).open('xb') as stream:
+                    stream.write(text.encode('ascii'))
+        if receipt['accepted'] and result is not None and 'reports' in result:
+            validate_reports(result['reports'])
+            report_directory = staging / 'reports'
+            report_directory.mkdir()
+            for name, text in result['reports'].items():
+                with (report_directory / name).open('xb') as stream:
                     stream.write(text.encode('ascii'))
         write_json(staging / 'receipt.json', receipt)
         staging.rename(output)
@@ -81,6 +90,7 @@ def main(argv=None):
     run.add_argument('--inputs', type=Path)
     run.add_argument('--expect', type=Path)
     run.add_argument('--expect-exports', type=Path, help='compare the complete export basename-to-text map as exact UTF8 bytes')
+    run.add_argument('--expect-reports', type=Path, help='compare the complete logical report basename-to-text map as exact UTF8 bytes')
     run.add_argument('--output', required=True, type=Path)
     tui = sub.add_parser('tui', help='open the rich console interface')
     tui.add_argument('source', nargs='?', type=Path)

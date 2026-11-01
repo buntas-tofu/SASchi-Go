@@ -229,15 +229,23 @@ def record_pass(source: str, plan, *, file: str = "<source>",
     from the plan, which is the emitter's own verdict. Nothing is re-derived
     from the other side, which is what makes the two counts a cross-check.
     """
-    from .parser import split_statements
+    from .parser import Kind, split_statements
     from .rules import route_function, route_statement
 
     statements = split_statements(source)
     cat = Catalog()
     statement_rows = []
     function_rows = []
+    procedure_context = None
     for st in statements:
-        construct, rule_id = route_statement(st.text)
+        opaque = any(token.kind is Kind.DATA for token in st.tokens)
+        if not opaque and re.match(r'^\s*(?:data|proc)\b(?!\s*=)', st.text, re.I | re.ASCII):
+            procedure_context = None
+        construct, rule_id = route_statement(st.text, 'opaque' if opaque else procedure_context)
+        if not opaque and construct in ('proc-means', 'proc-print') and re.match(r'^\s*proc\s', st.text, re.I | re.ASCII):
+            procedure_context = construct
+        if not opaque and st.text.strip().lower() in ('run', 'quit'):
+            procedure_context = None
         statement_rows.append(
             (st.line, st.text, construct, rule_id, bool(st.terminated)))
         masked = _mask_strings(st.text)

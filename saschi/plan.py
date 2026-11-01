@@ -1316,3 +1316,11 @@ def compile_plan(source: str) -> Plan:
         if ticket not in combined.tickets:
             combined.tickets.append(ticket)
     return combined
+
+
+_compile_before_procedures = compile_plan
+
+def compile_plan(source: str) -> Plan:
+    from .procedures import compile_program
+    combined = compile_program(source, _compile_before_procedures)
+    return _compile_before_procedures(source) if combined is None else combined
