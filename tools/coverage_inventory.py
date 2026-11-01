@@ -115,11 +115,15 @@ def build(corpus, receipt_path):
     receipt = json.loads(receipt_raw)
     if not receipt['all_passed'] or not receipt['source_stable']:
         raise ValueError('a successful stable-source verification receipt is required')
-    proofs, tests = set(), 0
+    proofs, tests, proof_contracts = set(), 0, {}
     for check in receipt['constructs']:
         if check['kind'] == 'suite':
             tests += int(re.search(r'Ran (\d+) tests?', check['stdout'] + '\n' + check['stderr'])[1])
         proofs.update(re.findall(r'^VERIFIED corpus: ([^;]+);', check['stdout'], re.M))
+        for line in check['stdout'].splitlines():
+            match = re.match(r'VERIFIED corpus: ([^;]+);.*output_contract=([a-z0-9-]+)', line)
+            if match:
+                proof_contracts.setdefault(match[1], []).append(match[2])
     files, primary, unknown, routed = [], Counter(), Counter(), Counter()
     for path in sorted(corpus.glob('*.sas')):
         raw = path.read_bytes()
@@ -141,6 +145,7 @@ def build(corpus, receipt_path):
         files.append({'file': path.name, 'sha256': digest(raw),
                       'compile_clean': not plan.blocked,
                       'complete_program_proof_in_receipt': path.name in proofs,
+                      'explicit_proof_output_contracts': proof_contracts.get(path.name, []),
                       'tickets': rows,
                       'categories': dict(sorted(Counter(r['category'] for r in rows).items()))})
     if not files:
@@ -168,7 +173,8 @@ def build(corpus, receipt_path):
         'verification': {'receipt': str(receipt_path), 'sha256': digest(receipt_raw),
                          'git_commit': receipt['source']['git_commit'],
                          'current_source_files_match': before['files'] == receipt['source']['files'],
-                         'unit_tests': tests, 'complete_program_proofs': sorted(proofs)},
+                         'unit_tests': tests, 'complete_program_proofs': sorted(proofs),
+                         'explicit_proof_output_contracts': proof_contracts},
         'registered': {'fixture_runners': len(VERIFIERS), 'suite_runners': len(SUITES),
                        'synthesis_runners': 1, 'rules': len(rules), 'rule_families': family_counts(rules)},
         'manifest': {'entries': len(manifest['entries']), 'dispositions': dict(sorted(dispositions.items())),

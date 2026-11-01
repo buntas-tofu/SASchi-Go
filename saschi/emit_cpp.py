@@ -8,8 +8,8 @@ from .plan import Ticket, compile_plan
 from .emit_py import Translation
 
 
-def translate(source: str) -> Translation:
-    parsed = compile_plan(source)
+def translate(source: str, *, output_contract=None) -> Translation:
+    parsed = compile_plan(source) if output_contract is None else compile_plan(source, output_contract=output_contract)
     for step in parsed.steps:
         if step.kind != "data" or step.inputs or step.name != "_null_":
             parsed.tickets.append(Ticket(step.line, step.name, "cpp-target", "C++ pilot supports scalar DATA _NULL_ steps only"))

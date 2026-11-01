@@ -1,8 +1,9 @@
 # Coverage reconciliation and next gate series
 
 Status: Repository/base-R planning evidence, originally reconciled at main08eaa7b
-on2026-10-27 and updated through DS-069, ST-017/018/019/020, SQL-004 and A0.
-Current character/report registrations await the source-bound full receipt. The handoff binds acceptance.
+on2026-10-27 and updated through DS-072, ST-023, SQL-004 and A0.
+Current multi-cluster registrations await the source-bound full receipt. Accepted
+entry main9d36 completed the character/report cluster. The handoff binds acceptance.
 For principal/maintainer prioritization. Counts describe this checkout and the56
 pinned sibling corpus files, not all SAS or live-SAS equivalence. Updated for
 DS-039 arrays, DS-040 DO OVER and DS-041 nested/computed counted loops after the original
@@ -12,13 +13,13 @@ This document does not authorize additional implementation or publication scope.
 
 ## Inventory reconciled against actual evidence
 
-The golden command registers80 fixture runners,58 translator suites and1
-synthesis runner. The unittest loader discovers1271 tests; these are registration
-counts, not passing outcomes. A source-bound full receipt records actual skips and
-results. Accepted cluster entry main7c1113b contained76 fixtures,55 suites and1197
+The golden command registers86 fixture runners,62 translator suites and1
+synthesis runner. These are registration counts, not passing outcomes. The
+source-bound full receipt records the discovered test count. A source-bound full receipt records actual skips and
+results. Accepted run entry main9d36 contained80 fixtures,58 suites and1271
 tests with zero skips,60 faithful synthesis checks and60 naive controls. The
 separate1k workload checks total39:18 ledger and21 text. These counts have
-different units. Neither109 rulebook rules nor139 golden-command runners is a
+different units. Neither115 rulebook rules nor149 golden-command runners is a
 SAS capability denominator.
 
 [The capability manifest](capability-manifest.json) still enumerates108 statements
@@ -26,8 +27,8 @@ and40 data-set options. The other7 declared reference areas remain unenumerated:
 formats/informats, functions/CALL routines, system options, component objects,
 utilities, macros and procedures. Their null universes are not zero.
 
-The current148-entry manifest records43 GATED,5 RULE,8 HUMAN-REVIEW,22 OUT-OF-SCOPE
-and70 UNASSESSED. Among GATED entries,42 have bounded source-execution evidence;
+The current148-entry manifest records44 GATED,5 RULE,8 HUMAN-REVIEW,22 OUT-OF-SCOPE
+and69 UNASSESSED. Among GATED entries,43 have bounded source-execution evidence;
 1 has reference fixtures only: IN=. DS-039/DS-040 add bounded source-array evidence; DS-041 adds scoped counted-loop
 evidence to the existing iterative-DO entry. DS-044 promotes four bounded entries:
 INPUT, INPUT List, CARDS and DATALINES, preserving their prior assessments.
@@ -72,15 +73,15 @@ registration, rule and universe requirement.
 The historical72-entry unassessed snapshot had these planning bins:
 28 external-environment review,13 separate-scope review,7 input records,
 10 data-set options,1 control,7 output,5 descriptor/environment and1 projection.
-The current70-entry manifest derives28 external-environment review,13 separate-scope
-review,6 input records,10 data-set options,1 control,7 output,4 descriptor/environment
+The current69-entry manifest derives28 external-environment review,13 separate-scope
+review,5 input records,10 data-set options,1 control,7 output,4 descriptor/environment
 and1 projection. These bins organize work; they do not promote dispositions or
 decide exclusions.
 The5 RULE entries and8 HUMAN-REVIEW entries retain their review boundaries.
 
 ## Unknown blockers classified
 
-The latest accepted56-file compile census at cluster entry main7c1113b has22
+The latest accepted56-file compile census at accepted run entry main9d36 has22
 clean and34 blocked, with534 ticket occurrences. This is the accepted diagnostic
 baseline; the changed tree requires a fresh source-bound full receipt and census. A2 resolves20 compiler tickets across the corpus. The newly compile-
 clean100_doors.sas now passes the DS-042 mixed-output whole-program proof.
@@ -156,28 +157,33 @@ unterminated tickets. They need an explicit source-boundary decision; silently
 discarding those sections would invalidate a complete unmodified-file claim.
 No sibling corpus file was changed or copied into this repository.
 
-Twenty-one files have complete-program repository/base-R proofs when the current source-bound full gates pass. B5 adds the unchanged sum_of_a_series.sas and trigonometric_functions.sas under explicit numerical tolerances and an inferred logical decimal text policy. These two proofs do not establish exact SAS BEST12/DECIMALCONV or physical-log equivalence. B3 adds the entire unchanged
+Twenty-two files have complete-program repository/base-R proofs when the current
+source-bound full gates pass. The bitwise program requires explicit
+output_contract=bitwise-put-all-67-v1. The earlier21 proofs retain their policies. B5 adds the unchanged sum_of_a_series.sas and trigonometric_functions.sas under explicit numerical tolerances and an inferred logical decimal text policy. These two proofs do not establish exact SAS BEST12/DECIMALCONV or physical-log equivalence. B3 adds the entire unchanged
 sum_and_product_of_an_array.sas, retaining its unassigned c as missing. A0 separately
 closes existing hello_world_text.sas and explicit comment-only no-op evidence,
 without language expansion. DS-042, DS-043 and DS-044 retain the complete
 100_doors.sas, loops_for.sas and integer_comparison.sas proofs. SQL-004 separately proves the entire descriptor-only postal-address program.
-The one other
-compile-clean file is bitwise_operations.sas, whose67-column output still refuses
-under the unchanged64-column PUT_ALL profile. The original
+bitwise_operations.sas still refuses under the unchanged default64-column
+PUT_ALL profile. DS-070 separately proves its complete67-byte record under an
+explicit opt-in; a clean default compile is not an execution claim. The original
 reconciliation itself did not increase the proof count. Compile tickets also miss
 runtime limitations:
 earlier numeric-list PUT remains bounded integer output and earlier division requires exact representability. The new syntax explicitly selects the separately bounded binary64/text policy in docs/BINARY64.md; INT retains its conservative near-integer refusal band.
 
 ## Separate vendor benchmark
 
-The registered vendor benchmark contains1 pinned Apache-2.0 program, identified
-by repository commit,path,source/license hashes and Git blob IDs in
-[its manifest](vendor-benchmark-manifest.json). Its source stays in an explicitly
-prepared external cache. The complete sorted-copy gate requires both typed
-datasets and the375/402-byte logical reports to match independent hand/base-R,
-runtime,emitted and actual CLI evidence. Acceptance of the1 vendor program is
-pending the current source-bound full receipt. It is separate from the unchanged
-21 accepted Roku proofs and56 pinned Roku files; the denominators are not combined.
+The registered vendor benchmarks contain2 pinned Apache-2.0 programs, identified
+by immutable commit,source and LICENSE bytes in
+[the manifest](vendor-benchmark-manifest.json). Bodies remain in an explicitly
+prepared external cache. The unchanged sorted-copy and INVALUE examples have
+separate independent whole-source hand/base-R gates. The INVALUE program checks
+8rows,9input attempts,36events,local labels and persistent TITLE across two
+logical reports. Acceptance requires the current source-bound full gates;
+cache preparation alone is not execution evidence. These2 vendor programs remain
+separate from the22 Roku proofs registered for conditional current acceptance
+among56 pinned files. The bitwise Roku
+proof requires its explicit output contract. The denominators are not combined.
 
 ## Prioritized finite backlog
 
@@ -208,13 +214,16 @@ evidence-cost ranking, not a schedule or an estimate of business demand.
 | D3a, implemented in DS-060/061 | Numeric DO groups and bounded LEAVE/CONTINUE | Separate integer control_data profile and earlier loop/control limits | Original57-statement/172-event source and independent R prove state/snapshot/transfer scheduling;11 exact prior-source promotions; no new complete corpus proof | High; zero-PDV output, INPUT/array/rounded composition, labels and broader control remain separate |
 | D2b, implemented in DS-062/063 | Numeric SUM OF/PUT ranges and one caller-rooted CSV artifact | Separate exchange_data profile, unchanged decoder/exact helpers and explicit ASCII/LF/open policy | Complete unchanged csv_data_manipulation.sas proof plus original25-statement state/export witness; exact CLI artifact comparison and atomic staging | High; arbitrary paths, DSD, formats and physical SAS defaults remain separate |
 | D3b, implemented in DS-064/065 | Local scalar labels/GOTO/STOP and bounded one-caller LINK/RETURN | Separate flow_data profiles, numeric INPUT, exact integer MOD and existing loop limits | Both unchanged flow_control_structures.sas steps pass complete hand/R/runtime/emitted/CLI proof with 58 logical records and 698 events; original 31-statement state fixture and cross-profile export controls | High; broader calls, structured-body jumps, Boolean/array/numeric domains and no-INPUT unlinked RETURN remain separate |
-| NEXT-CHAR-REPORT, implemented pending full acceptance in DS-069/ST-019/020 | Character/numeric unquoted DSD,DATALINES4 and two default mixed reports with literal TITLE set/reset | Separate character-records-v1,mixed-print-v1 and logical-title-v1; existing ascending SORT | Original hand/R/state/report gates and a separate pinned vendor sorted-copy benchmark; no additional Roku proof | High; quoted CSV,custom informats,broader reports and physical SAS/ODS layout remain separate |
+| NEXT-CHAR-REPORT, accepted at main9d36 in DS-069/ST-019/020 | Character/numeric unquoted DSD,DATALINES4 and two default mixed reports with literal TITLE set/reset | Separate character-records-v1,mixed-print-v1 and logical-title-v1; existing ascending SORT | Original hand/R/state/report gates and a separate pinned vendor sorted-copy benchmark; no additional Roku proof | High; quoted CSV,custom informats,broader reports and physical SAS/ODS layout remain separate |
+| NEXT-BITWISE, DS-070 pending current full acceptance | Explicit finite uint32 output profile and exact log comparison | Caller-selected bitwise-put-all-67-v1;old64-byte default unchanged | Complete unchanged469-byte bitwise target with hand/R/runtime/emitted/actualCLI evidence | Medium;other output widths/domains remain separate |
+| NEXT-INFORMAT-REPORT, DS-071/072 and ST-021..023 pending current full acceptance | Job-local literal INVALUE,absolute pointer INPUT,local labelled PRINT and default MEANS | Distinct formatted family/empty initial state;exact logical reports and local TITLE | Separate components and complete pinned1802-byte official vendor example;no DATA-step LABEL promotion | High;general informats,missing recovery,broader procedures and physical layout remain separate |
 
-Analyst inference only: after the current cluster is accepted, NEXT-BITWISE may
-be a separate narrow67-column logical-output contract; it must preserve existing
-64-column refusals. INFORMAT/custom INVALUE and pointer INPUT are later work with
-new conversion and report oracles. Neither is included in the current character
-records/report profile or authorized by this backlog.
+The current run implements NEXT-BITWISE and NEXT-INFORMAT-REPORT under the
+separate contracts listed above. Their current full receipt binds acceptance;
+the old64-column default and earlier character-record profile remain strict.
+Analyst inference only: later work could expand informat forms, missing-data
+recovery or procedure options after separate source research and new oracles.
+This backlog does not authorize those extensions.
 
 A1 has reviewable sub-slices: bounded numeric array declaration/index/OF
 execution is implemented in DS-039; single-level implicit numeric DO OVER is

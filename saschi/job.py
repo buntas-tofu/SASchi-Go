@@ -24,7 +24,7 @@ from .runtime import run_plan
 from .numeric_exchange import (read_expected_exports, exports_equal, export_manifest,
                                EXPORT_CONTRACT, COMPARISON_CONTRACT)
 from .report_artifacts import (read_expected_reports, reports_equal, report_manifest,
-                               REPORT_CONTRACT, MIXED_REPORT_CONTRACT, REPORT_COMPARISON_CONTRACT)
+                               REPORT_CONTRACT, MIXED_REPORT_CONTRACT, INFORMAT_REPORT_CONTRACT, REPORT_COMPARISON_CONTRACT)
 
 
 @dataclass
@@ -76,10 +76,12 @@ def _read_expected(path: Path) -> tuple[object, str]:
 
 def build_job(source: str, inputs: "Path | None" = None, expect: "Path | None" = None,
               target: str = "python", *, expect_exports: "Path | None" = None,
-              expect_reports: "Path | None" = None) -> Job:
+              expect_reports: "Path | None" = None, expect_log: "Path | None" = None,
+              output_contract=None) -> Job:
     """Run one program through the full treatment and return every artifact."""
-    plan = compile_plan(source)
-    translation = (python_translate if target == 'python' else cpp_translate)(source)
+    selection = {} if output_contract is None else {'output_contract': output_contract}
+    plan = compile_plan(source, **selection)
+    translation = (python_translate if target == 'python' else cpp_translate)(source, **selection)
     # Target-specific refusals must block execution and appear in the receipt,
     # just like source-plan tickets. A Python-supported call can exceed C++.
     plan.tickets = list(translation.tickets)
@@ -91,6 +93,11 @@ def build_job(source: str, inputs: "Path | None" = None, expect: "Path | None" =
                'plan_sha256': hashlib.sha256(json.dumps(plan.to_dict(), sort_keys=True).encode()).hexdigest(),
                'tickets': [vars(t) for t in plan.tickets], 'accepted': False,
                'comparison': 'not requested', 'comparison_contract': 'typed-exact-values-ordered-rows-and-columns-metadata-v1'}
+    if output_contract is not None:
+        receipt['output_contract'] = output_contract
+    if expect_log is not None:
+        receipt['log_comparison'] = 'not requested'
+        receipt['log_comparison_contract'] = 'ascii-log-records-v1'
     receipt['completeness'] = _completeness_record(source, plan, target, receipt['ts_utc'])
     export_program = any(step.kind == 'exchange_data' and any(op.kind == 'file_select' for op in step.operations) for step in plan.steps)
     if export_program or expect_exports is not None:
@@ -99,8 +106,9 @@ def build_job(source: str, inputs: "Path | None" = None, expect: "Path | None" =
         if export_program:
             receipt['export_contract'] = EXPORT_CONTRACT
     mixed_report_program = any(step.kind == 'mixed_print' for step in plan.steps)
-    report_program = mixed_report_program or any(step.kind == 'proc_print' for step in plan.steps)
-    report_contract = MIXED_REPORT_CONTRACT if mixed_report_program else REPORT_CONTRACT
+    informat_report_program = any(step.kind in ('labelled_print', 'default_means') for step in plan.steps)
+    report_program = mixed_report_program or informat_report_program or any(step.kind == 'proc_print' for step in plan.steps)
+    report_contract = INFORMAT_REPORT_CONTRACT if informat_report_program else MIXED_REPORT_CONTRACT if mixed_report_program else REPORT_CONTRACT
     if report_program or expect_reports is not None:
         receipt['report_comparison'] = 'not requested'
         receipt['report_comparison_contract'] = REPORT_COMPARISON_CONTRACT
@@ -133,6 +141,14 @@ def build_job(source: str, inputs: "Path | None" = None, expect: "Path | None" =
             if not reports_equal(result.get('reports', {}), expected_reports):
                 raise ValueError('expected report artifact names or exact UTF8 bytes differ')
             receipt['report_comparison'] = 'passed'
+        if expect_log is not None:
+            from .log_artifacts import read_expected_log
+            receipt['log_comparison'] = 'failed'
+            expected_log, checksum = read_expected_log(expect_log)
+            receipt['expected_log_sha256'] = checksum
+            if result['log'] != expected_log:
+                raise ValueError('expected ordered log record bytes differ')
+            receipt['log_comparison'] = 'passed'
         if expect:
             expected, expected_sha256 = _read_expected(expect)
             receipt['expected_sha256'] = expected_sha256

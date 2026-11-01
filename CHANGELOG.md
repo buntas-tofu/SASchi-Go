@@ -3,6 +3,15 @@
 Status: development changes with original pins and Python/base-R evidence; no
 live SAS comparison. Branch synchronization is separate from a release.
 
+- Add DS-070..072 and ST-021..023 in three separately checked lanes: explicit
+  bitwise67 output selection with exact log comparison, job-local numeric literal
+  INVALUE with physical pointer INPUT, and procedure-local labelled PRINT/default
+  MEANS with persistent literal TITLE. Preserve old defaults and semantic helper
+  bytes. Complete unchanged bitwise proof requires the new output contract; the
+  second pinned vendor benchmark remains a separate denominator. Independent
+  hand/base-R, emitted Python, actual CLI and atomic failure checks provide the
+  evidence under named logical output policies.
+
 - Add DS-042 bounded mixed literal/numeric PUT with exact logical spacing,
   conservative integer fields, skipped-path descriptor checks and atomic failure.
   Preserve earlier PUT profiles. The unchanged100_doors.sas supplies the eleventh
