@@ -127,7 +127,16 @@ exec(multiplied.code, namespace)
 assert namespace['result'] == {'datasets': {'d': {
     'schema': {'x': 'number', 'y': 'number', 'p': 'number', 'unseen': 'number'},
     'rows': [{'x': 12., 'y': 4., 'p': 48., 'unseen': None}]}}, 'log': ['48 . ']}
-print('VERIFIED: isolated installed wheel, canonical rulebook, all web assets, CLI entry point, MOD-to-PUT output, calendar, sum/UNTIL, division/INT/WHILE and numeric inline INPUT and exact multiplication/output discovery')
+character_report = translate('data raw;infile datalines dsd;input word :$3. n;datalines4;\nB,2\nA,1\n;;;;\nrun;\ntitle "Before";proc print data=raw;run;title;proc sort data=raw out=ordered;by word;run;title "After";proc print data=ordered;run;title;')
+assert not character_report.blocked, character_report.tickets
+namespace = {}
+exec(character_report.code, namespace)
+assert namespace['result']['datasets']['raw']['rows'] == [{'word':'B  ','n':2.},{'word':'A  ','n':1.}]
+assert namespace['result']['reports'] == {
+    'print_01.txt':'TITLE: Before\nobs word n\n1 "B" 2\n2 "A" 1\n',
+    'print_02.txt':'TITLE: After\nobs word n\n1 "A" 1\n2 "B" 2\n'}
+assert namespace['result']['log'] == []
+print('VERIFIED: isolated installed wheel, canonical rulebook, all web assets, CLI entry point, MOD-to-PUT output, calendar, sum/UNTIL, division/INT/WHILE and numeric inline INPUT and exact multiplication/output discovery; character DSD/DATALINES4 and two titled mixed reports')
 '''
 
 

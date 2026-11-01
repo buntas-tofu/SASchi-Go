@@ -3104,6 +3104,105 @@
         "https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a002291718.htm",
         "https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a000064125.htm"
       ]
+    },
+    {
+      "rule_id": "DS-069",
+      "sas_pattern": "Bounded unquoted mixed character/numeric DSD physical records with DATALINES4",
+      "scope": "data-step",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "Separate explicit profile parser, exact portable validator and event executor; earlier profiles remain strict."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent complete-source scanner, descriptors, schedule and exact character/report bytes; no Python plan or expected data input."
+      },
+      "required_settings": [
+        "Exact version2 character_data Step with one character_input operation and character-records-v1. Body is only named DATA,INFILE DATALINES DSD,one INPUT,DATALINES4 and explicit RUN; all syntax is consumed. Require at least one character colon:$w. item and1..32 unique ordinary ASCII names before lowercase.",
+        "Character widths1..64 and numeric length8; lowercase ordered schema,empty unrelated Step metadata and display_names. Fresh output destination evenempty; the complete new family has an empty initial catalog,at most64 top-level Steps,and only character_data/SORT or the separately proved title/mixed PRINT family.",
+        "Zero to1000 physical records,each0..80 printable ASCII bytes. Split commas preserving all empty spans; exact declared field count on every physical record,no FLOWOVER. Trim outer ASCII spaces,preserve internal spaces and pad characters to exact byte widths. Empty character spans become blanks; reject overwidth and trimmed character dot before coercion.",
+        "Reject both quote characters,controls,tabs and nonASCII record bytes. Semicolons,backslashes and macro-shaped record bytes remain opaque data. Require exact unindented standalone four-semicolon terminator and six source line positions including physical payload provenance.",
+        "Numeric empty or period is ordinary missing; otherwise reuse unchanged sas_input_number exact conversion: token<=32bytes,<=15significand digits,exponent magnitude<=15,abs<=2147483647 and exact binary64. Eager descriptor/record validation before empty paths; no numeric widening,truncation,quoted/general CSV,external I/O or new runtime dependency.",
+        "The strict physical-record/ASCII/character-dot policies are repository bounds. Version-labeled SAS9.2 explanatory citations do not enumerate or certify the whole SAS9.4 language. Preserve old plan/result/receipt shapes,149 semantic helpers/reference bytes and old numeric-only/marker refusals."
+      ],
+      "forbidden_patterns": [
+        "Quoted/general CSV,short/extra physical records,overwidth/character-dot,unknown metadata/body syntax or older-profile widening"
+      ],
+      "silent_difference_checks": [
+        "Complete ordered typed schema/rows, padding and missing values, source/record accounting, old-profile refusals and whole-job atomic accepted output."
+      ],
+      "validation_test": "examples/verify_character_input.py",
+      "confidence": "Bounded repository and independent base-R evidence under explicit policies; no live SAS, whole-language or physical-output equivalence.",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000146932.htm",
+        "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000144370.htm",
+        "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000201747.htm"
+      ]
+    },
+    {
+      "rule_id": "ST-019",
+      "sas_pattern": "Bounded default mixed PROC PRINT,observation numbers and two named logical reports",
+      "scope": "stat-proc",
+      "equivalence_class": "APPROXIMATE",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "Separate explicit profile parser, exact portable validator and event executor; earlier profiles remain strict."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent complete-source scanner, descriptors, schedule and exact character/report bytes; no Python plan or expected data input."
+      },
+      "required_settings": [
+        "Exact version2 mixed_print Step and mixed-print-v1,same-kind operation,one ordinary DATA input and RUN source position. Source is only PROC PRINT DATA=name;RUN; with no VAR,NOOBS,labels,formats,options or arbitrary artifact names. Select only a whole program containing a genuinely validated character_data producer.",
+        "Complete family only character_data,SORT,report_title,mixed_print,empty initial catalog and valid left-to-right lineage. At most2 PRINTs and64 Steps. Default to all ordered columns;1..32 ordinary lowercase names,at least one character column,no obs collision,character widths1..64,numeric length8,no labels or formats. Validate descriptors and every selected value evenempty.",
+        "Named ascii-titled-mixed-integer-v1 repository report policy: optional TITLE: plus literal title line,then obs and normalized ordered names. Observation numbers start at1 for every report. Character fields use JSON quotes after stripping trailing ASCII padding only; leading/interior spaces remain. Numeric values are missing or exact integers within2147483647,rendered as period or existing integer text.",
+        "One ASCII space separates fields,LF terminates every record,no inserted blank lines. Header<=1055bytes,data row<=415bytes,each PRINT<=1000rows,total<=417056bytes including optional title. Snapshot immutable print_01.txt/print_02.txt in execution order; these are logical bytes,not physical SAS/ODS output.",
+        "Optional pure reports channel publishes only through whole-job accepted staging. Independent --expect-reports checks exact complete basename set and UTF8 bytes separately from datasets/exports. A late execution,comparison,write or rename failure leaves no accepted reports,result or stdout; earlier numeric-print-v1 and no-report result/receipt shapes remain unchanged."
+      ],
+      "forbidden_patterns": [
+        "Physical SAS/ODS layout,format/label/VAR/NOOBS/ID/SUM/BY options,unlisted report names or arbitrary procedure composition"
+      ],
+      "silent_difference_checks": [
+        "Complete ordered typed schema/rows, padding and missing values, source/record accounting, old-profile refusals and whole-job atomic accepted output."
+      ],
+      "validation_test": "examples/verify_mixed_print.py",
+      "confidence": "Bounded repository and independent base-R evidence under explicit policies; no live SAS, whole-language or physical-output equivalence.",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a000064125.htm"
+      ]
+    },
+    {
+      "rule_id": "ST-020",
+      "sas_pattern": "Bounded literal TITLE set/reset state for logical mixed reports",
+      "scope": "global-statement",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "Separate explicit profile parser, exact portable validator and event executor; earlier profiles remain strict."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent complete-source scanner, descriptors, schedule and exact character/report bytes; no Python plan or expected data input."
+      },
+      "required_settings": [
+        "Exact version2 report_title Step,name _null_,no inputs,one same-kind operation and logical-title-v1. One printable ASCII literal of1..128 characters with at least one nonspace sets title; bare TITLE resets. Preserve leading/trailing title spaces verbatim.",
+        "Refuse ampersand and percent markers under both quote spellings and portable title text; no macro interpolation. Empty/allspace literals,numbered/multiple titles,options,concatenated literals and unlisted syntax remain outside the profile.",
+        "Title starts None for each run,persists across character DATA/SORT until changed or reset,and is read when each mixed PRINT executes. A final reset remains an explicit executed Step; no report is created by TITLE alone.",
+        "Only the proved character_data/SORT/title/mixed PRINT whole family with empty initial catalog is admitted. At most32 set/reset Steps,2 PRINTs and64 total Steps. Validate every title even without rows or PRINT; old title-only and old profile/hidden-operation refusals remain strict.",
+        "Use named logical title rendering through ascii-titled-mixed-integer-v1,not SAS session persistence,physical title placement or ODS. Version-labeled SAS9.3 explanatory references provide context,not a new reference-universe count or live-SAS proof."
+      ],
+      "forbidden_patterns": [
+        "Macro interpolation,numbered/formatted/multiple title lines or title-only admission without a character producer"
+      ],
+      "silent_difference_checks": [
+        "Complete ordered typed schema/rows, padding and missing values, source/record accounting, old-profile refusals and whole-job atomic accepted output."
+      ],
+      "validation_test": "examples/verify_logical_title.py",
+      "confidence": "Bounded repository and independent base-R evidence under explicit policies; no live SAS, whole-language or physical-output equivalence.",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/lestmtsref/63323/HTML/default/p10gcmrmf83iaxn1ilrx4pra969n.htm"
+      ]
     }
   ],
   "runtime_capabilities": {
@@ -3698,6 +3797,52 @@
     "proc_print": {
       "rule_id": "ST-018",
       "scope": "Optional exact logical report channel under numeric-space-fixed12-v1; general SAS PRINT/ODS layout is not reproduced."
+    },
+    "character_input": {
+      "rule_id": "DS-069",
+      "target": "saschi.character_input.execute_step",
+      "scope": [
+        "Exact version2 character_data Step with one character_input operation and character-records-v1. Body is only named DATA,INFILE DATALINES DSD,one INPUT,DATALINES4 and explicit RUN; all syntax is consumed. Require at least one character colon:$w. item and1..32 unique ordinary ASCII names before lowercase.",
+        "Character widths1..64 and numeric length8; lowercase ordered schema,empty unrelated Step metadata and display_names. Fresh output destination evenempty; the complete new family has an empty initial catalog,at most64 top-level Steps,and only character_data/SORT or the separately proved title/mixed PRINT family.",
+        "Zero to1000 physical records,each0..80 printable ASCII bytes. Split commas preserving all empty spans; exact declared field count on every physical record,no FLOWOVER. Trim outer ASCII spaces,preserve internal spaces and pad characters to exact byte widths. Empty character spans become blanks; reject overwidth and trimmed character dot before coercion.",
+        "Reject both quote characters,controls,tabs and nonASCII record bytes. Semicolons,backslashes and macro-shaped record bytes remain opaque data. Require exact unindented standalone four-semicolon terminator and six source line positions including physical payload provenance.",
+        "Numeric empty or period is ordinary missing; otherwise reuse unchanged sas_input_number exact conversion: token<=32bytes,<=15significand digits,exponent magnitude<=15,abs<=2147483647 and exact binary64. Eager descriptor/record validation before empty paths; no numeric widening,truncation,quoted/general CSV,external I/O or new runtime dependency.",
+        "The strict physical-record/ASCII/character-dot policies are repository bounds. Version-labeled SAS9.2 explanatory citations do not enumerate or certify the whole SAS9.4 language. Preserve old plan/result/receipt shapes,149 semantic helpers/reference bytes and old numeric-only/marker refusals."
+      ],
+      "validation_test": "examples/verify_character_input.py",
+      "r_witness": "examples/character_input.R",
+      "boundary_tests": "saschi.test_character_input",
+      "evidence": "Separate bounded source/runtime/emitted/base-R and actual CLI gates. The pinned complete vendor SORT benchmark is separately attributed to vendor-sorted-copy,never to the21/56 Roku inventory; no live SAS or physical layout claim."
+    },
+    "mixed_print": {
+      "rule_id": "ST-019",
+      "target": "saschi.mixed_reports.execute_print",
+      "scope": [
+        "Exact version2 mixed_print Step and mixed-print-v1,same-kind operation,one ordinary DATA input and RUN source position. Source is only PROC PRINT DATA=name;RUN; with no VAR,NOOBS,labels,formats,options or arbitrary artifact names. Select only a whole program containing a genuinely validated character_data producer.",
+        "Complete family only character_data,SORT,report_title,mixed_print,empty initial catalog and valid left-to-right lineage. At most2 PRINTs and64 Steps. Default to all ordered columns;1..32 ordinary lowercase names,at least one character column,no obs collision,character widths1..64,numeric length8,no labels or formats. Validate descriptors and every selected value evenempty.",
+        "Named ascii-titled-mixed-integer-v1 repository report policy: optional TITLE: plus literal title line,then obs and normalized ordered names. Observation numbers start at1 for every report. Character fields use JSON quotes after stripping trailing ASCII padding only; leading/interior spaces remain. Numeric values are missing or exact integers within2147483647,rendered as period or existing integer text.",
+        "One ASCII space separates fields,LF terminates every record,no inserted blank lines. Header<=1055bytes,data row<=415bytes,each PRINT<=1000rows,total<=417056bytes including optional title. Snapshot immutable print_01.txt/print_02.txt in execution order; these are logical bytes,not physical SAS/ODS output.",
+        "Optional pure reports channel publishes only through whole-job accepted staging. Independent --expect-reports checks exact complete basename set and UTF8 bytes separately from datasets/exports. A late execution,comparison,write or rename failure leaves no accepted reports,result or stdout; earlier numeric-print-v1 and no-report result/receipt shapes remain unchanged."
+      ],
+      "validation_test": "examples/verify_mixed_print.py",
+      "r_witness": "examples/mixed_reports.R",
+      "boundary_tests": "saschi.test_mixed_reports",
+      "evidence": "Separate bounded source/runtime/emitted/base-R and actual CLI gates. The pinned complete vendor SORT benchmark is separately attributed to vendor-sorted-copy,never to the21/56 Roku inventory; no live SAS or physical layout claim."
+    },
+    "logical_title": {
+      "rule_id": "ST-020",
+      "target": "saschi.mixed_reports.execute_title",
+      "scope": [
+        "Exact version2 report_title Step,name _null_,no inputs,one same-kind operation and logical-title-v1. One printable ASCII literal of1..128 characters with at least one nonspace sets title; bare TITLE resets. Preserve leading/trailing title spaces verbatim.",
+        "Refuse ampersand and percent markers under both quote spellings and portable title text; no macro interpolation. Empty/allspace literals,numbered/multiple titles,options,concatenated literals and unlisted syntax remain outside the profile.",
+        "Title starts None for each run,persists across character DATA/SORT until changed or reset,and is read when each mixed PRINT executes. A final reset remains an explicit executed Step; no report is created by TITLE alone.",
+        "Only the proved character_data/SORT/title/mixed PRINT whole family with empty initial catalog is admitted. At most32 set/reset Steps,2 PRINTs and64 total Steps. Validate every title even without rows or PRINT; old title-only and old profile/hidden-operation refusals remain strict.",
+        "Use named logical title rendering through ascii-titled-mixed-integer-v1,not SAS session persistence,physical title placement or ODS. Version-labeled SAS9.3 explanatory references provide context,not a new reference-universe count or live-SAS proof."
+      ],
+      "validation_test": "examples/verify_logical_title.py",
+      "r_witness": "examples/logical_title.R",
+      "boundary_tests": "saschi.test_mixed_reports",
+      "evidence": "Separate bounded source/runtime/emitted/base-R and actual CLI gates. The pinned complete vendor SORT benchmark is separately attributed to vendor-sorted-copy,never to the21/56 Roku inventory; no live SAS or physical layout claim."
     }
   }
 }

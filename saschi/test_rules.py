@@ -27,7 +27,7 @@ class LoaderTests(unittest.TestCase):
         self.rules = load_rulebook(REPO_ROOT / "docs" / "sasconversionrulebook.json")
 
     def test_rule_count_is_99(self):
-        self.assertEqual(len(self.rules), 106)
+        self.assertEqual(len(self.rules), 109)
         self.assertIn(f"rulebook. {len(self.rules)} rules", (REPO_ROOT / "README.md").read_text())
         self.assertIn('verify_multiply.py',self.rules['DS-045'].validation_test)
         self.assertIn('verify_numeric_discovery.py',self.rules['DS-046'].validation_test)
@@ -48,6 +48,8 @@ class LoaderTests(unittest.TestCase):
         self.assertIn('verify_scalar_link.py', self.rules['DS-065'].validation_test)
         self.assertIn('verify_means_output.py', self.rules['ST-017'].validation_test)
         self.assertIn('verify_print_report.py', self.rules['ST-018'].validation_test)
+        for rid, verifier in (('DS-069','verify_character_input.py'),('ST-019','verify_mixed_print.py'),('ST-020','verify_logical_title.py')):
+            self.assertIn(verifier,self.rules[rid].validation_test)
         for rid, verifier in (('DS-066','verify_numeric_sqrt.py'),('DS-067','verify_numeric_log.py'),('DS-068','verify_rounded_sum.py')):
             self.assertIn(verifier,self.rules[rid].validation_test)
         for rid, verifier in (('DS-054','verify_pipeline_input.py'),('DS-055','verify_pipeline_arrays.py'),('DS-056','verify_pipeline_loops.py'),('DS-057','verify_numeric_pipeline.py')):
@@ -59,9 +61,9 @@ class LoaderTests(unittest.TestCase):
 
     def test_family_counts(self):
         counts = family_counts(self.rules)
-        self.assertEqual(counts["DS"], 68)
+        self.assertEqual(counts["DS"], 69)
         self.assertEqual(counts["SQL"], 4)
-        self.assertEqual(counts["ST"], 18)
+        self.assertEqual(counts["ST"], 20)
         self.assertEqual(counts["SV"], 6)
         self.assertEqual(counts["MC"], 9)
         self.assertEqual(counts["MX"], 1)

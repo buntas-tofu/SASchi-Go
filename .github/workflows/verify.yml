@@ -30,6 +30,7 @@ jobs:
         env:
           SASCHI_ROKU_CORPUS: ${{ github.workspace }}/.verification-corpus/corpus
         run: |
+          python tools/prepare_vendor_sources.py
           saschi doctor
           python verify_all.py
       - name: Check monthly ledger against independent R (1k)

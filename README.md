@@ -16,7 +16,7 @@ policies. Receipts record what passed for the source and environment tested.
 ## Current verification
 
 Status: version 0.4.0 development evidence for maintainer review, updated on
-2026-10-31. The current registry contains 76 fixture gates, 55 suites and 1197
+2026-11-01. The current registry contains 80 fixture gates, 58 suites and 1271
 tests. With the pinned Roku corpus present, `python verify_all.py` records the
 source-bound unified verdict. Synthesis separately checks 60 faithful cases and
 60 naive variants. The accepted entry baseline covered 71 gates, 53 suites and
@@ -105,6 +105,13 @@ comparison and accepted-only publication are separate from DATA logs and exports
 The original complete supplied-data workflow has independent base-R evidence;
 no new external-program or native SAS page-layout proof is claimed.
 
+[Character records and titled reports](docs/CHARACTER_REPORTS.md) adds a separate
+bounded DSD/DATALINES4 family, two immutable mixed-column reports and literal
+TITLE state. A complete unchanged pinned vendor SORT example has an independent
+hand/base-R gate. Vendor sources use explicit external cache preparation; this
+benchmark is separate from the21 Roku whole-program proofs. The previous numeric
+PRINT contract and64-column PUT_ALL limit remain intact.
+
 ## Operational workflow
 
 The typed execution workflow and C++ scalar pilot use a shared, versioned
@@ -138,7 +145,7 @@ fixed expected output and base-R evidence. Special missings retain their tags.
   sibling plus a fixture verifier (`verify_*.py`). Run any verifier directly,
   or all of them through [verify_all.py](verify_all.py).
 - [docs/sasconversionrulebook.json](docs/sasconversionrulebook.json) : the machine-consumable translation
-  rulebook. 106 rules with equivalence classes (EXACT,
+  rulebook. 109 rules with equivalence classes (EXACT,
   EQUIVALENT-WITH-SETTINGS, APPROXIMATE, NO-DIRECT-EQUIVALENT), required
   settings, forbidden patterns, and validation tests.
 - [docs/capability-manifest.json](docs/capability-manifest.json) : the coverage manifest. Enumerated entries of

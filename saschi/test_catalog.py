@@ -158,5 +158,58 @@ class PassTests(unittest.TestCase):
         self.assertEqual(block["blocked"], job.plan.blocked)
 
 
+class CharacterReportAccountingTests(unittest.TestCase):
+    PREFIX = ('data raw;infile datalines dsd;input word :$32. n;datalines4;\n'
+              'ROUND(1),1\n;;;;\nrun;\n')
+
+    def accounting(self, source):
+        cat, result = record_pass(source, compile_plan(source), git='test')
+        self.addCleanup(cat.close)
+        return cat, result
+
+    def test_complete_source_routes_and_opaque_calls_are_data(self):
+        cat, result = self.accounting(self.PREFIX + 'title "Probe";proc print data=raw;run;title;')
+        self.assertEqual(result.n_statements,10)
+        self.assertEqual(result.n_routed,9)
+        self.assertEqual(result.n_functions,0)
+        self.assertEqual(result.n_tickets,0)
+        self.assertEqual(cat.functions_seen(),[])
+
+    def test_invalid_and_missing_RUN_producers_cannot_enable_report_routes(self):
+        from saschi.rules import character_report_routes
+        for prefix in (self.PREFIX.replace(':$32.',':$0.'),self.PREFIX.replace('run;','')):
+            source = prefix + 'title "Probe";proc print data=raw;run;'
+            self.assertEqual(character_report_routes(source,split_statements(source)),{})
+
+    def test_same_line_statements_use_indices_and_do_not_promote_other_INPUT(self):
+        from saschi.rules import character_report_routes
+        source = self.PREFIX + 'title "P";title bad;proc print data=raw;run;input bad;'
+        statements = split_statements(source)
+        routes = character_report_routes(source,statements)
+        self.assertEqual(routes[6],('logical-title','ST-020'))
+        self.assertNotIn(7,routes)
+        self.assertEqual(routes[8],('mixed-print','ST-019'))
+        self.assertEqual(routes[9],('mixed-print','ST-019'))
+        self.assertNotIn(10,routes)
+        self.assertEqual(statements[6].line,statements[10].line)
+
+    def test_quoted_and_opaque_titles_cannot_select_the_profile(self):
+        from saschi.rules import character_report_routes
+        sources = ['data d;word="title \'P\';proc print data=raw;";run;',
+                   'data d;input word;datalines4;\nTITLE proc print ROUND(1)\n;;;;\nrun;']
+        for source in sources:
+            self.assertEqual(character_report_routes(source,split_statements(source)),{})
+        _,result = self.accounting(self.PREFIX.replace('ROUND(1),1','proc sort data=raw,1'))
+        self.assertEqual(result.n_routed,5)
+        self.assertEqual(result.n_functions,0)
+
+    def test_numeric_only_old_routes_remain_old(self):
+        from saschi.rules import character_report_routes, route_statement
+        source = 'data d;input n;datalines;\n1\n;\nrun;title "P";'
+        self.assertEqual(character_report_routes(source,split_statements(source)),{})
+        self.assertEqual(route_statement('input n'),('input-list','DS-044'))
+        self.assertEqual(route_statement('proc print data=d noobs'),('proc-print','ST-018'))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
