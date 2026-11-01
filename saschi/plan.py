@@ -203,6 +203,10 @@ def call(text, strict=False):
     if not match:
         return None
     name = match[1].lower()
+    from .numeric_math import parse_call
+    scoped = parse_call(text, strict)
+    if scoped is not None:
+        return scoped
     spec = FUNCTIONS.get(name)
     if spec is None:
         return None
@@ -307,7 +311,8 @@ def expression(text, _depth=0, strict=False):
     # A failed depth-budget split must never regroup a product and hide an
     # invalid intermediate behind zero or missing in another parse tree.
     unquoted = re.sub(r"'(?:[^']|'')*'|\"(?:[^\"]|\"\")*\"", '', text)
-    strict = strict or '*' in unquoted
+    from .numeric_math import strict_source
+    strict = strict or '*' in unquoted or strict_source()
     if _depth > 32:
         return None
     parts = _concat_parts(text)
@@ -417,7 +422,7 @@ def put_known_types(ops):
         if kind == 'variable':
             return known.get(expr['value'])
         if kind == 'call':
-            return FUNCTIONS[expr['name']].returns
+            return 'number' if expr['name'] in ('sqrt', 'log') else FUNCTIONS[expr['name']].returns
         if kind == 'arithmetic' and all(expression_type(expr[key]) == 'number' for key in ('left', 'right')):
             return 'number'
         return None
@@ -458,7 +463,7 @@ def bind_current(node, name):
             bind_current(child, name)
 
 
-def _compile_legacy_plan(source: str) -> Plan:
+def _compile_legacy_body(source: str) -> Plan:
     plan, step, context, active_do = Plan(), None, None, None
     character_put_matches = {}
     numeric_rules = {}
@@ -696,13 +701,15 @@ def _compile_legacy_plan(source: str) -> Plan:
     source_texts = ['' if any(t.kind == Kind.DATA for t in s.tokens) else
                     re.sub(r"'(?:[^']|'')*'|\"(?:[^\"]|\"\")*\"", '', s.text)
                     for s in statements]
+    from .numeric_math import strict_source
+    math_source = strict_source()
     numeric_input_source = any(re.match(r'^infile\b(?!\s*=)', text, re.I)
                                or re.match(r'^input\b(?!\s*=)', text, re.I) and '-' in text
                                for text in source_texts)
-    if numeric_input_source or any('**' in text or re.search(r'\b(?:constant|sin|cos|tan|arsin|arcos|atan)\s*\(', text, re.I)
+    if numeric_input_source or any('**' in text or re.search(r'\b(?:constant|sin|cos|tan|arsin|arcos|atan|sqrt|log)\s*\(', text, re.I)
                                    for text in source_texts):
         for statement, text in zip(statements, source_texts):
-            if numeric_input_source and not any(t.kind == Kind.DATA for t in statement.tokens) and len(re.findall(r'[+*/-]|[A-Za-z_][A-Za-z0-9_]*\s*\(', text, re.ASCII)) > 128:
+            if (numeric_input_source or math_source) and not any(t.kind == Kind.DATA for t in statement.tokens) and len(re.findall(r'[+*/-]|[A-Za-z_][A-Za-z0-9_]*\s*\(', text, re.ASCII)) > 128:
                 plan.tickets.append(Ticket(statement.line, 'numeric-inline-v1', 'input-ranges',
                     'numeric inline source exceeds128 arithmetic/call markers per statement'))
                 return plan
@@ -1114,17 +1121,30 @@ def _compile_legacy_plan(source: str) -> Plan:
         if compiled.kind == 'sql_create':
             continue
         nodes = [node for node, _ in expression_nodes(asdict(compiled))]
-        if any(node.get('kind') == 'arithmetic' and node.get('op') == '**'
+        from .numeric_math import selected as math_selected, PROFILE as MATH_PROFILE
+        math_profile = math_selected(asdict(compiled)['operations'])
+        if math_profile and any(op.kind == 'input_numeric' for op in walk_operations(compiled.operations)):
+            plan.tickets.append(Ticket(compiled.line, 'numeric-math-v1', 'numeric-math', 'comma/range INPUT composition is outside the numeric math profile'))
+            continue
+        if math_profile or any(node.get('kind') == 'arithmetic' and node.get('op') == '**'
                or node.get('kind') == 'call' and node.get('name') in BINARY64_FUNCTIONS for node in nodes):
             pipeline_features = {op.kind for op in walk_operations(compiled.operations)} & {'input_list','array_declare','do_over','do_while','do_until'}
             composed = bool(compiled.inputs or any(op.kind == 'projection' for op in walk_operations(compiled.operations)))
-            profile = PIPELINE_PROFILE if pipeline_features else BINARY64_ROWS_PROFILE if composed else BINARY64_PROFILE
+            profile = MATH_PROFILE if math_profile else PIPELINE_PROFILE if pipeline_features else BINARY64_ROWS_PROFILE if composed else BINARY64_PROFILE
             groups = ({'input'} if 'input_list' in pipeline_features else set()) | ({'arrays'} if pipeline_features & {'array_declare','do_over'} else set()) | ({'loops'} if pipeline_features & {'do_while','do_until'} else set())
             rule = ('DS-057' if len(groups)>1 else 'DS-054' if 'input' in groups else 'DS-055' if 'arrays' in groups else 'DS-056') if pipeline_features else 'DS-053' if compiled.inputs else 'DS-052' if composed else 'DS-049'
+            if math_profile:
+                names = {n.get('name') for n in nodes if n.get('kind') == 'call'}
+                rule = 'DS-068' if 'sum' in names else 'DS-066' if 'sqrt' in names else 'DS-067'
             numeric_rules[id(compiled)] = rule
             compiled.operations.insert(0, Operation('numeric_profile', compiled.line, {'name': profile}))
             construct = {'DS-054':'pipeline-input','DS-055':'pipeline-arrays','DS-056':'pipeline-loops','DS-057':'numeric-pipeline'}.get(rule) if pipeline_features else 'numeric-set' if compiled.inputs else 'numeric-projection' if composed else 'binary64'
-            plan.matched.append((construct, rule, compiled.line))
+            if math_profile:
+                for name, label, math_rule in [('sqrt','numeric-sqrt','DS-066'),('log','numeric-log','DS-067'),('sum','rounded-sum','DS-068')]:
+                    if name in names:
+                        plan.matched.append((label, math_rule, compiled.line))
+            else:
+                plan.matched.append((construct, rule, compiled.line))
             if compiled.inputs:
                 # A supplied numeric descriptor resolves these names at runtime.
                 # Only the new profile changes the legacy character fallback;
@@ -1250,7 +1270,7 @@ def _compile_legacy_plan(source: str) -> Plan:
                      or node.get('kind') == 'call' and node.get('name') == 'int']
     for node, line, rounded_rule in numeric_nodes:
         family, rule = (('int', 'DS-037') if node['kind'] == 'call' else
-                        ({'DS-054':'pipeline-input','DS-055':'pipeline-arrays','DS-056':'pipeline-loops','DS-057':'numeric-pipeline'}.get(rounded_rule) if rounded_rule in ('DS-054','DS-055','DS-056','DS-057') else 'numeric-set' if rounded_rule == 'DS-053' else
+                        ({'DS-054':'pipeline-input','DS-055':'pipeline-arrays','DS-056':'pipeline-loops','DS-057':'numeric-pipeline','DS-066':'numeric-sqrt','DS-067':'numeric-log','DS-068':'rounded-sum'}.get(rounded_rule) if rounded_rule in ('DS-054','DS-055','DS-056','DS-057','DS-066','DS-067','DS-068') else 'numeric-set' if rounded_rule == 'DS-053' else
                          'numeric-projection' if rounded_rule == 'DS-052' else 'binary64', rounded_rule) if rounded_rule else
                         ('multiplication', 'DS-045') if node['op'] == '*' else ('division', 'DS-036'))
         plan.matched.append((family, rule, line or 1))
@@ -1264,6 +1284,15 @@ def _compile_legacy_plan(source: str) -> Plan:
             if count > 128:
                 plan.tickets.append(Ticket(compiled.line, 'expression', 'division', 'numeric composition exceeds the128-node step policy'))
     return plan
+
+
+def _compile_legacy_plan(source: str) -> Plan:
+    from .numeric_math import parser_scope
+    with parser_scope(source):
+        try:
+            return _compile_legacy_body(source)
+        except RecursionError:
+            return Plan(tickets=[Ticket(1, 'numeric-math-v1', 'numeric-math', 'source exceeds bounded parser depth')])
 
 
 def compile_plan(source: str) -> Plan:

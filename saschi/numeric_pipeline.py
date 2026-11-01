@@ -85,6 +85,17 @@ def array_current_set(args, row, arrays, current):
 
 
 def validate_step(step, version=2, schema=None):
+    from . import numeric_math
+    if numeric_math.has_marker(step):
+        return numeric_math.validate_step(step, version, schema)
+    numeric_math.reject_unmarked_calls(step)
+    return _validate_step(step, version, schema)
+
+
+def _validate_step(step, version=2, schema=None, *, profile=PROFILE,
+                   calls=binary64.CALLS, functions=binary64.FUNCTIONS,
+                   apply_function=binary64.apply, call_arity=None,
+                   require_features=True):
     """Validate the new marker and inactive paths independently of compilation."""
     if not isinstance(step, dict) or not isinstance(step.get('operations'), list):
         raise ValueError('numeric pipeline requires a DATA-step mapping')
@@ -98,7 +109,7 @@ def validate_step(step, version=2, schema=None):
                 continue
             seen.add(id(node))
         if isinstance(node, dict):
-            if node.get('kind') == 'numeric_profile' and node.get('args') == {'name': PROFILE}:
+            if node.get('kind') == 'numeric_profile' and node.get('args') == {'name': profile}:
                 markers.append(node)
             pending.extend(node.values())
         elif isinstance(node, (list, tuple)):
@@ -114,7 +125,7 @@ def validate_step(step, version=2, schema=None):
     if (type(version) is not int or version != 2 or set(step) != expected or step['kind'] != 'data'
             or not (binary64.ordinary(step['name']) or step['name'] == '_null_')
             or type(step['line']) is not int or step['line'] < 1
-            or not roots or roots[0] is not marker or marker != {'kind': 'numeric_profile', 'line': step['line'], 'args': {'name': PROFILE}}
+            or not roots or roots[0] is not marker or marker != {'kind': 'numeric_profile', 'line': step['line'], 'args': {'name': profile}}
             or type(marker['line']) is not int or not isinstance(step['inputs'], list)
             or len(step['inputs']) > 1 or any(not binary64.ordinary(n) for n in step['inputs'])
             or step['by'] != [] or step['where'] is not None or step['lengths'] != {} or step['nodupkey'] is not False):
@@ -166,17 +177,18 @@ def validate_step(step, version=2, schema=None):
         if kind == 'call':
             numeric_nodes += 1
             if (set(expr) != {'kind', 'name', 'args'} or not isinstance(expr.get('name'), str)
-                    or expr['name'] not in binary64.CALLS or not isinstance(expr.get('args'), list) or len(expr['args']) != 1):
+                    or expr['name'] not in calls or not isinstance(expr.get('args'), list) or
+                    not (call_arity(expr['name'])[0] <= len(expr['args']) <= call_arity(expr['name'])[1] if call_arity else len(expr['args']) == 1)):
                 raise ValueError('numeric pipeline call shape/name/arity is invalid')
-            semantic_trigger |= expr['name'] in binary64.FUNCTIONS
+            semantic_trigger |= expr['name'] in functions
             if expr['name'] == 'constant':
                 arg = expr['args'][0]
                 if (not isinstance(arg, dict) or set(arg) != {'kind', 'value'}
                         or arg.get('kind') != 'character' or depth + 1 > 32):
                     raise ValueError('numeric pipeline CONSTANT requires a literal Pi name')
-                return True, binary64.apply('constant', [arg['value']])
-            known, value = expression(expr['args'][0], depth + 1, current)
-            return (True, binary64.apply(expr['name'], [value])) if known else (False, None)
+                return True, apply_function('constant', [arg['value']])
+            values = [expression(arg, depth + 1, current) for arg in expr['args']]
+            return (True, apply_function(expr['name'], [v for _, v in values])) if all(k for k, _ in values) else (False, None)
         expected_fields = {'kind', 'name', 'index'} if kind == 'array_get' else {'kind', 'name'}
         if kind not in ('array_get', 'array_current', 'array_sum') or set(expr) != expected_fields or not isinstance(expr.get('name'), str) or expr['name'] not in arrays:
             raise ValueError('numeric pipeline array reference requires a preceding declaration')
@@ -313,7 +325,7 @@ def validate_step(step, version=2, schema=None):
             raise ValueError('numeric pipeline RETAIN requires ordinary literal initialization')
         expression(initial)
     for op in roots[1:]: operation(op)
-    if not semantic_trigger or not features:
+    if not semantic_trigger or require_features and not features:
         raise ValueError('numeric pipeline requires executable new numeric syntax and a D1 feature')
     whole_numeric_nodes = sum(node.get('kind') in ('arithmetic', 'call') for node, _ in expression_nodes(step))
     if numeric_nodes > 128 or whole_numeric_nodes > 128 or array_nodes > 128:

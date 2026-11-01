@@ -249,7 +249,14 @@ def main(mode='composition'):
         if mode=='composition' and i==0:
             assert accounting=={'statements':32,'steps':[{'name':'pipeline','iterations':3,'trips':15},{'name':'fresh','iterations':1,'trips':0}]},accounting
     bad=refusals(mode);seen=witnesses(bad)
+    promotions=0
     for (source,catalog),independent in zip(bad,seen):
+        if source=='data d;array a{1} x;trigger=1**1;if 0 then z=sqrt(x);run;':
+            from examples.verify_numeric_math import promotion_control
+            assert independent is None
+            promotion_control(source,{'datasets':{'d':{'schema':{'x':'number','trigger':'number','z':'number'},'rows':[{'x':None,'trigger':1.,'z':None}]}},'log':[]})
+            promotions+=1
+            continue
         try:execute(source,catalog)
         except (ValueError,RuntimeError,AssertionError):pass
         else:raise AssertionError(('missing refusal',source))
@@ -263,7 +270,7 @@ def main(mode='composition'):
         assert hashlib.sha256(json.dumps(original_expected(),separators=(',',':')).encode()).hexdigest()==RESULT_PIN
         assert hashlib.sha256(''.join(line+'\n' for line in original_expected()['log']).encode()).hexdigest()==STDOUT_PIN
     print(f'VERIFIED: numeric-pipeline-{mode} {len(hand)} hand pins,120 generated full-source/runtime/R cases,'
-          f'{len(bad)} shared refusals,{naive_controls()} naive controls; exact structure/logical text,32-epsilon numeric budget; emitted/CLI, no live SAS')
+          f'{len(bad)-promotions} shared refusals,{promotions} older-profile controls,{naive_controls()} naive controls; exact structure/logical text,32-epsilon numeric budget; emitted/CLI, no live SAS')
 
 
 if __name__=='__main__':main()

@@ -109,6 +109,9 @@ VERIFIERS = [
     ("csv-export", HERE / "examples" / "verify_numeric_exchange.py"),
     ("scalar-jump", HERE / "examples" / "verify_scalar_jump.py"),
     ("scalar-link", HERE / "examples" / "verify_scalar_link.py"),
+    ("numeric-sqrt", HERE / "examples" / "verify_numeric_sqrt.py"),
+    ("numeric-log", HERE / "examples" / "verify_numeric_log.py"),
+    ("rounded-sum", HERE / "examples" / "verify_rounded_sum.py"),
 ]
 
 # The translator suites, run as unittest modules. They carry the same weight as
@@ -169,6 +172,7 @@ SUITES = [
     ("suite-grouped-control", "saschi.test_grouped_control"),
     ("suite-numeric-exchange", "saschi.test_numeric_exchange"),
     ("suite-flow-control", "saschi.test_flow_control"),
+    ("suite-numeric-math", "saschi.test_numeric_math"),
 ]
 
 

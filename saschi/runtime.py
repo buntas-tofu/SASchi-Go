@@ -10,7 +10,7 @@ from .operations import walk_operations as operations
 from .values import normalize_catalog, column_type, coerce, descriptor, missing, order
 from .functions import FUNCTIONS, validate_calendar_calls, validate_sum_expression, validate_numeric_composition, validate_multiplication_profile
 from sas_semantics import sas_sum_statement, sas_do_until, sas_do_while, sas_divide, sas_multiply
-from . import binary64, numeric_pipeline
+from . import binary64, numeric_pipeline, numeric_math
 from .sql_create import materialize as materialize_sql_create
 from sas_semantics import sas_numeric_array_value, sas_numeric_array_index, sas_numeric_array_add, sas_do_over
 from .arrays import validate_step as validate_array_step, contains_array, value as array_value
@@ -334,6 +334,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
             continue
         inputs, keys, ops = step['inputs'], step['by'], step['operations']
         pipeline = numeric_pipeline.validate_step(step, plan['version'])
+        pipeline_engine = numeric_math if pipeline is not None and pipeline.get('math_profile') else numeric_pipeline
         rounded_profile = pipeline is not None or binary64.validate_step(step, plan['version'])
         input_projection, output_projection = validate_projection_step(step, plan['version'])
         if not rounded_profile:
@@ -546,7 +547,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                     origin = schema.get(expr['value'], 'number')
                     spec = {'type': 'character', 'length': origin['length']} if column_type(origin) == 'character' else 'number'
                 else:
-                    spec = (assign_spec(expr, schema) if kind == 'assign' else None) or 'number'
+                    spec = (assign_spec(expr, schema) if kind == 'assign' and pipeline_engine is not numeric_math else None) or 'number'
                 if args['name'] in schema and column_type(schema[args['name']]) != column_type(spec):
                     raise ValueError('implicit assignment type conversion is unsupported')
                 schema.setdefault(args['name'], spec)
@@ -771,7 +772,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
             def sum_value(expr):
                 """Check every numeric operand before arithmetic can hide a tag/overflow."""
                 if pipeline is not None:
-                    return numeric_pipeline.evaluate(expr, row, arrays, current)
+                    return pipeline_engine.evaluate(expr, row, arrays, current)
                 if rounded_profile:
                     return binary64.evaluate(expr, row)
                 if arrays and contains_array(expr):
@@ -797,7 +798,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                 resolved = {}
                 for side in ('left', 'right'):
                     if side in test:
-                        value = numeric_pipeline.evaluate(test[side], row, arrays, current) if pipeline is not None else binary64.evaluate(test[side], row)
+                        value = pipeline_engine.evaluate(test[side], row, arrays, current) if pipeline is not None else binary64.evaluate(test[side], row)
                         resolved[side] = {'kind': 'missing' if value is None else 'number', 'value': value}
                 return condition({'op': test['op'], **resolved}, row, schema)
 
@@ -815,7 +816,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                         value = queue.invoke(number(expression['args'][0], row, schema), difference=family == 'dif')
                     else:
                         try:
-                            value = (numeric_pipeline.evaluate(expression, row, arrays, current) if pipeline is not None else
+                            value = (pipeline_engine.evaluate(expression, row, arrays, current) if pipeline is not None else
                                      binary64.evaluate(expression, row) if rounded_profile else
                                      put_all_value(expression, row) if put_all else number(expression, row, schema, arrays, current))
                         except ValueError as exc:
@@ -831,13 +832,13 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                 elif kind == 'array_current_set':
                     name = args['name']
                     if pipeline is not None:
-                        numeric_pipeline.array_current_set(args, row, arrays, current)
+                        pipeline_engine.array_current_set(args, row, arrays, current)
                     else:
                         row[arrays[name]['names'][current[name]]] = array_value(args['value'], row, arrays, current)
                 elif kind == 'array_set':
                     try:
                         if pipeline is not None:
-                            numeric_pipeline.array_set(args, row, arrays, current)
+                            pipeline_engine.array_set(args, row, arrays, current)
                             return True
                         a = arrays[args['name']]
                         index = sas_numeric_array_index(array_value(args['index'], row, arrays, current), a['lower'], len(a['names']))

@@ -135,3 +135,15 @@ source/R acceptance and forced-old-marker refusal are both required; existing
 old-profile R still refuses. See [NUMERIC_ROWS.md](NUMERIC_ROWS.md) for the
 unchanged7/21 boundary-control totals and their5/19 shared-source plus2 old-marker
 split. No earlier control was deleted, skipped or reordered.
+
+## Later numeric math profile
+
+DS-066..068 separately introduce `binary64-math-v1`, described in
+[NUMERIC_MATH.md](NUMERIC_MATH.md). The original pipeline profile retains its
+SQRT/LOG and argument-SUM refusals. Four exact older source frontiers are retained
+as promotion controls: the scalar SQRT source in the array suite, the two inline
+SQRT/LOG sources in the pipeline suite, and the dead SQRT action in the array
+pipeline gate. New hand/R/runtime/emitted positives are paired with old independent
+R and all older marker/unmarked runtime negatives. The array gate retains nine
+boundary units as eight shared refusals and one older-profile control. No older
+source clause is removed, substituted or reordered.

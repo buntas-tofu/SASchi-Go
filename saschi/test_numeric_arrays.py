@@ -241,7 +241,9 @@ class NumericArrayTests(unittest.TestCase):
 
     def test_unrelated_function_calls_keep_old_refusal_route(self):
         p = compile_plan('data d; x=sqrt(7); run;')
-        self.assertEqual(p.tickets[0].construct, 'assignment')
+        from examples.verify_numeric_math import promotion_control
+        self.assertFalse(p.blocked,p.tickets)
+        promotion_control('data d; x=sqrt(7); run;', {'datasets':{'d':{'schema':{'x':'number'},'rows':[{'x':2.6457513110645907}]}},'log':[]})
 
     def test_calls_can_use_a_stored_scalar_without_global_quarantine(self):
         t = self.run_source('array a[1] x; x=4; r=a[1]; q=int(r/2);')
