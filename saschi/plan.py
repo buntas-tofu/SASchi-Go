@@ -1363,3 +1363,13 @@ def compile_plan(source: str, *, output_contract=None) -> Plan:
         return compile_program(source, _compile_before_formatted_program)
     from .formatted_program import compile_program
     return compile_program(source, _compile_before_formatted_program)
+
+
+_compile_before_sort_options = compile_plan
+
+
+def compile_plan(source: str, *, output_contract=None) -> Plan:
+    if output_contract is not None:
+        return _compile_before_sort_options(source, output_contract=output_contract)
+    from .sort_options import compile_program
+    return compile_program(source, _compile_before_sort_options)

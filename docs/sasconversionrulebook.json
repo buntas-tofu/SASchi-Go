@@ -3372,6 +3372,76 @@
       "validation_test": "examples/verify_labelled_print.py",
       "confidence": "Bounded repository/base-R contract evidence;no live SAS,whole-language or physical-output equivalence.",
       "sources": []
+    },
+    {
+      "rule_id": "DS-073",
+      "sas_pattern": "Bounded per-key DESCENDING PROC SORT",
+      "scope": "procedure",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "saschi.sort_options.run_program with exact source and portable admission; preserve old profiles."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent full-source R scanner with explicit ordinal tie breaks and separate schema-order expansion."
+      },
+      "required_settings": [
+        "directed-sort-v1 requires1..8 unique explicit ordered keys, exact name/descending bool fields and at least one DESCENDING. Optional NODUPKEY keeps first stable BY-key occurrence. Ordinary missing sorts first ascending and last descending. Source numeric fractions follow accepted exact converter; PRINT independently retains integer-only rendering.",
+        "Require exact version2 bounded_sort Step and one same-kind operation; empty legacy metadata and by list. Whole family has genuine character_data lineage, empty initial catalog and at most64 Steps,1000rows,32columns,2PRINTs,32TITLEs. New SORT requires explicit DATA and fresh OUT names; earlier sort shapes and source profiles stay unchanged.",
+        "Validate all descriptors and values eagerly including empty data; ordinary missing only, printableASCII padded characters and unchanged exact numeric-input converter domain. Stable per-key order reverses comparison classes, never tie order. Preserve source and full ordered schema/storage cells. No tagged missings,linguistic collation,NOEQUALS,DUPOUT,NODUPRECS,projection,external engines,new report bounds or runtime dependencies.",
+        "Use existing exact logical mixed report/TITLE policies and atomic whole-job publication. Wrong comparators,source/runtime/emitted/actualCLI,original independent hand/base-R and complete unchanged official targets establish only repository behavior,not live SAS or physical output."
+      ],
+      "forbidden_patterns": [
+        "Reverse the entire sorted result",
+        "Resolve _ALL_ alphabetically",
+        "Use last-row deduplication",
+        "Discard any original vendor step or report"
+      ],
+      "silent_difference_checks": [
+        "Stable row identity,missing direction,character padding,ordered descriptors,source scheduling,complete reports and atomic failure."
+      ],
+      "validation_test": "examples/verify_sort_descending.py",
+      "confidence": "Bounded repository/base-R evidence conditional on source-bound full gates; no live SAS or physical output.",
+      "sources": [
+        "https://documentation.sas.com/api/docsets/lrcon/9.4/content/lrcon.pdf",
+        "https://documentation.sas.com/api/docsets/proc/9.4/content/proc.pdf?locale=en"
+      ]
+    },
+    {
+      "rule_id": "DS-074",
+      "sas_pattern": "Bounded PROC SORT NODUPKEY with sole BY _ALL_",
+      "scope": "procedure",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "saschi.sort_options.run_program with exact source and portable admission; preserve old profiles."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent full-source R scanner with explicit ordinal tie breaks and separate schema-order expansion."
+      },
+      "required_settings": [
+        "descriptor-sort-all-v1 requires NODUPKEY and empty explicit key list. Resolve all1..32 columns from ordered INPUT/schema descriptors,not alphabetical names or first-row key order. This maps BaseSAS9.4 variable definition order to repository descriptors. A nonalphabetical original permutation witnesses this policy beyond the vendor target.",
+        "Require exact version2 bounded_sort Step and one same-kind operation; empty legacy metadata and by list. Whole family has genuine character_data lineage, empty initial catalog and at most64 Steps,1000rows,32columns,2PRINTs,32TITLEs. New SORT requires explicit DATA and fresh OUT names; earlier sort shapes and source profiles stay unchanged.",
+        "Validate all descriptors and values eagerly including empty data; ordinary missing only, printableASCII padded characters and unchanged exact numeric-input converter domain. Stable per-key order reverses comparison classes, never tie order. Preserve source and full ordered schema/storage cells. No tagged missings,linguistic collation,NOEQUALS,DUPOUT,NODUPRECS,projection,external engines,new report bounds or runtime dependencies.",
+        "Use existing exact logical mixed report/TITLE policies and atomic whole-job publication. Wrong comparators,source/runtime/emitted/actualCLI,original independent hand/base-R and complete unchanged official targets establish only repository behavior,not live SAS or physical output."
+      ],
+      "forbidden_patterns": [
+        "Reverse the entire sorted result",
+        "Resolve _ALL_ alphabetically",
+        "Use last-row deduplication",
+        "Discard any original vendor step or report"
+      ],
+      "silent_difference_checks": [
+        "Stable row identity,missing direction,character padding,ordered descriptors,source scheduling,complete reports and atomic failure."
+      ],
+      "validation_test": "examples/verify_sort_all.py",
+      "confidence": "Bounded repository/base-R evidence conditional on source-bound full gates; no live SAS or physical output.",
+      "sources": [
+        "https://documentation.sas.com/api/docsets/lrcon/9.4/content/lrcon.pdf",
+        "https://documentation.sas.com/api/docsets/proc/9.4/content/proc.pdf?locale=en"
+      ]
     }
   ],
   "runtime_capabilities": {
@@ -4078,6 +4148,34 @@
       "r_witness": "examples/informat_reports.R",
       "boundary_tests": "saschi.test_informat_reports",
       "evidence": "Separate original hand/generated/refusal/source/runtime/emitted/actualCLI gates plus complete pinned whole-program witness. Claim applies only when current full gates pass."
+    },
+    "directed_sort": {
+      "rule_id": "DS-073",
+      "target": "saschi.sort_options.run_program",
+      "scope": [
+        "directed-sort-v1 requires1..8 unique explicit ordered keys, exact name/descending bool fields and at least one DESCENDING. Optional NODUPKEY keeps first stable BY-key occurrence. Ordinary missing sorts first ascending and last descending. Source numeric fractions follow accepted exact converter; PRINT independently retains integer-only rendering.",
+        "Require exact version2 bounded_sort Step and one same-kind operation; empty legacy metadata and by list. Whole family has genuine character_data lineage, empty initial catalog and at most64 Steps,1000rows,32columns,2PRINTs,32TITLEs. New SORT requires explicit DATA and fresh OUT names; earlier sort shapes and source profiles stay unchanged.",
+        "Validate all descriptors and values eagerly including empty data; ordinary missing only, printableASCII padded characters and unchanged exact numeric-input converter domain. Stable per-key order reverses comparison classes, never tie order. Preserve source and full ordered schema/storage cells. No tagged missings,linguistic collation,NOEQUALS,DUPOUT,NODUPRECS,projection,external engines,new report bounds or runtime dependencies.",
+        "Use existing exact logical mixed report/TITLE policies and atomic whole-job publication. Wrong comparators,source/runtime/emitted/actualCLI,original independent hand/base-R and complete unchanged official targets establish only repository behavior,not live SAS or physical output."
+      ],
+      "validation_test": "examples/verify_sort_descending.py",
+      "r_witness": "examples/sort_options.R",
+      "boundary_tests": "saschi.test_sort_options",
+      "evidence": "Original hand/base-R source fixtures and separately pinned whole vendor proofs; new dispositions and a complete language universe are not implied."
+    },
+    "descriptor_sort_all": {
+      "rule_id": "DS-074",
+      "target": "saschi.sort_options.run_program",
+      "scope": [
+        "descriptor-sort-all-v1 requires NODUPKEY and empty explicit key list. Resolve all1..32 columns from ordered INPUT/schema descriptors,not alphabetical names or first-row key order. This maps BaseSAS9.4 variable definition order to repository descriptors. A nonalphabetical original permutation witnesses this policy beyond the vendor target.",
+        "Require exact version2 bounded_sort Step and one same-kind operation; empty legacy metadata and by list. Whole family has genuine character_data lineage, empty initial catalog and at most64 Steps,1000rows,32columns,2PRINTs,32TITLEs. New SORT requires explicit DATA and fresh OUT names; earlier sort shapes and source profiles stay unchanged.",
+        "Validate all descriptors and values eagerly including empty data; ordinary missing only, printableASCII padded characters and unchanged exact numeric-input converter domain. Stable per-key order reverses comparison classes, never tie order. Preserve source and full ordered schema/storage cells. No tagged missings,linguistic collation,NOEQUALS,DUPOUT,NODUPRECS,projection,external engines,new report bounds or runtime dependencies.",
+        "Use existing exact logical mixed report/TITLE policies and atomic whole-job publication. Wrong comparators,source/runtime/emitted/actualCLI,original independent hand/base-R and complete unchanged official targets establish only repository behavior,not live SAS or physical output."
+      ],
+      "validation_test": "examples/verify_sort_all.py",
+      "r_witness": "examples/sort_options.R",
+      "boundary_tests": "saschi.test_sort_options",
+      "evidence": "Original hand/base-R source fixtures and separately pinned whole vendor proofs; new dispositions and a complete language universe are not implied."
     }
   }
 }
