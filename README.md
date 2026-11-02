@@ -16,11 +16,11 @@ policies. Receipts record what passed for the source and environment tested.
 ## Current verification
 
 Status: version 0.4.0 development evidence for maintainer review, updated on
-2026-11-02. The current registry contains 93 fixture gates and64 suites. The full receipt
+2026-11-02. The current registry contains 97 fixture gates and65 suites. The full receipt
 records the discovered tests and their outcomes. With the pinned Roku corpus present, `python verify_all.py` records the
 source-bound unified verdict. Synthesis separately checks 60 faithful cases and
-60 naive variants. The accepted entry PR64/main716a82a6 covered91 gates,63 suites and
-1404 tests with zero skips; current passing outcomes require a matching receipt.
+60 naive variants. The accepted entry PR65/mainac9d800 covered93 gates,64 suites and
+1446 tests with zero skips; current passing outcomes require a matching receipt.
 Live-SAS validation remains outstanding.
 
 D2b accepted twenty complete external-program repository/base-R proofs, including
@@ -125,12 +125,19 @@ An original hand/base-R fixture and unchanged official SORT4 have separate gates
 DROP, directed/ALL projection joins and DUPOUT remain outside this profile;
 accepted counts require the current source-bound full receipt.
 
+[SORT duplicate partition and owned replacement](docs/SORT_DUPLICATES.md) adds
+separate DUPOUT/NODUPKEY,controlled omitted-OUT replacement and three-report
+contracts. Independent original and complete unchanged official SORT5 hand/R
+expectations precede runtime comparison. Removed-stream order is an explicit
+repository mapping; older profiles retain their caps. Three component gates and
+a separate vendor gate require the current source-bound full receipt.
+
 [Explicit bitwise output and informat reports](docs/INFORMAT_REPORTS.md) adds
 `--output-contract bitwise-put-all-67-v1` while preserving the old default64-byte
 refusal. Its unchanged Roku target requires that explicit selection. A separate
 whole-program gate covers the pinned official INVALUE example, including custom
 numeric definitions, absolute pointer input, procedure-local labelled PRINT and
-default MEANS. Both logical reports preserve local TITLE state. The two vendor
+default MEANS. Both logical reports preserve local TITLE state. Those two earlier vendor
 benchmarks stay separate from the Roku inventory; current full receipts bind
 acceptance. No live SAS or physical-output equivalence is claimed.
 
@@ -167,7 +174,7 @@ fixed expected output and base-R evidence. Special missings retain their tags.
   sibling plus a fixture verifier (`verify_*.py`). Run any verifier directly,
   or all of them through [verify_all.py](verify_all.py).
 - [docs/sasconversionrulebook.json](docs/sasconversionrulebook.json) : the machine-consumable translation
-  rulebook. 118 rules with equivalence classes (EXACT,
+  rulebook. 121 rules with equivalence classes (EXACT,
   EQUIVALENT-WITH-SETTINGS, APPROXIMATE, NO-DIRECT-EQUIVALENT), required
   settings, forbidden patterns, and validation tests.
 - [docs/capability-manifest.json](docs/capability-manifest.json) : the coverage manifest. Enumerated entries of

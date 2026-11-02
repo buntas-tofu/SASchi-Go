@@ -1,9 +1,10 @@
 # Coverage reconciliation and next gate series
 
 Status: Repository/base-R planning evidence, originally reconciled at main08eaa7b
-on2026-10-27 and updated through DS-075, ST-023, SQL-004 and A0.
-Current multi-cluster registrations await the source-bound full receipt. Accepted
-entry PR64/main716a82a6 completed directed/all-column SORT work. The handoff binds acceptance.
+on2026-10-27 and updated through DS-077, ST-024, SQL-004 and A0.
+Accepted entry PR65/mainac9d800 completed input KEEP after directed/all-column
+SORT. New duplicate/replacement/report registrations require the current full
+source-bound receipt. The sealed handoff binds acceptance.
 For principal/maintainer prioritization. Counts describe this checkout and the56
 pinned sibling corpus files, not all SAS or live-SAS equivalence. Updated for
 DS-039 arrays, DS-040 DO OVER and DS-041 nested/computed counted loops after the original
@@ -13,13 +14,13 @@ This document does not authorize additional implementation or publication scope.
 
 ## Inventory reconciled against actual evidence
 
-The golden command registers93 fixture runners,64 translator suites and1
+The golden command registers97 fixture runners,65 translator suites and1
 synthesis runner. These are registration counts, not passing outcomes. The
 source-bound full receipt records the discovered test count. A source-bound full receipt records actual skips and
-results. Accepted run entry PR64/main716a82a6 contained91 fixtures,63 suites and1404
+results. Accepted run entry PR65/mainac9d800 contained93 fixtures,64 suites and1446
 tests with zero skips,60 faithful synthesis checks and60 naive controls. The
 separate1k workload checks total39:18 ledger and21 text. These counts have
-different units. Neither118 rulebook rules nor158 golden-command runners is a
+different units. Neither121 rulebook rules nor163 golden-command runners is a
 SAS capability denominator.
 
 [The capability manifest](capability-manifest.json) still enumerates108 statements
@@ -173,15 +174,17 @@ earlier numeric-list PUT remains bounded integer output and earlier division req
 
 ## Separate vendor benchmark
 
-The vendor manifest registers5 pinned Apache-2.0 programs, identified
+At the PR65 accepted entry, six vendor programs have complete separate proofs.
+The current manifest registers seven pinned Apache-2.0 programs, identified
 by immutable commit,source and LICENSE bytes in
 [the manifest](vendor-benchmark-manifest.json). Bodies remain in an explicitly
 prepared external cache. The2 prior accepted sorted-copy and INVALUE examples have
 separate independent whole-source hand/base-R gates. The INVALUE program checks
 8rows,9input attempts,36events,local labels and persistent TITLE across two
 logical reports. Acceptance requires the current source-bound full gates;
-cache preparation alone is not execution evidence. Three further registered SORT
-examples have separate whole-source gates described in SORT_OPTIONS.md. All vendor programs remain
+cache preparation alone is not execution evidence. Three further SORT examples have whole-source gates described in
+SORT_OPTIONS.md; SORT4 is covered in SORT_INPUT_KEEP.md. SORT5 now has its own
+registered gate under SORT_DUPLICATES.md,requiring current full verification. All vendor programs remain
 separate from the22 Roku proofs registered for conditional current acceptance
 among56 pinned files. The bitwise Roku
 proof requires its explicit output contract. The denominators are not combined.
@@ -382,3 +385,26 @@ six vendor sources, including this candidate; passing whole-source gates establi
 proofs separately from Roku22/56. All117 prior rules and capability-manifest bytes
 remain unchanged, with only DS-075 appended. DROP, directed/ALL projection joins,
 DUPOUT, controlled replacement and a third report remain future scope.
+
+
+## SORT5 duplicate partition and controlled replacement
+
+Status: principal-approved DS-076/077 and ST-024 registrations require current
+source-bound full verification. PR65/mainac9d800 accepted input KEEP at93fixtures,
+64suites,1446tests and zero skips,with six separate vendor proofs. Older pending
+wording describes historical registration events and does not reopen that work.
+
+[The new contract](SORT_DUPLICATES.md) separately bounds DUPOUT/NODUPKEY row-identity
+partition,omitted-OUT replacement of a prior survivor and three logical reports.
+Three first-party gates/R twins and one whole unchanged2132-byte official SORT5
+gate append to the existing order; one source suite is added. All118 earlier
+rule/runtime objects,26 earlier first-party plans/emitted bytes,semantics/mirror
+and capability manifest remain unchanged. Only DS-076,DS-077 and ST-024 append.
+The vendor manifest registers seven sources; no new Roku completion is claimed.
+
+Independent original and whole-source hand/R expectations freeze before runtime.
+The original distinguishes sorted removed-stream order from encounter order;
+that ordering is an explicit repository policy,not a native SAS guarantee. Fresh
+DUPOUT names,owned survivor replacement,earlier source/report snapshots and late
+atomic failures have distinct controls. Input projection,ALL joins,broader
+procedure options and recovery behavior remain separate future contracts.

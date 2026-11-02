@@ -289,6 +289,9 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
         raise ValueError('unsupported plan version')
     if plan['tickets'] and not allow_partial:
         raise RuntimeError('saschi: blocked translation. Nothing from this program was executed.')
+    from .sort_duplicates import validate_program as validate_duplicates, run_program as run_duplicates
+    if validate_duplicates(plan, catalog) is not None:
+        return run_duplicates(plan, catalog)
     from .sort_projection import validate_program as validate_sort_projection, run_program as run_sort_projection
     if validate_sort_projection(plan, catalog) is not None:
         return run_sort_projection(plan, catalog)

@@ -411,6 +411,10 @@ def character_report_routes(source, statements):
     lexers provide the separate whole-program statement-accounting cross-check.
     Indices keep distinct statements on the same physical line distinct.
     """
+    from .sort_duplicates import source_steps as duplicate_steps
+    _, _, duplicate_routes, duplicate_selected = duplicate_steps(source, statements)
+    if duplicate_selected:
+        return duplicate_routes
     from .sort_projection import source_steps as projection_steps
     _, _, projection_routes, projection_selected = projection_steps(source, statements)
     if projection_selected:

@@ -7,6 +7,7 @@ REPORT_BASENAME = 'print.txt'
 REPORT_CONTRACT = 'numeric-space-fixed12-v1'
 MIXED_REPORT_CONTRACT = 'ascii-titled-mixed-integer-v1'
 INFORMAT_REPORT_CONTRACT = 'ascii-informat-reports-v1'
+DUPLICATE_REPORT_CONTRACT = 'ascii-dupout-mixed-integer-v1'
 REPORT_COMPARISON_CONTRACT = 'exact-basename-set-utf8-bytes-v1'
 MAX_REPORT_BYTES = 417056
 
@@ -36,6 +37,9 @@ def report_manifest(reports, *, contract=REPORT_CONTRACT):
     elif contract == INFORMAT_REPORT_CONTRACT:
         from .informat_reports import validate_reports as validate_informat_reports
         validate_informat_reports(reports)
+    elif contract == DUPLICATE_REPORT_CONTRACT:
+        from .sort_duplicates import validate_reports as validate_duplicate_reports
+        validate_duplicate_reports(reports)
     else:
         raise ValueError('unknown logical report contract')
     return {name: {'sha256': hashlib.sha256(text.encode('ascii')).hexdigest(),
@@ -53,11 +57,14 @@ def read_expected_reports(path, *, contract=REPORT_CONTRACT):
         return result
     def constant(value):
         raise ValueError('invalid expected report JSON constant')
-    if contract not in (REPORT_CONTRACT, MIXED_REPORT_CONTRACT, INFORMAT_REPORT_CONTRACT):
+    if contract not in (REPORT_CONTRACT, MIXED_REPORT_CONTRACT, INFORMAT_REPORT_CONTRACT, DUPLICATE_REPORT_CONTRACT):
         raise ValueError('unknown expected report contract')
-    maximum = 2097152 if contract in (MIXED_REPORT_CONTRACT, INFORMAT_REPORT_CONTRACT) else 1048576
+    maximum = (4194304 if contract == DUPLICATE_REPORT_CONTRACT else
+               2097152 if contract in (MIXED_REPORT_CONTRACT, INFORMAT_REPORT_CONTRACT) else 1048576)
     raw = path.read_bytes()
     if len(raw) > maximum:
+        if contract == DUPLICATE_REPORT_CONTRACT:
+            raise ValueError('expected three-report manifest exceeds four MiB')
         if contract in (MIXED_REPORT_CONTRACT, INFORMAT_REPORT_CONTRACT):
             raise ValueError('expected mixed report manifest exceeds two MiB')
         raise ValueError('expected report manifest exceeds one MiB')
@@ -68,6 +75,8 @@ def read_expected_reports(path, *, contract=REPORT_CONTRACT):
     if (contract in (MIXED_REPORT_CONTRACT, INFORMAT_REPORT_CONTRACT) and
             (type(value) is not dict or not 1 <= len(value) <= 2)):
         raise ValueError('expected mixed reports require one or two basename-to-text entries')
+    if contract == DUPLICATE_REPORT_CONTRACT and (type(value) is not dict or not 1 <= len(value) <= 3):
+        raise ValueError('expected three-report manifest requires one to three basename-to-text entries')
     if contract == REPORT_CONTRACT and (type(value) is not dict or len(value) != 1):
         raise ValueError('expected reports require one complete basename-to-text map')
     for name, text in value.items():
