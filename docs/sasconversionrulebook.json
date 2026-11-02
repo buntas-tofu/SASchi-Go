@@ -3442,6 +3442,41 @@
         "https://documentation.sas.com/api/docsets/lrcon/9.4/content/lrcon.pdf",
         "https://documentation.sas.com/api/docsets/proc/9.4/content/proc.pdf?locale=en"
       ]
+    },
+    {
+      "rule_id": "DS-075",
+      "sas_pattern": "Bounded PROC SORT input KEEP= with ascending BY and optional NODUPKEY",
+      "scope": "procedure",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "saschi.sort_projection.run_program with separate exact source and portable admission."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent complete-source R selection and pairwise stable ordering witness."
+      },
+      "required_settings": [
+        "sort-input-keep-v1 requires an exact version2 projected_sort Step with one same-kind operation and exact profile,keep,by,nodupkey,source_lines args. Admit1..32 unique literal KEEP names and1..8 unique ascending BY names; require prior genuine character_data lineage,empty initial catalog and explicit fresh OUT. Earlier profile shapes remain unchanged.",
+        "Validate the complete original input before KEEP,including excluded descriptors,cells and empty or unused paths. Select in original descriptor order,not KEEP-list order; retain at least one character descriptor. All BY columns must survive selection. Stable ASCII/padded-character/ordinary-missing sorting and optional first-survivor NODUPKEY preserve source datasets and stored cells.",
+        "Retain64steps,1000rows,32columns,character widths1..64,2PRINTs and32TITLEs. Preserve the existing exact numeric INPUT converter including fractions; PRINT retains integer-only rendering. No DROP,ranges,special variable lists,DESCENDING or BY_ALL composition,output options,DUPOUT,new in-place forms,additional reports or dependencies.",
+        "Preflight validates and propagates selected descriptors/values without sorting or deduplication. Each actual SORT executes once. Independent original hand/base-R and whole unchanged vendor hand/R expectations are frozen before new runtime implementation; actual runtime,emitted,CLI,wrong-comparator and late-failure atomic checks follow. Repository evidence only,no live SAS or physical report claim."
+      ],
+      "forbidden_patterns": [
+        "Apply KEEP only after BY processing",
+        "Reorder descriptors by KEEP-list spelling",
+        "Hide invalid excluded values",
+        "Select the last tied row",
+        "Modify earlier Step or profile field sets"
+      ],
+      "silent_difference_checks": [
+        "Input timing,ordered descriptors,stable row identity,missing/padding,complete reports,whole-source trace and atomic publication."
+      ],
+      "validation_test": "examples/verify_sort_input_keep.py",
+      "confidence": "Bounded repository/base-R evidence conditional on source-bound full gates; no live SAS or physical output.",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/ledsoptsref/69751/HTML/default/p0vw9lyyxk1cxkn0zzfemrsr3t9a.htm"
+      ]
     }
   ],
   "runtime_capabilities": {
@@ -4176,6 +4211,20 @@
       "r_witness": "examples/sort_options.R",
       "boundary_tests": "saschi.test_sort_options",
       "evidence": "Original hand/base-R source fixtures and separately pinned whole vendor proofs; new dispositions and a complete language universe are not implied."
+    },
+    "sort_input_keep": {
+      "rule_id": "DS-075",
+      "target": "saschi.sort_projection.run_program",
+      "scope": [
+        "sort-input-keep-v1 requires an exact version2 projected_sort Step with one same-kind operation and exact profile,keep,by,nodupkey,source_lines args. Admit1..32 unique literal KEEP names and1..8 unique ascending BY names; require prior genuine character_data lineage,empty initial catalog and explicit fresh OUT. Earlier profile shapes remain unchanged.",
+        "Validate the complete original input before KEEP,including excluded descriptors,cells and empty or unused paths. Select in original descriptor order,not KEEP-list order; retain at least one character descriptor. All BY columns must survive selection. Stable ASCII/padded-character/ordinary-missing sorting and optional first-survivor NODUPKEY preserve source datasets and stored cells.",
+        "Retain64steps,1000rows,32columns,character widths1..64,2PRINTs and32TITLEs. Preserve the existing exact numeric INPUT converter including fractions; PRINT retains integer-only rendering. No DROP,ranges,special variable lists,DESCENDING or BY_ALL composition,output options,DUPOUT,new in-place forms,additional reports or dependencies.",
+        "Preflight validates and propagates selected descriptors/values without sorting or deduplication. Each actual SORT executes once. Independent original hand/base-R and whole unchanged vendor hand/R expectations are frozen before new runtime implementation; actual runtime,emitted,CLI,wrong-comparator and late-failure atomic checks follow. Repository evidence only,no live SAS or physical report claim."
+      ],
+      "validation_test": "examples/verify_sort_input_keep.py",
+      "r_witness": "examples/sort_input_keep.R",
+      "boundary_tests": "saschi.test_sort_projection",
+      "evidence": "Separate pre-runtime original and unchanged official source hand/base-R qualification plus actual runtime/emitted/CLI gates. Requires current full verification."
     }
   }
 }

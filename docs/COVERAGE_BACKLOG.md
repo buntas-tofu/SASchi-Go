@@ -1,9 +1,9 @@
 # Coverage reconciliation and next gate series
 
 Status: Repository/base-R planning evidence, originally reconciled at main08eaa7b
-on2026-10-27 and updated through DS-074, ST-023, SQL-004 and A0.
+on2026-10-27 and updated through DS-075, ST-023, SQL-004 and A0.
 Current multi-cluster registrations await the source-bound full receipt. Accepted
-entry PR63/main34915047 completed bitwise and informat/report work. The handoff binds acceptance.
+entry PR64/main716a82a6 completed directed/all-column SORT work. The handoff binds acceptance.
 For principal/maintainer prioritization. Counts describe this checkout and the56
 pinned sibling corpus files, not all SAS or live-SAS equivalence. Updated for
 DS-039 arrays, DS-040 DO OVER and DS-041 nested/computed counted loops after the original
@@ -13,13 +13,13 @@ This document does not authorize additional implementation or publication scope.
 
 ## Inventory reconciled against actual evidence
 
-The golden command registers91 fixture runners,63 translator suites and1
+The golden command registers93 fixture runners,64 translator suites and1
 synthesis runner. These are registration counts, not passing outcomes. The
 source-bound full receipt records the discovered test count. A source-bound full receipt records actual skips and
-results. Accepted run entry PR63/main34915047 contained86 fixtures,62 suites and1370
+results. Accepted run entry PR64/main716a82a6 contained91 fixtures,63 suites and1404
 tests with zero skips,60 faithful synthesis checks and60 naive controls. The
 separate1k workload checks total39:18 ledger and21 text. These counts have
-different units. Neither117 rulebook rules nor155 golden-command runners is a
+different units. Neither118 rulebook rules nor158 golden-command runners is a
 SAS capability denominator.
 
 [The capability manifest](capability-manifest.json) still enumerates108 statements
@@ -367,3 +367,18 @@ The148 capability identities,seven null universes and dispositions stay fixed.
 Inference: richer informats,short-record or invalid-data recovery,PROC-local
 projection,DUPOUT and wider procedure options remain separately screened future
 work. Their source/oracle feasibility is not established by this SORT series.
+
+## PROC SORT input KEEP continuation
+
+Status: DS-075 registration and its bounded contract require the current full
+source-bound receipt. PR64/main716a82a6 accepted the preceding SORT profiles at
+91fixtures,63suites,1404tests,zero skips. Those profiles are not reopened.
+
+[Input KEEP](SORT_INPUT_KEEP.md) adds a separate ascending SORT projection family.
+It preserves source descriptor order and validates excluded input columns before
+selection. An independent original fixture and the whole unchanged official
+SORT4 target retain two reports and fresh destinations. The manifest registers
+six vendor sources, including this candidate; passing whole-source gates establish
+proofs separately from Roku22/56. All117 prior rules and capability-manifest bytes
+remain unchanged, with only DS-075 appended. DROP, directed/ALL projection joins,
+DUPOUT, controlled replacement and a third report remain future scope.
