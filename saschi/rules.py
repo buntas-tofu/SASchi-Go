@@ -141,6 +141,7 @@ def load_rulebook(path: Optional[Path] = None) -> dict[str, Rule]:
 CONSTRUCT_MAP: dict[str, str] = {
     "directed-sort": "DS-073",
     "descriptor-sort-all": "DS-074",
+    "sort-input-keep": "DS-075",
     "bitwise-output": "DS-070",
     "numeric-invalue": "DS-071",
     "formatted-input": "DS-072",
@@ -410,6 +411,10 @@ def character_report_routes(source, statements):
     lexers provide the separate whole-program statement-accounting cross-check.
     Indices keep distinct statements on the same physical line distinct.
     """
+    from .sort_projection import source_steps as projection_steps
+    _, _, projection_routes, projection_selected = projection_steps(source, statements)
+    if projection_selected:
+        return projection_routes
     from .sort_options import source_steps as sort_steps
     _, _, sort_routes, sort_selected = sort_steps(source, statements)
     if sort_selected:

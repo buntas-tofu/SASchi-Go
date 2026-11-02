@@ -129,6 +129,8 @@ VERIFIERS = [
     ("vendor-sort-descending", HERE / "examples" / "verify_vendor_sort_descending.py"),
     ("vendor-sort-all", HERE / "examples" / "verify_vendor_sort_all.py"),
     ("vendor-sort-survivors", HERE / "examples" / "verify_vendor_sort_survivors.py"),
+    ("sort-input-keep", HERE / "examples" / "verify_sort_input_keep.py"),
+    ("vendor-sort-input-keep", HERE / "examples" / "verify_vendor_sort_input_keep.py"),
 ]
 
 # The translator suites, run as unittest modules. They carry the same weight as
@@ -199,6 +201,7 @@ SUITES = [
     ("suite-informat-reports", "saschi.test_informat_reports"),
     ("suite-formatted-program", "saschi.test_formatted_program"),
     ("suite-sort-options", "saschi.test_sort_options"),
+    ("suite-sort-projection", "saschi.test_sort_projection"),
 ]
 
 

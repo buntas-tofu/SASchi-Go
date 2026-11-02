@@ -96,3 +96,7 @@ source still requires other options and procedures. Four DROP occurrences belong
 to the unsupported DS2 priority-queue program. No new complete sibling-program
 proof is claimed. The Fibonacci file's first DATA step still does not prove the
 FCMP recursion later in that file. No corpus source was changed or copied here.
+
+DS-075 separately admits [PROC SORT input KEEP](SORT_INPUT_KEEP.md) under its own
+character-lineage profile and unchanged report caps. It does not extend these
+DATA-step operation shapes or admit general PROC dataset options.

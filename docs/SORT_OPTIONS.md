@@ -92,4 +92,8 @@ python verify_all.py
 NOTSORTED, NOEQUALS, SORTSEQ/linguistic/non-ASCII collation, tagged missings,
 NODUPRECS, DUPOUT, input projection, external engines, new in-place SORT forms,
 additional report invocations, broader informats and missing-data recovery remain
-refused. PROC-local KEEP= and duplicate-output partitioning need separate contracts.
+refused in these profiles. Duplicate-output partitioning needs a later contract.
+
+DS-075 separately admits bounded input KEEP with ascending BY under the
+[input KEEP contract](SORT_INPUT_KEEP.md). The directed/ALL profiles above retain
+their projection refusal; duplicate-output partitioning remains deferred.
