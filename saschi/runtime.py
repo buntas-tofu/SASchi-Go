@@ -289,6 +289,9 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
         raise ValueError('unsupported plan version')
     if plan['tickets'] and not allow_partial:
         raise RuntimeError('saschi: blocked translation. Nothing from this program was executed.')
+    from .sort_options import validate_program as validate_sort_options, run_program as run_sort_options
+    if validate_sort_options(plan, catalog) is not None:
+        return run_sort_options(plan, catalog)
     from .formatted_program import validate_program as validate_formatted, run_program as run_formatted
     if validate_formatted(plan, catalog) is not None:
         return run_formatted(plan, catalog)

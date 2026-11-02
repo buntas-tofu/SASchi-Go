@@ -1,9 +1,9 @@
 # Coverage reconciliation and next gate series
 
 Status: Repository/base-R planning evidence, originally reconciled at main08eaa7b
-on2026-10-27 and updated through DS-072, ST-023, SQL-004 and A0.
+on2026-10-27 and updated through DS-074, ST-023, SQL-004 and A0.
 Current multi-cluster registrations await the source-bound full receipt. Accepted
-entry main9d36 completed the character/report cluster. The handoff binds acceptance.
+entry PR63/main34915047 completed bitwise and informat/report work. The handoff binds acceptance.
 For principal/maintainer prioritization. Counts describe this checkout and the56
 pinned sibling corpus files, not all SAS or live-SAS equivalence. Updated for
 DS-039 arrays, DS-040 DO OVER and DS-041 nested/computed counted loops after the original
@@ -13,13 +13,13 @@ This document does not authorize additional implementation or publication scope.
 
 ## Inventory reconciled against actual evidence
 
-The golden command registers86 fixture runners,62 translator suites and1
+The golden command registers91 fixture runners,63 translator suites and1
 synthesis runner. These are registration counts, not passing outcomes. The
 source-bound full receipt records the discovered test count. A source-bound full receipt records actual skips and
-results. Accepted run entry main9d36 contained80 fixtures,58 suites and1271
+results. Accepted run entry PR63/main34915047 contained86 fixtures,62 suites and1370
 tests with zero skips,60 faithful synthesis checks and60 naive controls. The
 separate1k workload checks total39:18 ledger and21 text. These counts have
-different units. Neither115 rulebook rules nor149 golden-command runners is a
+different units. Neither117 rulebook rules nor155 golden-command runners is a
 SAS capability denominator.
 
 [The capability manifest](capability-manifest.json) still enumerates108 statements
@@ -173,14 +173,15 @@ earlier numeric-list PUT remains bounded integer output and earlier division req
 
 ## Separate vendor benchmark
 
-The registered vendor benchmarks contain2 pinned Apache-2.0 programs, identified
+The vendor manifest registers5 pinned Apache-2.0 programs, identified
 by immutable commit,source and LICENSE bytes in
 [the manifest](vendor-benchmark-manifest.json). Bodies remain in an explicitly
-prepared external cache. The unchanged sorted-copy and INVALUE examples have
+prepared external cache. The2 prior accepted sorted-copy and INVALUE examples have
 separate independent whole-source hand/base-R gates. The INVALUE program checks
 8rows,9input attempts,36events,local labels and persistent TITLE across two
 logical reports. Acceptance requires the current source-bound full gates;
-cache preparation alone is not execution evidence. These2 vendor programs remain
+cache preparation alone is not execution evidence. Three further registered SORT
+examples have separate whole-source gates described in SORT_OPTIONS.md. All vendor programs remain
 separate from the22 Roku proofs registered for conditional current acceptance
 among56 pinned files. The bitwise Roku
 proof requires its explicit output contract. The denominators are not combined.
@@ -215,11 +216,11 @@ evidence-cost ranking, not a schedule or an estimate of business demand.
 | D2b, implemented in DS-062/063 | Numeric SUM OF/PUT ranges and one caller-rooted CSV artifact | Separate exchange_data profile, unchanged decoder/exact helpers and explicit ASCII/LF/open policy | Complete unchanged csv_data_manipulation.sas proof plus original25-statement state/export witness; exact CLI artifact comparison and atomic staging | High; arbitrary paths, DSD, formats and physical SAS defaults remain separate |
 | D3b, implemented in DS-064/065 | Local scalar labels/GOTO/STOP and bounded one-caller LINK/RETURN | Separate flow_data profiles, numeric INPUT, exact integer MOD and existing loop limits | Both unchanged flow_control_structures.sas steps pass complete hand/R/runtime/emitted/CLI proof with 58 logical records and 698 events; original 31-statement state fixture and cross-profile export controls | High; broader calls, structured-body jumps, Boolean/array/numeric domains and no-INPUT unlinked RETURN remain separate |
 | NEXT-CHAR-REPORT, accepted at main9d36 in DS-069/ST-019/020 | Character/numeric unquoted DSD,DATALINES4 and two default mixed reports with literal TITLE set/reset | Separate character-records-v1,mixed-print-v1 and logical-title-v1; existing ascending SORT | Original hand/R/state/report gates and a separate pinned vendor sorted-copy benchmark; no additional Roku proof | High; quoted CSV,custom informats,broader reports and physical SAS/ODS layout remain separate |
-| NEXT-BITWISE, DS-070 pending current full acceptance | Explicit finite uint32 output profile and exact log comparison | Caller-selected bitwise-put-all-67-v1;old64-byte default unchanged | Complete unchanged469-byte bitwise target with hand/R/runtime/emitted/actualCLI evidence | Medium;other output widths/domains remain separate |
-| NEXT-INFORMAT-REPORT, DS-071/072 and ST-021..023 pending current full acceptance | Job-local literal INVALUE,absolute pointer INPUT,local labelled PRINT and default MEANS | Distinct formatted family/empty initial state;exact logical reports and local TITLE | Separate components and complete pinned1802-byte official vendor example;no DATA-step LABEL promotion | High;general informats,missing recovery,broader procedures and physical layout remain separate |
+| NEXT-BITWISE, DS-070 accepted at PR63/main34915047 | Explicit finite uint32 output profile and exact log comparison | Caller-selected bitwise-put-all-67-v1;old64-byte default unchanged | Complete unchanged469-byte bitwise target with hand/R/runtime/emitted/actualCLI evidence | Medium;other output widths/domains remain separate |
+| NEXT-INFORMAT-REPORT, DS-071/072 and ST-021..023 accepted at PR63/main34915047 | Job-local literal INVALUE,absolute pointer INPUT,local labelled PRINT and default MEANS | Distinct formatted family/empty initial state;exact logical reports and local TITLE | Separate components and complete pinned1802-byte official vendor example;no DATA-step LABEL promotion | High;general informats,missing recovery,broader procedures and physical layout remain separate |
 
-The current run implements NEXT-BITWISE and NEXT-INFORMAT-REPORT under the
-separate contracts listed above. Their current full receipt binds acceptance;
+PR63 accepted NEXT-BITWISE and NEXT-INFORMAT-REPORT under the
+separate contracts listed above. Its sealed full receipt binds that acceptance;
 the old64-column default and earlier character-record profile remain strict.
 Analyst inference only: later work could expand informat forms, missing-data
 recovery or procedure options after separate source research and new oracles.
@@ -347,3 +348,22 @@ retain their refusals. This adds4 fixture registrations and3 suites including
 external-source preparation/benchmark checks; passing outcomes remain the job of
 the current source-bound full receipt. No native SAS/ODS layout,general CSV or
 custom informat contract is inferred.
+
+## Directed SORT and descriptor-order continuation
+
+Status: DS-073/074 registrations and bounded contracts require the current
+source-bound full receipt. PR63/main34915047 accepted the preceding bitwise and
+informat/report work at86 fixture gates,62 suites,1370tests,zero skips. Earlier
+pending wording above is historical; those completed clusters are not reopened.
+
+[The SORT profile](SORT_OPTIONS.md) separates directed stable ordering from sole
+BY _ALL_ with existing NODUPKEY. Original hand/base-R fixtures and three newly
+pinned whole vendor targets extend procedure evidence while preserving old
+source/portable contracts. The manifest now registers5 vendor sources; only
+passing whole-source gates establish proofs. No new Roku proof is projected.
+Rule identities grow from115 to117 without modifying the prior115 objects.
+The148 capability identities,seven null universes and dispositions stay fixed.
+
+Inference: richer informats,short-record or invalid-data recovery,PROC-local
+projection,DUPOUT and wider procedure options remain separately screened future
+work. Their source/oracle feasibility is not established by this SORT series.

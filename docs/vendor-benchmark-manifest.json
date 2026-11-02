@@ -37,6 +37,60 @@
         "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
         "git_blob_sha1": "261eeb9e9f8b2b4b0d119366dda99c6fd7d35c64"
       }
+    },
+    {
+      "id": "sas-code-examples-sort-descending-v1",
+      "repository": "sassoftware/sas-code-examples",
+      "commit": "579e057f90cd699f744fd6a1c8acaf9243f7ff67",
+      "license_identifier": "Apache-2.0",
+      "source": {
+        "path": "By Syntax/SORT Procedure/2_Sort by groups and in descending order.sas",
+        "bytes": 1854,
+        "sha256": "70e8a5b6abd89e3427bf85d5d7d7eea920040b97b9a13fc97af97a9ab7025402",
+        "git_blob_sha1": "c3d7fccddcd7bb8c5483b51f2af6f1f485a82f35"
+      },
+      "license": {
+        "path": "LICENSE",
+        "bytes": 11357,
+        "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+        "git_blob_sha1": "261eeb9e9f8b2b4b0d119366dda99c6fd7d35c64"
+      }
+    },
+    {
+      "id": "sas-code-examples-sort-all-v1",
+      "repository": "sassoftware/sas-code-examples",
+      "commit": "579e057f90cd699f744fd6a1c8acaf9243f7ff67",
+      "license_identifier": "Apache-2.0",
+      "source": {
+        "path": "By Syntax/SORT Procedure/3_Remove entirely duplicated rows.sas",
+        "bytes": 1856,
+        "sha256": "23c6e50eee0b744377818d49c05e2e36669c99e5a31dd601c613c84f212edbc8",
+        "git_blob_sha1": "61d09f9080bd6059019d7849307cfb33d76b3fde"
+      },
+      "license": {
+        "path": "LICENSE",
+        "bytes": 11357,
+        "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+        "git_blob_sha1": "261eeb9e9f8b2b4b0d119366dda99c6fd7d35c64"
+      }
+    },
+    {
+      "id": "sas-code-examples-sort-survivors-v1",
+      "repository": "sassoftware/sas-code-examples",
+      "commit": "579e057f90cd699f744fd6a1c8acaf9243f7ff67",
+      "license_identifier": "Apache-2.0",
+      "source": {
+        "path": "By Syntax/SORT Procedure/6_Remove duplicated rows by columns.sas",
+        "bytes": 1886,
+        "sha256": "d62f2d0563f8fd0f21a1a799f5a60cec930a485a86ab6862398e431abc34f361",
+        "git_blob_sha1": "20bc2433a77e396b03479c2a03447f41148a60fb"
+      },
+      "license": {
+        "path": "LICENSE",
+        "bytes": 11357,
+        "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+        "git_blob_sha1": "261eeb9e9f8b2b4b0d119366dda99c6fd7d35c64"
+      }
     }
   ]
 }
