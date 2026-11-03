@@ -1,10 +1,10 @@
 # Coverage reconciliation and next gate series
 
 Status: Repository/base-R planning evidence, originally reconciled at main08eaa7b
-on2026-10-27 and updated through DS-077, ST-024, SQL-004 and A0.
-Accepted entry PR65/mainac9d800 completed input KEEP after directed/all-column
-SORT. New duplicate/replacement/report registrations require the current full
-source-bound receipt. The sealed handoff binds acceptance.
+on2026-10-27 and updated through DS-079, ST-024, SQL-004 and A0.
+Accepted entry PR66/main0abf161 completed duplicate partition,owned replacement
+and three-report SORT. New input DROP/directed projection registrations require
+the current full source-bound receipt. The sealed handoff binds acceptance.
 For principal/maintainer prioritization. Counts describe this checkout and the56
 pinned sibling corpus files, not all SAS or live-SAS equivalence. Updated for
 DS-039 arrays, DS-040 DO OVER and DS-041 nested/computed counted loops after the original
@@ -14,13 +14,13 @@ This document does not authorize additional implementation or publication scope.
 
 ## Inventory reconciled against actual evidence
 
-The golden command registers97 fixture runners,65 translator suites and1
+The golden command registers99 fixture runners,66 translator suites and1
 synthesis runner. These are registration counts, not passing outcomes. The
 source-bound full receipt records the discovered test count. A source-bound full receipt records actual skips and
-results. Accepted run entry PR65/mainac9d800 contained93 fixtures,64 suites and1446
+results. Accepted run entry PR66/main0abf161 contained97 fixtures,65 suites and1491
 tests with zero skips,60 faithful synthesis checks and60 naive controls. The
 separate1k workload checks total39:18 ledger and21 text. These counts have
-different units. Neither121 rulebook rules nor163 golden-command runners is a
+different units. Neither123 rulebook rules nor166 golden-command runners is a
 SAS capability denominator.
 
 [The capability manifest](capability-manifest.json) still enumerates108 statements
@@ -408,3 +408,14 @@ that ordering is an explicit repository policy,not a native SAS guarantee. Fresh
 DUPOUT names,owned survivor replacement,earlier source/report snapshots and late
 atomic failures have distinct controls. Input projection,ALL joins,broader
 procedure options and recovery behavior remain separate future contracts.
+
+## Input DROP and directed projection composition
+
+DS-078/079 use a separate composed_sort profile with an original integrated
+hand/base-R witness. They reuse validated input selection and stable per-key
+sorting while preserving older shapes. Two component gates and one source suite
+are appended; passing outcomes require the current full receipt. Seven existing
+vendor proofs and22complete Roku proofs among56pins remain separate and unchanged.
+Projected DUPOUT,replacement,ALL,output projection,numeric-only selected schemas
+and broader report bounds remain deferred. This original witness adds no vendor
+or Roku proof and makes no live SAS or physical output claim.

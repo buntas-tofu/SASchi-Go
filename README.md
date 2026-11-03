@@ -132,6 +132,13 @@ expectations precede runtime comparison. Removed-stream order is an explicit
 repository mapping; older profiles retain their caps. Three component gates and
 a separate vendor gate require the current source-bound full receipt.
 
+[SORT input DROP and directed projection](docs/SORT_COMPOSITION.md) combines
+literal input selection with per-key direction and stable optional NODUPKEY.
+It reuses the existing sorting engine after separate admission. An original
+complete hand/base-R witness and two component gates cover descriptor order,
+ties, snapshots and atomic failure. Existing vendor proofs remain separate;
+projected DUPOUT and replacement remain deferred.
+
 [Explicit bitwise output and informat reports](docs/INFORMAT_REPORTS.md) adds
 `--output-contract bitwise-put-all-67-v1` while preserving the old default64-byte
 refusal. Its unchanged Roku target requires that explicit selection. A separate
@@ -174,7 +181,7 @@ fixed expected output and base-R evidence. Special missings retain their tags.
   sibling plus a fixture verifier (`verify_*.py`). Run any verifier directly,
   or all of them through [verify_all.py](verify_all.py).
 - [docs/sasconversionrulebook.json](docs/sasconversionrulebook.json) : the machine-consumable translation
-  rulebook. 121 rules with equivalence classes (EXACT,
+  rulebook. 123 rules with equivalence classes (EXACT,
   EQUIVALENT-WITH-SETTINGS, APPROXIMATE, NO-DIRECT-EQUIVALENT), required
   settings, forbidden patterns, and validation tests.
 - [docs/capability-manifest.json](docs/capability-manifest.json) : the coverage manifest. Enumerated entries of

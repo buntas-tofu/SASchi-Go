@@ -27,7 +27,7 @@ class LoaderTests(unittest.TestCase):
         self.rules = load_rulebook(REPO_ROOT / "docs" / "sasconversionrulebook.json")
 
     def test_registered_rule_count(self):
-        self.assertEqual(len(self.rules), 121)
+        self.assertEqual(len(self.rules), 123)
         self.assertIn(f"rulebook. {len(self.rules)} rules", (REPO_ROOT / "README.md").read_text())
         self.assertIn('verify_multiply.py',self.rules['DS-045'].validation_test)
         self.assertIn('verify_numeric_discovery.py',self.rules['DS-046'].validation_test)
@@ -55,13 +55,16 @@ class LoaderTests(unittest.TestCase):
         for rid, verifier in (('DS-054','verify_pipeline_input.py'),('DS-055','verify_pipeline_arrays.py'),('DS-056','verify_pipeline_loops.py'),('DS-057','verify_numeric_pipeline.py')):
             self.assertIn(verifier, self.rules[rid].validation_test)
 
+        self.assertIn('verify_sort_input_drop.py', self.rules['DS-078'].validation_test)
+        self.assertIn('verify_sort_directed_projection.py', self.rules['DS-079'].validation_test)
+
     def test_rule_ids_unique(self):
         ids = list(self.rules)
         self.assertEqual(len(ids), len(set(ids)))
 
     def test_family_counts(self):
         counts = family_counts(self.rules)
-        self.assertEqual(counts["DS"], 77)
+        self.assertEqual(counts["DS"], 79)
         self.assertEqual(counts["SQL"], 4)
         self.assertEqual(counts["ST"], 24)
         self.assertEqual(counts["SV"], 6)

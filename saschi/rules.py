@@ -142,6 +142,8 @@ CONSTRUCT_MAP: dict[str, str] = {
     "directed-sort": "DS-073",
     "descriptor-sort-all": "DS-074",
     "sort-input-keep": "DS-075",
+    "sort-input-drop": "DS-078",
+    "sort-directed-projection": "DS-079",
     "bitwise-output": "DS-070",
     "numeric-invalue": "DS-071",
     "formatted-input": "DS-072",
@@ -411,6 +413,10 @@ def character_report_routes(source, statements):
     lexers provide the separate whole-program statement-accounting cross-check.
     Indices keep distinct statements on the same physical line distinct.
     """
+    from .sort_composition import source_steps as composition_steps
+    _, _, composition_routes, composition_selected = composition_steps(source, statements)
+    if composition_selected:
+        return composition_routes
     from .sort_duplicates import source_steps as duplicate_steps
     _, _, duplicate_routes, duplicate_selected = duplicate_steps(source, statements)
     if duplicate_selected:

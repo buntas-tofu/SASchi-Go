@@ -184,10 +184,19 @@ class SortProjectionTests(unittest.TestCase):
         self.blocked(source('', keep='k id'))
 
     def test_unadmitted_projection_and_sort_combinations_refuse(self):
+        from .parser import split_statements
+        from .formatted_program import _blocks
         for text in [source().replace('(keep=label k id)', '(drop=discarded)'),
-                     source().replace('(keep=label k id)', '(keep=label k id drop=discarded)'),
+                     source(by='descending k')]:
+            parsed = compile_plan(text)
+            self.assertFalse(parsed.blocked, parsed.tickets)
+            self.assertEqual(parsed.steps[1].kind, 'composed_sort')
+            block = list(_blocks(split_statements(text)))[1][2]
+            with self.assertRaises(ValueError):
+                projection.parse_sort(block)
+        for text in [source().replace('(keep=label k id)', '(keep=label k id drop=discarded)'),
                      source().replace('out=ordered', 'out=ordered(keep=label)'),
-                     source(by='descending k'), source(by='_all_', options=' nodupkey'),
+                     source(by='_all_', options=' nodupkey'),
                      source(options=' dupout=removed'), source(options=' noduprecs'),
                      source(options=' sortseq=linguistic'), source(options=' noequalS')]:
             with self.subTest(text=text):

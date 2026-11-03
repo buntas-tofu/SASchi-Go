@@ -321,18 +321,40 @@ def run():
         result, trace = execute(text); exact(result, witness['result']); exact(trace, witness['trace'])
     from saschi.plan import compile_plan
     from saschi.runtime import run_plan
+    boundary_admissions = 0
     for label, text in qualified['refused']:
         plan = compile_plan(text)
-        if not plan.blocked:
+        if label in ('descending', 'drop-option'):
+            from saschi.parser import split_statements
+            from saschi.formatted_program import _blocks
+            from saschi.sort_projection import parse_sort
+            block = list(_blocks(split_statements(text)))[1][2]
+            try: parse_sort(block)
+            except ValueError: pass
+            else: raise AssertionError('old KEEP profile broadened: ' + label)
+            assert not plan.blocked and [step.kind for step in plan.steps] == ['character_data', 'composed_sort']
+            args = plan.steps[1].operations[0].args
+            assert args['profile'] == 'sort-projection-composition-v1'
+            names = ['z', 'n'] if label == 'descending' else ['z', 'n', 'serial']
+            assert args['selection'] == ({'mode': 'keep', 'names': ['z', 'n']} if label == 'descending'
+                                         else {'mode': 'drop', 'names': ['q']})
+            assert args['keys'] == ([{'name': 'n', 'descending': True}] if label == 'descending'
+                                   else [{'name': 'z', 'descending': False}, {'name': 'n', 'descending': False}])
+            exact(run_plan(plan.to_dict()), expected_case([], names, [], False))
+            boundary_admissions += 1
+        elif not plan.blocked:
             try: run_plan(plan.to_dict())
             except (ValueError, TypeError, KeyError, RecursionError): pass
             else: raise AssertionError(label)
+    assert boundary_admissions == 2
     truth = qualified['truth']; cli_check(qualified['original'], truth)
     for incorrect in wrong_cases(truth): cli_check(qualified['original'], incorrect, True)
     portable = portable_refusals(); atomic = atomic_check(qualified['original'])
     summary = {'original_language_statements': 18, 'original_rows': 8, 'original_input_attempts': 9, 'original_trace_events': len(qualified['trace']),
                'generated_programs': len(qualified['generated']), 'positive_boundaries': len(qualified['boundaries']),
-               'shared_refusals': len(qualified['refused']), 'portable_refusals': portable,
+               'old_profile_refusals': len(qualified['refused']),
+               'whole_compiler_refusals': len(qualified['refused']) - boundary_admissions,
+               'new_profile_boundary_admissions': boundary_admissions, 'portable_refusals': portable,
                'actual_wrong_cli_comparators': len(wrong_cases(truth)), 'actual_late_runtime_cli_faults': atomic}
     print('sort-input-keep: ' + json.dumps(summary, sort_keys=True)); return summary
 
