@@ -1393,3 +1393,13 @@ def compile_plan(source: str, *, output_contract=None) -> Plan:
         return _compile_before_sort_duplicates(source, output_contract=output_contract)
     from .sort_duplicates import compile_program
     return compile_program(source, _compile_before_sort_duplicates)
+
+
+_compile_before_sort_composition = compile_plan
+
+
+def compile_plan(source, *, output_contract=None):
+    if output_contract is not None:
+        return _compile_before_sort_composition(source, output_contract=output_contract)
+    from .sort_composition import compile_program
+    return compile_program(source, _compile_before_sort_composition)

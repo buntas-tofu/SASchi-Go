@@ -250,9 +250,9 @@ def record_pass(source: str, plan, *, file: str = "<source>",
             procedure_context = None
         statement_rows.append(
             (st.line, st.text, construct, rule_id, bool(st.terminated)))
-        if opaque or (construct == 'sort-input-keep'
+        if opaque or (construct in ('sort-input-keep', 'sort-input-drop', 'sort-directed-projection')
                       and re.match(r'^proc\s+sort\b', st.text, re.I | re.ASCII)):
-            # A source-validated KEEP header has literal dataset-option syntax,
+            # A source-validated projection header has literal option syntax,
             # not a function call at the input table's opening parenthesis.
             continue
         masked = _mask_strings(st.text)

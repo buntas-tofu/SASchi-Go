@@ -3579,6 +3579,80 @@
       "sources": [
         "https://documentation.sas.com/api/docsets/proc/9.4/content/proc.pdf?locale=en"
       ]
+    },
+    {
+      "rule_id": "DS-078",
+      "sas_pattern": "Bounded PROC SORT input DROP with ascending BY and optional NODUPKEY",
+      "scope": "procedure",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "saschi.sort_composition.run_program with separate exact source and portable admission."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent complete-source hand/base-R projection and pairwise stable insertion witness."
+      },
+      "required_settings": [
+        "Ascending input DROP is admitted by the new composition profile; ordinary ascending KEEP continues to use unchanged DS-075.",
+        "Exact version2 composed_sort/sort-projection-composition-v1 with one same-kind header operation, empty legacy defaults and exact profile,selection,keys,nodupkey,source_lines arguments. One literal input KEEP or DROP list of1..32 unique ordinary names,1..8 unique explicit name/Boolean direction keys and explicit fresh OUT; require prior genuine character DATA and an empty initial catalog.",
+        "Validate every complete original table,descriptor and cell before input selection,including excluded,unused and empty paths. Preserve original descriptor order and storage cells,retain a character descriptor and require all BY names to survive. These eager validation and descriptor-order rules are repository policy,not exact native diagnostic/schema claims.",
+        "Reuse exact numeric INPUT including admitted fractions,ordinary missing,ASCII/padded-character comparison and stable per-key sorting. Optional NODUPKEY retains the first input-row identity in each BY group,including equal and unequal payload ties. Preflight propagates unsorted values without sorting/deduplicating; actual SORT executes once and preserves earlier source/report snapshots.",
+        "Retain64Steps,1000rows/table,32columns,character widths1..64,2mixed-integer PRINT reports and32local TITLE statements. Join only character DATA,fresh plain/directed SORT,older ascending input KEEP,TITLE and default PRINT. No projected DUPOUT,replacement,ALL,output selection,numeric-only selected schema,new report caps or dependencies.",
+        "Independent original complete hand/base-R expectations and full59-event trace freeze before runtime implementation. Separate component gates exercise runtime,portable/emitted programs,actualCLI,wrong comparisons and late-failure atomic publication. Current full release verification is required; no new vendor target or live SAS/physical output evidence."
+      ],
+      "forbidden_patterns": [
+        "Broaden an earlier profile or reorder its serialized fields",
+        "Hide invalid discarded values or reorder selected descriptors",
+        "Reverse tied rows or select the last BY-group survivor",
+        "Treat original repository evidence as a new vendor or native SAS proof"
+      ],
+      "silent_difference_checks": [
+        "Input timing,descriptor order,stable row identity,per-key direction,missing/padding,report snapshots,whole-source trace and atomic publication."
+      ],
+      "validation_test": "examples/verify_sort_input_drop.py",
+      "confidence": "Bounded repository/base-R evidence conditional on current source-bound full verification; no live SAS or physical output.",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/ledsoptsref/69751/HTML/default/p0vw9lyyxk1cxkn0zzfemrsr3t9a.htm",
+        "https://documentation.sas.com/api/docsets/proc/9.4/content/proc.pdf?locale=en"
+      ]
+    },
+    {
+      "rule_id": "DS-079",
+      "sas_pattern": "Bounded PROC SORT input KEEP or DROP with directed BY and optional NODUPKEY",
+      "scope": "procedure",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "saschi.sort_composition.run_program with separate exact source and portable admission."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent complete-source hand/base-R projection and pairwise stable insertion witness."
+      },
+      "required_settings": [
+        "At least one DESCENDING key composes input KEEP or DROP. Direction applies per comparison key without reversing tied rows or the whole sorted stream.",
+        "Exact version2 composed_sort/sort-projection-composition-v1 with one same-kind header operation, empty legacy defaults and exact profile,selection,keys,nodupkey,source_lines arguments. One literal input KEEP or DROP list of1..32 unique ordinary names,1..8 unique explicit name/Boolean direction keys and explicit fresh OUT; require prior genuine character DATA and an empty initial catalog.",
+        "Validate every complete original table,descriptor and cell before input selection,including excluded,unused and empty paths. Preserve original descriptor order and storage cells,retain a character descriptor and require all BY names to survive. These eager validation and descriptor-order rules are repository policy,not exact native diagnostic/schema claims.",
+        "Reuse exact numeric INPUT including admitted fractions,ordinary missing,ASCII/padded-character comparison and stable per-key sorting. Optional NODUPKEY retains the first input-row identity in each BY group,including equal and unequal payload ties. Preflight propagates unsorted values without sorting/deduplicating; actual SORT executes once and preserves earlier source/report snapshots.",
+        "Retain64Steps,1000rows/table,32columns,character widths1..64,2mixed-integer PRINT reports and32local TITLE statements. Join only character DATA,fresh plain/directed SORT,older ascending input KEEP,TITLE and default PRINT. No projected DUPOUT,replacement,ALL,output selection,numeric-only selected schema,new report caps or dependencies.",
+        "Independent original complete hand/base-R expectations and full59-event trace freeze before runtime implementation. Separate component gates exercise runtime,portable/emitted programs,actualCLI,wrong comparisons and late-failure atomic publication. Current full release verification is required; no new vendor target or live SAS/physical output evidence."
+      ],
+      "forbidden_patterns": [
+        "Broaden an earlier profile or reorder its serialized fields",
+        "Hide invalid discarded values or reorder selected descriptors",
+        "Reverse tied rows or select the last BY-group survivor",
+        "Treat original repository evidence as a new vendor or native SAS proof"
+      ],
+      "silent_difference_checks": [
+        "Input timing,descriptor order,stable row identity,per-key direction,missing/padding,report snapshots,whole-source trace and atomic publication."
+      ],
+      "validation_test": "examples/verify_sort_directed_projection.py",
+      "confidence": "Bounded repository/base-R evidence conditional on current source-bound full verification; no live SAS or physical output.",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/ledsoptsref/69751/HTML/default/p0vw9lyyxk1cxkn0zzfemrsr3t9a.htm",
+        "https://documentation.sas.com/api/docsets/proc/9.4/content/proc.pdf?locale=en"
+      ]
     }
   ],
   "runtime_capabilities": {
@@ -4369,6 +4443,38 @@
       "r_witness": "examples/sort_duplicate_reports.R",
       "boundary_tests": "saschi.test_sort_duplicates",
       "evidence": "Separate pre-runtime original and whole unchanged official hand/base-R qualification,followed by runtime/emitted/actualCLI controls. Requires full release acceptance."
+    },
+    "sort_input_drop": {
+      "rule_id": "DS-078",
+      "target": "saschi.sort_composition.run_program",
+      "scope": [
+        "Ascending input DROP is admitted by the new composition profile; ordinary ascending KEEP continues to use unchanged DS-075.",
+        "Exact version2 composed_sort/sort-projection-composition-v1 with one same-kind header operation, empty legacy defaults and exact profile,selection,keys,nodupkey,source_lines arguments. One literal input KEEP or DROP list of1..32 unique ordinary names,1..8 unique explicit name/Boolean direction keys and explicit fresh OUT; require prior genuine character DATA and an empty initial catalog.",
+        "Validate every complete original table,descriptor and cell before input selection,including excluded,unused and empty paths. Preserve original descriptor order and storage cells,retain a character descriptor and require all BY names to survive. These eager validation and descriptor-order rules are repository policy,not exact native diagnostic/schema claims.",
+        "Reuse exact numeric INPUT including admitted fractions,ordinary missing,ASCII/padded-character comparison and stable per-key sorting. Optional NODUPKEY retains the first input-row identity in each BY group,including equal and unequal payload ties. Preflight propagates unsorted values without sorting/deduplicating; actual SORT executes once and preserves earlier source/report snapshots.",
+        "Retain64Steps,1000rows/table,32columns,character widths1..64,2mixed-integer PRINT reports and32local TITLE statements. Join only character DATA,fresh plain/directed SORT,older ascending input KEEP,TITLE and default PRINT. No projected DUPOUT,replacement,ALL,output selection,numeric-only selected schema,new report caps or dependencies.",
+        "Independent original complete hand/base-R expectations and full59-event trace freeze before runtime implementation. Separate component gates exercise runtime,portable/emitted programs,actualCLI,wrong comparisons and late-failure atomic publication. Current full release verification is required; no new vendor target or live SAS/physical output evidence."
+      ],
+      "validation_test": "examples/verify_sort_input_drop.py",
+      "r_witness": "examples/sort_input_drop.R",
+      "boundary_tests": "saschi.test_sort_composition",
+      "evidence": "Independent original hand/base-R qualification before implementation,then source/runtime/emitted/actualCLI controls. Requires current full release acceptance;seven existing vendor proofs stay separate."
+    },
+    "sort_directed_projection": {
+      "rule_id": "DS-079",
+      "target": "saschi.sort_composition.run_program",
+      "scope": [
+        "At least one DESCENDING key composes input KEEP or DROP. Direction applies per comparison key without reversing tied rows or the whole sorted stream.",
+        "Exact version2 composed_sort/sort-projection-composition-v1 with one same-kind header operation, empty legacy defaults and exact profile,selection,keys,nodupkey,source_lines arguments. One literal input KEEP or DROP list of1..32 unique ordinary names,1..8 unique explicit name/Boolean direction keys and explicit fresh OUT; require prior genuine character DATA and an empty initial catalog.",
+        "Validate every complete original table,descriptor and cell before input selection,including excluded,unused and empty paths. Preserve original descriptor order and storage cells,retain a character descriptor and require all BY names to survive. These eager validation and descriptor-order rules are repository policy,not exact native diagnostic/schema claims.",
+        "Reuse exact numeric INPUT including admitted fractions,ordinary missing,ASCII/padded-character comparison and stable per-key sorting. Optional NODUPKEY retains the first input-row identity in each BY group,including equal and unequal payload ties. Preflight propagates unsorted values without sorting/deduplicating; actual SORT executes once and preserves earlier source/report snapshots.",
+        "Retain64Steps,1000rows/table,32columns,character widths1..64,2mixed-integer PRINT reports and32local TITLE statements. Join only character DATA,fresh plain/directed SORT,older ascending input KEEP,TITLE and default PRINT. No projected DUPOUT,replacement,ALL,output selection,numeric-only selected schema,new report caps or dependencies.",
+        "Independent original complete hand/base-R expectations and full59-event trace freeze before runtime implementation. Separate component gates exercise runtime,portable/emitted programs,actualCLI,wrong comparisons and late-failure atomic publication. Current full release verification is required; no new vendor target or live SAS/physical output evidence."
+      ],
+      "validation_test": "examples/verify_sort_directed_projection.py",
+      "r_witness": "examples/sort_directed_projection.R",
+      "boundary_tests": "saschi.test_sort_composition",
+      "evidence": "Independent original hand/base-R qualification before implementation,then source/runtime/emitted/actualCLI controls. Requires current full release acceptance;seven existing vendor proofs stay separate."
     }
   }
 }
