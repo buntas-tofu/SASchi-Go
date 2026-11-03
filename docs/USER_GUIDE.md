@@ -391,3 +391,13 @@ execution through full-source accounting, independent base R, exact logical logs
 emitted execution and actual CLI jobs. A comment-only source is accepted as an
 explicit no-op, with no datasets or log records. These are repository/base-R
 whole-program proofs, not live-SAS validation or additional language features.
+
+
+## Duplicate partition and report snapshots
+
+[The separate DUPOUT profile](SORT_DUPLICATES.md) partitions stable NODUPKEY
+survivors and removed observations. Omitted OUT replaces only an earlier SORT
+survivor owned by the same job. A distinct logical-report contract permits three
+reports and preserves earlier snapshots. These repository/base-R contracts require
+current full verification; exact native duplicate-stream ordering and physical
+SAS/ODS layout are not established. Existing profile limits remain intact.

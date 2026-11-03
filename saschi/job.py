@@ -24,7 +24,8 @@ from .runtime import run_plan
 from .numeric_exchange import (read_expected_exports, exports_equal, export_manifest,
                                EXPORT_CONTRACT, COMPARISON_CONTRACT)
 from .report_artifacts import (read_expected_reports, reports_equal, report_manifest,
-                               REPORT_CONTRACT, MIXED_REPORT_CONTRACT, INFORMAT_REPORT_CONTRACT, REPORT_COMPARISON_CONTRACT)
+                               REPORT_CONTRACT, MIXED_REPORT_CONTRACT, INFORMAT_REPORT_CONTRACT,
+                               DUPLICATE_REPORT_CONTRACT, REPORT_COMPARISON_CONTRACT)
 
 
 @dataclass
@@ -106,9 +107,12 @@ def build_job(source: str, inputs: "Path | None" = None, expect: "Path | None" =
         if export_program:
             receipt['export_contract'] = EXPORT_CONTRACT
     mixed_report_program = any(step.kind == 'mixed_print' for step in plan.steps)
+    duplicate_report_program = any(step.kind == 'duplicate_print' for step in plan.steps)
     informat_report_program = any(step.kind in ('labelled_print', 'default_means') for step in plan.steps)
-    report_program = mixed_report_program or informat_report_program or any(step.kind == 'proc_print' for step in plan.steps)
-    report_contract = INFORMAT_REPORT_CONTRACT if informat_report_program else MIXED_REPORT_CONTRACT if mixed_report_program else REPORT_CONTRACT
+    report_program = duplicate_report_program or mixed_report_program or informat_report_program or any(step.kind == 'proc_print' for step in plan.steps)
+    report_contract = (DUPLICATE_REPORT_CONTRACT if duplicate_report_program else
+                       INFORMAT_REPORT_CONTRACT if informat_report_program else
+                       MIXED_REPORT_CONTRACT if mixed_report_program else REPORT_CONTRACT)
     if report_program or expect_reports is not None:
         receipt['report_comparison'] = 'not requested'
         receipt['report_comparison_contract'] = REPORT_COMPARISON_CONTRACT

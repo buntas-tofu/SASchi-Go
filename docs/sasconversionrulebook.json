@@ -3477,6 +3477,108 @@
       "sources": [
         "https://support.sas.com/documentation/cdl/en/ledsoptsref/69751/HTML/default/p0vw9lyyxk1cxkn0zzfemrsr3t9a.htm"
       ]
+    },
+    {
+      "rule_id": "DS-076",
+      "sas_pattern": "PROC SORT NODUPKEY with fresh survivor OUT and DUPOUT partition",
+      "scope": "procedure",
+      "equivalence_class": "APPROXIMATE",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "saschi.sort_duplicates.run_program with exact separate source and portable admission."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent full-source hand/base-R partition,state and logical report oracle."
+      },
+      "required_settings": [
+        "Exact version2 duplicate_sort/sort-dupout-v1; one same-kind operation with profile,by,dupout,replace,source_lines and empty legacy defaults. Literal DATA,fresh explicit OUT,fresh distinct DUPOUT,NODUPKEY and1..8 unique ascending BY names. Genuine preceding character DATA,empty initial catalog and complete source required.",
+        "Partition the stable sorted input-row identity stream into first BY-group survivors and all removed observations,with complete disjoint identity coverage and multiplicity including equal payloads. Both outputs preserve ordered descriptors and storage values. Removed-stream ordering is explicit repository policy,not a native SAS ordering guarantee.",
+        "Validate schemas and every source cell before sorting,including empty/unused paths. Retain64Steps,1000rows/table,32columns,ASCII character widths1..64 and existing exact numeric converter including fractions. No projection,ALL,directed DUPOUT,NOEQUALS,NODUPRECS,external engines or dependencies.",
+        "Independent whole original and unchanged official hand/R expectations freeze before runtime. Preflight does not execute SORT. Runtime executes each SORT once; failed whole jobs publish no accepted partial catalog or reports."
+      ],
+      "forbidden_patterns": [
+        "Broaden older portable profiles or report caps",
+        "Overwrite arbitrary existing datasets",
+        "Treat value equality as complete row identity",
+        "Infer native SAS ordering or physical layout from repository witnesses"
+      ],
+      "silent_difference_checks": [
+        "Stable complete survivor/removed identity partition,ordered descriptors,multiplicity,source/report snapshot preservation and whole-job atomic publication."
+      ],
+      "validation_test": "examples/verify_sort_duplicates.py",
+      "confidence": "Bounded repository/base-R evidence conditional on current source-bound full verification; no live SAS or physical output.",
+      "sources": [
+        "https://documentation.sas.com/api/docsets/proc/9.4/content/proc.pdf?locale=en"
+      ]
+    },
+    {
+      "rule_id": "DS-077",
+      "sas_pattern": "Controlled omitted-OUT SORT replacement with DUPOUT",
+      "scope": "procedure",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "saschi.sort_duplicates.run_program with exact separate source and portable admission."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent full-source hand/base-R partition,state and logical report oracle."
+      },
+      "required_settings": [
+        "Use the exact DS-076 operation with replace=true and Step.name equal to its sole input. Omitted OUT only; explicit OUT=input is refused. Source must be a preceding admitted SORT survivor destination in this same empty-catalog program.",
+        "Original producers and earlier DUPOUT side-output names confer no replacement ownership. Preserve original datasets,earlier logical report snapshots,full descriptors,stable survivors and removed identities. DUPOUT must be a fresh distinct name even when rows are empty.",
+        "Only character DATA,plain/directed fresh SORT,TITLE and separately bounded duplicate_print join the family. Preserve all older standalone replacement behavior and portable shapes; no arbitrary catalog overwrite or broader procedure composition.",
+        "Separate independent original/R lineage,state/snapshot and late replacement/CLI faults qualify this bounded repository contract. Native failure/engine behavior and maintenance-wide applicability are not implied."
+      ],
+      "forbidden_patterns": [
+        "Broaden older portable profiles or report caps",
+        "Overwrite arbitrary existing datasets",
+        "Treat value equality as complete row identity",
+        "Infer native SAS ordering or physical layout from repository witnesses"
+      ],
+      "silent_difference_checks": [
+        "Stable complete survivor/removed identity partition,ordered descriptors,multiplicity,source/report snapshot preservation and whole-job atomic publication."
+      ],
+      "validation_test": "examples/verify_sort_replacement.py",
+      "confidence": "Bounded repository/base-R evidence conditional on current source-bound full verification; no live SAS or physical output.",
+      "sources": [
+        "https://documentation.sas.com/api/docsets/proc/9.4/content/proc.pdf?locale=en"
+      ]
+    },
+    {
+      "rule_id": "ST-024",
+      "sas_pattern": "Three bounded logical PRINT reports in the DUPOUT family",
+      "scope": "procedure",
+      "equivalence_class": "APPROXIMATE",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "saschi.sort_duplicates.run_program with exact separate source and portable admission."
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent full-source hand/base-R partition,state and logical report oracle."
+      },
+      "required_settings": [
+        "Exact version2 duplicate_print/sort-dupout-print-v1 with name=input,one input,one same-kind header-line operation and exact profile/source_lines args. Require an admitted duplicate_sort in the whole family; print markers alone cannot broaden old programs.",
+        "At most three ordered print_01.txt through print_03.txt artifacts and32 local TITLE statements. Reuse exact ASCII/LF,default-column,mixed integer logical rendering and existing per-report limits. Old two-report policies remain unchanged.",
+        "Job/CLI report contract ascii-dupout-mixed-integer-v1 selects1..3 expected-report entries and4MiB JSON cap only for this profile. Exact basename-set/UTF8-byte comparison and atomic staging remain. Third-report or comparison failure publishes no accepted partial artifacts.",
+        "Independent original hand/R report bytes,full actual-runtime trace,wrong basename/text/snapshot comparators,real late renderer faults and whole unchanged official source qualify repository behavior only. Physical SAS/ODS and exact native display remain unclaimed."
+      ],
+      "forbidden_patterns": [
+        "Broaden older portable profiles or report caps",
+        "Overwrite arbitrary existing datasets",
+        "Treat value equality as complete row identity",
+        "Infer native SAS ordering or physical layout from repository witnesses"
+      ],
+      "silent_difference_checks": [
+        "Stable complete survivor/removed identity partition,ordered descriptors,multiplicity,source/report snapshot preservation and whole-job atomic publication."
+      ],
+      "validation_test": "examples/verify_sort_duplicate_reports.py",
+      "confidence": "Bounded repository/base-R evidence conditional on current source-bound full verification; no live SAS or physical output.",
+      "sources": [
+        "https://documentation.sas.com/api/docsets/proc/9.4/content/proc.pdf?locale=en"
+      ]
     }
   ],
   "runtime_capabilities": {
@@ -4225,6 +4327,48 @@
       "r_witness": "examples/sort_input_keep.R",
       "boundary_tests": "saschi.test_sort_projection",
       "evidence": "Separate pre-runtime original and unchanged official source hand/base-R qualification plus actual runtime/emitted/CLI gates. Requires current full verification."
+    },
+    "sort_duplicates": {
+      "rule_id": "DS-076",
+      "target": "saschi.sort_duplicates.run_program",
+      "scope": [
+        "Exact version2 duplicate_sort/sort-dupout-v1; one same-kind operation with profile,by,dupout,replace,source_lines and empty legacy defaults. Literal DATA,fresh explicit OUT,fresh distinct DUPOUT,NODUPKEY and1..8 unique ascending BY names. Genuine preceding character DATA,empty initial catalog and complete source required.",
+        "Partition the stable sorted input-row identity stream into first BY-group survivors and all removed observations,with complete disjoint identity coverage and multiplicity including equal payloads. Both outputs preserve ordered descriptors and storage values. Removed-stream ordering is explicit repository policy,not a native SAS ordering guarantee.",
+        "Validate schemas and every source cell before sorting,including empty/unused paths. Retain64Steps,1000rows/table,32columns,ASCII character widths1..64 and existing exact numeric converter including fractions. No projection,ALL,directed DUPOUT,NOEQUALS,NODUPRECS,external engines or dependencies.",
+        "Independent whole original and unchanged official hand/R expectations freeze before runtime. Preflight does not execute SORT. Runtime executes each SORT once; failed whole jobs publish no accepted partial catalog or reports."
+      ],
+      "validation_test": "examples/verify_sort_duplicates.py",
+      "r_witness": "examples/sort_duplicates.R",
+      "boundary_tests": "saschi.test_sort_duplicates",
+      "evidence": "Separate pre-runtime original and whole unchanged official hand/base-R qualification,followed by runtime/emitted/actualCLI controls. Requires full release acceptance."
+    },
+    "sort_replacement": {
+      "rule_id": "DS-077",
+      "target": "saschi.sort_duplicates.run_program",
+      "scope": [
+        "Use the exact DS-076 operation with replace=true and Step.name equal to its sole input. Omitted OUT only; explicit OUT=input is refused. Source must be a preceding admitted SORT survivor destination in this same empty-catalog program.",
+        "Original producers and earlier DUPOUT side-output names confer no replacement ownership. Preserve original datasets,earlier logical report snapshots,full descriptors,stable survivors and removed identities. DUPOUT must be a fresh distinct name even when rows are empty.",
+        "Only character DATA,plain/directed fresh SORT,TITLE and separately bounded duplicate_print join the family. Preserve all older standalone replacement behavior and portable shapes; no arbitrary catalog overwrite or broader procedure composition.",
+        "Separate independent original/R lineage,state/snapshot and late replacement/CLI faults qualify this bounded repository contract. Native failure/engine behavior and maintenance-wide applicability are not implied."
+      ],
+      "validation_test": "examples/verify_sort_replacement.py",
+      "r_witness": "examples/sort_replacement.R",
+      "boundary_tests": "saschi.test_sort_duplicates",
+      "evidence": "Separate pre-runtime original and whole unchanged official hand/base-R qualification,followed by runtime/emitted/actualCLI controls. Requires full release acceptance."
+    },
+    "sort_duplicate_reports": {
+      "rule_id": "ST-024",
+      "target": "saschi.sort_duplicates.run_program",
+      "scope": [
+        "Exact version2 duplicate_print/sort-dupout-print-v1 with name=input,one input,one same-kind header-line operation and exact profile/source_lines args. Require an admitted duplicate_sort in the whole family; print markers alone cannot broaden old programs.",
+        "At most three ordered print_01.txt through print_03.txt artifacts and32 local TITLE statements. Reuse exact ASCII/LF,default-column,mixed integer logical rendering and existing per-report limits. Old two-report policies remain unchanged.",
+        "Job/CLI report contract ascii-dupout-mixed-integer-v1 selects1..3 expected-report entries and4MiB JSON cap only for this profile. Exact basename-set/UTF8-byte comparison and atomic staging remain. Third-report or comparison failure publishes no accepted partial artifacts.",
+        "Independent original hand/R report bytes,full actual-runtime trace,wrong basename/text/snapshot comparators,real late renderer faults and whole unchanged official source qualify repository behavior only. Physical SAS/ODS and exact native display remain unclaimed."
+      ],
+      "validation_test": "examples/verify_sort_duplicate_reports.py",
+      "r_witness": "examples/sort_duplicate_reports.R",
+      "boundary_tests": "saschi.test_sort_duplicates",
+      "evidence": "Separate pre-runtime original and whole unchanged official hand/base-R qualification,followed by runtime/emitted/actualCLI controls. Requires full release acceptance."
     }
   }
 }
