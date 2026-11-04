@@ -1403,3 +1403,63 @@ def compile_plan(source, *, output_contract=None):
         return _compile_before_sort_composition(source, output_contract=output_contract)
     from .sort_composition import compile_program
     return compile_program(source, _compile_before_sort_composition)
+
+
+_compile_before_date_program = compile_plan
+
+
+def compile_plan(source, *, output_contract=None):
+    if output_contract is not None:
+        return _compile_before_date_program(source, output_contract=output_contract)
+    from .date_program import compile_program
+    return compile_program(source, _compile_before_date_program)
+
+
+_compile_before_picture_dates = compile_plan
+
+
+def compile_plan(source, *, output_contract=None):
+    if output_contract is not None:
+        return _compile_before_picture_dates(source, output_contract=output_contract)
+    from .picture_dates import compile_program
+    return compile_program(source, _compile_before_picture_dates)
+
+
+_compile_before_groupformat = compile_plan
+
+
+def compile_plan(source, *, output_contract=None):
+    if output_contract is not None:
+        return _compile_before_groupformat(source, output_contract=output_contract)
+    from .groupformat import compile_program
+    return compile_program(source, _compile_before_groupformat)
+
+
+_compile_before_numeric_pictures = compile_plan
+
+
+def compile_plan(source, *, output_contract=None):
+    if output_contract is not None:
+        return _compile_before_numeric_pictures(source, output_contract=output_contract)
+    from .numeric_pictures import compile_program
+    return compile_program(source, _compile_before_numeric_pictures)
+
+
+_compile_before_week_callbacks = compile_plan
+
+
+def compile_plan(source, *, output_contract=None):
+    if output_contract is not None:
+        return _compile_before_week_callbacks(source, output_contract=output_contract)
+    from .week_callbacks import compile_program
+    return compile_program(source, _compile_before_week_callbacks)
+
+
+_compile_before_postal_function = compile_plan
+
+
+def compile_plan(source, *, output_contract=None):
+    if output_contract is not None:
+        return _compile_before_postal_function(source, output_contract=output_contract)
+    from .postal_function import compile_program
+    return compile_program(source, _compile_before_postal_function)

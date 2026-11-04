@@ -111,14 +111,20 @@ def build_showcase(job: Job, name: str, source_label: str = "pasted program") ->
     env = receipt.get('environment', {})
     header_meta = (f"host <span class='mono'>{html.escape(str(env.get('host', '?')))}</span> ; "
                    f"python <span class='mono'>{html.escape(str(env.get('python', '?')))}</span> ; "
-                   f"R <span class='mono'>{html.escape(str(env.get('r_version', 'absent'))[:60])}</span> ; "
+                   f"R availability <span class='mono'>{html.escape(str(env.get('r_version') or 'absent')[:60])}</span> ; "
                    f"tool <span class='mono'>{__version__}</span>")
 
     badge = 'ok' if verdict else ('fail' if blocked else 'warn')
     badge_text = 'ACCEPTED' if verdict else ('BLOCKED' if blocked else 'REJECTED')
-    status_line = (f"Status: verified fixture evidence at the rungs shown below; "
-                   f"{'Python and R agree with the documented rule' if verdict else 'the job did not complete acceptance'}. "
-                   f"No live SAS. What would change it: a different tool commit, environment, or input.")
+    comparisons = [('Dataset', 'comparison'), ('Report', 'report_comparison'),
+                   ('Export', 'export_comparison'), ('Log', 'log_comparison')]
+    comparison_summary = '; '.join(
+        f"{label} comparison: {receipt.get(key, 'not requested')}"
+        for label, key in comparisons if key == 'comparison' or key in receipt)
+    status_line = (f"Status: job receipt evidence for maintainer review. "
+                   f"Job verdict: {badge_text.lower()}. {html.escape(comparison_summary)}. "
+                   f"No per-job R comparison or live SAS validation was performed. "
+                   f"What would change it: a different tool commit, environment, or input.")
 
     return f"""<!DOCTYPE html>
 <html lang="en">

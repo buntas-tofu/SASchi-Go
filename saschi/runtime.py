@@ -289,6 +289,24 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
         raise ValueError('unsupported plan version')
     if plan['tickets'] and not allow_partial:
         raise RuntimeError('saschi: blocked translation. Nothing from this program was executed.')
+    from .postal_function import validate_program as validate_postal, run_program as run_postal
+    if validate_postal(plan, catalog) is not None:
+        return run_postal(plan, catalog)
+    from .week_callbacks import validate_program as validate_week, run_program as run_week
+    if validate_week(plan, catalog) is not None:
+        return run_week(plan, catalog)
+    from .numeric_pictures import validate_program as validate_numbers, run_program as run_numbers
+    if validate_numbers(plan, catalog) is not None:
+        return run_numbers(plan, catalog)
+    from .groupformat import validate_program as validate_groupformat, run_program as run_groupformat
+    if validate_groupformat(plan, catalog) is not None:
+        return run_groupformat(plan, catalog)
+    from .picture_dates import validate_program as validate_picture_dates, run_program as run_picture_dates
+    if validate_picture_dates(plan, catalog) is not None:
+        return run_picture_dates(plan, catalog)
+    from .date_program import validate_program as validate_dates, run_program as run_dates
+    if validate_dates(plan, catalog) is not None:
+        return run_dates(plan, catalog)
     from .sort_composition import validate_program as validate_composition, run_program as run_composition
     if validate_composition(plan, catalog) is not None:
         return run_composition(plan, catalog)

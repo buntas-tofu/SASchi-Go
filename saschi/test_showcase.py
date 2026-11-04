@@ -7,6 +7,8 @@ for every stage it did not, the checksummed receipt, and no external asset
 anywhere in the document.
 """
 import re
+import json
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -27,6 +29,61 @@ def blocked_job():
 
 
 class ShowcaseTests(unittest.TestCase):
+    def status(self, job):
+        document = build_showcase(job, 'evidence status')
+        self.assertNotIn('Python and R agree', document)
+        self.assertNotIn('verified fixture evidence', document)
+        status = re.search(r'<p class="status">(.*?)</p>', document, re.S)[1]
+        self.assertIn('No per-job R comparison or live SAS validation was performed.', status)
+        return status
+
+    def test_uncompared_execution_does_not_claim_verification(self):
+        job = build_job('data _null_; x=7; put x=; run;')
+        self.assertTrue(job.receipt['accepted'])
+        self.assertEqual(job.receipt['comparison'], 'not requested')
+        for r_version in (None, 'Rscript (R) version available'):
+            with self.subTest(r_version=r_version):
+                job.receipt['environment']['r_version'] = r_version
+                status = self.status(job)
+                self.assertIn('Job verdict: accepted.', status)
+                self.assertIn('Dataset comparison: not requested.', status)
+                self.assertIn('R availability', status)
+
+    def test_matching_expectation_claims_only_the_recorded_comparison(self):
+        job = accepted_job()
+        self.assertEqual(job.receipt['comparison'], 'passed')
+        self.assertIn('Dataset comparison: passed.', self.status(job))
+
+    def test_mismatching_expectation_reports_rejection_and_failed_comparison(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            expected = Path(temporary) / 'wrong.json'
+            expected.write_text(json.dumps({'d': {'schema': {'x': 'number'},
+                                                   'rows': [{'x': 8.0}]}}))
+            job = build_job('data d; x=7; run;', expect=expected)
+        self.assertEqual(job.code, 1)
+        self.assertIsNotNone(job.result)
+        self.assertIn('Job verdict: rejected.', self.status(job))
+        self.assertIn('Dataset comparison: failed.', self.status(job))
+
+    def test_blocked_and_runtime_failed_jobs_do_not_claim_verification(self):
+        for job, verdict in ((blocked_job(), 'blocked'),
+                             (build_job('data d; set absent; run;'), 'rejected')):
+            with self.subTest(verdict=verdict):
+                self.assertFalse(job.receipt['accepted'])
+                self.assertIsNone(job.result)
+                self.assertIn(f'Job verdict: {verdict}.', self.status(job))
+                self.assertIn('Dataset comparison: not requested.', self.status(job))
+
+    def test_log_only_expectation_is_distinct_from_dataset_comparison(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            expected = Path(temporary) / 'log.json'
+            expected.write_text(json.dumps(['hello']))
+            job = build_job("data _null_; put 'hello'; run;", expect_log=expected)
+        self.assertEqual(job.code, 0)
+        status = self.status(job)
+        self.assertIn('Dataset comparison: not requested;', status)
+        self.assertIn('Log comparison: passed.', status)
+
     def test_accepted_job_renders_every_stage_with_its_artifact(self):
         html = build_showcase(accepted_job(), 'workflow')
         for stage in ('stage-source', 'stage-plan', 'stage-translate', 'stage-run',

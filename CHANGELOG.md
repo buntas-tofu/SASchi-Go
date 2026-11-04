@@ -3,6 +3,45 @@
 Status: development changes with original pins and Python/base-R evidence; no
 live SAS comparison. Branch synchronization is separate from a release.
 
+- Tighten the new format source boundaries: LOW/HIGH must be closed outer
+  endpoints; exclusions apply to literal endpoints. Add refusal controls for
+  finite-domain reinterpretation while retaining frozen original expectations.
+
+- Add DS-092..095 and ST-030 for bounded character formats, country FCMP,
+  quoted character DSD, owned stable SORT and computed reports. Pin an external
+  19-code USPS policy; refuse unverified ZIPs and keep reference-derived results
+  outside Go. Add explicit reference preparation before offline CI gates.
+- Stage a later human interface session with completed human sessions n=0.
+- Add DS-089..091 and ST-029 for finite job-local FCMP week callbacks,
+  CMPLIB, DATE9 producers and ordered/spanned logical reports, with a separate
+  unchanged official-example proof and explicit function-source accounting.
+- Add DS-087/088 and ST-028 for valid integer PICTURE selectors, NOEDIT,
+  fixed integer/character input and bounded alias reports. Account explicitly
+  for one scoped BOM prefix. Retain original vendor H12 without invented output.
+- Correct date-picture non-ASCII refusal and source accounting for PRINT OBS.
+- Add DS-084..086 and ST-027 for numeric VALUE/GROUPFORMAT and bounded detail
+  REPORT. Preserve raw sort order, formatted group boundaries and both OUTPUT
+  calls on a one-row group. Add complete original/vendor hand/base-R traces,
+  exact logical reports, strict portable/source limits and atomic failure gates.
+
+- Add DS-082/083 and ST-026 for the separate date-picture family: canonical
+  DATE9 composition, bounded English directives/ranges/OTHER and VAR/OBS PRINT
+  with persistent procedure TITLE. Freeze complete hand/base-R expectations
+  before the translator; add original and unchanged official-example gates,
+  portable/source refusals, exact reports and late-failure atomic controls.
+
+- Add separately gated FMT-01 reference foundations for canonical DATE9 decoding
+  and complete-name WEEKDATE/WORDDATE fields in valid bounded widths. Preserve the
+  central semantics reference and mirror. Add separate DS-080/081 and ST-025
+  source/portable date composition with original hand/base-R fixtures, exact
+  logical reports, strict refusals and atomic publication checks. The original
+  vendor WEEKDATE50 request remains held at H11; no new vendor proof.
+
+- Correct showcase evidence wording: derive the verdict and comparison states
+  from the job receipt, label R availability, and state that no per-job R or
+  live SAS comparison ran. Successful execution without an expectation no
+  longer claims Python/R agreement or verified fixture evidence.
+
 - Add DS-070..072 and ST-021..023 in three separately checked lanes: explicit
   bitwise67 output selection with exact log comparison, job-local numeric literal
   INVALUE with physical pointer INPUT, and procedure-local labelled PRINT/default

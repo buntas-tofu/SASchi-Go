@@ -127,6 +127,78 @@
         "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
         "git_blob_sha1": "261eeb9e9f8b2b4b0d119366dda99c6fd7d35c64"
       }
+    },
+    {
+      "id": "sas-code-examples-date-picture-v1",
+      "repository": "sassoftware/sas-code-examples",
+      "commit": "579e057f90cd699f744fd6a1c8acaf9243f7ff67",
+      "license_identifier": "Apache-2.0",
+      "source": {
+        "path": "By Syntax/FORMAT Procedure/Using date directives on the PICTURE statement.sas",
+        "bytes": 3775,
+        "sha256": "e066c564052bb6e9467f2c3f56794e9eba8011de0fc5b027c3c6dd92948cfdfa",
+        "git_blob_sha1": "019a9d10cf49406adae5b344f65563a43cf5f349"
+      },
+      "license": {
+        "bytes": 11357,
+        "git_blob_sha1": "261eeb9e9f8b2b4b0d119366dda99c6fd7d35c64",
+        "path": "LICENSE",
+        "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+      }
+    },
+    {
+      "id": "sas-code-examples-groupformat-v1",
+      "repository": "sassoftware/sas-code-examples",
+      "commit": "579e057f90cd699f744fd6a1c8acaf9243f7ff67",
+      "license_identifier": "Apache-2.0",
+      "source": {
+        "path": "By Syntax/FORMAT Procedure/Using the By Groupformat Statement to Process Data.sas",
+        "bytes": 3828,
+        "sha256": "574ae686cae9e5b81e65da1a4d2e3565d5b100f75fa6550087047b842381c1de",
+        "git_blob_sha1": "1163748f00f1b9249afe2944a0e58f26e33d9378"
+      },
+      "license": {
+        "bytes": 11357,
+        "git_blob_sha1": "261eeb9e9f8b2b4b0d119366dda99c6fd7d35c64",
+        "path": "LICENSE",
+        "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+      }
+    },
+    {
+      "id": "sas-code-examples-week-callbacks-v1",
+      "repository": "sassoftware/sas-code-examples",
+      "commit": "579e057f90cd699f744fd6a1c8acaf9243f7ff67",
+      "license_identifier": "Apache-2.0",
+      "source": {
+        "path": "By Syntax/FORMAT Procedure/Using Functions to Create Formats.sas",
+        "bytes": 3127,
+        "sha256": "129d54f964ed66fb2dbf591d1b38b12f39d60e9e718e273d1c7a33a367617111",
+        "git_blob_sha1": "50f34c08e2a3277479d5eb285e19814466a1064c"
+      },
+      "license": {
+        "bytes": 11357,
+        "git_blob_sha1": "261eeb9e9f8b2b4b0d119366dda99c6fd7d35c64",
+        "path": "LICENSE",
+        "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+      }
+    },
+    {
+      "id": "sas-code-examples-postal-function-v1",
+      "repository": "sassoftware/sas-code-examples",
+      "commit": "579e057f90cd699f744fd6a1c8acaf9243f7ff67",
+      "license_identifier": "Apache-2.0",
+      "source": {
+        "path": "By Syntax/FORMAT Procedure/Using A Format To Create A Function.sas",
+        "bytes": 3902,
+        "sha256": "39e8f17657e9aaa31f3940cbff076384a893da6f95b4ed42b49c8a116d06d417",
+        "git_blob_sha1": "a797e253d0b70ee6f893792c09bd0db03b5a7cfd"
+      },
+      "license": {
+        "bytes": 11357,
+        "git_blob_sha1": "261eeb9e9f8b2b4b0d119366dda99c6fd7d35c64",
+        "path": "LICENSE",
+        "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+      }
     }
   ]
 }

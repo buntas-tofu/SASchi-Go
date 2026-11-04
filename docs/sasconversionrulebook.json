@@ -3653,6 +3653,847 @@
         "https://support.sas.com/documentation/cdl/en/ledsoptsref/69751/HTML/default/p0vw9lyyxk1cxkn0zzfemrsr3t9a.htm",
         "https://documentation.sas.com/api/docsets/proc/9.4/content/proc.pdf?locale=en"
       ]
+    },
+    {
+      "rule_id": "DS-080",
+      "sas_pattern": "Bounded canonical DATE9 mixed list INPUT with INFILE CARDS",
+      "scope": "data-step",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "saschi.date_program.run_program with separate source and portable admission"
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent original whole-fixture date conversion and C-locale report witness"
+      },
+      "required_settings": [
+        "Separate date-format-fields-v1 source/portable family with empty initial catalog, exact version2 fields,64 Steps,8 fresh DATA names,8 unique local format names,32 TITLEs and2 PRINTs. No implicit joins to older profiles.",
+        "INFILE CARDS and one INPUT with1..32 columns: bare bounded signed integer or period, colon:$w. character1..64 without missing/truncation, canonical colon:DATE9 DDMMMYYYY or period. English months,1753..3999, SAS epoch1960-01-01. Exactly one complete field set per unquoted printable-ASCII record,0..1000 records of at most80 bytes. Reject invalid inputs eagerly, including unused tables.",
+        "One numeric VALUE per PROC FORMAT, named cohort,benefit or an ordinary usr_ name ending in a nondigit. Ordered contiguous inclusive LOW/HIGH or four-digit date literal ranges cover the qualified calendar. Render literals1..128 edge-blank-free printable nonmacro ASCII, WEEKDATE29..37 or WORDDATE18..32. Validate unused/empty definitions; no YEARCUTOFF, gaps, overlaps, recursion or wider fields.",
+        "Default PROC PRINT with one FORMAT binding of unique DATE9 columns to a preceding local definition. Existing logical TITLE/reset applies. ascii-date-fields-v1 artifacts print_01.txt and optionally print_02.txt quote formatted dates and right-trimmed character storage with JSON; unformatted numbers are integer/period. Nested alignment blanks are explicitly removed. Missing date is a quoted period outside LOW/HIGH dispatch. Numeric storage and ordered descriptors remain separate from presentation.",
+        "Retain1055-byte header,415-byte row and417056-byte report caps. Preflight does not render; later rendering/comparison failure publishes no accepted partial result. C++ refuses. Independent original hand/base-R expectations were qualified before the source executor. No native physical layout, custom-format DEFAULT width, WEEKDATE50 handling or whole vendor proof is claimed; H11 stays open."
+      ],
+      "forbidden_patterns": [
+        "Infer native WEEKDATE50 behavior or repair the held vendor source",
+        "Treat logical report text as physical SAS output",
+        "Broaden an older profile or infer general DATE input and custom format behavior"
+      ],
+      "silent_difference_checks": [
+        "SAS epoch,calendar validity,storage types,ordered descriptors,missing/range endpoints,English text,title snapshots,complete reports and atomic publication"
+      ],
+      "validation_test": "examples/verify_date_profile.py",
+      "confidence": "Bounded original hand/base-R evidence, conditional on source-bound full verification; no live SAS.",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/leforinforref/63324/HTML/default/p106m1k307c61in1hyfymetc7uh3.htm",
+        "https://support.sas.com/documentation/cdl/en/leforinforref/64790/HTML/default/p1rib2891qxd4yn18x1myfkmxeet.htm",
+        "https://documentation.sas.com/api/docsets/leforinforref/9.4/content/leforinforref.pdf"
+      ]
+    },
+    {
+      "rule_id": "DS-081",
+      "sas_pattern": "Bounded numeric VALUE date ranges with valid full-name nested date formats",
+      "scope": "data-step",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "saschi.date_program.run_program with separate source and portable admission"
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent original whole-fixture date conversion and C-locale report witness"
+      },
+      "required_settings": [
+        "Separate date-format-fields-v1 source/portable family with empty initial catalog, exact version2 fields,64 Steps,8 fresh DATA names,8 unique local format names,32 TITLEs and2 PRINTs. No implicit joins to older profiles.",
+        "INFILE CARDS and one INPUT with1..32 columns: bare bounded signed integer or period, colon:$w. character1..64 without missing/truncation, canonical colon:DATE9 DDMMMYYYY or period. English months,1753..3999, SAS epoch1960-01-01. Exactly one complete field set per unquoted printable-ASCII record,0..1000 records of at most80 bytes. Reject invalid inputs eagerly, including unused tables.",
+        "One numeric VALUE per PROC FORMAT, named cohort,benefit or an ordinary usr_ name ending in a nondigit. Ordered contiguous inclusive LOW/HIGH or four-digit date literal ranges cover the qualified calendar. Render literals1..128 edge-blank-free printable nonmacro ASCII, WEEKDATE29..37 or WORDDATE18..32. Validate unused/empty definitions; no YEARCUTOFF, gaps, overlaps, recursion or wider fields.",
+        "Default PROC PRINT with one FORMAT binding of unique DATE9 columns to a preceding local definition. Existing logical TITLE/reset applies. ascii-date-fields-v1 artifacts print_01.txt and optionally print_02.txt quote formatted dates and right-trimmed character storage with JSON; unformatted numbers are integer/period. Nested alignment blanks are explicitly removed. Missing date is a quoted period outside LOW/HIGH dispatch. Numeric storage and ordered descriptors remain separate from presentation.",
+        "Retain1055-byte header,415-byte row and417056-byte report caps. Preflight does not render; later rendering/comparison failure publishes no accepted partial result. C++ refuses. Independent original hand/base-R expectations were qualified before the source executor. No native physical layout, custom-format DEFAULT width, WEEKDATE50 handling or whole vendor proof is claimed; H11 stays open.",
+        "LOW is a closed lower endpoint only and HIGH a closed upper endpoint only. Exclusions apply only to qualified literal endpoints; do not reinterpret symbolic extremes as finite domain values."
+      ],
+      "forbidden_patterns": [
+        "Infer native WEEKDATE50 behavior or repair the held vendor source",
+        "Treat logical report text as physical SAS output",
+        "Broaden an older profile or infer general DATE input and custom format behavior"
+      ],
+      "silent_difference_checks": [
+        "SAS epoch,calendar validity,storage types,ordered descriptors,missing/range endpoints,English text,title snapshots,complete reports and atomic publication"
+      ],
+      "validation_test": "examples/verify_date_profile.py",
+      "confidence": "Bounded original hand/base-R evidence, conditional on source-bound full verification; no live SAS.",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/leforinforref/63324/HTML/default/p106m1k307c61in1hyfymetc7uh3.htm",
+        "https://support.sas.com/documentation/cdl/en/leforinforref/64790/HTML/default/p1rib2891qxd4yn18x1myfkmxeet.htm",
+        "https://documentation.sas.com/api/docsets/leforinforref/9.4/content/leforinforref.pdf"
+      ]
+    },
+    {
+      "rule_id": "ST-025",
+      "sas_pattern": "Bounded default PRINT with nested date format bindings",
+      "scope": "procedure",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "saschi.date_program.run_program with separate source and portable admission"
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent original whole-fixture date conversion and C-locale report witness"
+      },
+      "required_settings": [
+        "Separate date-format-fields-v1 source/portable family with empty initial catalog, exact version2 fields,64 Steps,8 fresh DATA names,8 unique local format names,32 TITLEs and2 PRINTs. No implicit joins to older profiles.",
+        "INFILE CARDS and one INPUT with1..32 columns: bare bounded signed integer or period, colon:$w. character1..64 without missing/truncation, canonical colon:DATE9 DDMMMYYYY or period. English months,1753..3999, SAS epoch1960-01-01. Exactly one complete field set per unquoted printable-ASCII record,0..1000 records of at most80 bytes. Reject invalid inputs eagerly, including unused tables.",
+        "One numeric VALUE per PROC FORMAT, named cohort,benefit or an ordinary usr_ name ending in a nondigit. Ordered contiguous inclusive LOW/HIGH or four-digit date literal ranges cover the qualified calendar. Render literals1..128 edge-blank-free printable nonmacro ASCII, WEEKDATE29..37 or WORDDATE18..32. Validate unused/empty definitions; no YEARCUTOFF, gaps, overlaps, recursion or wider fields.",
+        "Default PROC PRINT with one FORMAT binding of unique DATE9 columns to a preceding local definition. Existing logical TITLE/reset applies. ascii-date-fields-v1 artifacts print_01.txt and optionally print_02.txt quote formatted dates and right-trimmed character storage with JSON; unformatted numbers are integer/period. Nested alignment blanks are explicitly removed. Missing date is a quoted period outside LOW/HIGH dispatch. Numeric storage and ordered descriptors remain separate from presentation.",
+        "Retain1055-byte header,415-byte row and417056-byte report caps. Preflight does not render; later rendering/comparison failure publishes no accepted partial result. C++ refuses. Independent original hand/base-R expectations were qualified before the source executor. No native physical layout, custom-format DEFAULT width, WEEKDATE50 handling or whole vendor proof is claimed; H11 stays open."
+      ],
+      "forbidden_patterns": [
+        "Infer native WEEKDATE50 behavior or repair the held vendor source",
+        "Treat logical report text as physical SAS output",
+        "Broaden an older profile or infer general DATE input and custom format behavior"
+      ],
+      "silent_difference_checks": [
+        "SAS epoch,calendar validity,storage types,ordered descriptors,missing/range endpoints,English text,title snapshots,complete reports and atomic publication"
+      ],
+      "validation_test": "examples/verify_date_profile.py",
+      "confidence": "Bounded original hand/base-R evidence, conditional on source-bound full verification; no live SAS.",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/leforinforref/63324/HTML/default/p106m1k307c61in1hyfymetc7uh3.htm",
+        "https://support.sas.com/documentation/cdl/en/leforinforref/64790/HTML/default/p1rib2891qxd4yn18x1myfkmxeet.htm",
+        "https://documentation.sas.com/api/docsets/leforinforref/9.4/content/leforinforref.pdf"
+      ]
+    },
+    {
+      "rule_id": "DS-082",
+      "sas_pattern": "Bounded DATATYPE=DATE PICTURE with exact English directive vocabulary",
+      "scope": "procedure",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "saschi.picture_dates.run_program with separately marked source and portable admission"
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent complete-source hand/C-locale base-R oracle, including complete reports and trace"
+      },
+      "required_settings": [
+        "Separate picture-date-fields-v1 with exact version2 fields, empty initial catalog,64Steps,8fresh DATE9 producers,8unique PICTURE definitions,32TITLE changes and2PRINTs; C++ and unqualified family joins refuse.",
+        "Reuse canonical DDMMMYYYY DATE9, English months,1753..3999, SAS epoch, complete unquoted CARDS records0..1000/80bytes, character storage1..64 and bounded signed integers through a separately marked composition. Eagerly validate unused/empty paths; descriptors retain type/length only.",
+        "One date PICTURE per PROC FORMAT: hirefmt,mrg or ordinary usr_ name ending in a nondigit;1..32 ordered nonoverlapping inclusive ranges with optional exclusive upper endpoint, LOW/HIGH/four-digit dates and optional final OTHER. Without OTHER require calendar coverage. Single-quoted ASCII templates1..40, maximal expansion128. Only %d,%0d,%b,%B,%Y,%% under DATATYPE=DATE; non-date literals contain no digit selectors or macro markers. English C-locale title-case spelling is a named repository policy. Missing without OTHER gives ERROR.",
+        "PRINT DATA=name with optional OBS1..1000, ordered unique VAR, FORMAT bindings of selected DATE9 fields to prior definitions, optional one TITLE/reset and RUN. Title persists locally, VAR changes report order only, OBS takes a prefix without storage mutation.",
+        "ascii-picture-date-v1 preserves template text except trailing padding, JSON-quotes formatted dates and trimmed character storage, and retains observation numbers. Named logical text, not native DEFAULT width, session casing or physical layout. Reuse1055/415/417056 header/row/report caps; late failure publishes no accepted partial job.",
+        "Complete original and unchanged vendor hand/base-R results,source accounting and full traces qualified before translator implementation. Gates cover portable/source refusals, runtime/emitted/actualCLI,wrong comparisons and late actual rendering failure. Current full verification is required; H11 is unrelated and remains open.",
+        "LOW is a closed lower endpoint only and HIGH a closed upper endpoint only. Exclusions apply only to qualified literal endpoints; do not reinterpret symbolic extremes as finite domain values."
+      ],
+      "forbidden_patterns": [
+        "Broaden the earlier date profile by implication",
+        "Infer native page layout, DEFAULT width or session casing",
+        "Treat compilation or cache preparation as a whole-program proof"
+      ],
+      "silent_difference_checks": [
+        "Directive case/zeros,range inclusivity,OTHER/missing,stored dates,VAR/OBS,title persistence,full trace and atomic artifacts"
+      ],
+      "validation_test": "examples/verify_picture_dates.py",
+      "confidence": "Conditional source-bound repository/base-R evidence; no live SAS.",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a002473467.htm"
+      ]
+    },
+    {
+      "rule_id": "DS-083",
+      "sas_pattern": "Canonical DATE9 CARDS data in the separate date-picture composition",
+      "scope": "data-step",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "saschi.picture_dates.run_program with separately marked source and portable admission"
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent complete-source hand/C-locale base-R oracle, including complete reports and trace"
+      },
+      "required_settings": [
+        "Separate picture-date-fields-v1 with exact version2 fields, empty initial catalog,64Steps,8fresh DATE9 producers,8unique PICTURE definitions,32TITLE changes and2PRINTs; C++ and unqualified family joins refuse.",
+        "Reuse canonical DDMMMYYYY DATE9, English months,1753..3999, SAS epoch, complete unquoted CARDS records0..1000/80bytes, character storage1..64 and bounded signed integers through a separately marked composition. Eagerly validate unused/empty paths; descriptors retain type/length only.",
+        "One date PICTURE per PROC FORMAT: hirefmt,mrg or ordinary usr_ name ending in a nondigit;1..32 ordered nonoverlapping inclusive ranges with optional exclusive upper endpoint, LOW/HIGH/four-digit dates and optional final OTHER. Without OTHER require calendar coverage. Single-quoted ASCII templates1..40, maximal expansion128. Only %d,%0d,%b,%B,%Y,%% under DATATYPE=DATE; non-date literals contain no digit selectors or macro markers. English C-locale title-case spelling is a named repository policy. Missing without OTHER gives ERROR.",
+        "PRINT DATA=name with optional OBS1..1000, ordered unique VAR, FORMAT bindings of selected DATE9 fields to prior definitions, optional one TITLE/reset and RUN. Title persists locally, VAR changes report order only, OBS takes a prefix without storage mutation.",
+        "ascii-picture-date-v1 preserves template text except trailing padding, JSON-quotes formatted dates and trimmed character storage, and retains observation numbers. Named logical text, not native DEFAULT width, session casing or physical layout. Reuse1055/415/417056 header/row/report caps; late failure publishes no accepted partial job.",
+        "Complete original and unchanged vendor hand/base-R results,source accounting and full traces qualified before translator implementation. Gates cover portable/source refusals, runtime/emitted/actualCLI,wrong comparisons and late actual rendering failure. Current full verification is required; H11 is unrelated and remains open.",
+        "LOW is a closed lower endpoint only and HIGH a closed upper endpoint only. Exclusions apply only to qualified literal endpoints; do not reinterpret symbolic extremes as finite domain values."
+      ],
+      "forbidden_patterns": [
+        "Broaden the earlier date profile by implication",
+        "Infer native page layout, DEFAULT width or session casing",
+        "Treat compilation or cache preparation as a whole-program proof"
+      ],
+      "silent_difference_checks": [
+        "Directive case/zeros,range inclusivity,OTHER/missing,stored dates,VAR/OBS,title persistence,full trace and atomic artifacts"
+      ],
+      "validation_test": "examples/verify_picture_dates.py",
+      "confidence": "Conditional source-bound repository/base-R evidence; no live SAS.",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a002473467.htm"
+      ]
+    },
+    {
+      "rule_id": "ST-026",
+      "sas_pattern": "Bounded date-picture PRINT with VAR,OBS and procedure TITLE",
+      "scope": "procedure",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "saschi.picture_dates.run_program with separately marked source and portable admission"
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent complete-source hand/C-locale base-R oracle, including complete reports and trace"
+      },
+      "required_settings": [
+        "Separate picture-date-fields-v1 with exact version2 fields, empty initial catalog,64Steps,8fresh DATE9 producers,8unique PICTURE definitions,32TITLE changes and2PRINTs; C++ and unqualified family joins refuse.",
+        "Reuse canonical DDMMMYYYY DATE9, English months,1753..3999, SAS epoch, complete unquoted CARDS records0..1000/80bytes, character storage1..64 and bounded signed integers through a separately marked composition. Eagerly validate unused/empty paths; descriptors retain type/length only.",
+        "One date PICTURE per PROC FORMAT: hirefmt,mrg or ordinary usr_ name ending in a nondigit;1..32 ordered nonoverlapping inclusive ranges with optional exclusive upper endpoint, LOW/HIGH/four-digit dates and optional final OTHER. Without OTHER require calendar coverage. Single-quoted ASCII templates1..40, maximal expansion128. Only %d,%0d,%b,%B,%Y,%% under DATATYPE=DATE; non-date literals contain no digit selectors or macro markers. English C-locale title-case spelling is a named repository policy. Missing without OTHER gives ERROR.",
+        "PRINT DATA=name with optional OBS1..1000, ordered unique VAR, FORMAT bindings of selected DATE9 fields to prior definitions, optional one TITLE/reset and RUN. Title persists locally, VAR changes report order only, OBS takes a prefix without storage mutation.",
+        "ascii-picture-date-v1 preserves template text except trailing padding, JSON-quotes formatted dates and trimmed character storage, and retains observation numbers. Named logical text, not native DEFAULT width, session casing or physical layout. Reuse1055/415/417056 header/row/report caps; late failure publishes no accepted partial job.",
+        "Complete original and unchanged vendor hand/base-R results,source accounting and full traces qualified before translator implementation. Gates cover portable/source refusals, runtime/emitted/actualCLI,wrong comparisons and late actual rendering failure. Current full verification is required; H11 is unrelated and remains open.",
+        "LOW is a closed lower endpoint only and HIGH a closed upper endpoint only. Exclusions apply only to qualified literal endpoints; do not reinterpret symbolic extremes as finite domain values."
+      ],
+      "forbidden_patterns": [
+        "Broaden the earlier date profile by implication",
+        "Infer native page layout, DEFAULT width or session casing",
+        "Treat compilation or cache preparation as a whole-program proof"
+      ],
+      "silent_difference_checks": [
+        "Directive case/zeros,range inclusivity,OTHER/missing,stored dates,VAR/OBS,title persistence,full trace and atomic artifacts"
+      ],
+      "validation_test": "examples/verify_picture_dates.py",
+      "confidence": "Conditional source-bound repository/base-R evidence; no live SAS.",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a002473467.htm"
+      ]
+    },
+    {
+      "rule_id": "DS-084",
+      "sas_pattern": "Bounded integer VALUE ranges for formatted grouping and detail display",
+      "scope": "procedure",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "saschi.groupformat.run_program with separate strict source and portable admission"
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent complete-source formatted grouping and detail report witness, including complete traces"
+      },
+      "required_settings": [
+        "Separate numeric-groupformat-v1 source/portable family: exact version2 defaults, empty initial catalog,64Steps,8fresh canonical DATE9 producers,8unique numeric VALUE definitions,1GROUPFORMAT DATA,2detail REPORTs and32TITLE changes. Unqualified joins and C++ refuse.",
+        "Reuse canonical DATE9/character/integer CARDS ingestion through separately marked group_data. Preserve numeric dates, padded characters and ordered type/length descriptors. Validate every record and unused definition eagerly, including empty paths. No persistent native FORMAT metadata claim.",
+        "Numeric VALUE names salgrp or ordinary usr_ names ending in a nondigit,1..32 contiguous inclusive integer ranges covering[-2147483647,2147483647],LOW/HIGH/integer endpoints, optional exclusive upper bound and edge-blank-free literal outputs1..128 nonmacro ASCII bytes. No options, OTHER, date endpoints or callback formats.",
+        "Fresh GROUPFORMAT output reads a genuine producer of at most500 rows, one nonmissing non-date numeric key in raw ascending order, and its prior numeric VALUE. Separate FIRST then LAST OUTPUT predicates use adjacent formatted-label equality; emit twice when both are true. No chaining, sort, reordering or deduplication. Preflight forwards source values conservatively for eager report validation without actual grouping.",
+        "Detail REPORT requires DATA=name NOWD,1..32 source/alias columns,known DEFINE aliases and at least one explicit DISPLAY. Optional FORMAT=DATE9,DOLLAR12 or prior numeric VALUE and literal labels; optional TITLE/reset. Every grouped-key alias requires explicit FORMAT, avoiding unqualified inherited/default-width display. DOLLAR12 admits nonnegative integral values0..999999999 or missing; DATE9 requires genuine date storage. No aggregation,ORDER,GROUP,ACROSS,COMPUTE or broader formatting.",
+        "ascii-groupformat-report-v1 JSON-quotes headers/formatted text/trimmed characters and uses integer/period unformatted numbers, no observation column. Uppercase DATE9 and whole-dollar/comma text remove alignment as explicit logical policy. Retain1055header/415row/417056report caps and1000report rows. Actual late rendering failure publishes no partial accepted job or artifacts.",
+        "Original and unchanged vendor complete hand/base-R results,all statement lines and full traces qualified before translator implementation. Gates distinguish raw/formatted grouping,tied-row identity,one-row dual OUTPUT,empty inputs,portable/source refusals,actualCLI wrong comparisons and actual late failure. Current full source-bound verification required; no live SAS or native physical-layout claim.",
+        "LOW is a closed lower endpoint only and HIGH a closed upper endpoint only. Exclusions apply only to qualified literal endpoints; do not reinterpret symbolic extremes as finite domain values."
+      ],
+      "forbidden_patterns": [
+        "Group by raw key instead of adjacent formatted labels",
+        "Replace the two OUTPUT predicates with an if/else choice or deduplication",
+        "Infer inherited FORMAT metadata, broader REPORT or native physical output"
+      ],
+      "silent_difference_checks": [
+        "Raw sortedness,formatted boundaries,ties,dual output,multiplicity,schema/source preservation,aliases,currency/date text and atomic publication"
+      ],
+      "validation_test": "examples/verify_groupformat.py",
+      "confidence": "Conditional original/vendor source-bound repository/base-R evidence; no live SAS.",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000202968.htm",
+        "https://support.sas.com/documentation/cdl/en/proc/65145/HTML/default/n0jann0dticnpbn1woe95yuphoaz.htm",
+        "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000200614.htm"
+      ]
+    },
+    {
+      "rule_id": "DS-085",
+      "sas_pattern": "Raw-sorted numeric BY GROUPFORMAT with separate FIRST/LAST OUTPUT",
+      "scope": "data-step",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "saschi.groupformat.run_program with separate strict source and portable admission"
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent complete-source formatted grouping and detail report witness, including complete traces"
+      },
+      "required_settings": [
+        "Separate numeric-groupformat-v1 source/portable family: exact version2 defaults, empty initial catalog,64Steps,8fresh canonical DATE9 producers,8unique numeric VALUE definitions,1GROUPFORMAT DATA,2detail REPORTs and32TITLE changes. Unqualified joins and C++ refuse.",
+        "Reuse canonical DATE9/character/integer CARDS ingestion through separately marked group_data. Preserve numeric dates, padded characters and ordered type/length descriptors. Validate every record and unused definition eagerly, including empty paths. No persistent native FORMAT metadata claim.",
+        "Numeric VALUE names salgrp or ordinary usr_ names ending in a nondigit,1..32 contiguous inclusive integer ranges covering[-2147483647,2147483647],LOW/HIGH/integer endpoints, optional exclusive upper bound and edge-blank-free literal outputs1..128 nonmacro ASCII bytes. No options, OTHER, date endpoints or callback formats.",
+        "Fresh GROUPFORMAT output reads a genuine producer of at most500 rows, one nonmissing non-date numeric key in raw ascending order, and its prior numeric VALUE. Separate FIRST then LAST OUTPUT predicates use adjacent formatted-label equality; emit twice when both are true. No chaining, sort, reordering or deduplication. Preflight forwards source values conservatively for eager report validation without actual grouping.",
+        "Detail REPORT requires DATA=name NOWD,1..32 source/alias columns,known DEFINE aliases and at least one explicit DISPLAY. Optional FORMAT=DATE9,DOLLAR12 or prior numeric VALUE and literal labels; optional TITLE/reset. Every grouped-key alias requires explicit FORMAT, avoiding unqualified inherited/default-width display. DOLLAR12 admits nonnegative integral values0..999999999 or missing; DATE9 requires genuine date storage. No aggregation,ORDER,GROUP,ACROSS,COMPUTE or broader formatting.",
+        "ascii-groupformat-report-v1 JSON-quotes headers/formatted text/trimmed characters and uses integer/period unformatted numbers, no observation column. Uppercase DATE9 and whole-dollar/comma text remove alignment as explicit logical policy. Retain1055header/415row/417056report caps and1000report rows. Actual late rendering failure publishes no partial accepted job or artifacts.",
+        "Original and unchanged vendor complete hand/base-R results,all statement lines and full traces qualified before translator implementation. Gates distinguish raw/formatted grouping,tied-row identity,one-row dual OUTPUT,empty inputs,portable/source refusals,actualCLI wrong comparisons and actual late failure. Current full source-bound verification required; no live SAS or native physical-layout claim.",
+        "LOW is a closed lower endpoint only and HIGH a closed upper endpoint only. Exclusions apply only to qualified literal endpoints; do not reinterpret symbolic extremes as finite domain values."
+      ],
+      "forbidden_patterns": [
+        "Group by raw key instead of adjacent formatted labels",
+        "Replace the two OUTPUT predicates with an if/else choice or deduplication",
+        "Infer inherited FORMAT metadata, broader REPORT or native physical output"
+      ],
+      "silent_difference_checks": [
+        "Raw sortedness,formatted boundaries,ties,dual output,multiplicity,schema/source preservation,aliases,currency/date text and atomic publication"
+      ],
+      "validation_test": "examples/verify_groupformat.py",
+      "confidence": "Conditional original/vendor source-bound repository/base-R evidence; no live SAS.",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000202968.htm",
+        "https://support.sas.com/documentation/cdl/en/proc/65145/HTML/default/n0jann0dticnpbn1woe95yuphoaz.htm",
+        "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000200614.htm"
+      ]
+    },
+    {
+      "rule_id": "DS-086",
+      "sas_pattern": "Canonical DATE9 CARDS producers in the separate GROUPFORMAT composition",
+      "scope": "data-step",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "saschi.groupformat.run_program with separate strict source and portable admission"
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent complete-source formatted grouping and detail report witness, including complete traces"
+      },
+      "required_settings": [
+        "Separate numeric-groupformat-v1 source/portable family: exact version2 defaults, empty initial catalog,64Steps,8fresh canonical DATE9 producers,8unique numeric VALUE definitions,1GROUPFORMAT DATA,2detail REPORTs and32TITLE changes. Unqualified joins and C++ refuse.",
+        "Reuse canonical DATE9/character/integer CARDS ingestion through separately marked group_data. Preserve numeric dates, padded characters and ordered type/length descriptors. Validate every record and unused definition eagerly, including empty paths. No persistent native FORMAT metadata claim.",
+        "Numeric VALUE names salgrp or ordinary usr_ names ending in a nondigit,1..32 contiguous inclusive integer ranges covering[-2147483647,2147483647],LOW/HIGH/integer endpoints, optional exclusive upper bound and edge-blank-free literal outputs1..128 nonmacro ASCII bytes. No options, OTHER, date endpoints or callback formats.",
+        "Fresh GROUPFORMAT output reads a genuine producer of at most500 rows, one nonmissing non-date numeric key in raw ascending order, and its prior numeric VALUE. Separate FIRST then LAST OUTPUT predicates use adjacent formatted-label equality; emit twice when both are true. No chaining, sort, reordering or deduplication. Preflight forwards source values conservatively for eager report validation without actual grouping.",
+        "Detail REPORT requires DATA=name NOWD,1..32 source/alias columns,known DEFINE aliases and at least one explicit DISPLAY. Optional FORMAT=DATE9,DOLLAR12 or prior numeric VALUE and literal labels; optional TITLE/reset. Every grouped-key alias requires explicit FORMAT, avoiding unqualified inherited/default-width display. DOLLAR12 admits nonnegative integral values0..999999999 or missing; DATE9 requires genuine date storage. No aggregation,ORDER,GROUP,ACROSS,COMPUTE or broader formatting.",
+        "ascii-groupformat-report-v1 JSON-quotes headers/formatted text/trimmed characters and uses integer/period unformatted numbers, no observation column. Uppercase DATE9 and whole-dollar/comma text remove alignment as explicit logical policy. Retain1055header/415row/417056report caps and1000report rows. Actual late rendering failure publishes no partial accepted job or artifacts.",
+        "Original and unchanged vendor complete hand/base-R results,all statement lines and full traces qualified before translator implementation. Gates distinguish raw/formatted grouping,tied-row identity,one-row dual OUTPUT,empty inputs,portable/source refusals,actualCLI wrong comparisons and actual late failure. Current full source-bound verification required; no live SAS or native physical-layout claim.",
+        "LOW is a closed lower endpoint only and HIGH a closed upper endpoint only. Exclusions apply only to qualified literal endpoints; do not reinterpret symbolic extremes as finite domain values."
+      ],
+      "forbidden_patterns": [
+        "Group by raw key instead of adjacent formatted labels",
+        "Replace the two OUTPUT predicates with an if/else choice or deduplication",
+        "Infer inherited FORMAT metadata, broader REPORT or native physical output"
+      ],
+      "silent_difference_checks": [
+        "Raw sortedness,formatted boundaries,ties,dual output,multiplicity,schema/source preservation,aliases,currency/date text and atomic publication"
+      ],
+      "validation_test": "examples/verify_groupformat.py",
+      "confidence": "Conditional original/vendor source-bound repository/base-R evidence; no live SAS.",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000202968.htm",
+        "https://support.sas.com/documentation/cdl/en/proc/65145/HTML/default/n0jann0dticnpbn1woe95yuphoaz.htm",
+        "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000200614.htm"
+      ]
+    },
+    {
+      "rule_id": "ST-027",
+      "sas_pattern": "Bounded numeric GROUPFORMAT detail REPORT with aliases and explicit formats",
+      "scope": "procedure",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "saschi.groupformat.run_program with separate strict source and portable admission"
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent complete-source formatted grouping and detail report witness, including complete traces"
+      },
+      "required_settings": [
+        "Separate numeric-groupformat-v1 source/portable family: exact version2 defaults, empty initial catalog,64Steps,8fresh canonical DATE9 producers,8unique numeric VALUE definitions,1GROUPFORMAT DATA,2detail REPORTs and32TITLE changes. Unqualified joins and C++ refuse.",
+        "Reuse canonical DATE9/character/integer CARDS ingestion through separately marked group_data. Preserve numeric dates, padded characters and ordered type/length descriptors. Validate every record and unused definition eagerly, including empty paths. No persistent native FORMAT metadata claim.",
+        "Numeric VALUE names salgrp or ordinary usr_ names ending in a nondigit,1..32 contiguous inclusive integer ranges covering[-2147483647,2147483647],LOW/HIGH/integer endpoints, optional exclusive upper bound and edge-blank-free literal outputs1..128 nonmacro ASCII bytes. No options, OTHER, date endpoints or callback formats.",
+        "Fresh GROUPFORMAT output reads a genuine producer of at most500 rows, one nonmissing non-date numeric key in raw ascending order, and its prior numeric VALUE. Separate FIRST then LAST OUTPUT predicates use adjacent formatted-label equality; emit twice when both are true. No chaining, sort, reordering or deduplication. Preflight forwards source values conservatively for eager report validation without actual grouping.",
+        "Detail REPORT requires DATA=name NOWD,1..32 source/alias columns,known DEFINE aliases and at least one explicit DISPLAY. Optional FORMAT=DATE9,DOLLAR12 or prior numeric VALUE and literal labels; optional TITLE/reset. Every grouped-key alias requires explicit FORMAT, avoiding unqualified inherited/default-width display. DOLLAR12 admits nonnegative integral values0..999999999 or missing; DATE9 requires genuine date storage. No aggregation,ORDER,GROUP,ACROSS,COMPUTE or broader formatting.",
+        "ascii-groupformat-report-v1 JSON-quotes headers/formatted text/trimmed characters and uses integer/period unformatted numbers, no observation column. Uppercase DATE9 and whole-dollar/comma text remove alignment as explicit logical policy. Retain1055header/415row/417056report caps and1000report rows. Actual late rendering failure publishes no partial accepted job or artifacts.",
+        "Original and unchanged vendor complete hand/base-R results,all statement lines and full traces qualified before translator implementation. Gates distinguish raw/formatted grouping,tied-row identity,one-row dual OUTPUT,empty inputs,portable/source refusals,actualCLI wrong comparisons and actual late failure. Current full source-bound verification required; no live SAS or native physical-layout claim.",
+        "LOW is a closed lower endpoint only and HIGH a closed upper endpoint only. Exclusions apply only to qualified literal endpoints; do not reinterpret symbolic extremes as finite domain values."
+      ],
+      "forbidden_patterns": [
+        "Group by raw key instead of adjacent formatted labels",
+        "Replace the two OUTPUT predicates with an if/else choice or deduplication",
+        "Infer inherited FORMAT metadata, broader REPORT or native physical output"
+      ],
+      "silent_difference_checks": [
+        "Raw sortedness,formatted boundaries,ties,dual output,multiplicity,schema/source preservation,aliases,currency/date text and atomic publication"
+      ],
+      "validation_test": "examples/verify_groupformat.py",
+      "confidence": "Conditional original/vendor source-bound repository/base-R evidence; no live SAS.",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000202968.htm",
+        "https://support.sas.com/documentation/cdl/en/proc/65145/HTML/default/n0jann0dticnpbn1woe95yuphoaz.htm",
+        "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000200614.htm"
+      ]
+    },
+    {
+      "rule_id": "DS-087",
+      "sas_pattern": "Bounded integer PICTURE with leading digit selectors and explicit NOEDIT",
+      "scope": "format",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "saschi.numeric_pictures.run_program with exact source and portable admission"
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent whole-source original numeric PICTURE witness with ASCII/BOM accounting"
+      },
+      "required_settings": [
+        "Use a separate numeric-picture-fields-v1 family with number_data,number_picture, number_report and existing literal/reset TITLE. Exact version2 fields,empty initial catalog,64Steps,8fresh producers,8total PICTURE definitions,2REPORTs and 32title changes. No implicit joins,DATE/FCMP,CSV or C++ behavior.",
+        "One leading UTF8 BOM is an explicit source-envelope policy only for this family. Keep original source bytes/hash and physical line numbers. Account for3prefix bytes separately from language statements. Require the remainder to be ASCII; repeated/embedded BOMs and other families retain refusal. Portable args carry one consistent source-prefix enum; receipt accounting records the scoped prefix policy. Independent source accounting reads this frame from source syntax, not from the plan. Do not globally strip BOMs or alter the old lexer contract.",
+        "DATA has a fresh name,INFILE DATALINES,INPUT numeric-name character-name $w., DATALINES,opaque payload and RUN. Exactly one bounded signed integer followed by one ASCII blank and exactlyw ASCII letters, then optional trailing blanks, per record. w1..8;0..1000records,80bytes each. No numeric missing,fractions,extra fields, quoted input,truncation,FLOWOVER,controls or ambiguous separators. Public storage is number8 and characterw in declaration order. This is a narrow fixed-width mixed-input composition,not general formatted/list input.",
+        "PROC FORMAT contains1..8 numeric PICTURE statements and RUN. Names are delgrp, delgx,delgy or ordinary usr_ names ending in a nondigit. Each definition has1..32 ordered contiguous integer ranges covering[-2147483647,2147483647]. LOW is a closed lower endpoint only;HIGH is a closed upper endpoint only. Numeric endpoints may be open on either side; singleton integers are admitted. No OTHER,decimal ranges,FUZZ,MULTIPLIER,PREFIX,ROUND or DATATYPE. Validate every alternative, even when unused by records or reports.",
+        "Templates are1..40 printable nonmacro ASCII bytes. NOEDIT preserves the literal, including digits and leading blanks. Without NOEDIT, either a nonblank text message has no digits,or1..16 contiguous digit selectors begin the template and are followed only by ASCII letters/blanks. At least one selector is nonzero. Take integer absolute value,retain the rightmostn decimal digits,pad with zeros, and suppress leading zeros only until the first nonzero selector or significant digit. Remove only the resulting leading fill blanks as a logical mapping. 09 and99 therefore differ for single-digit values. All-zero selectors and richer numeric editing remain outside the profile. Template trailing message text is preserved. A digit after leading message text without NOEDIT refuses. H12 marks this exact unresolved source form in the original delGy definition.",
+        "Reuse the qualified detail REPORT column/alias/DEFINE/TITLE grammar through this new composition. At least one explicit DISPLAY; numeric PICTURE names and COMMA12 are the only formats. COMMA12 accepts signed whole numbers of magnitude at most 999999999 and emits comma-separated text without alignment. No dates,ORDER, GROUP,aggregation,COMPUTE or native page-layout inference. Empty descriptors and unused definitions validate eagerly. ascii-number-picture-report-v1 uses one or two report_01/02.txt artifacts,JSON-quoted headers/formatted text/characters and integer unformatted values,1055header/415row/417056report byte caps and1000rows. Preflight does not render. Actual late failure publishes no partial accepted job.",
+        "Independently qualify original ASCII and BOM programs,all rows,reports,statement lines,EOF attempts and full traces before translator code. Compare runtime, emitted Python,actualCLI,wrong outputs and real late failure. The vendor source is not an expected-output fixture: it remains unchanged outside Go and held at H12 even when the independent envelope policy resolves the BOM obstacle. "
+      ],
+      "forbidden_patterns": [
+        "Treat a digit after message text without NOEDIT as an accepted selector",
+        "Generalize BOM admission to other families",
+        "Infer native page layout or complete vendor acceptance"
+      ],
+      "silent_difference_checks": [
+        "09 versus99,absolute value,rightmost digits,NOEDIT literal digits,complete records/traces,aliases,prefix bytes and atomic publication"
+      ],
+      "validation_test": "examples/verify_numeric_pictures.py",
+      "confidence": "Conditional first-party repository/base-R evidence; original vendor remains held at H12; no live SAS.",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a002473467.htm"
+      ]
+    },
+    {
+      "rule_id": "DS-088",
+      "sas_pattern": "Fixed integer and character INPUT in numeric PICTURE composition",
+      "scope": "data-step",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "saschi.numeric_pictures.run_program with exact source and portable admission"
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent whole-source original numeric PICTURE witness with ASCII/BOM accounting"
+      },
+      "required_settings": [
+        "Use a separate numeric-picture-fields-v1 family with number_data,number_picture, number_report and existing literal/reset TITLE. Exact version2 fields,empty initial catalog,64Steps,8fresh producers,8total PICTURE definitions,2REPORTs and 32title changes. No implicit joins,DATE/FCMP,CSV or C++ behavior.",
+        "One leading UTF8 BOM is an explicit source-envelope policy only for this family. Keep original source bytes/hash and physical line numbers. Account for3prefix bytes separately from language statements. Require the remainder to be ASCII; repeated/embedded BOMs and other families retain refusal. Portable args carry one consistent source-prefix enum; receipt accounting records the scoped prefix policy. Independent source accounting reads this frame from source syntax, not from the plan. Do not globally strip BOMs or alter the old lexer contract.",
+        "DATA has a fresh name,INFILE DATALINES,INPUT numeric-name character-name $w., DATALINES,opaque payload and RUN. Exactly one bounded signed integer followed by one ASCII blank and exactlyw ASCII letters, then optional trailing blanks, per record. w1..8;0..1000records,80bytes each. No numeric missing,fractions,extra fields, quoted input,truncation,FLOWOVER,controls or ambiguous separators. Public storage is number8 and characterw in declaration order. This is a narrow fixed-width mixed-input composition,not general formatted/list input.",
+        "PROC FORMAT contains1..8 numeric PICTURE statements and RUN. Names are delgrp, delgx,delgy or ordinary usr_ names ending in a nondigit. Each definition has1..32 ordered contiguous integer ranges covering[-2147483647,2147483647]. LOW is a closed lower endpoint only;HIGH is a closed upper endpoint only. Numeric endpoints may be open on either side; singleton integers are admitted. No OTHER,decimal ranges,FUZZ,MULTIPLIER,PREFIX,ROUND or DATATYPE. Validate every alternative, even when unused by records or reports.",
+        "Templates are1..40 printable nonmacro ASCII bytes. NOEDIT preserves the literal, including digits and leading blanks. Without NOEDIT, either a nonblank text message has no digits,or1..16 contiguous digit selectors begin the template and are followed only by ASCII letters/blanks. At least one selector is nonzero. Take integer absolute value,retain the rightmostn decimal digits,pad with zeros, and suppress leading zeros only until the first nonzero selector or significant digit. Remove only the resulting leading fill blanks as a logical mapping. 09 and99 therefore differ for single-digit values. All-zero selectors and richer numeric editing remain outside the profile. Template trailing message text is preserved. A digit after leading message text without NOEDIT refuses. H12 marks this exact unresolved source form in the original delGy definition.",
+        "Reuse the qualified detail REPORT column/alias/DEFINE/TITLE grammar through this new composition. At least one explicit DISPLAY; numeric PICTURE names and COMMA12 are the only formats. COMMA12 accepts signed whole numbers of magnitude at most 999999999 and emits comma-separated text without alignment. No dates,ORDER, GROUP,aggregation,COMPUTE or native page-layout inference. Empty descriptors and unused definitions validate eagerly. ascii-number-picture-report-v1 uses one or two report_01/02.txt artifacts,JSON-quoted headers/formatted text/characters and integer unformatted values,1055header/415row/417056report byte caps and1000rows. Preflight does not render. Actual late failure publishes no partial accepted job.",
+        "Independently qualify original ASCII and BOM programs,all rows,reports,statement lines,EOF attempts and full traces before translator code. Compare runtime, emitted Python,actualCLI,wrong outputs and real late failure. The vendor source is not an expected-output fixture: it remains unchanged outside Go and held at H12 even when the independent envelope policy resolves the BOM obstacle. "
+      ],
+      "forbidden_patterns": [
+        "Treat a digit after message text without NOEDIT as an accepted selector",
+        "Generalize BOM admission to other families",
+        "Infer native page layout or complete vendor acceptance"
+      ],
+      "silent_difference_checks": [
+        "09 versus99,absolute value,rightmost digits,NOEDIT literal digits,complete records/traces,aliases,prefix bytes and atomic publication"
+      ],
+      "validation_test": "examples/verify_numeric_pictures.py",
+      "confidence": "Conditional first-party repository/base-R evidence; original vendor remains held at H12; no live SAS.",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a002473467.htm"
+      ]
+    },
+    {
+      "rule_id": "ST-028",
+      "sas_pattern": "Numeric PICTURE detail REPORT with aliases and COMMA12",
+      "scope": "procedure",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "saschi.numeric_pictures.run_program with exact source and portable admission"
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent whole-source original numeric PICTURE witness with ASCII/BOM accounting"
+      },
+      "required_settings": [
+        "Use a separate numeric-picture-fields-v1 family with number_data,number_picture, number_report and existing literal/reset TITLE. Exact version2 fields,empty initial catalog,64Steps,8fresh producers,8total PICTURE definitions,2REPORTs and 32title changes. No implicit joins,DATE/FCMP,CSV or C++ behavior.",
+        "One leading UTF8 BOM is an explicit source-envelope policy only for this family. Keep original source bytes/hash and physical line numbers. Account for3prefix bytes separately from language statements. Require the remainder to be ASCII; repeated/embedded BOMs and other families retain refusal. Portable args carry one consistent source-prefix enum; receipt accounting records the scoped prefix policy. Independent source accounting reads this frame from source syntax, not from the plan. Do not globally strip BOMs or alter the old lexer contract.",
+        "DATA has a fresh name,INFILE DATALINES,INPUT numeric-name character-name $w., DATALINES,opaque payload and RUN. Exactly one bounded signed integer followed by one ASCII blank and exactlyw ASCII letters, then optional trailing blanks, per record. w1..8;0..1000records,80bytes each. No numeric missing,fractions,extra fields, quoted input,truncation,FLOWOVER,controls or ambiguous separators. Public storage is number8 and characterw in declaration order. This is a narrow fixed-width mixed-input composition,not general formatted/list input.",
+        "PROC FORMAT contains1..8 numeric PICTURE statements and RUN. Names are delgrp, delgx,delgy or ordinary usr_ names ending in a nondigit. Each definition has1..32 ordered contiguous integer ranges covering[-2147483647,2147483647]. LOW is a closed lower endpoint only;HIGH is a closed upper endpoint only. Numeric endpoints may be open on either side; singleton integers are admitted. No OTHER,decimal ranges,FUZZ,MULTIPLIER,PREFIX,ROUND or DATATYPE. Validate every alternative, even when unused by records or reports.",
+        "Templates are1..40 printable nonmacro ASCII bytes. NOEDIT preserves the literal, including digits and leading blanks. Without NOEDIT, either a nonblank text message has no digits,or1..16 contiguous digit selectors begin the template and are followed only by ASCII letters/blanks. At least one selector is nonzero. Take integer absolute value,retain the rightmostn decimal digits,pad with zeros, and suppress leading zeros only until the first nonzero selector or significant digit. Remove only the resulting leading fill blanks as a logical mapping. 09 and99 therefore differ for single-digit values. All-zero selectors and richer numeric editing remain outside the profile. Template trailing message text is preserved. A digit after leading message text without NOEDIT refuses. H12 marks this exact unresolved source form in the original delGy definition.",
+        "Reuse the qualified detail REPORT column/alias/DEFINE/TITLE grammar through this new composition. At least one explicit DISPLAY; numeric PICTURE names and COMMA12 are the only formats. COMMA12 accepts signed whole numbers of magnitude at most 999999999 and emits comma-separated text without alignment. No dates,ORDER, GROUP,aggregation,COMPUTE or native page-layout inference. Empty descriptors and unused definitions validate eagerly. ascii-number-picture-report-v1 uses one or two report_01/02.txt artifacts,JSON-quoted headers/formatted text/characters and integer unformatted values,1055header/415row/417056report byte caps and1000rows. Preflight does not render. Actual late failure publishes no partial accepted job.",
+        "Independently qualify original ASCII and BOM programs,all rows,reports,statement lines,EOF attempts and full traces before translator code. Compare runtime, emitted Python,actualCLI,wrong outputs and real late failure. The vendor source is not an expected-output fixture: it remains unchanged outside Go and held at H12 even when the independent envelope policy resolves the BOM obstacle. "
+      ],
+      "forbidden_patterns": [
+        "Treat a digit after message text without NOEDIT as an accepted selector",
+        "Generalize BOM admission to other families",
+        "Infer native page layout or complete vendor acceptance"
+      ],
+      "silent_difference_checks": [
+        "09 versus99,absolute value,rightmost digits,NOEDIT literal digits,complete records/traces,aliases,prefix bytes and atomic publication"
+      ],
+      "validation_test": "examples/verify_numeric_pictures.py",
+      "confidence": "Conditional first-party repository/base-R evidence; original vendor remains held at H12; no live SAS.",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a002473467.htm"
+      ]
+    },
+    {
+      "rule_id": "DS-089",
+      "sas_pattern": "Job-local bounded FCMP week functions and CMPLIB activation",
+      "scope": "data-step",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "saschi.week_callbacks.run_program with strict source and portable validation"
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent full-source base-R calendar/namespace/ORDER/spanned report witness"
+      },
+      "required_settings": [
+        "Use a separate week-callback-report-v1 family. Exact complete version2 portable plans, empty initial catalog,64Steps, up to8fresh date producers, one FCMP block, one CMPLIB activation, up to8unique callback VALUE definitions, two REPORTs and 32title changes. FCMP, CMPLIB and formats are job-local symbolic state, not host file paths. Validate unused functions, callbacks and empty-table report metadata.",
+        "FCMP requires OUTLIB=work.functions.package,1..8unique ordinary function names start,end or usr_ names ending in a nondigit. Each has one numeric argument, a fresh ordinary local dt variable and declared character return width9. Bodies are exactly dt=INTNX('week.2',argument,0), or  dt=INTNX('week.7',argument,1)-1, followed by RETURN(PUT(dt,DATE9.)),ENDSUB and QUIT. Case and whitespace may differ; no other calls, assignment expressions, recursion, side effects, macros or implicit external library lookup. OPTIONS CMPLIB=work.functions must follow this block. FCMP QUIT ends its own block; OPTIONS is a separate statement and Step.",
+        "WEEK.2 begins Monday, WEEK.7 begins Saturday. Default alignment is beginning. START therefore selects the Monday at or before the input; END selects Friday following the current Saturday-based interval. Sunday is not moved to the next Monday. Saturday's END is the next Friday. These are specified expressions, not inferences from the original prose. Independently test each weekday, epoch, leap/year boundaries and missing. Shifted output must stay in1753..3999. Missing returns the DATE9 period logical field. Numeric date storage remains unchanged.",
+        "PROC FORMAT VALUE name OTHER=[function()] binds an available activated local function implicitly receiving the formatted date. One or more VALUE statements per FORMAT block are distinct Steps, not duplicated language statements. Only this form is accepted. No ranges, DEFAULT or numeric return type. Callback formats require the declared12-character report width; the character return is DATE9 width9. Alignment padding is removed in the named logical text mapping.",
+        "Reuse canonical DATE9 CARDS producers through separately marked week_data: 1..32typed columns,1000records/80ASCII bytes, canonical four-digit DATE9 or period, bounded integer reads and colon-modified characters. Fresh tables only. No numeric source may masquerade as a date callback argument.",
+        "REPORT requires DATA=name NOWD, simple source/alias columns followed by one parenthesized literal spanning heading containing at least one alias. One ORDER column must be the first, unaliased, numeric non-date column; all values are nonmissing integers10..99 in ascending order. This bounded source order also agrees with formatted order and avoids general REPORT sorting. Repeated ORDER cells are suppressed to an empty quoted string after the first row of each run; no source row is dropped. At least one explicit DISPLAY, no GROUP/ACROSS/analysis, COMPUTE or other ordering. DEFINE labels preserve literal slashes as characters. The header for a spanned column is JSON-quoted span+'/'+label, a declared logical mapping, not physical stacked headers. Other headers use literal labels/aliases. One DISPLAY flag per DEFINE is optional, except ORDER cannot also be DISPLAY.",
+        "Formats are10. for nonnegative whole numeric storage through9999999999, WEEKDATE. for genuine date storage using the qualified English29-character full weekday/month field with alignment stripped, or callback-name12. for genuine dates. Empty schemas validate even without data. Callback result domains are checked eagerly for every source date without invoking actual callback/render execution. Unformatted integer, period and trimmed-character cells retain qualified logical conventions. Headers/formatted text/ORDER cells are quoted. One optional inline TITLE/reset and trailing job-local TITLE changes are allowed.",
+        "ascii-week-callback-report-v1 has report_01.txt/02.txt,1055header/415row and 417056report byte caps,1000report rows,ASCII LF with final LF. A real late second report overflow publishes no accepted partial result or artifacts. Preflight must not execute callback formatting or renderers. Runtime callback calls occur once per displayed callback cell, with a full independently frozen trace. Original and unchanged vendor source/license byte identities remain separate; source bodies and complete vendor-derived results stay external. ",
+        "Every displayed alias has exactly one DEFINE. Non-ORDER numeric columns require an explicit qualified format. Exactly one trailing spanning group uses explicit aliases. This avoids inference about broader analysis/default numeric output."
+      ],
+      "forbidden_patterns": [
+        "General FCMP or host library paths",
+        "Advance a Sunday start to the next Monday",
+        "Collapse repeated ORDER observations",
+        "Infer native physical pages or general REPORT defaults"
+      ],
+      "silent_difference_checks": [
+        "Saturday/Sunday and leap/year edges,missing,local symbol lifetime,callback timing,all aliases,ORDER suppression,headers,complete traces,atomic late failure"
+      ],
+      "validation_test": "examples/verify_week_callbacks.py",
+      "confidence": "Conditional original and unchanged vendor repository/base-R evidence; no live SAS.",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/p0syn64amroombn14vrdzksh459w.htm",
+        "https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a000146851.htm"
+      ]
+    },
+    {
+      "rule_id": "DS-090",
+      "sas_pattern": "VALUE OTHER callback to a preceding activated week function",
+      "scope": "format",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "saschi.week_callbacks.run_program with strict source and portable validation"
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent full-source base-R calendar/namespace/ORDER/spanned report witness"
+      },
+      "required_settings": [
+        "Use a separate week-callback-report-v1 family. Exact complete version2 portable plans, empty initial catalog,64Steps, up to8fresh date producers, one FCMP block, one CMPLIB activation, up to8unique callback VALUE definitions, two REPORTs and 32title changes. FCMP, CMPLIB and formats are job-local symbolic state, not host file paths. Validate unused functions, callbacks and empty-table report metadata.",
+        "FCMP requires OUTLIB=work.functions.package,1..8unique ordinary function names start,end or usr_ names ending in a nondigit. Each has one numeric argument, a fresh ordinary local dt variable and declared character return width9. Bodies are exactly dt=INTNX('week.2',argument,0), or  dt=INTNX('week.7',argument,1)-1, followed by RETURN(PUT(dt,DATE9.)),ENDSUB and QUIT. Case and whitespace may differ; no other calls, assignment expressions, recursion, side effects, macros or implicit external library lookup. OPTIONS CMPLIB=work.functions must follow this block. FCMP QUIT ends its own block; OPTIONS is a separate statement and Step.",
+        "WEEK.2 begins Monday, WEEK.7 begins Saturday. Default alignment is beginning. START therefore selects the Monday at or before the input; END selects Friday following the current Saturday-based interval. Sunday is not moved to the next Monday. Saturday's END is the next Friday. These are specified expressions, not inferences from the original prose. Independently test each weekday, epoch, leap/year boundaries and missing. Shifted output must stay in1753..3999. Missing returns the DATE9 period logical field. Numeric date storage remains unchanged.",
+        "PROC FORMAT VALUE name OTHER=[function()] binds an available activated local function implicitly receiving the formatted date. One or more VALUE statements per FORMAT block are distinct Steps, not duplicated language statements. Only this form is accepted. No ranges, DEFAULT or numeric return type. Callback formats require the declared12-character report width; the character return is DATE9 width9. Alignment padding is removed in the named logical text mapping.",
+        "Reuse canonical DATE9 CARDS producers through separately marked week_data: 1..32typed columns,1000records/80ASCII bytes, canonical four-digit DATE9 or period, bounded integer reads and colon-modified characters. Fresh tables only. No numeric source may masquerade as a date callback argument.",
+        "REPORT requires DATA=name NOWD, simple source/alias columns followed by one parenthesized literal spanning heading containing at least one alias. One ORDER column must be the first, unaliased, numeric non-date column; all values are nonmissing integers10..99 in ascending order. This bounded source order also agrees with formatted order and avoids general REPORT sorting. Repeated ORDER cells are suppressed to an empty quoted string after the first row of each run; no source row is dropped. At least one explicit DISPLAY, no GROUP/ACROSS/analysis, COMPUTE or other ordering. DEFINE labels preserve literal slashes as characters. The header for a spanned column is JSON-quoted span+'/'+label, a declared logical mapping, not physical stacked headers. Other headers use literal labels/aliases. One DISPLAY flag per DEFINE is optional, except ORDER cannot also be DISPLAY.",
+        "Formats are10. for nonnegative whole numeric storage through9999999999, WEEKDATE. for genuine date storage using the qualified English29-character full weekday/month field with alignment stripped, or callback-name12. for genuine dates. Empty schemas validate even without data. Callback result domains are checked eagerly for every source date without invoking actual callback/render execution. Unformatted integer, period and trimmed-character cells retain qualified logical conventions. Headers/formatted text/ORDER cells are quoted. One optional inline TITLE/reset and trailing job-local TITLE changes are allowed.",
+        "ascii-week-callback-report-v1 has report_01.txt/02.txt,1055header/415row and 417056report byte caps,1000report rows,ASCII LF with final LF. A real late second report overflow publishes no accepted partial result or artifacts. Preflight must not execute callback formatting or renderers. Runtime callback calls occur once per displayed callback cell, with a full independently frozen trace. Original and unchanged vendor source/license byte identities remain separate; source bodies and complete vendor-derived results stay external. ",
+        "Every displayed alias has exactly one DEFINE. Non-ORDER numeric columns require an explicit qualified format. Exactly one trailing spanning group uses explicit aliases. This avoids inference about broader analysis/default numeric output."
+      ],
+      "forbidden_patterns": [
+        "General FCMP or host library paths",
+        "Advance a Sunday start to the next Monday",
+        "Collapse repeated ORDER observations",
+        "Infer native physical pages or general REPORT defaults"
+      ],
+      "silent_difference_checks": [
+        "Saturday/Sunday and leap/year edges,missing,local symbol lifetime,callback timing,all aliases,ORDER suppression,headers,complete traces,atomic late failure"
+      ],
+      "validation_test": "examples/verify_week_callbacks.py",
+      "confidence": "Conditional original and unchanged vendor repository/base-R evidence; no live SAS.",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/p0syn64amroombn14vrdzksh459w.htm",
+        "https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a000146851.htm"
+      ]
+    },
+    {
+      "rule_id": "DS-091",
+      "sas_pattern": "Canonical DATE9 producer in week-callback composition",
+      "scope": "data-step",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "saschi.week_callbacks.run_program with strict source and portable validation"
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent full-source base-R calendar/namespace/ORDER/spanned report witness"
+      },
+      "required_settings": [
+        "Use a separate week-callback-report-v1 family. Exact complete version2 portable plans, empty initial catalog,64Steps, up to8fresh date producers, one FCMP block, one CMPLIB activation, up to8unique callback VALUE definitions, two REPORTs and 32title changes. FCMP, CMPLIB and formats are job-local symbolic state, not host file paths. Validate unused functions, callbacks and empty-table report metadata.",
+        "FCMP requires OUTLIB=work.functions.package,1..8unique ordinary function names start,end or usr_ names ending in a nondigit. Each has one numeric argument, a fresh ordinary local dt variable and declared character return width9. Bodies are exactly dt=INTNX('week.2',argument,0), or  dt=INTNX('week.7',argument,1)-1, followed by RETURN(PUT(dt,DATE9.)),ENDSUB and QUIT. Case and whitespace may differ; no other calls, assignment expressions, recursion, side effects, macros or implicit external library lookup. OPTIONS CMPLIB=work.functions must follow this block. FCMP QUIT ends its own block; OPTIONS is a separate statement and Step.",
+        "WEEK.2 begins Monday, WEEK.7 begins Saturday. Default alignment is beginning. START therefore selects the Monday at or before the input; END selects Friday following the current Saturday-based interval. Sunday is not moved to the next Monday. Saturday's END is the next Friday. These are specified expressions, not inferences from the original prose. Independently test each weekday, epoch, leap/year boundaries and missing. Shifted output must stay in1753..3999. Missing returns the DATE9 period logical field. Numeric date storage remains unchanged.",
+        "PROC FORMAT VALUE name OTHER=[function()] binds an available activated local function implicitly receiving the formatted date. One or more VALUE statements per FORMAT block are distinct Steps, not duplicated language statements. Only this form is accepted. No ranges, DEFAULT or numeric return type. Callback formats require the declared12-character report width; the character return is DATE9 width9. Alignment padding is removed in the named logical text mapping.",
+        "Reuse canonical DATE9 CARDS producers through separately marked week_data: 1..32typed columns,1000records/80ASCII bytes, canonical four-digit DATE9 or period, bounded integer reads and colon-modified characters. Fresh tables only. No numeric source may masquerade as a date callback argument.",
+        "REPORT requires DATA=name NOWD, simple source/alias columns followed by one parenthesized literal spanning heading containing at least one alias. One ORDER column must be the first, unaliased, numeric non-date column; all values are nonmissing integers10..99 in ascending order. This bounded source order also agrees with formatted order and avoids general REPORT sorting. Repeated ORDER cells are suppressed to an empty quoted string after the first row of each run; no source row is dropped. At least one explicit DISPLAY, no GROUP/ACROSS/analysis, COMPUTE or other ordering. DEFINE labels preserve literal slashes as characters. The header for a spanned column is JSON-quoted span+'/'+label, a declared logical mapping, not physical stacked headers. Other headers use literal labels/aliases. One DISPLAY flag per DEFINE is optional, except ORDER cannot also be DISPLAY.",
+        "Formats are10. for nonnegative whole numeric storage through9999999999, WEEKDATE. for genuine date storage using the qualified English29-character full weekday/month field with alignment stripped, or callback-name12. for genuine dates. Empty schemas validate even without data. Callback result domains are checked eagerly for every source date without invoking actual callback/render execution. Unformatted integer, period and trimmed-character cells retain qualified logical conventions. Headers/formatted text/ORDER cells are quoted. One optional inline TITLE/reset and trailing job-local TITLE changes are allowed.",
+        "ascii-week-callback-report-v1 has report_01.txt/02.txt,1055header/415row and 417056report byte caps,1000report rows,ASCII LF with final LF. A real late second report overflow publishes no accepted partial result or artifacts. Preflight must not execute callback formatting or renderers. Runtime callback calls occur once per displayed callback cell, with a full independently frozen trace. Original and unchanged vendor source/license byte identities remain separate; source bodies and complete vendor-derived results stay external. ",
+        "Every displayed alias has exactly one DEFINE. Non-ORDER numeric columns require an explicit qualified format. Exactly one trailing spanning group uses explicit aliases. This avoids inference about broader analysis/default numeric output."
+      ],
+      "forbidden_patterns": [
+        "General FCMP or host library paths",
+        "Advance a Sunday start to the next Monday",
+        "Collapse repeated ORDER observations",
+        "Infer native physical pages or general REPORT defaults"
+      ],
+      "silent_difference_checks": [
+        "Saturday/Sunday and leap/year edges,missing,local symbol lifetime,callback timing,all aliases,ORDER suppression,headers,complete traces,atomic late failure"
+      ],
+      "validation_test": "examples/verify_week_callbacks.py",
+      "confidence": "Conditional original and unchanged vendor repository/base-R evidence; no live SAS.",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/p0syn64amroombn14vrdzksh459w.htm",
+        "https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a000146851.htm"
+      ]
+    },
+    {
+      "rule_id": "ST-029",
+      "sas_pattern": "Bounded week callback REPORT with first ORDER and a trailing spanning header",
+      "scope": "procedure",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "saschi.week_callbacks.run_program with strict source and portable validation"
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent full-source base-R calendar/namespace/ORDER/spanned report witness"
+      },
+      "required_settings": [
+        "Use a separate week-callback-report-v1 family. Exact complete version2 portable plans, empty initial catalog,64Steps, up to8fresh date producers, one FCMP block, one CMPLIB activation, up to8unique callback VALUE definitions, two REPORTs and 32title changes. FCMP, CMPLIB and formats are job-local symbolic state, not host file paths. Validate unused functions, callbacks and empty-table report metadata.",
+        "FCMP requires OUTLIB=work.functions.package,1..8unique ordinary function names start,end or usr_ names ending in a nondigit. Each has one numeric argument, a fresh ordinary local dt variable and declared character return width9. Bodies are exactly dt=INTNX('week.2',argument,0), or  dt=INTNX('week.7',argument,1)-1, followed by RETURN(PUT(dt,DATE9.)),ENDSUB and QUIT. Case and whitespace may differ; no other calls, assignment expressions, recursion, side effects, macros or implicit external library lookup. OPTIONS CMPLIB=work.functions must follow this block. FCMP QUIT ends its own block; OPTIONS is a separate statement and Step.",
+        "WEEK.2 begins Monday, WEEK.7 begins Saturday. Default alignment is beginning. START therefore selects the Monday at or before the input; END selects Friday following the current Saturday-based interval. Sunday is not moved to the next Monday. Saturday's END is the next Friday. These are specified expressions, not inferences from the original prose. Independently test each weekday, epoch, leap/year boundaries and missing. Shifted output must stay in1753..3999. Missing returns the DATE9 period logical field. Numeric date storage remains unchanged.",
+        "PROC FORMAT VALUE name OTHER=[function()] binds an available activated local function implicitly receiving the formatted date. One or more VALUE statements per FORMAT block are distinct Steps, not duplicated language statements. Only this form is accepted. No ranges, DEFAULT or numeric return type. Callback formats require the declared12-character report width; the character return is DATE9 width9. Alignment padding is removed in the named logical text mapping.",
+        "Reuse canonical DATE9 CARDS producers through separately marked week_data: 1..32typed columns,1000records/80ASCII bytes, canonical four-digit DATE9 or period, bounded integer reads and colon-modified characters. Fresh tables only. No numeric source may masquerade as a date callback argument.",
+        "REPORT requires DATA=name NOWD, simple source/alias columns followed by one parenthesized literal spanning heading containing at least one alias. One ORDER column must be the first, unaliased, numeric non-date column; all values are nonmissing integers10..99 in ascending order. This bounded source order also agrees with formatted order and avoids general REPORT sorting. Repeated ORDER cells are suppressed to an empty quoted string after the first row of each run; no source row is dropped. At least one explicit DISPLAY, no GROUP/ACROSS/analysis, COMPUTE or other ordering. DEFINE labels preserve literal slashes as characters. The header for a spanned column is JSON-quoted span+'/'+label, a declared logical mapping, not physical stacked headers. Other headers use literal labels/aliases. One DISPLAY flag per DEFINE is optional, except ORDER cannot also be DISPLAY.",
+        "Formats are10. for nonnegative whole numeric storage through9999999999, WEEKDATE. for genuine date storage using the qualified English29-character full weekday/month field with alignment stripped, or callback-name12. for genuine dates. Empty schemas validate even without data. Callback result domains are checked eagerly for every source date without invoking actual callback/render execution. Unformatted integer, period and trimmed-character cells retain qualified logical conventions. Headers/formatted text/ORDER cells are quoted. One optional inline TITLE/reset and trailing job-local TITLE changes are allowed.",
+        "ascii-week-callback-report-v1 has report_01.txt/02.txt,1055header/415row and 417056report byte caps,1000report rows,ASCII LF with final LF. A real late second report overflow publishes no accepted partial result or artifacts. Preflight must not execute callback formatting or renderers. Runtime callback calls occur once per displayed callback cell, with a full independently frozen trace. Original and unchanged vendor source/license byte identities remain separate; source bodies and complete vendor-derived results stay external. ",
+        "Every displayed alias has exactly one DEFINE. Non-ORDER numeric columns require an explicit qualified format. Exactly one trailing spanning group uses explicit aliases. This avoids inference about broader analysis/default numeric output."
+      ],
+      "forbidden_patterns": [
+        "General FCMP or host library paths",
+        "Advance a Sunday start to the next Monday",
+        "Collapse repeated ORDER observations",
+        "Infer native physical pages or general REPORT defaults"
+      ],
+      "silent_difference_checks": [
+        "Saturday/Sunday and leap/year edges,missing,local symbol lifetime,callback timing,all aliases,ORDER suppression,headers,complete traces,atomic late failure"
+      ],
+      "validation_test": "examples/verify_week_callbacks.py",
+      "confidence": "Conditional original and unchanged vendor repository/base-R evidence; no live SAS.",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/lefunctionsref/63354/HTML/default/p0syn64amroombn14vrdzksh459w.htm",
+        "https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a000146851.htm"
+      ]
+    },
+    {
+      "rule_id": "DS-092",
+      "sas_pattern": "Bounded four-digit character VALUE ranges in postal-function composition",
+      "scope": "format",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "saschi.postal_function.run_program with strict source/portable admission and pinned external reference"
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent whole-source character ranges,CSV,FCMP,stable SORT,BY/computed report and separate workbook extraction"
+      },
+      "required_settings": [
+        "Use a separate postal-function-report-v1 source family. Exact version2 portable plans, empty initial catalog,64Steps, one character-format block, one FCMP block, one CMPLIB activation, up to8fresh quoted-input producers, one owned ascending country replacement SORT, up to2computed REPORTs and32title changes. No implicit join with week-callback, old CSV profiles, C++ or arbitrary FCMP. All definitions, unused paths and empty report schemas validate eagerly. State is job-local.",
+        "Character VALUE names postabb or usr_ names ending in a nondigit, with a leading $. Each range is four ASCII digits, inclusive lexical endpoints of equal width. Comma-separated range groups share one literal uppercase alphabetic label1..3. Ranges are nonoverlapping; source order may differ from lexical order. Singletons may be admitted explicitly. No LOW,HIGH,OTHER,exclusions,macro labels,nested formats or general collation. The country callback trims only trailing padding and requires AU input exactly four digits covered by a declared range. An uncovered AU code refuses, rather than inferring SAS default-format behavior. AU labels derive from source-defined ranges, not a universal postal database.",
+        "FCMP requires OUTLIB=work.functions.package and one function StateProv or usr_ ending in a nondigit, two declared character arguments and character return5. Its exact structure is IF UPCASE(country)='AU' THEN local=PUT(code,$format.); ELSE IF UPCASE(country)='US' THEN local=ZIPSTATE(code); ELSE local=' '; RETURN(local); ENDSUB; QUIT. Arguments are distinct, local is fresh, the named character format is preceding, and the CMPLIB activation is exactly work.functions after FCMP. Country UPCASE applies to padded character2 values; code is character5. US ZIPSTATE accepts exactly five ASCII digit text characters, preserving leading zeros. Numeric arguments,ZIP+4,missing or unknown US ZIPs refuse. Other countries return blank character5 without a postal lookup. No host library files, arbitrary statements, eval or callback recursion.",
+        "The USPS workbook is the dated2026-10-01 official ZIP Locale Detail XLSX, pinned by exact4380487bytes and SHA256. All reference bodies and derived ZIP/state maps stay outside Go and outside Git. The declared19ZIP identities and raw/semantic mapping hashes may be metadata in Go. Require every matching delivery-ZIP row to agree on physical state. For six original codes served by an office with another physical ZIP, prior direct official Cities by ZIP observations corroborate the state. The accepted compact map hash fixes those19values; changed reference content or uncovered codes refuse. Preparation is explicit before offline gates; runtime and verification never fetch. No additional runtime package is needed. Reference access verifies the external path, no symlink/Git/repository storage, raw digest and finite semantic map before use. No state values are hardcoded. First-party or vendor full expected reports containing derived postal values also stay external. Oracle/result pins and counts are permitted metadata.",
+        "DATA requires INFILE CARDS DLM=',' DSD and INPUT of1..8unique character variables, colon:$w. with widths1..64, then CARDS, opaque records and RUN. At most1000rows, 256ASCII bytes per record, exactly one physical CSV record per row, no blank or missing fields,controls,macros,overwidth values or FLOWOVER. Decoded fields must have no edge blanks and cannot be period-only. Quoted fields may contain commas and escaped double quotes; unquoted fields cannot contain quotes. A closing quote must be immediately followed by a comma or record end. Do not infer old unquoted CSV admission. Values retain declared right padding. Every record must contain the callback's character2country and character5code columns when a report invokes it. Descriptors remain ordered type/length only.",
+        "SORT requires DATA=owned-name, BY one character2country column and RUN. It replaces that owned table, with stable ASCII ascending order preserving ties, padding and all columns. Preflight validates schemas and forwards data without executing sorting, callback rendering or report formatting. Only one replacement sort; reports must follow it and BY the same country. No dates,descending, DUPOUT,NODUP,WHERE or external initial catalog.",
+        "REPORT requires DATA=name NOWD,COLUMN/COLUMNS of simple unaliased data names and one fresh computed column, BY the country, DEFINE computed / COMPUTED literal label, COMPUTE computed / CHAR LENGTH=5, computed=function(country,code), ENDCOMP, optional inline TITLE/reset and RUN. The two argument source columns must occur to the left of the computed column, matching left-to-right row evaluation. Every displayed source column is character storage. No general expressions, other DEFINEs,ORDER,GROUP,ACROSS,aggregation,COMPUTE BEFORE/AFTER or dynamictypes. Keep each source observation and add the computed text only to report cells, not the stored dataset. Every row's callback is executed once in report order.",
+        "ascii-postal-function-report-v1 uses report_01/02.txt. One optional TITLE line, JSON-quoted column labels, then a BY country=\"value\" line at each new country run and JSON-quoted trimmed character row cells. Computed values are right-padded to5during callback execution, then trimmed for logical text. No observation column or native page-layout inference. Retain1055header/415row/417056report byte caps and1000data rows, allowing at most1000additional BY lines. Preflight must not call actual sort/callback/render execution. Actual late report failure must publish no accepted partial result, reports or copied reference data. ",
+        "One or two computed REPORTs are required. Preflight checks only lexical/domain membership, never executes sorting, callbacks, ZIPSTATE lookup or rendering. Exact quoted AU/US literals are case-sensitive after UPCASE even though source keywords/names are case-insensitive. All computed data and reference-derived expected results stay external; only pins/counts are retained."
+      ],
+      "forbidden_patterns": [
+        "Store USPS rows,mappings or reference-derived complete expected reports inside Go",
+        "Accept unknown ZIPs or infer state from city labels",
+        "Treat this policy as a live SAS zone-table match",
+        "Generalize quoted CSV,FCMP,character FORMAT or computed REPORT to old profiles"
+      ],
+      "silent_difference_checks": [
+        "Character leading zeros,range boundaries,quoted commas/escaped quotes,case-sensitive branch constants,case-folded country dispatch,stable owned sort,computed timing,one call per row,all report bytes,reference pins,late atomic failure"
+      ],
+      "validation_test": "examples/verify_postal_function.py",
+      "confidence": "Conditional repository/base-R whole-source evidence under the principal-approved bounded USPS policy; not native SAS postal-data equivalence.",
+      "sources": [
+        "https://postalpro.usps.com/ZIP_Locale_Detail",
+        "https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a002473631.htm"
+      ]
+    },
+    {
+      "rule_id": "DS-093",
+      "sas_pattern": "Finite country FCMP dispatch, CMPLIB and approved character ZIPSTATE domain",
+      "scope": "data-step",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "saschi.postal_function.run_program with strict source/portable admission and pinned external reference"
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent whole-source character ranges,CSV,FCMP,stable SORT,BY/computed report and separate workbook extraction"
+      },
+      "required_settings": [
+        "Use a separate postal-function-report-v1 source family. Exact version2 portable plans, empty initial catalog,64Steps, one character-format block, one FCMP block, one CMPLIB activation, up to8fresh quoted-input producers, one owned ascending country replacement SORT, up to2computed REPORTs and32title changes. No implicit join with week-callback, old CSV profiles, C++ or arbitrary FCMP. All definitions, unused paths and empty report schemas validate eagerly. State is job-local.",
+        "Character VALUE names postabb or usr_ names ending in a nondigit, with a leading $. Each range is four ASCII digits, inclusive lexical endpoints of equal width. Comma-separated range groups share one literal uppercase alphabetic label1..3. Ranges are nonoverlapping; source order may differ from lexical order. Singletons may be admitted explicitly. No LOW,HIGH,OTHER,exclusions,macro labels,nested formats or general collation. The country callback trims only trailing padding and requires AU input exactly four digits covered by a declared range. An uncovered AU code refuses, rather than inferring SAS default-format behavior. AU labels derive from source-defined ranges, not a universal postal database.",
+        "FCMP requires OUTLIB=work.functions.package and one function StateProv or usr_ ending in a nondigit, two declared character arguments and character return5. Its exact structure is IF UPCASE(country)='AU' THEN local=PUT(code,$format.); ELSE IF UPCASE(country)='US' THEN local=ZIPSTATE(code); ELSE local=' '; RETURN(local); ENDSUB; QUIT. Arguments are distinct, local is fresh, the named character format is preceding, and the CMPLIB activation is exactly work.functions after FCMP. Country UPCASE applies to padded character2 values; code is character5. US ZIPSTATE accepts exactly five ASCII digit text characters, preserving leading zeros. Numeric arguments,ZIP+4,missing or unknown US ZIPs refuse. Other countries return blank character5 without a postal lookup. No host library files, arbitrary statements, eval or callback recursion.",
+        "The USPS workbook is the dated2026-10-01 official ZIP Locale Detail XLSX, pinned by exact4380487bytes and SHA256. All reference bodies and derived ZIP/state maps stay outside Go and outside Git. The declared19ZIP identities and raw/semantic mapping hashes may be metadata in Go. Require every matching delivery-ZIP row to agree on physical state. For six original codes served by an office with another physical ZIP, prior direct official Cities by ZIP observations corroborate the state. The accepted compact map hash fixes those19values; changed reference content or uncovered codes refuse. Preparation is explicit before offline gates; runtime and verification never fetch. No additional runtime package is needed. Reference access verifies the external path, no symlink/Git/repository storage, raw digest and finite semantic map before use. No state values are hardcoded. First-party or vendor full expected reports containing derived postal values also stay external. Oracle/result pins and counts are permitted metadata.",
+        "DATA requires INFILE CARDS DLM=',' DSD and INPUT of1..8unique character variables, colon:$w. with widths1..64, then CARDS, opaque records and RUN. At most1000rows, 256ASCII bytes per record, exactly one physical CSV record per row, no blank or missing fields,controls,macros,overwidth values or FLOWOVER. Decoded fields must have no edge blanks and cannot be period-only. Quoted fields may contain commas and escaped double quotes; unquoted fields cannot contain quotes. A closing quote must be immediately followed by a comma or record end. Do not infer old unquoted CSV admission. Values retain declared right padding. Every record must contain the callback's character2country and character5code columns when a report invokes it. Descriptors remain ordered type/length only.",
+        "SORT requires DATA=owned-name, BY one character2country column and RUN. It replaces that owned table, with stable ASCII ascending order preserving ties, padding and all columns. Preflight validates schemas and forwards data without executing sorting, callback rendering or report formatting. Only one replacement sort; reports must follow it and BY the same country. No dates,descending, DUPOUT,NODUP,WHERE or external initial catalog.",
+        "REPORT requires DATA=name NOWD,COLUMN/COLUMNS of simple unaliased data names and one fresh computed column, BY the country, DEFINE computed / COMPUTED literal label, COMPUTE computed / CHAR LENGTH=5, computed=function(country,code), ENDCOMP, optional inline TITLE/reset and RUN. The two argument source columns must occur to the left of the computed column, matching left-to-right row evaluation. Every displayed source column is character storage. No general expressions, other DEFINEs,ORDER,GROUP,ACROSS,aggregation,COMPUTE BEFORE/AFTER or dynamictypes. Keep each source observation and add the computed text only to report cells, not the stored dataset. Every row's callback is executed once in report order.",
+        "ascii-postal-function-report-v1 uses report_01/02.txt. One optional TITLE line, JSON-quoted column labels, then a BY country=\"value\" line at each new country run and JSON-quoted trimmed character row cells. Computed values are right-padded to5during callback execution, then trimmed for logical text. No observation column or native page-layout inference. Retain1055header/415row/417056report byte caps and1000data rows, allowing at most1000additional BY lines. Preflight must not call actual sort/callback/render execution. Actual late report failure must publish no accepted partial result, reports or copied reference data. ",
+        "One or two computed REPORTs are required. Preflight checks only lexical/domain membership, never executes sorting, callbacks, ZIPSTATE lookup or rendering. Exact quoted AU/US literals are case-sensitive after UPCASE even though source keywords/names are case-insensitive. All computed data and reference-derived expected results stay external; only pins/counts are retained."
+      ],
+      "forbidden_patterns": [
+        "Store USPS rows,mappings or reference-derived complete expected reports inside Go",
+        "Accept unknown ZIPs or infer state from city labels",
+        "Treat this policy as a live SAS zone-table match",
+        "Generalize quoted CSV,FCMP,character FORMAT or computed REPORT to old profiles"
+      ],
+      "silent_difference_checks": [
+        "Character leading zeros,range boundaries,quoted commas/escaped quotes,case-sensitive branch constants,case-folded country dispatch,stable owned sort,computed timing,one call per row,all report bytes,reference pins,late atomic failure"
+      ],
+      "validation_test": "examples/verify_postal_function.py",
+      "confidence": "Conditional repository/base-R whole-source evidence under the principal-approved bounded USPS policy; not native SAS postal-data equivalence.",
+      "sources": [
+        "https://postalpro.usps.com/ZIP_Locale_Detail",
+        "https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a002473631.htm"
+      ]
+    },
+    {
+      "rule_id": "DS-094",
+      "sas_pattern": "Strict quoted character DSD CARDS in postal-function composition",
+      "scope": "data-step",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "saschi.postal_function.run_program with strict source/portable admission and pinned external reference"
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent whole-source character ranges,CSV,FCMP,stable SORT,BY/computed report and separate workbook extraction"
+      },
+      "required_settings": [
+        "Use a separate postal-function-report-v1 source family. Exact version2 portable plans, empty initial catalog,64Steps, one character-format block, one FCMP block, one CMPLIB activation, up to8fresh quoted-input producers, one owned ascending country replacement SORT, up to2computed REPORTs and32title changes. No implicit join with week-callback, old CSV profiles, C++ or arbitrary FCMP. All definitions, unused paths and empty report schemas validate eagerly. State is job-local.",
+        "Character VALUE names postabb or usr_ names ending in a nondigit, with a leading $. Each range is four ASCII digits, inclusive lexical endpoints of equal width. Comma-separated range groups share one literal uppercase alphabetic label1..3. Ranges are nonoverlapping; source order may differ from lexical order. Singletons may be admitted explicitly. No LOW,HIGH,OTHER,exclusions,macro labels,nested formats or general collation. The country callback trims only trailing padding and requires AU input exactly four digits covered by a declared range. An uncovered AU code refuses, rather than inferring SAS default-format behavior. AU labels derive from source-defined ranges, not a universal postal database.",
+        "FCMP requires OUTLIB=work.functions.package and one function StateProv or usr_ ending in a nondigit, two declared character arguments and character return5. Its exact structure is IF UPCASE(country)='AU' THEN local=PUT(code,$format.); ELSE IF UPCASE(country)='US' THEN local=ZIPSTATE(code); ELSE local=' '; RETURN(local); ENDSUB; QUIT. Arguments are distinct, local is fresh, the named character format is preceding, and the CMPLIB activation is exactly work.functions after FCMP. Country UPCASE applies to padded character2 values; code is character5. US ZIPSTATE accepts exactly five ASCII digit text characters, preserving leading zeros. Numeric arguments,ZIP+4,missing or unknown US ZIPs refuse. Other countries return blank character5 without a postal lookup. No host library files, arbitrary statements, eval or callback recursion.",
+        "The USPS workbook is the dated2026-10-01 official ZIP Locale Detail XLSX, pinned by exact4380487bytes and SHA256. All reference bodies and derived ZIP/state maps stay outside Go and outside Git. The declared19ZIP identities and raw/semantic mapping hashes may be metadata in Go. Require every matching delivery-ZIP row to agree on physical state. For six original codes served by an office with another physical ZIP, prior direct official Cities by ZIP observations corroborate the state. The accepted compact map hash fixes those19values; changed reference content or uncovered codes refuse. Preparation is explicit before offline gates; runtime and verification never fetch. No additional runtime package is needed. Reference access verifies the external path, no symlink/Git/repository storage, raw digest and finite semantic map before use. No state values are hardcoded. First-party or vendor full expected reports containing derived postal values also stay external. Oracle/result pins and counts are permitted metadata.",
+        "DATA requires INFILE CARDS DLM=',' DSD and INPUT of1..8unique character variables, colon:$w. with widths1..64, then CARDS, opaque records and RUN. At most1000rows, 256ASCII bytes per record, exactly one physical CSV record per row, no blank or missing fields,controls,macros,overwidth values or FLOWOVER. Decoded fields must have no edge blanks and cannot be period-only. Quoted fields may contain commas and escaped double quotes; unquoted fields cannot contain quotes. A closing quote must be immediately followed by a comma or record end. Do not infer old unquoted CSV admission. Values retain declared right padding. Every record must contain the callback's character2country and character5code columns when a report invokes it. Descriptors remain ordered type/length only.",
+        "SORT requires DATA=owned-name, BY one character2country column and RUN. It replaces that owned table, with stable ASCII ascending order preserving ties, padding and all columns. Preflight validates schemas and forwards data without executing sorting, callback rendering or report formatting. Only one replacement sort; reports must follow it and BY the same country. No dates,descending, DUPOUT,NODUP,WHERE or external initial catalog.",
+        "REPORT requires DATA=name NOWD,COLUMN/COLUMNS of simple unaliased data names and one fresh computed column, BY the country, DEFINE computed / COMPUTED literal label, COMPUTE computed / CHAR LENGTH=5, computed=function(country,code), ENDCOMP, optional inline TITLE/reset and RUN. The two argument source columns must occur to the left of the computed column, matching left-to-right row evaluation. Every displayed source column is character storage. No general expressions, other DEFINEs,ORDER,GROUP,ACROSS,aggregation,COMPUTE BEFORE/AFTER or dynamictypes. Keep each source observation and add the computed text only to report cells, not the stored dataset. Every row's callback is executed once in report order.",
+        "ascii-postal-function-report-v1 uses report_01/02.txt. One optional TITLE line, JSON-quoted column labels, then a BY country=\"value\" line at each new country run and JSON-quoted trimmed character row cells. Computed values are right-padded to5during callback execution, then trimmed for logical text. No observation column or native page-layout inference. Retain1055header/415row/417056report byte caps and1000data rows, allowing at most1000additional BY lines. Preflight must not call actual sort/callback/render execution. Actual late report failure must publish no accepted partial result, reports or copied reference data. ",
+        "One or two computed REPORTs are required. Preflight checks only lexical/domain membership, never executes sorting, callbacks, ZIPSTATE lookup or rendering. Exact quoted AU/US literals are case-sensitive after UPCASE even though source keywords/names are case-insensitive. All computed data and reference-derived expected results stay external; only pins/counts are retained."
+      ],
+      "forbidden_patterns": [
+        "Store USPS rows,mappings or reference-derived complete expected reports inside Go",
+        "Accept unknown ZIPs or infer state from city labels",
+        "Treat this policy as a live SAS zone-table match",
+        "Generalize quoted CSV,FCMP,character FORMAT or computed REPORT to old profiles"
+      ],
+      "silent_difference_checks": [
+        "Character leading zeros,range boundaries,quoted commas/escaped quotes,case-sensitive branch constants,case-folded country dispatch,stable owned sort,computed timing,one call per row,all report bytes,reference pins,late atomic failure"
+      ],
+      "validation_test": "examples/verify_postal_function.py",
+      "confidence": "Conditional repository/base-R whole-source evidence under the principal-approved bounded USPS policy; not native SAS postal-data equivalence.",
+      "sources": [
+        "https://postalpro.usps.com/ZIP_Locale_Detail",
+        "https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a002473631.htm"
+      ]
+    },
+    {
+      "rule_id": "DS-095",
+      "sas_pattern": "Owned stable ascending country replacement SORT in postal composition",
+      "scope": "procedure",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "saschi.postal_function.run_program with strict source/portable admission and pinned external reference"
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent whole-source character ranges,CSV,FCMP,stable SORT,BY/computed report and separate workbook extraction"
+      },
+      "required_settings": [
+        "Use a separate postal-function-report-v1 source family. Exact version2 portable plans, empty initial catalog,64Steps, one character-format block, one FCMP block, one CMPLIB activation, up to8fresh quoted-input producers, one owned ascending country replacement SORT, up to2computed REPORTs and32title changes. No implicit join with week-callback, old CSV profiles, C++ or arbitrary FCMP. All definitions, unused paths and empty report schemas validate eagerly. State is job-local.",
+        "Character VALUE names postabb or usr_ names ending in a nondigit, with a leading $. Each range is four ASCII digits, inclusive lexical endpoints of equal width. Comma-separated range groups share one literal uppercase alphabetic label1..3. Ranges are nonoverlapping; source order may differ from lexical order. Singletons may be admitted explicitly. No LOW,HIGH,OTHER,exclusions,macro labels,nested formats or general collation. The country callback trims only trailing padding and requires AU input exactly four digits covered by a declared range. An uncovered AU code refuses, rather than inferring SAS default-format behavior. AU labels derive from source-defined ranges, not a universal postal database.",
+        "FCMP requires OUTLIB=work.functions.package and one function StateProv or usr_ ending in a nondigit, two declared character arguments and character return5. Its exact structure is IF UPCASE(country)='AU' THEN local=PUT(code,$format.); ELSE IF UPCASE(country)='US' THEN local=ZIPSTATE(code); ELSE local=' '; RETURN(local); ENDSUB; QUIT. Arguments are distinct, local is fresh, the named character format is preceding, and the CMPLIB activation is exactly work.functions after FCMP. Country UPCASE applies to padded character2 values; code is character5. US ZIPSTATE accepts exactly five ASCII digit text characters, preserving leading zeros. Numeric arguments,ZIP+4,missing or unknown US ZIPs refuse. Other countries return blank character5 without a postal lookup. No host library files, arbitrary statements, eval or callback recursion.",
+        "The USPS workbook is the dated2026-10-01 official ZIP Locale Detail XLSX, pinned by exact4380487bytes and SHA256. All reference bodies and derived ZIP/state maps stay outside Go and outside Git. The declared19ZIP identities and raw/semantic mapping hashes may be metadata in Go. Require every matching delivery-ZIP row to agree on physical state. For six original codes served by an office with another physical ZIP, prior direct official Cities by ZIP observations corroborate the state. The accepted compact map hash fixes those19values; changed reference content or uncovered codes refuse. Preparation is explicit before offline gates; runtime and verification never fetch. No additional runtime package is needed. Reference access verifies the external path, no symlink/Git/repository storage, raw digest and finite semantic map before use. No state values are hardcoded. First-party or vendor full expected reports containing derived postal values also stay external. Oracle/result pins and counts are permitted metadata.",
+        "DATA requires INFILE CARDS DLM=',' DSD and INPUT of1..8unique character variables, colon:$w. with widths1..64, then CARDS, opaque records and RUN. At most1000rows, 256ASCII bytes per record, exactly one physical CSV record per row, no blank or missing fields,controls,macros,overwidth values or FLOWOVER. Decoded fields must have no edge blanks and cannot be period-only. Quoted fields may contain commas and escaped double quotes; unquoted fields cannot contain quotes. A closing quote must be immediately followed by a comma or record end. Do not infer old unquoted CSV admission. Values retain declared right padding. Every record must contain the callback's character2country and character5code columns when a report invokes it. Descriptors remain ordered type/length only.",
+        "SORT requires DATA=owned-name, BY one character2country column and RUN. It replaces that owned table, with stable ASCII ascending order preserving ties, padding and all columns. Preflight validates schemas and forwards data without executing sorting, callback rendering or report formatting. Only one replacement sort; reports must follow it and BY the same country. No dates,descending, DUPOUT,NODUP,WHERE or external initial catalog.",
+        "REPORT requires DATA=name NOWD,COLUMN/COLUMNS of simple unaliased data names and one fresh computed column, BY the country, DEFINE computed / COMPUTED literal label, COMPUTE computed / CHAR LENGTH=5, computed=function(country,code), ENDCOMP, optional inline TITLE/reset and RUN. The two argument source columns must occur to the left of the computed column, matching left-to-right row evaluation. Every displayed source column is character storage. No general expressions, other DEFINEs,ORDER,GROUP,ACROSS,aggregation,COMPUTE BEFORE/AFTER or dynamictypes. Keep each source observation and add the computed text only to report cells, not the stored dataset. Every row's callback is executed once in report order.",
+        "ascii-postal-function-report-v1 uses report_01/02.txt. One optional TITLE line, JSON-quoted column labels, then a BY country=\"value\" line at each new country run and JSON-quoted trimmed character row cells. Computed values are right-padded to5during callback execution, then trimmed for logical text. No observation column or native page-layout inference. Retain1055header/415row/417056report byte caps and1000data rows, allowing at most1000additional BY lines. Preflight must not call actual sort/callback/render execution. Actual late report failure must publish no accepted partial result, reports or copied reference data. ",
+        "One or two computed REPORTs are required. Preflight checks only lexical/domain membership, never executes sorting, callbacks, ZIPSTATE lookup or rendering. Exact quoted AU/US literals are case-sensitive after UPCASE even though source keywords/names are case-insensitive. All computed data and reference-derived expected results stay external; only pins/counts are retained."
+      ],
+      "forbidden_patterns": [
+        "Store USPS rows,mappings or reference-derived complete expected reports inside Go",
+        "Accept unknown ZIPs or infer state from city labels",
+        "Treat this policy as a live SAS zone-table match",
+        "Generalize quoted CSV,FCMP,character FORMAT or computed REPORT to old profiles"
+      ],
+      "silent_difference_checks": [
+        "Character leading zeros,range boundaries,quoted commas/escaped quotes,case-sensitive branch constants,case-folded country dispatch,stable owned sort,computed timing,one call per row,all report bytes,reference pins,late atomic failure"
+      ],
+      "validation_test": "examples/verify_postal_function.py",
+      "confidence": "Conditional repository/base-R whole-source evidence under the principal-approved bounded USPS policy; not native SAS postal-data equivalence.",
+      "sources": [
+        "https://postalpro.usps.com/ZIP_Locale_Detail",
+        "https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a002473631.htm"
+      ]
+    },
+    {
+      "rule_id": "ST-030",
+      "sas_pattern": "Bounded BY-country computed character REPORT",
+      "scope": "procedure",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "package": "saschi",
+        "pattern": "saschi.postal_function.run_program with strict source/portable admission and pinned external reference"
+      },
+      "r_target": {
+        "package": "base",
+        "pattern": "Independent whole-source character ranges,CSV,FCMP,stable SORT,BY/computed report and separate workbook extraction"
+      },
+      "required_settings": [
+        "Use a separate postal-function-report-v1 source family. Exact version2 portable plans, empty initial catalog,64Steps, one character-format block, one FCMP block, one CMPLIB activation, up to8fresh quoted-input producers, one owned ascending country replacement SORT, up to2computed REPORTs and32title changes. No implicit join with week-callback, old CSV profiles, C++ or arbitrary FCMP. All definitions, unused paths and empty report schemas validate eagerly. State is job-local.",
+        "Character VALUE names postabb or usr_ names ending in a nondigit, with a leading $. Each range is four ASCII digits, inclusive lexical endpoints of equal width. Comma-separated range groups share one literal uppercase alphabetic label1..3. Ranges are nonoverlapping; source order may differ from lexical order. Singletons may be admitted explicitly. No LOW,HIGH,OTHER,exclusions,macro labels,nested formats or general collation. The country callback trims only trailing padding and requires AU input exactly four digits covered by a declared range. An uncovered AU code refuses, rather than inferring SAS default-format behavior. AU labels derive from source-defined ranges, not a universal postal database.",
+        "FCMP requires OUTLIB=work.functions.package and one function StateProv or usr_ ending in a nondigit, two declared character arguments and character return5. Its exact structure is IF UPCASE(country)='AU' THEN local=PUT(code,$format.); ELSE IF UPCASE(country)='US' THEN local=ZIPSTATE(code); ELSE local=' '; RETURN(local); ENDSUB; QUIT. Arguments are distinct, local is fresh, the named character format is preceding, and the CMPLIB activation is exactly work.functions after FCMP. Country UPCASE applies to padded character2 values; code is character5. US ZIPSTATE accepts exactly five ASCII digit text characters, preserving leading zeros. Numeric arguments,ZIP+4,missing or unknown US ZIPs refuse. Other countries return blank character5 without a postal lookup. No host library files, arbitrary statements, eval or callback recursion.",
+        "The USPS workbook is the dated2026-10-01 official ZIP Locale Detail XLSX, pinned by exact4380487bytes and SHA256. All reference bodies and derived ZIP/state maps stay outside Go and outside Git. The declared19ZIP identities and raw/semantic mapping hashes may be metadata in Go. Require every matching delivery-ZIP row to agree on physical state. For six original codes served by an office with another physical ZIP, prior direct official Cities by ZIP observations corroborate the state. The accepted compact map hash fixes those19values; changed reference content or uncovered codes refuse. Preparation is explicit before offline gates; runtime and verification never fetch. No additional runtime package is needed. Reference access verifies the external path, no symlink/Git/repository storage, raw digest and finite semantic map before use. No state values are hardcoded. First-party or vendor full expected reports containing derived postal values also stay external. Oracle/result pins and counts are permitted metadata.",
+        "DATA requires INFILE CARDS DLM=',' DSD and INPUT of1..8unique character variables, colon:$w. with widths1..64, then CARDS, opaque records and RUN. At most1000rows, 256ASCII bytes per record, exactly one physical CSV record per row, no blank or missing fields,controls,macros,overwidth values or FLOWOVER. Decoded fields must have no edge blanks and cannot be period-only. Quoted fields may contain commas and escaped double quotes; unquoted fields cannot contain quotes. A closing quote must be immediately followed by a comma or record end. Do not infer old unquoted CSV admission. Values retain declared right padding. Every record must contain the callback's character2country and character5code columns when a report invokes it. Descriptors remain ordered type/length only.",
+        "SORT requires DATA=owned-name, BY one character2country column and RUN. It replaces that owned table, with stable ASCII ascending order preserving ties, padding and all columns. Preflight validates schemas and forwards data without executing sorting, callback rendering or report formatting. Only one replacement sort; reports must follow it and BY the same country. No dates,descending, DUPOUT,NODUP,WHERE or external initial catalog.",
+        "REPORT requires DATA=name NOWD,COLUMN/COLUMNS of simple unaliased data names and one fresh computed column, BY the country, DEFINE computed / COMPUTED literal label, COMPUTE computed / CHAR LENGTH=5, computed=function(country,code), ENDCOMP, optional inline TITLE/reset and RUN. The two argument source columns must occur to the left of the computed column, matching left-to-right row evaluation. Every displayed source column is character storage. No general expressions, other DEFINEs,ORDER,GROUP,ACROSS,aggregation,COMPUTE BEFORE/AFTER or dynamictypes. Keep each source observation and add the computed text only to report cells, not the stored dataset. Every row's callback is executed once in report order.",
+        "ascii-postal-function-report-v1 uses report_01/02.txt. One optional TITLE line, JSON-quoted column labels, then a BY country=\"value\" line at each new country run and JSON-quoted trimmed character row cells. Computed values are right-padded to5during callback execution, then trimmed for logical text. No observation column or native page-layout inference. Retain1055header/415row/417056report byte caps and1000data rows, allowing at most1000additional BY lines. Preflight must not call actual sort/callback/render execution. Actual late report failure must publish no accepted partial result, reports or copied reference data. ",
+        "One or two computed REPORTs are required. Preflight checks only lexical/domain membership, never executes sorting, callbacks, ZIPSTATE lookup or rendering. Exact quoted AU/US literals are case-sensitive after UPCASE even though source keywords/names are case-insensitive. All computed data and reference-derived expected results stay external; only pins/counts are retained."
+      ],
+      "forbidden_patterns": [
+        "Store USPS rows,mappings or reference-derived complete expected reports inside Go",
+        "Accept unknown ZIPs or infer state from city labels",
+        "Treat this policy as a live SAS zone-table match",
+        "Generalize quoted CSV,FCMP,character FORMAT or computed REPORT to old profiles"
+      ],
+      "silent_difference_checks": [
+        "Character leading zeros,range boundaries,quoted commas/escaped quotes,case-sensitive branch constants,case-folded country dispatch,stable owned sort,computed timing,one call per row,all report bytes,reference pins,late atomic failure"
+      ],
+      "validation_test": "examples/verify_postal_function.py",
+      "confidence": "Conditional repository/base-R whole-source evidence under the principal-approved bounded USPS policy; not native SAS postal-data equivalence.",
+      "sources": [
+        "https://postalpro.usps.com/ZIP_Locale_Detail",
+        "https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a002473631.htm"
+      ]
     }
   ],
   "runtime_capabilities": {
@@ -4475,6 +5316,175 @@
       "r_witness": "examples/sort_directed_projection.R",
       "boundary_tests": "saschi.test_sort_composition",
       "evidence": "Independent original hand/base-R qualification before implementation,then source/runtime/emitted/actualCLI controls. Requires current full release acceptance;seven existing vendor proofs stay separate."
+    },
+    "date_input": {
+      "rule_id": "DS-080",
+      "target": "saschi.date_program.run_program",
+      "scope": [
+        "Separate date-format-fields-v1 source/portable family with empty initial catalog, exact version2 fields,64 Steps,8 fresh DATA names,8 unique local format names,32 TITLEs and2 PRINTs. No implicit joins to older profiles.",
+        "INFILE CARDS and one INPUT with1..32 columns: bare bounded signed integer or period, colon:$w. character1..64 without missing/truncation, canonical colon:DATE9 DDMMMYYYY or period. English months,1753..3999, SAS epoch1960-01-01. Exactly one complete field set per unquoted printable-ASCII record,0..1000 records of at most80 bytes. Reject invalid inputs eagerly, including unused tables.",
+        "One numeric VALUE per PROC FORMAT, named cohort,benefit or an ordinary usr_ name ending in a nondigit. Ordered contiguous inclusive LOW/HIGH or four-digit date literal ranges cover the qualified calendar. Render literals1..128 edge-blank-free printable nonmacro ASCII, WEEKDATE29..37 or WORDDATE18..32. Validate unused/empty definitions; no YEARCUTOFF, gaps, overlaps, recursion or wider fields.",
+        "Default PROC PRINT with one FORMAT binding of unique DATE9 columns to a preceding local definition. Existing logical TITLE/reset applies. ascii-date-fields-v1 artifacts print_01.txt and optionally print_02.txt quote formatted dates and right-trimmed character storage with JSON; unformatted numbers are integer/period. Nested alignment blanks are explicitly removed. Missing date is a quoted period outside LOW/HIGH dispatch. Numeric storage and ordered descriptors remain separate from presentation.",
+        "Retain1055-byte header,415-byte row and417056-byte report caps. Preflight does not render; later rendering/comparison failure publishes no accepted partial result. C++ refuses. Independent original hand/base-R expectations were qualified before the source executor. No native physical layout, custom-format DEFAULT width, WEEKDATE50 handling or whole vendor proof is claimed; H11 stays open."
+      ],
+      "validation_test": "examples/verify_date_profile.py",
+      "r_witness": "examples/date_profile.R",
+      "boundary_tests": "saschi.test_date_program",
+      "evidence": "Original hand/base-R fixture qualified before source executor; H11 held, no new vendor or native proof. Current full verification required."
+    },
+    "nested_date_format": {
+      "rule_id": "DS-081",
+      "target": "saschi.date_program.run_program",
+      "scope": [
+        "Separate date-format-fields-v1 source/portable family with empty initial catalog, exact version2 fields,64 Steps,8 fresh DATA names,8 unique local format names,32 TITLEs and2 PRINTs. No implicit joins to older profiles.",
+        "INFILE CARDS and one INPUT with1..32 columns: bare bounded signed integer or period, colon:$w. character1..64 without missing/truncation, canonical colon:DATE9 DDMMMYYYY or period. English months,1753..3999, SAS epoch1960-01-01. Exactly one complete field set per unquoted printable-ASCII record,0..1000 records of at most80 bytes. Reject invalid inputs eagerly, including unused tables.",
+        "One numeric VALUE per PROC FORMAT, named cohort,benefit or an ordinary usr_ name ending in a nondigit. Ordered contiguous inclusive LOW/HIGH or four-digit date literal ranges cover the qualified calendar. Render literals1..128 edge-blank-free printable nonmacro ASCII, WEEKDATE29..37 or WORDDATE18..32. Validate unused/empty definitions; no YEARCUTOFF, gaps, overlaps, recursion or wider fields.",
+        "Default PROC PRINT with one FORMAT binding of unique DATE9 columns to a preceding local definition. Existing logical TITLE/reset applies. ascii-date-fields-v1 artifacts print_01.txt and optionally print_02.txt quote formatted dates and right-trimmed character storage with JSON; unformatted numbers are integer/period. Nested alignment blanks are explicitly removed. Missing date is a quoted period outside LOW/HIGH dispatch. Numeric storage and ordered descriptors remain separate from presentation.",
+        "Retain1055-byte header,415-byte row and417056-byte report caps. Preflight does not render; later rendering/comparison failure publishes no accepted partial result. C++ refuses. Independent original hand/base-R expectations were qualified before the source executor. No native physical layout, custom-format DEFAULT width, WEEKDATE50 handling or whole vendor proof is claimed; H11 stays open.",
+        "Closed outer symbolic bounds only; exclusions require literal endpoints. Source-boundary refusal controls preserve original/vendor expectations."
+      ],
+      "validation_test": "examples/verify_date_profile.py",
+      "r_witness": "examples/date_profile.R",
+      "boundary_tests": "saschi.test_date_program",
+      "evidence": "Original hand/base-R fixture qualified before source executor; H11 held, no new vendor or native proof. Current full verification required."
+    },
+    "date_print": {
+      "rule_id": "ST-025",
+      "target": "saschi.date_program.run_program",
+      "scope": [
+        "Separate date-format-fields-v1 source/portable family with empty initial catalog, exact version2 fields,64 Steps,8 fresh DATA names,8 unique local format names,32 TITLEs and2 PRINTs. No implicit joins to older profiles.",
+        "INFILE CARDS and one INPUT with1..32 columns: bare bounded signed integer or period, colon:$w. character1..64 without missing/truncation, canonical colon:DATE9 DDMMMYYYY or period. English months,1753..3999, SAS epoch1960-01-01. Exactly one complete field set per unquoted printable-ASCII record,0..1000 records of at most80 bytes. Reject invalid inputs eagerly, including unused tables.",
+        "One numeric VALUE per PROC FORMAT, named cohort,benefit or an ordinary usr_ name ending in a nondigit. Ordered contiguous inclusive LOW/HIGH or four-digit date literal ranges cover the qualified calendar. Render literals1..128 edge-blank-free printable nonmacro ASCII, WEEKDATE29..37 or WORDDATE18..32. Validate unused/empty definitions; no YEARCUTOFF, gaps, overlaps, recursion or wider fields.",
+        "Default PROC PRINT with one FORMAT binding of unique DATE9 columns to a preceding local definition. Existing logical TITLE/reset applies. ascii-date-fields-v1 artifacts print_01.txt and optionally print_02.txt quote formatted dates and right-trimmed character storage with JSON; unformatted numbers are integer/period. Nested alignment blanks are explicitly removed. Missing date is a quoted period outside LOW/HIGH dispatch. Numeric storage and ordered descriptors remain separate from presentation.",
+        "Retain1055-byte header,415-byte row and417056-byte report caps. Preflight does not render; later rendering/comparison failure publishes no accepted partial result. C++ refuses. Independent original hand/base-R expectations were qualified before the source executor. No native physical layout, custom-format DEFAULT width, WEEKDATE50 handling or whole vendor proof is claimed; H11 stays open."
+      ],
+      "validation_test": "examples/verify_date_profile.py",
+      "r_witness": "examples/date_profile.R",
+      "boundary_tests": "saschi.test_date_program",
+      "evidence": "Original hand/base-R fixture qualified before source executor; H11 held, no new vendor or native proof. Current full verification required."
+    },
+    "date_picture": {
+      "rule_id": "DS-082",
+      "target": "saschi.picture_dates.run_program",
+      "scope": [
+        "Separate picture-date-fields-v1 with exact version2 fields, empty initial catalog,64Steps,8fresh DATE9 producers,8unique PICTURE definitions,32TITLE changes and2PRINTs; C++ and unqualified family joins refuse.",
+        "Reuse canonical DDMMMYYYY DATE9, English months,1753..3999, SAS epoch, complete unquoted CARDS records0..1000/80bytes, character storage1..64 and bounded signed integers through a separately marked composition. Eagerly validate unused/empty paths; descriptors retain type/length only.",
+        "One date PICTURE per PROC FORMAT: hirefmt,mrg or ordinary usr_ name ending in a nondigit;1..32 ordered nonoverlapping inclusive ranges with optional exclusive upper endpoint, LOW/HIGH/four-digit dates and optional final OTHER. Without OTHER require calendar coverage. Single-quoted ASCII templates1..40, maximal expansion128. Only %d,%0d,%b,%B,%Y,%% under DATATYPE=DATE; non-date literals contain no digit selectors or macro markers. English C-locale title-case spelling is a named repository policy. Missing without OTHER gives ERROR.",
+        "PRINT DATA=name with optional OBS1..1000, ordered unique VAR, FORMAT bindings of selected DATE9 fields to prior definitions, optional one TITLE/reset and RUN. Title persists locally, VAR changes report order only, OBS takes a prefix without storage mutation.",
+        "ascii-picture-date-v1 preserves template text except trailing padding, JSON-quotes formatted dates and trimmed character storage, and retains observation numbers. Named logical text, not native DEFAULT width, session casing or physical layout. Reuse1055/415/417056 header/row/report caps; late failure publishes no accepted partial job.",
+        "Complete original and unchanged vendor hand/base-R results,source accounting and full traces qualified before translator implementation. Gates cover portable/source refusals, runtime/emitted/actualCLI,wrong comparisons and late actual rendering failure. Current full verification is required; H11 is unrelated and remains open.",
+        "Closed outer symbolic bounds only; exclusions require literal endpoints. Source-boundary refusal controls preserve original/vendor expectations."
+      ],
+      "validation_test": "examples/verify_picture_dates.py",
+      "r_witness": "examples/picture_dates.R",
+      "boundary_tests": "saschi.test_picture_dates",
+      "evidence": "Original and unchanged vendor whole-source hand/base-R expectations frozen before translator. Current full verification required; no live SAS."
+    },
+    "picture_date_input": {
+      "rule_id": "DS-083",
+      "target": "saschi.picture_dates.run_program",
+      "scope": [
+        "Separate picture-date-fields-v1 with exact version2 fields, empty initial catalog,64Steps,8fresh DATE9 producers,8unique PICTURE definitions,32TITLE changes and2PRINTs; C++ and unqualified family joins refuse.",
+        "Reuse canonical DDMMMYYYY DATE9, English months,1753..3999, SAS epoch, complete unquoted CARDS records0..1000/80bytes, character storage1..64 and bounded signed integers through a separately marked composition. Eagerly validate unused/empty paths; descriptors retain type/length only.",
+        "One date PICTURE per PROC FORMAT: hirefmt,mrg or ordinary usr_ name ending in a nondigit;1..32 ordered nonoverlapping inclusive ranges with optional exclusive upper endpoint, LOW/HIGH/four-digit dates and optional final OTHER. Without OTHER require calendar coverage. Single-quoted ASCII templates1..40, maximal expansion128. Only %d,%0d,%b,%B,%Y,%% under DATATYPE=DATE; non-date literals contain no digit selectors or macro markers. English C-locale title-case spelling is a named repository policy. Missing without OTHER gives ERROR.",
+        "PRINT DATA=name with optional OBS1..1000, ordered unique VAR, FORMAT bindings of selected DATE9 fields to prior definitions, optional one TITLE/reset and RUN. Title persists locally, VAR changes report order only, OBS takes a prefix without storage mutation.",
+        "ascii-picture-date-v1 preserves template text except trailing padding, JSON-quotes formatted dates and trimmed character storage, and retains observation numbers. Named logical text, not native DEFAULT width, session casing or physical layout. Reuse1055/415/417056 header/row/report caps; late failure publishes no accepted partial job.",
+        "Complete original and unchanged vendor hand/base-R results,source accounting and full traces qualified before translator implementation. Gates cover portable/source refusals, runtime/emitted/actualCLI,wrong comparisons and late actual rendering failure. Current full verification is required; H11 is unrelated and remains open.",
+        "Closed outer symbolic bounds only; exclusions require literal endpoints. Source-boundary refusal controls preserve original/vendor expectations."
+      ],
+      "validation_test": "examples/verify_picture_dates.py",
+      "r_witness": "examples/picture_dates.R",
+      "boundary_tests": "saschi.test_picture_dates",
+      "evidence": "Original and unchanged vendor whole-source hand/base-R expectations frozen before translator. Current full verification required; no live SAS."
+    },
+    "picture_date_print": {
+      "rule_id": "ST-026",
+      "target": "saschi.picture_dates.run_program",
+      "scope": [
+        "Separate picture-date-fields-v1 with exact version2 fields, empty initial catalog,64Steps,8fresh DATE9 producers,8unique PICTURE definitions,32TITLE changes and2PRINTs; C++ and unqualified family joins refuse.",
+        "Reuse canonical DDMMMYYYY DATE9, English months,1753..3999, SAS epoch, complete unquoted CARDS records0..1000/80bytes, character storage1..64 and bounded signed integers through a separately marked composition. Eagerly validate unused/empty paths; descriptors retain type/length only.",
+        "One date PICTURE per PROC FORMAT: hirefmt,mrg or ordinary usr_ name ending in a nondigit;1..32 ordered nonoverlapping inclusive ranges with optional exclusive upper endpoint, LOW/HIGH/four-digit dates and optional final OTHER. Without OTHER require calendar coverage. Single-quoted ASCII templates1..40, maximal expansion128. Only %d,%0d,%b,%B,%Y,%% under DATATYPE=DATE; non-date literals contain no digit selectors or macro markers. English C-locale title-case spelling is a named repository policy. Missing without OTHER gives ERROR.",
+        "PRINT DATA=name with optional OBS1..1000, ordered unique VAR, FORMAT bindings of selected DATE9 fields to prior definitions, optional one TITLE/reset and RUN. Title persists locally, VAR changes report order only, OBS takes a prefix without storage mutation.",
+        "ascii-picture-date-v1 preserves template text except trailing padding, JSON-quotes formatted dates and trimmed character storage, and retains observation numbers. Named logical text, not native DEFAULT width, session casing or physical layout. Reuse1055/415/417056 header/row/report caps; late failure publishes no accepted partial job.",
+        "Complete original and unchanged vendor hand/base-R results,source accounting and full traces qualified before translator implementation. Gates cover portable/source refusals, runtime/emitted/actualCLI,wrong comparisons and late actual rendering failure. Current full verification is required; H11 is unrelated and remains open.",
+        "Closed outer symbolic bounds only; exclusions require literal endpoints. Source-boundary refusal controls preserve original/vendor expectations."
+      ],
+      "validation_test": "examples/verify_picture_dates.py",
+      "r_witness": "examples/picture_dates.R",
+      "boundary_tests": "saschi.test_picture_dates",
+      "evidence": "Original and unchanged vendor whole-source hand/base-R expectations frozen before translator. Current full verification required; no live SAS."
+    },
+    "numeric_value": {
+      "rule_id": "DS-084",
+      "target": "saschi.groupformat.run_program",
+      "scope": [
+        "Separate numeric-groupformat-v1 source/portable family: exact version2 defaults, empty initial catalog,64Steps,8fresh canonical DATE9 producers,8unique numeric VALUE definitions,1GROUPFORMAT DATA,2detail REPORTs and32TITLE changes. Unqualified joins and C++ refuse.",
+        "Reuse canonical DATE9/character/integer CARDS ingestion through separately marked group_data. Preserve numeric dates, padded characters and ordered type/length descriptors. Validate every record and unused definition eagerly, including empty paths. No persistent native FORMAT metadata claim.",
+        "Numeric VALUE names salgrp or ordinary usr_ names ending in a nondigit,1..32 contiguous inclusive integer ranges covering[-2147483647,2147483647],LOW/HIGH/integer endpoints, optional exclusive upper bound and edge-blank-free literal outputs1..128 nonmacro ASCII bytes. No options, OTHER, date endpoints or callback formats.",
+        "Fresh GROUPFORMAT output reads a genuine producer of at most500 rows, one nonmissing non-date numeric key in raw ascending order, and its prior numeric VALUE. Separate FIRST then LAST OUTPUT predicates use adjacent formatted-label equality; emit twice when both are true. No chaining, sort, reordering or deduplication. Preflight forwards source values conservatively for eager report validation without actual grouping.",
+        "Detail REPORT requires DATA=name NOWD,1..32 source/alias columns,known DEFINE aliases and at least one explicit DISPLAY. Optional FORMAT=DATE9,DOLLAR12 or prior numeric VALUE and literal labels; optional TITLE/reset. Every grouped-key alias requires explicit FORMAT, avoiding unqualified inherited/default-width display. DOLLAR12 admits nonnegative integral values0..999999999 or missing; DATE9 requires genuine date storage. No aggregation,ORDER,GROUP,ACROSS,COMPUTE or broader formatting.",
+        "ascii-groupformat-report-v1 JSON-quotes headers/formatted text/trimmed characters and uses integer/period unformatted numbers, no observation column. Uppercase DATE9 and whole-dollar/comma text remove alignment as explicit logical policy. Retain1055header/415row/417056report caps and1000report rows. Actual late rendering failure publishes no partial accepted job or artifacts.",
+        "Original and unchanged vendor complete hand/base-R results,all statement lines and full traces qualified before translator implementation. Gates distinguish raw/formatted grouping,tied-row identity,one-row dual OUTPUT,empty inputs,portable/source refusals,actualCLI wrong comparisons and actual late failure. Current full source-bound verification required; no live SAS or native physical-layout claim.",
+        "Closed outer symbolic bounds only; exclusions require literal endpoints. Source-boundary refusal controls preserve original/vendor expectations."
+      ],
+      "validation_test": "examples/verify_groupformat.py",
+      "r_witness": "examples/groupformat.R",
+      "boundary_tests": "saschi.test_groupformat",
+      "evidence": "Complete original and unchanged vendor hand/base-R qualification before translator; current full verification required, no native SAS."
+    },
+    "formatted_groups": {
+      "rule_id": "DS-085",
+      "target": "saschi.groupformat.run_program",
+      "scope": [
+        "Separate numeric-groupformat-v1 source/portable family: exact version2 defaults, empty initial catalog,64Steps,8fresh canonical DATE9 producers,8unique numeric VALUE definitions,1GROUPFORMAT DATA,2detail REPORTs and32TITLE changes. Unqualified joins and C++ refuse.",
+        "Reuse canonical DATE9/character/integer CARDS ingestion through separately marked group_data. Preserve numeric dates, padded characters and ordered type/length descriptors. Validate every record and unused definition eagerly, including empty paths. No persistent native FORMAT metadata claim.",
+        "Numeric VALUE names salgrp or ordinary usr_ names ending in a nondigit,1..32 contiguous inclusive integer ranges covering[-2147483647,2147483647],LOW/HIGH/integer endpoints, optional exclusive upper bound and edge-blank-free literal outputs1..128 nonmacro ASCII bytes. No options, OTHER, date endpoints or callback formats.",
+        "Fresh GROUPFORMAT output reads a genuine producer of at most500 rows, one nonmissing non-date numeric key in raw ascending order, and its prior numeric VALUE. Separate FIRST then LAST OUTPUT predicates use adjacent formatted-label equality; emit twice when both are true. No chaining, sort, reordering or deduplication. Preflight forwards source values conservatively for eager report validation without actual grouping.",
+        "Detail REPORT requires DATA=name NOWD,1..32 source/alias columns,known DEFINE aliases and at least one explicit DISPLAY. Optional FORMAT=DATE9,DOLLAR12 or prior numeric VALUE and literal labels; optional TITLE/reset. Every grouped-key alias requires explicit FORMAT, avoiding unqualified inherited/default-width display. DOLLAR12 admits nonnegative integral values0..999999999 or missing; DATE9 requires genuine date storage. No aggregation,ORDER,GROUP,ACROSS,COMPUTE or broader formatting.",
+        "ascii-groupformat-report-v1 JSON-quotes headers/formatted text/trimmed characters and uses integer/period unformatted numbers, no observation column. Uppercase DATE9 and whole-dollar/comma text remove alignment as explicit logical policy. Retain1055header/415row/417056report caps and1000report rows. Actual late rendering failure publishes no partial accepted job or artifacts.",
+        "Original and unchanged vendor complete hand/base-R results,all statement lines and full traces qualified before translator implementation. Gates distinguish raw/formatted grouping,tied-row identity,one-row dual OUTPUT,empty inputs,portable/source refusals,actualCLI wrong comparisons and actual late failure. Current full source-bound verification required; no live SAS or native physical-layout claim.",
+        "Closed outer symbolic bounds only; exclusions require literal endpoints. Source-boundary refusal controls preserve original/vendor expectations."
+      ],
+      "validation_test": "examples/verify_groupformat.py",
+      "r_witness": "examples/groupformat.R",
+      "boundary_tests": "saschi.test_groupformat",
+      "evidence": "Complete original and unchanged vendor hand/base-R qualification before translator; current full verification required, no native SAS."
+    },
+    "groupformat_input": {
+      "rule_id": "DS-086",
+      "target": "saschi.groupformat.run_program",
+      "scope": [
+        "Separate numeric-groupformat-v1 source/portable family: exact version2 defaults, empty initial catalog,64Steps,8fresh canonical DATE9 producers,8unique numeric VALUE definitions,1GROUPFORMAT DATA,2detail REPORTs and32TITLE changes. Unqualified joins and C++ refuse.",
+        "Reuse canonical DATE9/character/integer CARDS ingestion through separately marked group_data. Preserve numeric dates, padded characters and ordered type/length descriptors. Validate every record and unused definition eagerly, including empty paths. No persistent native FORMAT metadata claim.",
+        "Numeric VALUE names salgrp or ordinary usr_ names ending in a nondigit,1..32 contiguous inclusive integer ranges covering[-2147483647,2147483647],LOW/HIGH/integer endpoints, optional exclusive upper bound and edge-blank-free literal outputs1..128 nonmacro ASCII bytes. No options, OTHER, date endpoints or callback formats.",
+        "Fresh GROUPFORMAT output reads a genuine producer of at most500 rows, one nonmissing non-date numeric key in raw ascending order, and its prior numeric VALUE. Separate FIRST then LAST OUTPUT predicates use adjacent formatted-label equality; emit twice when both are true. No chaining, sort, reordering or deduplication. Preflight forwards source values conservatively for eager report validation without actual grouping.",
+        "Detail REPORT requires DATA=name NOWD,1..32 source/alias columns,known DEFINE aliases and at least one explicit DISPLAY. Optional FORMAT=DATE9,DOLLAR12 or prior numeric VALUE and literal labels; optional TITLE/reset. Every grouped-key alias requires explicit FORMAT, avoiding unqualified inherited/default-width display. DOLLAR12 admits nonnegative integral values0..999999999 or missing; DATE9 requires genuine date storage. No aggregation,ORDER,GROUP,ACROSS,COMPUTE or broader formatting.",
+        "ascii-groupformat-report-v1 JSON-quotes headers/formatted text/trimmed characters and uses integer/period unformatted numbers, no observation column. Uppercase DATE9 and whole-dollar/comma text remove alignment as explicit logical policy. Retain1055header/415row/417056report caps and1000report rows. Actual late rendering failure publishes no partial accepted job or artifacts.",
+        "Original and unchanged vendor complete hand/base-R results,all statement lines and full traces qualified before translator implementation. Gates distinguish raw/formatted grouping,tied-row identity,one-row dual OUTPUT,empty inputs,portable/source refusals,actualCLI wrong comparisons and actual late failure. Current full source-bound verification required; no live SAS or native physical-layout claim.",
+        "Closed outer symbolic bounds only; exclusions require literal endpoints. Source-boundary refusal controls preserve original/vendor expectations."
+      ],
+      "validation_test": "examples/verify_groupformat.py",
+      "r_witness": "examples/groupformat.R",
+      "boundary_tests": "saschi.test_groupformat",
+      "evidence": "Complete original and unchanged vendor hand/base-R qualification before translator; current full verification required, no native SAS."
+    },
+    "group_detail_report": {
+      "rule_id": "ST-027",
+      "target": "saschi.groupformat.run_program",
+      "scope": [
+        "Separate numeric-groupformat-v1 source/portable family: exact version2 defaults, empty initial catalog,64Steps,8fresh canonical DATE9 producers,8unique numeric VALUE definitions,1GROUPFORMAT DATA,2detail REPORTs and32TITLE changes. Unqualified joins and C++ refuse.",
+        "Reuse canonical DATE9/character/integer CARDS ingestion through separately marked group_data. Preserve numeric dates, padded characters and ordered type/length descriptors. Validate every record and unused definition eagerly, including empty paths. No persistent native FORMAT metadata claim.",
+        "Numeric VALUE names salgrp or ordinary usr_ names ending in a nondigit,1..32 contiguous inclusive integer ranges covering[-2147483647,2147483647],LOW/HIGH/integer endpoints, optional exclusive upper bound and edge-blank-free literal outputs1..128 nonmacro ASCII bytes. No options, OTHER, date endpoints or callback formats.",
+        "Fresh GROUPFORMAT output reads a genuine producer of at most500 rows, one nonmissing non-date numeric key in raw ascending order, and its prior numeric VALUE. Separate FIRST then LAST OUTPUT predicates use adjacent formatted-label equality; emit twice when both are true. No chaining, sort, reordering or deduplication. Preflight forwards source values conservatively for eager report validation without actual grouping.",
+        "Detail REPORT requires DATA=name NOWD,1..32 source/alias columns,known DEFINE aliases and at least one explicit DISPLAY. Optional FORMAT=DATE9,DOLLAR12 or prior numeric VALUE and literal labels; optional TITLE/reset. Every grouped-key alias requires explicit FORMAT, avoiding unqualified inherited/default-width display. DOLLAR12 admits nonnegative integral values0..999999999 or missing; DATE9 requires genuine date storage. No aggregation,ORDER,GROUP,ACROSS,COMPUTE or broader formatting.",
+        "ascii-groupformat-report-v1 JSON-quotes headers/formatted text/trimmed characters and uses integer/period unformatted numbers, no observation column. Uppercase DATE9 and whole-dollar/comma text remove alignment as explicit logical policy. Retain1055header/415row/417056report caps and1000report rows. Actual late rendering failure publishes no partial accepted job or artifacts.",
+        "Original and unchanged vendor complete hand/base-R results,all statement lines and full traces qualified before translator implementation. Gates distinguish raw/formatted grouping,tied-row identity,one-row dual OUTPUT,empty inputs,portable/source refusals,actualCLI wrong comparisons and actual late failure. Current full source-bound verification required; no live SAS or native physical-layout claim.",
+        "Closed outer symbolic bounds only; exclusions require literal endpoints. Source-boundary refusal controls preserve original/vendor expectations."
+      ],
+      "validation_test": "examples/verify_groupformat.py",
+      "r_witness": "examples/groupformat.R",
+      "boundary_tests": "saschi.test_groupformat",
+      "evidence": "Complete original and unchanged vendor hand/base-R qualification before translator; current full verification required, no native SAS."
     }
   }
 }

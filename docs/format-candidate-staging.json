@@ -1,0 +1,419 @@
+{
+  "schema_version": 1,
+  "status": "Six ordered bounded stages implemented, requiring the current full source-bound receipt. Four new whole official-example gates; originals FMT01/H11 and FMT04/H12 remain held. No publication or live SAS comparison.",
+  "recorded_on": "2026-11-03",
+  "principal_request": "that best next candidate list is lovely. The source hold notes are worth it to store.\n\nClean inference. Let's stage 1-6, in that order",
+  "repository": "sassoftware/sas-code-examples",
+  "commit": "579e057f90cd699f744fd6a1c8acaf9243f7ff67",
+  "root_tree_sha": "c8676f800a736f270cfe86b04f812034f26f7f5a",
+  "license_identifier": "Apache-2.0",
+  "license_pin": {
+    "bytes": 11357,
+    "git_blob_sha1": "261eeb9e9f8b2b4b0d119366dda99c6fd7d35c64",
+    "path": "LICENSE",
+    "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+  },
+  "stages": [
+    {
+      "order": 1,
+      "stage_id": "FMT-01",
+      "status": "bounded-original-profile-implemented-whole-target-held",
+      "path": "By Syntax/FORMAT Procedure/Using Nested Formats.sas",
+      "source_url": "https://github.com/sassoftware/sas-code-examples/blob/579e057f90cd699f744fd6a1c8acaf9243f7ff67/By%20Syntax/FORMAT%20Procedure/Using%20Nested%20Formats.sas",
+      "bytes": 1997,
+      "sha256": "5b586e14265e8caf0095828af2c6a93f3d15e85ddaefb37da3b0070193e0ad3e",
+      "git_blob_sha1": "375bd8e48aab6a98fe220b3e40ee9042e6bb95a3",
+      "follows_stage": null,
+      "source_hold_ids": [
+        "H11"
+      ],
+      "scope_to_characterize": "DATE9 input and date literals; numeric date storage; VALUE ranges; nested WEEKDATE/WORDDATE; PROC-local formatted PRINT.",
+      "preimplementation_work": [
+        "Freeze date decoding, SAS epoch, range endpoints, locale, widths and logical report text.",
+        "Freeze mixed whitespace CARDS, character/integer/DATE9 record handling and EOF behavior separately from existing comma profiles.",
+        "Author original boundary cases and a complete source-reading hand/base-R oracle.",
+        "Preserve unformatted stored dates, descriptors and the single PRINT result."
+      ],
+      "oracle_requirements": "Hand/R SAS-epoch dates and range mapping; authoritative format/locale/width characterization before full-source oracle.",
+      "explicit_exclusions": [
+        "No FCMP, PICTURE, formatted BY or PROC REPORT."
+      ],
+      "bounded_work": {
+        "principal_choice": "Keep the original on hold; build DATE9 and valid-width formats",
+        "contract": "docs/DATE_PROGRAM.md",
+        "gates": [
+          "date-foundations",
+          "date-profile",
+          "suite-date-program"
+        ],
+        "original_vendor_accepted": false
+      }
+    },
+    {
+      "order": 2,
+      "stage_id": "FMT-02",
+      "status": "whole-source-profile-implemented-acceptance-requires-current-full-receipt",
+      "path": "By Syntax/FORMAT Procedure/Using date directives on the PICTURE statement.sas",
+      "source_url": "https://github.com/sassoftware/sas-code-examples/blob/579e057f90cd699f744fd6a1c8acaf9243f7ff67/By%20Syntax/FORMAT%20Procedure/Using%20date%20directives%20on%20the%20PICTURE%20statement.sas",
+      "bytes": 3775,
+      "sha256": "e066c564052bb6e9467f2c3f56794e9eba8011de0fc5b027c3c6dd92948cfdfa",
+      "git_blob_sha1": "019a9d10cf49406adae5b344f65563a43cf5f349",
+      "follows_stage": "FMT-01",
+      "source_hold_ids": [],
+      "scope_to_characterize": "DATE9 reuse; date PICTURE directives, ranges and OTHER; VAR/OBS PRINT and two reports.",
+      "preimplementation_work": [
+        "Reuse stage 1 date rules only where the composition is separately witnessed.",
+        "Freeze directive casing, leading zeros, literal padding, ranges and OTHER.",
+        "Compare both reports, title state and unchanged input storage."
+      ],
+      "oracle_requirements": "Hand/R dates and explicit directive/case/padding policies; compare both original reports and unchanged storage.",
+      "explicit_exclusions": [
+        "No general numeric PICTURE or PROC REPORT."
+      ],
+      "bounded_work": {
+        "contract": "docs/DATE_PICTURES.md",
+        "gates": [
+          "date-picture",
+          "vendor-date-picture",
+          "suite-picture-dates"
+        ],
+        "original_vendor_accepted": "conditional on current full receipt",
+        "preengine_oracle": "Complete original and unchanged vendor hand/base-R result,accounting and trace qualified before translator."
+      }
+    },
+    {
+      "order": 3,
+      "stage_id": "FMT-03",
+      "status": "whole-source-profile-implemented-acceptance-requires-current-full-receipt",
+      "path": "By Syntax/FORMAT Procedure/Using the By Groupformat Statement to Process Data.sas",
+      "source_url": "https://github.com/sassoftware/sas-code-examples/blob/579e057f90cd699f744fd6a1c8acaf9243f7ff67/By%20Syntax/FORMAT%20Procedure/Using%20the%20By%20Groupformat%20Statement%20to%20Process%20Data.sas",
+      "bytes": 3828,
+      "sha256": "574ae686cae9e5b81e65da1a4d2e3565d5b100f75fa6550087047b842381c1de",
+      "git_blob_sha1": "1163748f00f1b9249afe2944a0e58f26e33d9378",
+      "follows_stage": "FMT-02",
+      "source_hold_ids": [],
+      "scope_to_characterize": "VALUE ranges; BY GROUPFORMAT; FIRST/LAST dual OUTPUT; bounded PROC REPORT with dollar/date formats.",
+      "preimplementation_work": [
+        "Freeze formatted-key grouping versus raw-key ordering and required input order.",
+        "Pin tied-row identity, first/last selection and a row selected by both predicates.",
+        "Define the new logical REPORT contract and complete state/report oracle."
+      ],
+      "oracle_requirements": "Independent formatted-group boundaries, tied rows and first/last duplication, plus full state/report oracle.",
+      "explicit_exclusions": [
+        "No automatic promotion of general REPORT, CLASS statistics or physical pages."
+      ],
+      "bounded_work": {
+        "contract": "docs/GROUPFORMAT.md",
+        "gates": [
+          "groupformat",
+          "vendor-groupformat",
+          "suite-groupformat"
+        ],
+        "preengine_oracle": "Complete original and unchanged vendor hand/base-R result,accounting,full trace.",
+        "original_vendor_accepted": "conditional on current full receipt"
+      }
+    },
+    {
+      "order": 4,
+      "stage_id": "FMT-04",
+      "status": "bounded-original-profile-implemented-whole-target-held",
+      "path": "By Syntax/FORMAT Procedure/Using digit selectors in the PICTURE statement.sas",
+      "source_url": "https://github.com/sassoftware/sas-code-examples/blob/579e057f90cd699f744fd6a1c8acaf9243f7ff67/By%20Syntax/FORMAT%20Procedure/Using%20digit%20selectors%20in%20the%20PICTURE%20statement.sas",
+      "bytes": 3214,
+      "sha256": "ea8926988ef16551568809867ef32941c8ce8e3704399eacb083e077fa7cba41",
+      "git_blob_sha1": "0f81bc90ceb311eea53a65d89cae9ea7f0e8512a",
+      "follows_stage": "FMT-03",
+      "source_hold_ids": [
+        "H12"
+      ],
+      "scope_to_characterize": "BOM admission; fixed-width character INPUT; PICTURE digit selectors and NOEDIT; REPORT aliases.",
+      "preimplementation_work": [
+        "Resolve H01 before target admission, preserving the full original byte hash.",
+        "Independently qualify fixed-width record consumption and destination widths.",
+        "Distinguish 09, 99 and NOEDIT across zero, negative and range boundaries, including aliases."
+      ],
+      "oracle_requirements": "Independently characterize picture digit editing and fixed-width input; BOM policy first.",
+      "explicit_exclusions": [
+        "No silent BOM removal, source repair or general picture editing."
+      ],
+      "bounded_work": {
+        "contract": "docs/NUMERIC_PICTURES.md",
+        "gates": [
+          "numeric-pictures",
+          "suite-numeric-pictures"
+        ],
+        "original_vendor_accepted": false,
+        "H01": "Resolved as numeric-picture-envelope-v1 repository policy, not native SAS validation",
+        "H12": "Selectors follow message text without NOEDIT; native behavior unresolved"
+      }
+    },
+    {
+      "order": 5,
+      "stage_id": "FMT-05",
+      "status": "whole-source-profile-implemented-acceptance-requires-current-full-receipt",
+      "path": "By Syntax/FORMAT Procedure/Using Functions to Create Formats.sas",
+      "source_url": "https://github.com/sassoftware/sas-code-examples/blob/579e057f90cd699f744fd6a1c8acaf9243f7ff67/By%20Syntax/FORMAT%20Procedure/Using%20Functions%20to%20Create%20Formats.sas",
+      "bytes": 3127,
+      "sha256": "129d54f964ed66fb2dbf591d1b38b12f39d60e9e718e273d1c7a33a367617111",
+      "git_blob_sha1": "50f34c08e2a3277479d5eb285e19814466a1064c",
+      "follows_stage": "FMT-04",
+      "source_hold_ids": [],
+      "scope_to_characterize": "DATE9 reuse; bounded FCMP/CMPLIB; week INTNX alignment; callback formats; REPORT aliases and headers.",
+      "preimplementation_work": [
+        "Freeze function lookup, local namespace, argument/result types and call timing.",
+        "Independently qualify both week alignments and date formatting.",
+        "Account for all callbacks, aliases, headers and complete source/report state."
+      ],
+      "oracle_requirements": "Hand/R sequential date and week controls, then full-source formatted-report expectations.",
+      "explicit_exclusions": [
+        "No general FCMP, recursion, arbitrary functions or automatic macro support."
+      ],
+      "bounded_work": {
+        "contract": "docs/WEEK_CALLBACKS.md",
+        "gates": [
+          "week-callbacks",
+          "vendor-week-callbacks",
+          "suite-week-callbacks"
+        ],
+        "original_vendor_accepted": "conditional on current full receipt"
+      }
+    },
+    {
+      "order": 6,
+      "stage_id": "FMT-06",
+      "status": "whole-source-profile-implemented-acceptance-requires-current-full-receipt",
+      "path": "By Syntax/FORMAT Procedure/Using A Format To Create A Function.sas",
+      "source_url": "https://github.com/sassoftware/sas-code-examples/blob/579e057f90cd699f744fd6a1c8acaf9243f7ff67/By%20Syntax/FORMAT%20Procedure/Using%20A%20Format%20To%20Create%20A%20Function.sas",
+      "bytes": 3902,
+      "sha256": "39e8f17657e9aaa31f3940cbff076384a893da6f95b4ed42b49c8a116d06d417",
+      "git_blob_sha1": "a797e253d0b70ee6f893792c09bd0db03b5a7cfd",
+      "follows_stage": "FMT-05",
+      "source_hold_ids": [],
+      "scope_to_characterize": "Character range formats; bounded FCMP/CMPLIB; ZIPSTATE/UPCASE; quoted DSD input; computed REPORT.",
+      "preimplementation_work": [
+        "Approve an independent postal reference policy, lookup domain and character-versus-numeric ZIPSTATE argument behavior before freezing truth.",
+        "Characterize quoted fields, leading-zero postal strings, widths and format range endpoints.",
+        "Qualify computed-column timing and complete country/state/report outputs."
+      ],
+      "oracle_requirements": "Independent postal mappings and hand/R full-source oracle; ZIPSTATE reference-data policy remains unresolved.",
+      "explicit_exclusions": [
+        "City labels cannot serve as ZIPSTATE truth; no general postal database, FCMP or computed REPORT admission."
+      ],
+      "bounded_work": {
+        "contract": "docs/POSTAL_FUNCTION.md",
+        "gates": [
+          "postal-reference",
+          "postal-function",
+          "vendor-postal-function",
+          "suite-postal-reference",
+          "suite-postal-function"
+        ],
+        "original_vendor_accepted": "conditional on current full receipt and approved bounded USPS policy",
+        "postal_policy": "Pinned USPS evidence,19ZIP identities,unknown ZIP refusal,all reference data/results external; no native SAS postal-data match"
+      }
+    }
+  ],
+  "source_holds": [
+    {
+      "hold_id": "H01",
+      "status": "resolved-for-bounded-repository-envelope-only",
+      "review_id": 9,
+      "path": "By Syntax/FORMAT Procedure/Using digit selectors in the PICTURE statement.sas",
+      "bytes": 3214,
+      "sha256": "ea8926988ef16551568809867ef32941c8ce8e3704399eacb083e077fa7cba41",
+      "git_blob_sha1": "0f81bc90ceb311eea53a65d89cae9ea7f0e8512a",
+      "type": "encoding-policy",
+      "observation": "UTF-8 BOM is present in the original bytes.",
+      "required_action": "Resolve BOM admission explicitly while preserving original bytes and source-line accounting.",
+      "resolution_evidence": "An explicit bounded policy with independent positive and refusal controls, original-byte pins and whole-source evidence; no silent stripping.",
+      "native_sas_execution_verified": false,
+      "decision": "numeric-picture-envelope-v1 admits exactly one leading UTF8 BOM and ASCII remainder,retains raw hash and physical lines,records3prefix bytes; native SAS handling is not established; original remains held at H12."
+    },
+    {
+      "hold_id": "H02",
+      "status": "open",
+      "review_id": 15,
+      "path": "By Syntax/FREQ Procedure/2_One-way frequency report statistics.sas",
+      "bytes": 1557,
+      "sha256": "290b7b489892f3b36ff7d29049034b12ad607d03d169f5c2e4360cab311313d2",
+      "git_blob_sha1": "ab2a4481bbf9e1e94cb19fd15a5fbdbfd739c0ad",
+      "type": "source-boundary",
+      "observation": "Opening header closes at line 7 before explanatory prose.",
+      "required_action": "Resolve the original-source boundary before unchanged-source acceptance.",
+      "resolution_evidence": "Document a principal-approved source decision; any corrected revision or adapted variant gets a separate identity and cannot inherit unchanged-original proof.",
+      "native_sas_execution_verified": false
+    },
+    {
+      "hold_id": "H03",
+      "status": "open",
+      "review_id": 16,
+      "path": "By Syntax/FREQ Procedure/3_Create an output table with frequency statistics.sas",
+      "bytes": 1067,
+      "sha256": "e108905c7755c024de00d64cc0819798dc58c7467b6b61ee39d0c1a50537e1c5",
+      "git_blob_sha1": "dcfdfddd2ba61ca176a84b9adf87202dc66049ea",
+      "type": "source-boundary",
+      "observation": "Opening header closes at line 6 before explanatory prose.",
+      "required_action": "Resolve the original-source boundary before unchanged-source acceptance.",
+      "resolution_evidence": "Document a principal-approved source decision; any corrected revision or adapted variant gets a separate identity and cannot inherit unchanged-original proof.",
+      "native_sas_execution_verified": false
+    },
+    {
+      "hold_id": "H04",
+      "status": "open",
+      "review_id": 17,
+      "path": "By Syntax/FREQ Procedure/4_Control frequency report order.sas",
+      "bytes": 2856,
+      "sha256": "88214db5b089dfd0174f969bf49bc1e6546c0efdf9092a6f3b8f93fbf9510156",
+      "git_blob_sha1": "663d4b45a8299a5416acc8511ab450bacdfe81aa",
+      "type": "source-boundary",
+      "observation": "Opening header closes at line 8 before explanatory prose.",
+      "required_action": "Resolve the original-source boundary before unchanged-source acceptance.",
+      "resolution_evidence": "Document a principal-approved source decision; any corrected revision or adapted variant gets a separate identity and cannot inherit unchanged-original proof.",
+      "native_sas_execution_verified": false
+    },
+    {
+      "hold_id": "H05",
+      "status": "open",
+      "review_id": 18,
+      "path": "By Syntax/FREQ Procedure/5_Frequency plots.sas",
+      "bytes": 2753,
+      "sha256": "02d0d700bea76b2a81c1c11708b647be9707500c61cb56aa10dc3ea2cdb6e20c",
+      "git_blob_sha1": "623f249ca52c28d7b015bffd085d9975d8b831ff",
+      "type": "source-boundary",
+      "observation": "Opening header closes at line 7 before explanatory prose.",
+      "required_action": "Resolve the original-source boundary before unchanged-source acceptance.",
+      "resolution_evidence": "Document a principal-approved source decision; any corrected revision or adapted variant gets a separate identity and cannot inherit unchanged-original proof.",
+      "native_sas_execution_verified": false
+    },
+    {
+      "hold_id": "H06",
+      "status": "open",
+      "review_id": 25,
+      "path": "By Syntax/IMPORT Procedure/2_Specify Column Attributes with Generated DATA Step Code.sas",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_blob_sha1": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "type": "empty-source",
+      "observation": "Original entry is exactly zero bytes.",
+      "required_action": "Keep it in the denominator and outside behavioral proof admission.",
+      "resolution_evidence": "A substantive new source revision needs its own identity and oracle; no-op acceptance does not supply missing benchmark behavior.",
+      "native_sas_execution_verified": false
+    },
+    {
+      "hold_id": "H07",
+      "status": "open",
+      "review_id": 26,
+      "path": "By Syntax/Macro Language/1_Creating_Macro_Variables.sas",
+      "bytes": 4743,
+      "sha256": "bfc429ec3e130e1498af1dd1371ddb0f8d5722de148f258dae015658e50205a9",
+      "git_blob_sha1": "e11ae3a24ea94a70bc4202d7fc74b4b24bed9317",
+      "type": "encoding-policy",
+      "observation": "UTF-8 BOM is present in the original bytes.",
+      "required_action": "Resolve BOM admission explicitly while preserving original bytes and source-line accounting.",
+      "resolution_evidence": "An explicit bounded policy with independent positive and refusal controls, original-byte pins and whole-source evidence; no silent stripping.",
+      "native_sas_execution_verified": false
+    },
+    {
+      "hold_id": "H08",
+      "status": "open",
+      "review_id": 32,
+      "path": "By Syntax/PRINT Procedure/3_Select rows to print and format displayed values.sas",
+      "bytes": 1508,
+      "sha256": "980840342f334c7c35b85f98262d74d6013f2ad36a913e021137befbfa56535b",
+      "git_blob_sha1": "fdf4f9366b7f816e466cc64b1ab825cb1b60bd28",
+      "type": "parser-policy",
+      "observation": "Go rejects an unterminated nested-looking header; its lexer tracks nesting depth.",
+      "required_action": "Characterize native comment treatment and the accepted Go parser policy separately.",
+      "resolution_evidence": "Independent first-party lexical witnesses and a reviewed contract decision before any lexer change or attribution of native source invalidity.",
+      "native_sas_execution_verified": false
+    },
+    {
+      "hold_id": "H09",
+      "status": "open",
+      "review_id": 33,
+      "path": "By Syntax/PRINT Procedure/4_Order rows in a report.sas",
+      "bytes": 1428,
+      "sha256": "853deefc1f08de2ffad7dcc74ad2bf4a41f814ff85cc4012103522cf499082f1",
+      "git_blob_sha1": "e8f9c6e67474e15d1279e2c8fb555a0f719d9828",
+      "type": "source-token",
+      "observation": "Original direction token is spelled desending at line 16.",
+      "required_action": "Preserve the token and resolve source validity before unchanged-file acceptance.",
+      "resolution_evidence": "Document a principal-approved source decision; an upstream correction or adapted program is a separately identified target.",
+      "native_sas_execution_verified": false
+    },
+    {
+      "hold_id": "H10",
+      "status": "open",
+      "review_id": 42,
+      "path": "By Topic/Utility Macros/Print first N rows from each table in a library.sas",
+      "bytes": 1036,
+      "sha256": "1a58b9ec40f4e17bf3471e76d79c9c854df4960100e386229586366e05766e87",
+      "git_blob_sha1": "d600dd4c4c2a1b685f4138252645dabcc597e4c8",
+      "type": "source-format",
+      "observation": "Original has 1036 bytes, 567 NUL bytes and invalid UTF-8; actual asset format is unresolved.",
+      "required_action": "Resolve asset format and source provenance; do not guess an encoding or replace a similarly named file.",
+      "resolution_evidence": "An identified valid source target and explicit provenance/format decision; any replacement retains a separate identity.",
+      "native_sas_execution_verified": false
+    },
+    {
+      "hold_id": "H11",
+      "status": "open",
+      "path": "By Syntax/FORMAT Procedure/Using Nested Formats.sas",
+      "bytes": 1997,
+      "sha256": "5b586e14265e8caf0095828af2c6a93f3d15e85ddaefb37da3b0070193e0ad3e",
+      "git_blob_sha1": "375bd8e48aab6a98fe220b3e40ee9042e6bb95a3",
+      "type": "format-width-authority",
+      "observation": "Original nests WEEKDATE50.; SAS9.4 HTML and current PDF specify WEEKDATE widths3..37. Native handling of this out-of-range nested request has not been established.",
+      "required_action": "Resolve the original-width behavior or obtain an explicit separately identified target decision before whole-program acceptance.",
+      "resolution_evidence": "Licensed native capture or authoritative behavior evidence, or a principal-selected new target identity with its own qualified oracle. No silent clamping or replacement.",
+      "native_sas_execution_verified": false,
+      "references": [
+        "https://support.sas.com/documentation/cdl/en/leforinforref/64790/HTML/default/p1rib2891qxd4yn18x1myfkmxeet.htm",
+        "https://documentation.sas.com/api/docsets/leforinforref/9.4/content/leforinforref.pdf#page=505"
+      ]
+    },
+    {
+      "hold_id": "H12",
+      "status": "open",
+      "path": "By Syntax/FORMAT Procedure/Using digit selectors in the PICTURE statement.sas",
+      "bytes": 3214,
+      "sha256": "ea8926988ef16551568809867ef32941c8ce8e3704399eacb083e077fa7cba41",
+      "git_blob_sha1": "0f81bc90ceb311eea53a65d89cae9ea7f0e8512a",
+      "type": "picture-selector-authority",
+      "observation": "Original delGy final template has digit selectors after leading message characters without NOEDIT. Documented selector editing requires a digit selector first; native outcome of this exact original is unresolved.",
+      "required_action": "Retain unchanged original hold. Valid09/99/NOEDIT first-party work is separate; no silent repair or complete expected vendor report.",
+      "native_sas_execution_verified": false,
+      "references": [
+        "https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a002473467.htm"
+      ]
+    }
+  ],
+  "provenance": {
+    "analysis_basis": "Complete pinned-source inspection, compile-only screen and explicitly inferred contract/oracle requirements.",
+    "scope": "Six inline-data candidates selected from the 44-entry official remainder; source-hold register retains all ten affected identities from that review.",
+    "local_analysis_artifacts": [
+      "telemetry/remaining-analysis-20261103/review-01.json",
+      "telemetry/remaining-analysis-20261103/RANKING.json",
+      "telemetry/remaining-analysis-20261103/VALIDATION.json"
+    ],
+    "public_reference_for_comment_policy": "https://documentation.sas.com/api/collections/pgmsascdc/9.4_3.5/docsets/lestmtsglobal/content/lestmtsglobal.pdf?locale=en",
+    "analysis_screen_sha256": "9b89c7a86d3e62a02255059090f3cd08cdf1e9a0dd1d9485391d24df2b16b827"
+  },
+  "boundaries": [
+    "Keep original source/LICENSE bodies,USPS reference bodies,mappings and complete vendor/reference-derived results outside Go.",
+    "Keep eleven registered vendor programs and the22/56 Roku denominator separate; current full gates decide acceptance.",
+    "H11 and H12 remain original-target holds; H01 is only a bounded repository envelope policy.",
+    "Every bounded contract and independent original/vendor oracle was qualified before its translator implementation.",
+    "The principal authorized completion in order and a local review commit. No push,release or publication."
+  ],
+  "processing_authority": {
+    "request": "That's not a problem at all. We can now begin processing items 1 through 6 from the report",
+    "recorded_on": "2026-11-03",
+    "scope": "Process FMT-01 through FMT-06 in order; source holds and independent-oracle requirements remain."
+  },
+  "continuation_authority": {
+    "request": "Thank you. Can we please carry out the remain phases of the plan and then I will review the commit",
+    "scope": "Continue FMT-02..06 in order while FMT-01 original remains held; prepare local review commit after verification.",
+    "postal_policy": "Principal approved pinned USPS evidence and a bounded ZIP set; refuse unverified ZIPs and keep reference data external."
+  }
+}

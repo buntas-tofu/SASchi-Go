@@ -8,6 +8,12 @@ REPORT_CONTRACT = 'numeric-space-fixed12-v1'
 MIXED_REPORT_CONTRACT = 'ascii-titled-mixed-integer-v1'
 INFORMAT_REPORT_CONTRACT = 'ascii-informat-reports-v1'
 DUPLICATE_REPORT_CONTRACT = 'ascii-dupout-mixed-integer-v1'
+POSTAL_FUNCTION_REPORT_CONTRACT = 'ascii-postal-function-report-v1'
+WEEK_CALLBACK_REPORT_CONTRACT = 'ascii-week-callback-report-v1'
+NUMBER_PICTURE_REPORT_CONTRACT = 'ascii-number-picture-report-v1'
+GROUPFORMAT_REPORT_CONTRACT = 'ascii-groupformat-report-v1'
+PICTURE_DATE_REPORT_CONTRACT = 'ascii-picture-date-v1'
+DATE_REPORT_CONTRACT = 'ascii-date-fields-v1'
 REPORT_COMPARISON_CONTRACT = 'exact-basename-set-utf8-bytes-v1'
 MAX_REPORT_BYTES = 417056
 
@@ -40,6 +46,18 @@ def report_manifest(reports, *, contract=REPORT_CONTRACT):
     elif contract == DUPLICATE_REPORT_CONTRACT:
         from .sort_duplicates import validate_reports as validate_duplicate_reports
         validate_duplicate_reports(reports)
+    elif contract == POSTAL_FUNCTION_REPORT_CONTRACT:
+        from .postal_function import validate_reports as validate_postal_reports
+        validate_postal_reports(reports)
+    elif contract in (GROUPFORMAT_REPORT_CONTRACT, NUMBER_PICTURE_REPORT_CONTRACT, WEEK_CALLBACK_REPORT_CONTRACT):
+        from .format_report import validate_reports as validate_groupformat_reports
+        validate_groupformat_reports(reports)
+    elif contract == PICTURE_DATE_REPORT_CONTRACT:
+        from .picture_dates import validate_reports as validate_picture_reports
+        validate_picture_reports(reports)
+    elif contract == DATE_REPORT_CONTRACT:
+        from .date_program import validate_reports as validate_date_reports
+        validate_date_reports(reports)
     else:
         raise ValueError('unknown logical report contract')
     return {name: {'sha256': hashlib.sha256(text.encode('ascii')).hexdigest(),
@@ -57,22 +75,22 @@ def read_expected_reports(path, *, contract=REPORT_CONTRACT):
         return result
     def constant(value):
         raise ValueError('invalid expected report JSON constant')
-    if contract not in (REPORT_CONTRACT, MIXED_REPORT_CONTRACT, INFORMAT_REPORT_CONTRACT, DUPLICATE_REPORT_CONTRACT):
+    if contract not in (REPORT_CONTRACT, MIXED_REPORT_CONTRACT, INFORMAT_REPORT_CONTRACT, DUPLICATE_REPORT_CONTRACT, DATE_REPORT_CONTRACT, PICTURE_DATE_REPORT_CONTRACT, GROUPFORMAT_REPORT_CONTRACT, NUMBER_PICTURE_REPORT_CONTRACT, WEEK_CALLBACK_REPORT_CONTRACT, POSTAL_FUNCTION_REPORT_CONTRACT):
         raise ValueError('unknown expected report contract')
     maximum = (4194304 if contract == DUPLICATE_REPORT_CONTRACT else
-               2097152 if contract in (MIXED_REPORT_CONTRACT, INFORMAT_REPORT_CONTRACT) else 1048576)
+               2097152 if contract in (MIXED_REPORT_CONTRACT, INFORMAT_REPORT_CONTRACT, DATE_REPORT_CONTRACT, PICTURE_DATE_REPORT_CONTRACT, GROUPFORMAT_REPORT_CONTRACT, NUMBER_PICTURE_REPORT_CONTRACT, WEEK_CALLBACK_REPORT_CONTRACT, POSTAL_FUNCTION_REPORT_CONTRACT) else 1048576)
     raw = path.read_bytes()
     if len(raw) > maximum:
         if contract == DUPLICATE_REPORT_CONTRACT:
             raise ValueError('expected three-report manifest exceeds four MiB')
-        if contract in (MIXED_REPORT_CONTRACT, INFORMAT_REPORT_CONTRACT):
+        if contract in (MIXED_REPORT_CONTRACT, INFORMAT_REPORT_CONTRACT, DATE_REPORT_CONTRACT, PICTURE_DATE_REPORT_CONTRACT, GROUPFORMAT_REPORT_CONTRACT, NUMBER_PICTURE_REPORT_CONTRACT, WEEK_CALLBACK_REPORT_CONTRACT, POSTAL_FUNCTION_REPORT_CONTRACT):
             raise ValueError('expected mixed report manifest exceeds two MiB')
         raise ValueError('expected report manifest exceeds one MiB')
     try:
         value = json.loads(raw, object_pairs_hook=pairs, parse_constant=constant)
     except (UnicodeError, json.JSONDecodeError, RecursionError) as exc:
         raise ValueError('expected reports require bounded valid JSON text') from exc
-    if (contract in (MIXED_REPORT_CONTRACT, INFORMAT_REPORT_CONTRACT) and
+    if (contract in (MIXED_REPORT_CONTRACT, INFORMAT_REPORT_CONTRACT, DATE_REPORT_CONTRACT, PICTURE_DATE_REPORT_CONTRACT, GROUPFORMAT_REPORT_CONTRACT, NUMBER_PICTURE_REPORT_CONTRACT, WEEK_CALLBACK_REPORT_CONTRACT, POSTAL_FUNCTION_REPORT_CONTRACT) and
             (type(value) is not dict or not 1 <= len(value) <= 2)):
         raise ValueError('expected mixed reports require one or two basename-to-text entries')
     if contract == DUPLICATE_REPORT_CONTRACT and (type(value) is not dict or not 1 <= len(value) <= 3):
