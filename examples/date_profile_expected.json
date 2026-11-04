@@ -1,0 +1,55 @@
+{
+  "datasets": {
+    "dates": {
+      "schema": {
+        "id": {
+          "type": "number",
+          "length": 8
+        },
+        "sex": {
+          "type": "character",
+          "length": 1
+        },
+        "amount": {
+          "type": "number",
+          "length": 8
+        },
+        "born": {
+          "type": "number",
+          "length": 8
+        },
+        "hired": {
+          "type": "number",
+          "length": 8
+        }
+      },
+      "rows": [
+        {
+          "id": 1.0,
+          "sex": "F",
+          "amount": 7.0,
+          "born": -1.0,
+          "hired": 0.0
+        },
+        {
+          "id": 2.0,
+          "sex": "M",
+          "amount": -2.0,
+          "born": 0.0,
+          "hired": 3653.0
+        },
+        {
+          "id": 3.0,
+          "sex": "F",
+          "amount": null,
+          "born": null,
+          "hired": 14669.0
+        }
+      ]
+    }
+  },
+  "log": [],
+  "reports": {
+    "print_01.txt": "TITLE: Dates\nobs id sex amount born hired\n1 1 \"F\" 7 \"Thursday, December 31, 1959\" \"January 1, 1960\"\n2 2 \"M\" -2 \"January 1, 1960\" \"January 1, 1970\"\n3 3 \"F\" . \".\" \"New era\"\n"
+  }
+}

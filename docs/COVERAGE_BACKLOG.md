@@ -1,10 +1,11 @@
 # Coverage reconciliation and next gate series
 
 Status: Repository/base-R planning evidence, originally reconciled at main08eaa7b
-on2026-10-27 and updated through DS-079, ST-024, SQL-004 and A0.
+on2026-10-27 and updated through DS-095, ST-030, SQL-004 and A0.
 Accepted entry PR66/main0abf161 completed duplicate partition,owned replacement
 and three-report SORT. New input DROP/directed projection registrations require
-the current full source-bound receipt. The sealed handoff binds acceptance.
+the current full source-bound receipt. The sealed handoff retains the historical accepted entry; current full receipts
+bind the added profiles.
 For principal/maintainer prioritization. Counts describe this checkout and the56
 pinned sibling corpus files, not all SAS or live-SAS equivalence. Updated for
 DS-039 arrays, DS-040 DO OVER and DS-041 nested/computed counted loops after the original
@@ -14,13 +15,13 @@ This document does not authorize additional implementation or publication scope.
 
 ## Inventory reconciled against actual evidence
 
-The golden command registers99 fixture runners,66 translator suites and1
+The golden command registers111 fixture runners,73 translator suites and1
 synthesis runner. These are registration counts, not passing outcomes. The
 source-bound full receipt records the discovered test count. A source-bound full receipt records actual skips and
 results. Accepted run entry PR66/main0abf161 contained97 fixtures,65 suites and1491
 tests with zero skips,60 faithful synthesis checks and60 naive controls. The
 separate1k workload checks total39:18 ledger and21 text. These counts have
-different units. Neither123 rulebook rules nor166 golden-command runners is a
+different units. Neither145 rulebook rules nor185 golden-command runners is a
 SAS capability denominator.
 
 [The capability manifest](capability-manifest.json) still enumerates108 statements
@@ -175,7 +176,7 @@ earlier numeric-list PUT remains bounded integer output and earlier division req
 ## Separate vendor benchmark
 
 At the PR65 accepted entry, six vendor programs have complete separate proofs.
-The current manifest registers seven pinned Apache-2.0 programs, identified
+The current manifest registers eleven pinned Apache-2.0 programs, identified
 by immutable commit,source and LICENSE bytes in
 [the manifest](vendor-benchmark-manifest.json). Bodies remain in an explicitly
 prepared external cache. The2 prior accepted sorted-copy and INVALUE examples have
@@ -419,3 +420,72 @@ vendor proofs and22complete Roku proofs among56pins remain separate and unchange
 Projected DUPOUT,replacement,ALL,output projection,numeric-only selected schemas
 and broader report bounds remain deferred. This original witness adds no vendor
 or Roku proof and makes no live SAS or physical output claim.
+
+## Ordered FORMAT candidate staging
+
+On 2026-11-03 the principal selected the six inline-data candidates from the
+larger official-example review in their recorded order. The
+[candidate plan](FORMAT_CANDIDATE_PLAN.md) stages nested formats, date PICTURE,
+BY GROUPFORMAT, digit-selector PICTURE, function-backed formats and format-backed
+functions. Each stage needs a bounded contract and independently qualified
+oracle before implementation. Stage1 now has a separate original-fixture
+DATE9/valid-width source contract; its vendor target remains held. This is a planning selection, not a capability or
+new whole-program proof. The [source-hold register](SOURCE_HOLDS.md) retains all
+ten observations from that review and H11 discovered during stage 1 processing.
+H11 records the original WEEKDATE50 request against the documented maximum width
+37. The [reference foundations](DATE_FOUNDATIONS.md) and separate
+[date source profile](DATE_PROGRAM.md) provide original-fixture evidence,
+conditional on the current full receipt. They do not resolve H11 or add a vendor
+proof; the later stages remain queued in the selected order.
+
+
+## FMT-02 date-picture composition
+
+[The separate date-picture profile](DATE_PICTURES.md) adds original full-source
+hand/base-R evidence and a pinned unchanged official-example gate. It covers
+21language statements,1opaque payload,20rows/21attempts,5Steps and2complete logical
+reports, with frozen full execution traces and actualCLI comparison controls.
+This is conditional on the current full receipt. It adds no Roku proof or native
+SAS/physical-layout validation. The other source holds remain separate.
+
+
+## FMT-03 formatted groups and detail reports
+
+[The GROUPFORMAT profile](GROUPFORMAT.md) adds a separate source/portable family
+with original and unchanged official-example gates. It preserves adjacent
+formatted boundaries,raw-key sortedness and both OUTPUT calls, including the
+one-row duplicate. The vendor case binds45input rows,8explicit outputs,complete
+schema/report text and the full trace. Current full verification decides
+acceptance. No new Roku completion, inherited-format/general REPORT or native
+SAS/physical-page claim is made.
+
+## FMT-04 numeric PICTURE
+
+[The numeric-picture profile](NUMERIC_PICTURES.md), DS-087/088 and ST-028, adds
+separate fixed integer/character input, valid leading selectors, NOEDIT and
+logical detail reports. An explicit source-envelope policy accounts for one
+leading BOM without changing the raw source identity. The unchanged original
+remains held at H12 for selectors after message text without NOEDIT. Its original
+first-party oracle is qualified; no new whole vendor proof is claimed.
+
+## FMT-05 function-backed week formats
+
+[The week-callback profile](WEEK_CALLBACKS.md), DS-089..091 and ST-029, joins
+finite job-local FCMP functions, CMPLIB activation, VALUE callbacks, canonical
+DATE9 input and first-ORDER/spanned logical REPORT. Whole original and unchanged
+vendor hand/base-R results and traces were qualified before implementation.
+No host library files, arbitrary function bodies, broader REPORT or native SAS
+comparison is claimed.
+
+## FMT-06 bounded postal function
+
+[The postal-function profile](POSTAL_FUNCTION.md), DS-092..095 and ST-030, joins
+character ranges, finite country FCMP, CMPLIB, strict quoted character DSD, owned
+stable country SORT and BY/computed REPORT. The principal approved a pinned official USPS reference policy with a finite
+ZIP set and unknown ZIP refusal. Implementation decision: the19-code domain
+contains the original16USZIPs plus three explicit boundary controls. Every reference
+body, mapping and complete reference-derived expected report remains external.
+The unchanged3902-byte official example has a separate whole hand/base-R gate
+under that policy. This does not establish live SAS postal-data equivalence.
+The six-stage sequence registers four new official-example proofs, while H11
+and H12 retain two unchanged original holds. No new Roku completion is claimed.

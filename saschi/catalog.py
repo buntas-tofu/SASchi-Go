@@ -80,6 +80,7 @@ class Completeness:
     other.
     """
 
+    source_prefix_bytes: int = 0
     n_statements: int = 0
     n_terminated: int = 0
     n_routed: int = 0
@@ -112,7 +113,7 @@ class Completeness:
 
     def as_record(self) -> dict:
         """The receipt form, carrying its own status line."""
-        return {
+        record = {
             "status": "recorded",
             "evidence": "statement and ticket accounting from this pass; not a live SAS comparison",
             "n_statements": self.n_statements,
@@ -126,6 +127,9 @@ class Completeness:
             "coverage": round(self.coverage, 6),
             "tickets_by_construct": dict(self.tickets_by_construct),
         }
+        if self.source_prefix_bytes:
+            record['source_prefix'] = {'policy':'numeric-picture-envelope-v1','bytes':self.source_prefix_bytes,'encoding':'utf8-bom'}
+        return record
 
 
 class Catalog:
@@ -173,7 +177,7 @@ class Catalog:
         )
 
     def completeness(self) -> Completeness:
-        c = Completeness()
+        c = Completeness(source_prefix_bytes=getattr(self, "_source_prefix_bytes", 0))
         row = self._con.execute(
             "SELECT COUNT(*),"
             " COALESCE(SUM(CASE WHEN terminated THEN 1 ELSE 0 END), 0),"
@@ -232,9 +236,12 @@ def record_pass(source: str, plan, *, file: str = "<source>",
     from .parser import Kind, split_statements
     from .rules import route_function, route_statement, character_report_routes
 
-    statements = split_statements(source)
+    from .numeric_pictures import accounting_frame
+    body, prefix_bytes = accounting_frame(source)
+    statements = split_statements(body)
     source_routes = character_report_routes(source, statements)
     cat = Catalog()
+    cat._source_prefix_bytes = prefix_bytes
     statement_rows = []
     function_rows = []
     procedure_context = None
@@ -250,19 +257,27 @@ def record_pass(source: str, plan, *, file: str = "<source>",
             procedure_context = None
         statement_rows.append(
             (st.line, st.text, construct, rule_id, bool(st.terminated)))
-        if opaque or (construct in ('sort-input-keep', 'sort-input-drop', 'sort-directed-projection')
-                      and re.match(r'^proc\s+sort\b', st.text, re.I | re.ASCII)):
+        if opaque or (construct in ('sort-input-keep', 'sort-input-drop', 'sort-directed-projection', 'picture-date-print')
+                      and re.match(r'^proc\s+(?:sort|print)\b', st.text, re.I | re.ASCII)):
             # A source-validated projection header has literal option syntax,
             # not a function call at the input table's opening parenthesis.
             continue
+        if (construct in ('week-library','postal-library') and re.match(r'^function\s',st.text,re.I|re.ASCII)
+                or construct=='week-report' and re.match(r'^columns?\s',st.text,re.I|re.ASCII)):
+            # A declaration and a spanned column list are not function calls.
+            continue
         masked = _mask_strings(st.text)
+        if construct in ('week-library','postal-library'):
+            masked=re.sub(r'^return\s*\(', '(', masked, flags=re.I|re.ASCII)
+
         seen: set[str] = set()
         for m in _FUNC_CALL_RE.finditer(masked):
             name = m.group(1).upper()
             if name in seen:
                 continue
             seen.add(name)
-            f_construct, f_rule = route_function(m.group(0))
+            f_construct, f_rule = (('postal-local-call','DS-093') if construct in ('postal-library','postal-report') else
+                                   ('week-format-callback', 'DS-090') if construct=='week-format' else route_function(m.group(0)))
             function_rows.append((st.line, name, f_construct, f_rule))
     cat.record_statements(statement_rows)
     cat.record_functions(function_rows)

@@ -3,7 +3,9 @@
 The run command, the web workbench, and the showcase all render from this
 single path, so the artifacts a job produces are the artifacts a viewer
 reads. Nothing here talks to a network, a terminal, or a file outside the
-three paths a caller hands in.
+paths a caller hands in, except the explicitly pinned external postal reference
+required by the separate postal-function profile. That profile performs no
+runtime network access.
 """
 from __future__ import annotations
 
@@ -25,7 +27,7 @@ from .numeric_exchange import (read_expected_exports, exports_equal, export_mani
                                EXPORT_CONTRACT, COMPARISON_CONTRACT)
 from .report_artifacts import (read_expected_reports, reports_equal, report_manifest,
                                REPORT_CONTRACT, MIXED_REPORT_CONTRACT, INFORMAT_REPORT_CONTRACT,
-                               DUPLICATE_REPORT_CONTRACT, REPORT_COMPARISON_CONTRACT)
+                               DUPLICATE_REPORT_CONTRACT, DATE_REPORT_CONTRACT, PICTURE_DATE_REPORT_CONTRACT, GROUPFORMAT_REPORT_CONTRACT, NUMBER_PICTURE_REPORT_CONTRACT, WEEK_CALLBACK_REPORT_CONTRACT, POSTAL_FUNCTION_REPORT_CONTRACT, REPORT_COMPARISON_CONTRACT)
 
 
 @dataclass
@@ -109,8 +111,20 @@ def build_job(source: str, inputs: "Path | None" = None, expect: "Path | None" =
     mixed_report_program = any(step.kind == 'mixed_print' for step in plan.steps)
     duplicate_report_program = any(step.kind == 'duplicate_print' for step in plan.steps)
     informat_report_program = any(step.kind in ('labelled_print', 'default_means') for step in plan.steps)
-    report_program = duplicate_report_program or mixed_report_program or informat_report_program or any(step.kind == 'proc_print' for step in plan.steps)
-    report_contract = (DUPLICATE_REPORT_CONTRACT if duplicate_report_program else
+    date_report_program = any(step.kind == 'date_print' for step in plan.steps)
+    picture_date_program = any(step.kind == 'picture_print' for step in plan.steps)
+    groupformat_report_program = any(step.kind == 'group_report' for step in plan.steps)
+    number_picture_program = any(step.kind == 'number_report' for step in plan.steps)
+    week_program = any(step.kind == 'week_report' for step in plan.steps)
+    postal_program = any(step.kind == 'postal_report' for step in plan.steps)
+    report_program = postal_program or week_program or number_picture_program or groupformat_report_program or picture_date_program or date_report_program or duplicate_report_program or mixed_report_program or informat_report_program or any(step.kind == 'proc_print' for step in plan.steps)
+    report_contract = (POSTAL_FUNCTION_REPORT_CONTRACT if postal_program else
+                       WEEK_CALLBACK_REPORT_CONTRACT if week_program else
+                       NUMBER_PICTURE_REPORT_CONTRACT if number_picture_program else
+                       GROUPFORMAT_REPORT_CONTRACT if groupformat_report_program else
+                       PICTURE_DATE_REPORT_CONTRACT if picture_date_program else
+                       DATE_REPORT_CONTRACT if date_report_program else
+                       DUPLICATE_REPORT_CONTRACT if duplicate_report_program else
                        INFORMAT_REPORT_CONTRACT if informat_report_program else
                        MIXED_REPORT_CONTRACT if mixed_report_program else REPORT_CONTRACT)
     if report_program or expect_reports is not None:
@@ -126,6 +140,9 @@ def build_job(source: str, inputs: "Path | None" = None, expect: "Path | None" =
         catalog = json.loads(input_bytes) if input_bytes is not None else {}
         receipt['input_sha256'] = hashlib.sha256(input_bytes).hexdigest() if input_bytes is not None else None
         result = run_plan(plan.to_dict(), catalog)
+        if postal_program:
+            from .postal_reference import metadata as postal_metadata
+            receipt['postal_reference'] = postal_metadata()
         del input_bytes, catalog
         if 'exports' in result:
             receipt['exports'] = export_manifest(result['exports'])

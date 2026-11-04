@@ -139,6 +139,32 @@ def load_rulebook(path: Optional[Path] = None) -> dict[str, Rule]:
 # ---------------------------------------------------------------------------
 
 CONSTRUCT_MAP: dict[str, str] = {
+    "numeric-value": "DS-084",
+    "formatted-groups": "DS-085",
+    "groupformat-input": "DS-086",
+    "postal-format": "DS-092",
+    "postal-library": "DS-093",
+    "postal-cmplib": "DS-093",
+    "postal-input": "DS-094",
+    "postal-sort": "DS-095",
+    "postal-report": "ST-030",
+    "postal-local-call": "DS-093",
+    "week-library": "DS-089",
+    "week-cmplib": "DS-089",
+    "week-format": "DS-090",
+    "week-format-callback": "DS-090",
+    "week-input": "DS-091",
+    "week-report": "ST-029",
+    "number-picture-input": "DS-088",
+    "number-picture": "DS-087",
+    "number-picture-report": "ST-028",
+    "group-detail-report": "ST-027",
+    "date-picture": "DS-082",
+    "picture-date-input": "DS-083",
+    "picture-date-print": "ST-026",
+    "date-input": "DS-080",
+    "nested-date-format": "DS-081",
+    "date-print": "ST-025",
     "directed-sort": "DS-073",
     "descriptor-sort-all": "DS-074",
     "sort-input-keep": "DS-075",
@@ -413,6 +439,30 @@ def character_report_routes(source, statements):
     lexers provide the separate whole-program statement-accounting cross-check.
     Indices keep distinct statements on the same physical line distinct.
     """
+    from .postal_function import source_steps as postal_steps
+    _, _, postal_routes, postal_selected = postal_steps(source, statements)
+    if postal_selected:
+        return postal_routes
+    from .week_callbacks import source_steps as week_steps
+    _, _, week_routes, week_selected = week_steps(source, statements)
+    if week_selected:
+        return week_routes
+    from .numeric_pictures import source_steps as number_steps
+    _, _, number_routes, number_selected = number_steps(source, statements)
+    if number_selected:
+        return number_routes
+    from .groupformat import source_steps as groupformat_steps
+    _, _, groupformat_routes, groupformat_selected = groupformat_steps(source, statements)
+    if groupformat_selected:
+        return groupformat_routes
+    from .picture_dates import source_steps as picture_steps
+    _, _, picture_routes, picture_selected = picture_steps(source, statements)
+    if picture_selected:
+        return picture_routes
+    from .date_program import source_steps as date_steps
+    _, _, date_routes, date_selected = date_steps(source, statements)
+    if date_selected:
+        return date_routes
     from .sort_composition import source_steps as composition_steps
     _, _, composition_routes, composition_selected = composition_steps(source, statements)
     if composition_selected:

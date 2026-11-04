@@ -137,6 +137,18 @@ VERIFIERS = [
     ("vendor-sort-duplicates", HERE / "examples" / "verify_vendor_sort_duplicates.py"),
     ("sort-input-drop", HERE / "examples" / "verify_sort_input_drop.py"),
     ("sort-directed-projection", HERE / "examples" / "verify_sort_directed_projection.py"),
+    ("date-foundations", HERE / "examples" / "verify_date_foundations.py"),
+    ("date-profile", HERE / "examples" / "verify_date_profile.py"),
+    ("date-picture", HERE / "examples" / "verify_picture_dates.py"),
+    ("vendor-date-picture", HERE / "examples" / "verify_vendor_picture_dates.py"),
+    ("groupformat", HERE / "examples" / "verify_groupformat.py"),
+    ("vendor-groupformat", HERE / "examples" / "verify_vendor_groupformat.py"),
+    ("numeric-pictures", HERE / "examples" / "verify_numeric_pictures.py"),
+    ("week-callbacks", HERE / "examples" / "verify_week_callbacks.py"),
+    ("vendor-week-callbacks", HERE / "examples" / "verify_vendor_week_callbacks.py"),
+    ("postal-reference", HERE / "examples" / "verify_postal_reference.py"),
+    ("postal-function", HERE / "examples" / "verify_postal_function.py"),
+    ("vendor-postal-function", HERE / "examples" / "verify_vendor_postal_function.py"),
 ]
 
 # The translator suites, run as unittest modules. They carry the same weight as
@@ -210,6 +222,13 @@ SUITES = [
     ("suite-sort-projection", "saschi.test_sort_projection"),
     ("suite-sort-duplicates", "saschi.test_sort_duplicates"),
     ("suite-sort-composition", "saschi.test_sort_composition"),
+    ("suite-date-program", "saschi.test_date_program"),
+    ("suite-picture-dates", "saschi.test_picture_dates"),
+    ("suite-groupformat", "saschi.test_groupformat"),
+    ("suite-numeric-pictures", "saschi.test_numeric_pictures"),
+    ("suite-week-callbacks", "saschi.test_week_callbacks"),
+    ("suite-postal-reference", "saschi.test_postal_reference"),
+    ("suite-postal-function", "saschi.test_postal_function"),
 ]
 
 

@@ -16,12 +16,50 @@ policies. Receipts record what passed for the source and environment tested.
 ## Current verification
 
 Status: version 0.4.0 development evidence for maintainer review, updated on
-2026-11-02. The current registry contains 97 fixture gates and65 suites. The full receipt
+2026-11-03. The current registry contains 111 fixture gates and73 suites. The full receipt
 records the discovered tests and their outcomes. With the pinned Roku corpus present, `python verify_all.py` records the
 source-bound unified verdict. Synthesis separately checks 60 faithful cases and
 60 naive variants. The accepted entry PR65/mainac9d800 covered93 gates,64 suites and
 1446 tests with zero skips; current passing outcomes require a matching receipt.
 Live-SAS validation remains outstanding.
+
+[FMT-01 date foundations](docs/DATE_FOUNDATIONS.md) and the separate
+[DATE9/nested-date source profile](docs/DATE_PROGRAM.md) add canonical input,
+valid-width nested formats and logical PRINT with original hand/base-R evidence.
+The unchanged nested-format vendor target's WEEKDATE50 request remains held at H11.
+The separate [date PICTURE profile](docs/DATE_PICTURES.md) adds VAR/OBS PRINT and
+procedure-title composition with a separately gated unchanged official example.
+Its acceptance requires the current full receipt; no live-SAS comparison is claimed.
+
+The separate [postal-function profile](docs/POSTAL_FUNCTION.md) adds character
+ranges, quoted input, country dispatch and a computed report. Its ZIPSTATE
+behavior uses19 explicitly listed ZIPs from a pinned external USPS reference;
+it refuses unverified ZIPs and does not claim native SAS postal-data agreement.
+Prepare the external fixtures before offline verification:
+
+```sh
+python tools/prepare_vendor_sources.py
+python tools/prepare_postal_reference.py
+python verify_all.py
+```
+
+The [ordered FORMAT plan](docs/FORMAT_CANDIDATE_PLAN.md) records six bounded
+stages and four new separate official-example gates. The two held originals
+remain visible. [Human interface testing](docs/HUMAN_INTERFACE_TEST_PLAN.md)
+is staged for a later operator session; completed human sessions n=0.
+
+The separate [week-callback profile](docs/WEEK_CALLBACKS.md) adds job-local
+FCMP/CMPLIB, function-backed date formats and a bounded ordered/spanned report.
+Its unchanged official example has a separate pinned whole-source proof.
+
+The separate [numeric-picture profile](docs/NUMERIC_PICTURES.md) adds valid
+integer selectors, NOEDIT and explicitly accounted BOM input. Its original vendor
+target remains held at H12; it is not a new vendor proof.
+
+The separate [GROUPFORMAT/detail REPORT profile](docs/GROUPFORMAT.md) adds
+formatted group endpoints, explicit duplicate OUTPUTs, aliases and bounded
+currency/date display with another unchanged official-example gate. Its receipt
+is separate from the date-picture proof and the held nested-width original.
 
 D2b accepted twenty complete external-program repository/base-R proofs, including
 the unchanged CSV-artifact program. D3b adds a full-source gate for both unchanged
@@ -181,7 +219,7 @@ fixed expected output and base-R evidence. Special missings retain their tags.
   sibling plus a fixture verifier (`verify_*.py`). Run any verifier directly,
   or all of them through [verify_all.py](verify_all.py).
 - [docs/sasconversionrulebook.json](docs/sasconversionrulebook.json) : the machine-consumable translation
-  rulebook. 123 rules with equivalence classes (EXACT,
+  rulebook. 145 rules with equivalence classes (EXACT,
   EQUIVALENT-WITH-SETTINGS, APPROXIMATE, NO-DIRECT-EQUIVALENT), required
   settings, forbidden patterns, and validation tests.
 - [docs/capability-manifest.json](docs/capability-manifest.json) : the coverage manifest. Enumerated entries of
