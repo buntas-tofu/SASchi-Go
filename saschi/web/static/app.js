@@ -3,6 +3,17 @@
 const $ = (id) => document.getElementById(id);
 let currentJob = null;
 let activeTab = 'plan';
+let runSequence = 0;
+
+const comparisons = [
+  ['Dataset', 'comparison'], ['Report', 'report_comparison'],
+  ['Export', 'export_comparison'], ['Log', 'log_comparison']
+];
+
+function comparisonSummary(receipt) {
+  return comparisons.filter(([, key]) => key === 'comparison' || key in receipt)
+    .map(([label, key]) => `${label} comparison: ${receipt[key] || 'not requested'}`).join('; ');
+}
 
 async function getJSON(url) {
   const res = await fetch(url);
@@ -28,7 +39,7 @@ function valueText(v) {
   if (v === null) return '[missing]';
   if (typeof v === 'object') return '[missing:' + (v.missing || '?') + ']';
   if (typeof v === 'string') return '"' + v + '"';
-  if (typeof v === 'number' && Number.isFinite(v)) return v.toPrecision(17).replace(/0+$/, '').replace(/\.$/, '');
+  if (typeof v === 'number' && Number.isFinite(v)) return String(v);
   return String(v);
 }
 
@@ -57,10 +68,14 @@ function renderStages(job) {
   ];
   $('tabs').innerHTML = tabs.map(([key, label]) => {
     const n = key === 'plan' ? job.plan.tickets.length : 0;
-    return `<span class="tab ${key === activeTab ? 'active' : ''}" data-tab="${key}">${label}${n ? `<span class="n">${n}</span>` : ''}</span>`;
+    return `<button type="button" class="tab ${key === activeTab ? 'active' : ''}" data-tab="${key}" aria-pressed="${key === activeTab}">${label}${n ? `<span class="n">${n}</span>` : ''}</button>`;
   }).join('');
   for (const el of $('tabs').querySelectorAll('.tab')) {
-    el.addEventListener('click', () => { activeTab = el.dataset.tab; renderStages(job); });
+    el.addEventListener('click', () => {
+      activeTab = el.dataset.tab;
+      renderStages(job);
+      $('tabs').querySelector(`[data-tab="${activeTab}"]`).focus();
+    });
   }
   const body = $('stage-body');
   if (activeTab === 'source') {
@@ -93,7 +108,12 @@ function renderStages(job) {
       : '') + (t.code ? `<pre class="code">${esc(t.code)}</pre>` : '<p class="notreached">no translation produced</p>');
   } else if (activeTab === 'run') {
     if (job.result) {
-      let html = '';
+      let html = job.accepted ? '' : '<p class="notreached">Execution output from a rejected job; see comparison evidence and receipt error.</p>';
+      const reports = Object.entries(job.result.reports || {});
+      if (reports.length) html += '<h3>Formatted reports</h3>';
+      for (const [name, content] of reports) {
+        html += `<h4>${esc(name)}</h4><pre class="code">${esc(content)}</pre>`;
+      }
       for (const [name, table] of Object.entries(job.result.datasets || {})) {
         html += `<h3 style="margin:12px 0 4px">${esc(name)}</h3>${dataTable(table)}`;
       }
@@ -105,10 +125,10 @@ function renderStages(job) {
       body.innerHTML = `<p class="notreached">not reached: ${esc(job.receipt.error || 'no execution was performed')}</p>`;
     }
   } else if (activeTab === 'compare') {
-    const c = job.receipt.comparison || 'not requested';
-    if (c === 'passed') body.innerHTML = '<p class="meta">passed: the typed exact-values contract held over the expected datasets.</p>';
-    else if (c === 'failed') body.innerHTML = `<p style="color:#f85149">failed: ${esc(job.receipt.error || 'expected dataset differs')}</p>`;
-    else body.innerHTML = '<p class="meta">not requested for this run.</p>';
+    body.innerHTML = comparisons.filter(([, key]) => key === 'comparison' || key in job.receipt)
+      .map(([label, key]) => `<p class="meta">${label} comparison: ${esc(job.receipt[key] || 'not requested')}</p>`).join('') +
+      (job.receipt.error ? `<p class="notreached">Job error: ${esc(job.receipt.error)}</p>` : '') +
+      '<p class="meta">No per-job R comparison or live SAS validation was performed.</p>';
   } else {
     body.innerHTML = '<details open><summary>receipt.json</summary><pre class="code">' +
       esc(JSON.stringify(job.receipt, null, 2)) + '</pre></details>';
@@ -123,7 +143,8 @@ function renderJob(job, name) {
   else if (blocked) { verdict.className = 'fail'; verdict.textContent = 'BLOCKED BY TICKETS'; }
   else { verdict.className = 'warn'; verdict.textContent = 'REJECTED: ' + (job.receipt.error || 'run failed'); }
   $('status-line').textContent =
-    `${name} ; source_sha256 ${job.source_sha256} ; ${job.receipt.environment.python} / ${String(job.receipt.environment.r_version || 'no R').slice(0, 40)}`;
+    `${name} ; ${comparisonSummary(job.receipt)}. No per-job R comparison or live SAS validation was performed. ` +
+    `Source ${job.source_sha256} ; Python ${job.receipt.environment.python} ; R availability: ${String(job.receipt.environment.r_version || 'absent').slice(0, 60)}`;
   renderStages(job);
   const ctx = job.receipt.comparison === 'passed'
     ? 'comparison passed' : 'comparison: ' + (job.receipt.comparison || 'none');
@@ -139,10 +160,20 @@ function jobContext() {
 }
 
 async function runProgram(spec, name) {
+  const sequence = ++runSequence;
+  currentJob = null;
+  $('verdict').className = 'empty';
+  $('verdict').textContent = 'RUNNING';
+  $('status-line').textContent = name;
+  $('stage-body').innerHTML = '';
+  $('tabs').innerHTML = '';
+  $('chat-context').textContent = 'context: none attached while treatment runs';
   try {
     const job = await postJSON('/api/program', spec);
+    if (sequence !== runSequence) return;
     renderJob(job, name);
   } catch (err) {
+    if (sequence !== runSequence) return;
     const v = $('verdict');
     v.className = 'fail';
     v.textContent = 'ERROR';
@@ -180,9 +211,10 @@ async function init() {
   try {
     const data = await getJSON('/api/programs');
     for (const p of data.programs) {
-      const el = document.createElement('div');
+      const el = document.createElement('button');
+      el.type = 'button';
       el.className = 'program';
-      el.innerHTML = `<div class="name">${esc(p.name)}</div><div class="note">${esc(p.note)}</div>`;
+      el.innerHTML = `<span class="name">${esc(p.name)}</span><span class="note">${esc(p.note)}</span>`;
       el.addEventListener('click', () => {
         for (const other of list.children) other.classList.remove('active');
         el.classList.add('active');

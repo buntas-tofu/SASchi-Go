@@ -13,6 +13,8 @@ import unittest
 import urllib.error
 import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
+from html import unescape
 
 from .web import make_server
 
@@ -108,6 +110,15 @@ class WorkbenchTests(AssistantOffMixin, unittest.TestCase):
         self.assertEqual(status, 200)
         self.assertTrue(data['accepted'])
         self.assertTrue(data['result']['log'][0].startswith('r1=0.3'))
+
+    def test_report_job_returns_visible_showcase_output_and_uncompared_evidence(self):
+        source = (Path(__file__).resolve().parents[1] / 'examples/numeric_pictures.sas').read_text()
+        status, data = post(self.base + '/api/program', {'source': source})
+        self.assertEqual(status, 200)
+        self.assertTrue(data['accepted'])
+        self.assertEqual(data['receipt']['report_comparison'], 'not requested')
+        section = data['showcase'].split('id="stage-run"', 1)[1].split('</section>', 1)[0]
+        self.assertIn(data['result']['reports']['report_01.txt'], unescape(section))
 
     def test_blocked_pasted_source_reports_tickets(self):
         status, data = post(self.base + '/api/program',

@@ -24,6 +24,31 @@ REPO = Path(__file__).resolve().parent.parent
 
 
 class BuildJobTests(unittest.TestCase):
+    def test_requested_comparisons_are_not_reached_when_execution_cannot_start(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            missing = Path(temporary) / 'not-read.json'
+            for source in ('data d; set absent; run;',
+                           'data d; x=count(y); run;'):
+                with self.subTest(source=source):
+                    job = build_job(source, expect=missing, expect_exports=missing,
+                                    expect_reports=missing, expect_log=missing)
+                    self.assertFalse(job.receipt['accepted'])
+                    for key in ('comparison', 'export_comparison',
+                                'report_comparison', 'log_comparison'):
+                        self.assertEqual(job.receipt[key], 'not reached')
+                    self.assertFalse(any(k.startswith('expected_') for k in job.receipt))
+
+    def test_later_checks_remain_not_reached_after_first_comparison_fails(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / 'wrong.json'
+            path.write_text('{}')
+            job = build_job('data d; x=1; run;', expect=path, expect_exports=path,
+                            expect_reports=path, expect_log=path)
+        self.assertFalse(job.receipt['accepted'])
+        self.assertEqual(job.receipt['export_comparison'], 'failed')
+        for key in ('comparison', 'report_comparison', 'log_comparison'):
+            self.assertEqual(job.receipt[key], 'not reached')
+
     def test_accepted_workflow_job_passes_its_comparison(self):
         source = (REPO / 'examples' / 'workflow' / 'job.sas').read_text(encoding='utf-8')
         job = build_job(source, REPO / 'examples' / 'workflow' / 'inputs.json',
@@ -96,11 +121,11 @@ class ExpectedOutputTests(unittest.TestCase):
 
     def test_expected_failures_preserve_receipt_hash_boundary(self):
         import hashlib
-        cases = [(b'{', False, 'not requested'),
-                 (b'\xff', False, 'not requested'),
-                 (b'{}', True, 'not requested'),
-                 (b'[]', True, 'not requested'),
-                 (b'null', True, 'not requested'),
+        cases = [(b'{', False, 'failed'),
+                 (b'\xff', False, 'failed'),
+                 (b'{}', True, 'failed'),
+                 (b'[]', True, 'failed'),
+                 (b'null', True, 'failed'),
                  (b'{"out":{"schema":{"x":"number"},"rows":[{"x":9}]}}', True, 'failed')]
         with tempfile.TemporaryDirectory() as td:
             path = Path(td) / 'expected.json'
@@ -118,6 +143,7 @@ class ExpectedOutputTests(unittest.TestCase):
             path.unlink()
             missing = build_job('data out; x=1; run;', expect=path)
             self.assertEqual(missing.code, 1)
+            self.assertEqual(missing.receipt['comparison'], 'failed')
             self.assertNotIn('expected_sha256', missing.receipt)
 
     def test_expected_loading_allocations_stay_bounded(self):
