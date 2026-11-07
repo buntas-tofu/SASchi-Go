@@ -11,7 +11,9 @@ sudo apt install ./saschi-desktop_0.4.0+desktop1_all.deb
 
 Launch SASchi-Go from Applications, or run `saschi-desktop`.
 For a source checkout, install `python3-tk` and run
-`.venv/bin/python -m saschi.desktop`.
+`/usr/bin/python3 -m saschi.desktop`. Use the distribution interpreter, not an
+isolated project environment: the packaged launcher runs on `/usr/bin/python3`,
+so the checkout run and the installed run load the same toolkit.
 
 Choose a SAS program, any supporting typed JSON input catalog, and an existing
 output folder using the file and folder dialogs. Optional JSON expectations
@@ -41,12 +43,22 @@ R, C++ and scientific Python packages remain verification dependencies rather
 than mandatory desktop runtime dependencies. The postal profile still needs its
 explicitly prepared external pinned USPS reference. No reference data is bundled.
 
-Build locally with the installed wheel/build tooling:
+Build locally with the distribution interpreter and its packaged tooling:
+`/usr/bin/python3` carries pip and setuptools on Ubuntu, while an isolated
+project environment may carry neither and will fail inside the builder's
+wheel step. The version in the filename follows `pyproject.toml`; the package
+version adds a `+desktop1` suffix to that base.
 
 ```sh
-.venv/bin/python tools/build_desktop_deb.py --output output/saschi-desktop_0.4.0+desktop1_all.deb
-.venv/bin/python -m unittest saschi.test_desktop
+/usr/bin/python3 tools/build_desktop_deb.py --output output/saschi-desktop_0.4.0+desktop1_all.deb
+/usr/bin/python3 -m unittest saschi.test_desktop
 ```
+
+The verification workflow's `package-smoke` job builds the same package,
+asserts its control metadata and payload paths, installs it in the runner and
+requires the headless entry point to exit 1 with the documented display
+message. A package that tests clean but cannot install is caught there rather
+than by the first person who downloads it.
 
 The package has no automatic updater, network service or privileged runtime.
 Installing it is separate from building and reviewing it. Human testing should
