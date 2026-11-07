@@ -25,7 +25,7 @@ jobs:
       - name: Install base R and the C++ compiler
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends r-base-core g++
+          sudo apt-get install -y --no-install-recommends r-base-core g++ python3-tk
       - name: Check the environment and run every gate
         env:
           SASCHI_ROKU_CORPUS: ${{ github.workspace }}/.verification-corpus/corpus
