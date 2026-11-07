@@ -15,13 +15,13 @@ This document does not authorize additional implementation or publication scope.
 
 ## Inventory reconciled against actual evidence
 
-The golden command registers111 fixture runners,73 translator suites and1
+The golden command registers111 fixture runners,74 application/translator suites and1
 synthesis runner. These are registration counts, not passing outcomes. The
 source-bound full receipt records the discovered test count. A source-bound full receipt records actual skips and
 results. Accepted run entry PR66/main0abf161 contained97 fixtures,65 suites and1491
 tests with zero skips,60 faithful synthesis checks and60 naive controls. The
 separate1k workload checks total39:18 ledger and21 text. These counts have
-different units. Neither145 rulebook rules nor185 golden-command runners is a
+different units. Neither145 rulebook rules nor186 golden-command runners is a
 SAS capability denominator.
 
 [The capability manifest](capability-manifest.json) still enumerates108 statements

@@ -15,6 +15,10 @@ from . import __version__
 from .job import Job
 
 MAX_ROWS = 500
+COMPARISONS = [('Dataset', 'comparison', 'expected_sha256'),
+               ('Report', 'report_comparison', 'expected_reports_sha256'),
+               ('Export', 'export_comparison', 'expected_exports_sha256'),
+               ('Log', 'log_comparison', 'expected_log_sha256')]
 
 STAGES = [
     ('source', '1. Source'),
@@ -84,20 +88,30 @@ def build_showcase(job: Job, name: str, source_label: str = "pasted program") ->
         datasets = []
         for dname, table in job.result.get('datasets', {}).items():
             datasets.append(f"<h4>{html.escape(dname)}</h4>{_table(table)}")
+        reports = ''.join(
+            f"<h4>{html.escape(rname)}</h4><pre class='mono'>{html.escape(content)}</pre>"
+            for rname, content in job.result.get('reports', {}).items())
+        report_html = ('<h3>Formatted reports</h3>' + reports) if reports else ''
         logs = job.result.get('log', [])
         log_html = ('<pre class="mono">' + html.escape('\n'.join(logs)) + '</pre>') if logs else "<p class='dim'>no log lines</p>"
-        run_html = ''.join(f"<section class='step'>{d}</section>" for d in datasets) + log_html
+        rejection = ("<p class='verdict warn'>Execution output from a rejected job; "
+                     "see comparison evidence and receipt error.</p>") if not verdict else ''
+        run_html = rejection + report_html + ''.join(f"<section class='step'>{d}</section>" for d in datasets) + log_html
     else:
         run_html = _not_reached(receipt)
 
-    comparison = receipt.get('comparison', 'not requested')
-    if comparison in ('passed', 'failed'):
-        badge = 'ok' if comparison == 'passed' else 'fail'
-        compare_html = (f"<p class='verdict {badge}'>comparison {comparison}: the typed exact-values contract "
-                        f"{'held' if comparison == 'passed' else 'broke'} over the expected datasets.</p>"
-                        f"<p class='meta'>expected_sha256 <span class='mono'>{html.escape(receipt.get('expected_sha256', ''))}</span></p>")
-    else:
-        compare_html = "<p class='dim'>Not requested for this run.</p>"
+    comparisons = []
+    for label, key, checksum in COMPARISONS:
+        if key != 'comparison' and key not in receipt:
+            continue
+        state = receipt.get(key, 'not requested')
+        badge = 'ok' if state == 'passed' else 'fail' if state == 'failed' else 'dim'
+        comparisons.append(f"<p class='{badge}'>{label} comparison: {html.escape(state)}</p>")
+        if checksum in receipt:
+            comparisons.append(f"<p class='meta'>{checksum} <span class='mono'>{html.escape(receipt[checksum])}</span></p>")
+    if 'error' in receipt:
+        comparisons.append(f"<p class='meta'>Job error: {html.escape(receipt['error'])}</p>")
+    compare_html = ''.join(comparisons)
 
     translation_code = job.translation.code if job.translation else ''
     trans_note = ''
@@ -116,11 +130,9 @@ def build_showcase(job: Job, name: str, source_label: str = "pasted program") ->
 
     badge = 'ok' if verdict else ('fail' if blocked else 'warn')
     badge_text = 'ACCEPTED' if verdict else ('BLOCKED' if blocked else 'REJECTED')
-    comparisons = [('Dataset', 'comparison'), ('Report', 'report_comparison'),
-                   ('Export', 'export_comparison'), ('Log', 'log_comparison')]
     comparison_summary = '; '.join(
         f"{label} comparison: {receipt.get(key, 'not requested')}"
-        for label, key in comparisons if key == 'comparison' or key in receipt)
+        for label, key, _ in COMPARISONS if key == 'comparison' or key in receipt)
     status_line = (f"Status: job receipt evidence for maintainer review. "
                    f"Job verdict: {badge_text.lower()}. {html.escape(comparison_summary)}. "
                    f"No per-job R comparison or live SAS validation was performed. "

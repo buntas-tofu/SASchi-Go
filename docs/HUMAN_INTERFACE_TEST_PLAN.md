@@ -7,7 +7,7 @@ commit, source digest and full verification receipt before beginning.
 
 Use the local web workbench and the two prepared first-party showcase documents.
 The assistant pane stays off; these tasks require no external service. Planned
-session length is about20minutes. A facilitator may explain where the workbench
+session length is about 20 minutes. A facilitator may explain where the workbench
 is, then observe without supplying the expected answer. Capture the operator's
 interpretation before consulting the checks below.
 
@@ -21,6 +21,26 @@ Open http://127.0.0.1:8070. The final preparation record under
 telemetry/format-phases-20261103 identifies the compared and uncompared original
 showcase files and their source binding. An agent opening the browser or taking
 a screenshot does not count as a human session.
+
+For an interactive task sheet, prepare a fresh first-party session:
+
+```sh
+.venv/bin/python tools/prepare_interface_session.py --output telemetry/human-session
+```
+
+Open `telemetry/human-session/index.html` in a browser. It provides the nine tasks,
+copyable source, paired comparison documents, facilitator checks and an explicit
+JSON observation export. Notes remain in the page until exported; reload clears
+them. The preparation manifest records the source digest. Match that digest to
+the current full verification receipt before testing. Preparation does not count
+as a completed session, and generated documents do not establish browser layout
+or keyboard usability.
+
+Receipt comparison states distinguish `not requested`, `not reached`, `failed`
+and `passed`. A requested check stays `not reached` if execution or an earlier
+check stops the job. A check that starts but cannot read or validate its expected
+artifact is `failed`. The Run stage and showcase show logical report text;
+the Compare stage lists each recorded comparison separately.
 
 | Task | Human action | Facilitator check after the attempt |
 | --- | --- | --- |

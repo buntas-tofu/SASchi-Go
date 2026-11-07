@@ -229,6 +229,7 @@ SUITES = [
     ("suite-week-callbacks", "saschi.test_week_callbacks"),
     ("suite-postal-reference", "saschi.test_postal_reference"),
     ("suite-postal-function", "saschi.test_postal_function"),
+    ("suite-desktop", "saschi.test_desktop"),
 ]
 
 

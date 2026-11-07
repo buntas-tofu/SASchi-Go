@@ -95,16 +95,17 @@ def build_job(source: str, inputs: "Path | None" = None, expect: "Path | None" =
                'evidence': 'repository behavior contracts; no live SAS',
                'plan_sha256': hashlib.sha256(json.dumps(plan.to_dict(), sort_keys=True).encode()).hexdigest(),
                'tickets': [vars(t) for t in plan.tickets], 'accepted': False,
-               'comparison': 'not requested', 'comparison_contract': 'typed-exact-values-ordered-rows-and-columns-metadata-v1'}
+               'comparison': 'not reached' if expect is not None else 'not requested',
+               'comparison_contract': 'typed-exact-values-ordered-rows-and-columns-metadata-v1'}
     if output_contract is not None:
         receipt['output_contract'] = output_contract
     if expect_log is not None:
-        receipt['log_comparison'] = 'not requested'
+        receipt['log_comparison'] = 'not reached'
         receipt['log_comparison_contract'] = 'ascii-log-records-v1'
     receipt['completeness'] = _completeness_record(source, plan, target, receipt['ts_utc'])
     export_program = any(step.kind == 'exchange_data' and any(op.kind == 'file_select' for op in step.operations) for step in plan.steps)
     if export_program or expect_exports is not None:
-        receipt['export_comparison'] = 'not requested'
+        receipt['export_comparison'] = 'not reached' if expect_exports is not None else 'not requested'
         receipt['export_comparison_contract'] = COMPARISON_CONTRACT
         if export_program:
             receipt['export_contract'] = EXPORT_CONTRACT
@@ -128,7 +129,7 @@ def build_job(source: str, inputs: "Path | None" = None, expect: "Path | None" =
                        INFORMAT_REPORT_CONTRACT if informat_report_program else
                        MIXED_REPORT_CONTRACT if mixed_report_program else REPORT_CONTRACT)
     if report_program or expect_reports is not None:
-        receipt['report_comparison'] = 'not requested'
+        receipt['report_comparison'] = 'not reached' if expect_reports is not None else 'not requested'
         receipt['report_comparison_contract'] = REPORT_COMPARISON_CONTRACT
         if report_program:
             receipt['report_contract'] = report_contract
@@ -171,6 +172,7 @@ def build_job(source: str, inputs: "Path | None" = None, expect: "Path | None" =
                 raise ValueError('expected ordered log record bytes differ')
             receipt['log_comparison'] = 'passed'
         if expect:
+            receipt['comparison'] = 'failed'
             expected, expected_sha256 = _read_expected(expect)
             receipt['expected_sha256'] = expected_sha256
             if not isinstance(expected, dict) or not expected:

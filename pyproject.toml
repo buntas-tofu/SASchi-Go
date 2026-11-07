@@ -17,6 +17,7 @@ verify = ["numpy>=2,<3", "pandas>=3,<4", "scipy>=1.15,<2", "duckdb>=1,<2", "json
 
 [project.scripts]
 saschi = "saschi.cli:main"
+saschi-desktop = "saschi.desktop:main"
 
 [tool.setuptools]
 packages = ["saschi"]

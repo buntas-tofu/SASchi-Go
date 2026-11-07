@@ -10,6 +10,7 @@ import re
 import json
 import tempfile
 import unittest
+from html import unescape
 from pathlib import Path
 
 from .job import build_job
@@ -29,6 +30,48 @@ def blocked_job():
 
 
 class ShowcaseTests(unittest.TestCase):
+    def test_formatted_reports_are_visible_as_exact_escaped_text(self):
+        source = (REPO / 'examples' / 'numeric_pictures.sas').read_text()
+        job = build_job(source)
+        self.assertTrue(job.receipt['accepted'])
+        document = build_showcase(job, 'pictures')
+        section = document.split('id="stage-run"', 1)[1].split('</section>', 1)[0]
+        for name, content in job.result['reports'].items():
+            self.assertIn(name, section)
+            self.assertIn(content, unescape(section))
+
+    def test_report_only_comparison_is_visible_in_compare_stage(self):
+        source = (REPO / 'examples' / 'numeric_pictures.sas').read_text()
+        expected = json.loads((REPO / 'examples' / 'numeric_pictures_expected.json').read_text())
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'reports.json'
+            path.write_text(json.dumps(expected['reports']))
+            job = build_job(source, expect_reports=path)
+        document = build_showcase(job, 'report evidence')
+        section = document.split('id="stage-compare"', 1)[1].split('</section>', 1)[0]
+        self.assertIn('Report comparison: passed', section)
+        self.assertIn('Dataset comparison: not requested', section)
+
+    def test_requested_comparison_before_execution_failure_is_not_reached(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'expected.json'
+            path.write_text('{}')
+            job = build_job('data d; set absent; run;', expect=path)
+        self.assertEqual(job.receipt['comparison'], 'not reached')
+        document = build_showcase(job, 'unreached comparison')
+        self.assertIn('Dataset comparison: not reached', document)
+
+    def test_report_html_is_escaped_and_rejected_output_is_labelled(self):
+        job = build_job((REPO / 'examples/numeric_pictures.sas').read_text())
+        job.result['reports'] = {'<report>.txt': '<script>alert("test")</script>\n'}
+        job.receipt['accepted'] = False
+        document = build_showcase(job, 'escaped report')
+        section = document.split('id="stage-run"', 1)[1].split('</section>', 1)[0]
+        self.assertNotIn('<script>', section)
+        self.assertIn('&lt;report&gt;.txt', section)
+        self.assertIn('&lt;script&gt;', section)
+        self.assertIn('Execution output from a rejected job', section)
+
     def status(self, job):
         document = build_showcase(job, 'evidence status')
         self.assertNotIn('Python and R agree', document)
@@ -91,7 +134,7 @@ class ShowcaseTests(unittest.TestCase):
             self.assertIn(f'id="{stage}"', html)
         self.assertIn('ACCEPTED', html)
         self.assertIn('data rounded; set raw;', html)
-        self.assertIn('comparison passed', html)
+        self.assertIn('Dataset comparison: passed', html)
         self.assertIn('proc sort data=rounded out=ordered', html)
         self.assertIn('receipt.json', html)
 
