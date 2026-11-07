@@ -62,3 +62,53 @@ jobs:
           name: workload-diagnostics
           path: telemetry/workloads/
           if-no-files-found: warn
+  package-smoke:
+    name: Desktop package builds, installs, and starts headless
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install the packaging tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends dpkg-dev python3-tk
+          python -m pip install --upgrade setuptools wheel
+      - name: Build the Debian package
+        run: python tools/build_desktop_deb.py --output output/saschi-desktop.deb
+      - name: Assert the control metadata and payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          deb=output/saschi-desktop.deb
+          test -s "$deb"
+          version=$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")
+          control=$(dpkg-deb -I "$deb")
+          grep -q '^ Package: saschi-desktop$' <<<"$control"
+          grep -q "^ Version: ${version}+desktop1$" <<<"$control"
+          grep -q '^ Architecture: all$' <<<"$control"
+          grep -q 'Depends:.*python3-tk' <<<"$control"
+          grep -q 'Depends:.*xdg-utils' <<<"$control"
+          contents=$(dpkg-deb --fsys-tarfile "$deb" | tar -t)
+          for path in \
+              ./usr/bin/saschi-desktop \
+              ./usr/share/applications/saschi-desktop.desktop \
+              ./usr/share/doc/saschi-desktop/copyright \
+              ./usr/lib/saschi-desktop/saschi/data/sasconversionrulebook.json
+          do
+            grep -qx -- "$path" <<<"$contents" || { echo "missing payload path: $path"; exit 1; }
+          done
+          echo "metadata and payload verified for version ${version}+desktop1"
+      - name: Install and start the entry point headless
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get install -y ./output/saschi-desktop.deb
+          set +e
+          message=$(env -u DISPLAY -u WAYLAND_DISPLAY saschi-desktop 2>&1)
+          code=$?
+          set -e
+          test "$code" -eq 1
+          grep -q 'Desktop display unavailable' <<<"$message"
+          echo "headless entry point exited ${code} with the documented display message"
