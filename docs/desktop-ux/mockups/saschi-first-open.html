@@ -1,0 +1,231 @@
+<div id="saschi-first-open" aria-label="SASchi-Go first-open design">
+  <div class="preview-tools"><span>Design preview · sample file selections</span><label for="fo-size">Window</label><select id="fo-size"><option value="1024">Wide</option><option value="640">Small</option><option value="360">Narrow</option></select><label for="fo-text">Text</label><select id="fo-text"><option value="16">Comfortable</option><option value="18">Larger</option><option value="20">Largest</option></select></div>
+  <div class="window-size" id="fo-viewport">
+    <section class="app" id="fo-app" aria-label="SASchi-Go first-open screen">
+      <header class="chrome"><div class="brand"><span class="brand-symbol">S</span>SASchi-Go</div><span class="local"><i data-lucide="hard-drive" aria-hidden="true"></i>Local workspace</span></header>
+      <div id="fo-setup-screen">
+        <div class="intro"><span class="eyebrow">NEW CONVERSION</span><h1>Start with your SAS program</h1><p>Connect your data, then review the conversion options.</p></div>
+        <div class="setup-layout">
+          <div class="steps">
+            <section class="step program-step" aria-labelledby="fo-program-heading">
+              <div class="step-heading"><span class="step-number" id="fo-step-one">1</span><div><h2 id="fo-program-heading">SAS program</h2><p>Choose the .sas file you want to convert.</p></div></div>
+              <div class="step-content">
+                <div class="open-area" id="fo-program-empty"><i data-lucide="file-code-2" aria-hidden="true"></i><button class="primary" data-choose="program">Open SAS program</button><p>Your original file stays unchanged.</p></div>
+                <div id="fo-program-selected" hidden><div class="selected-file"><i data-lucide="file-code-2" aria-hidden="true"></i><div><strong>net_sales.sas</strong><span>2 input datasets · 1 output dataset</span></div><button class="text-button" data-choose="program">Change</button></div><button class="text-button source-jump" id="fo-view-source">View SAS source<i data-lucide="arrow-up-right" aria-hidden="true"></i></button></div>
+              </div>
+            </section>
+            <section class="step" aria-labelledby="fo-input-heading">
+              <div class="step-heading"><span class="step-number" id="fo-step-two">2</span><div><h2 id="fo-input-heading">Input datasets</h2><p>Connect the data your program reads.</p></div><span id="fo-input-count" class="step-state">Waiting for program</span></div>
+              <div class="step-content"><p class="waiting" id="fo-input-empty">Open a program to see which datasets it needs.</p>
+                <div id="fo-inputs" hidden>
+                  <div class="dataset-row"><div class="dataset-identity"><span class="field-label">Program uses</span><strong><code>orders</code></strong></div><div class="dataset-file"><span class="field-label">Connected file</span><span id="fo-orders-name">No file connected</span><small id="fo-orders-meta"></small></div><button class="secondary" id="fo-orders-action" data-choose="orders">Choose file</button></div>
+                  <div class="dataset-row"><div class="dataset-identity"><span class="field-label">Program uses</span><strong><code>returns</code></strong></div><div class="dataset-file"><span class="field-label">Connected file</span><span id="fo-returns-name">No file connected</span><small id="fo-returns-meta"></small></div><button class="secondary" id="fo-returns-action" data-choose="returns">Choose file</button></div>
+                  <div class="input-actions"><button class="text-button" data-choose="inputs"><i data-lucide="folder-open" aria-hidden="true"></i>Manage input datasets</button><span class="helper">.sas7bdat files</span></div>
+                </div>
+              </div>
+            </section>
+            <section class="step comparison-step" aria-labelledby="fo-compare-heading">
+              <div class="step-heading"><span class="step-number optional-number">3</span><div><h2 id="fo-compare-heading">Compare with SAS results <span class="optional">Optional</span></h2><p>Add output datasets from an earlier SAS run.</p></div></div>
+              <div class="step-content">
+                <details id="fo-comparison-disclosure"><summary><span id="fo-sas-state">No SAS results added</span><span class="disclosure-cue">Details</span></summary><div class="compare-body"><p>Use results from the same program, input data and settings. We will compare them with the converted output.</p><div class="selected-file" id="fo-sas-selected" hidden><i data-lucide="table-2" aria-hidden="true"></i><div><strong>net_sales.sas7bdat</strong><span>Compare to output: net_sales</span></div><button class="text-button" id="fo-remove-sas">Remove</button></div><button class="secondary" id="fo-add-sas" data-choose="sas" disabled>Add SAS results</button><p class="helper" id="fo-sas-helper">Open a program first. You can continue without SAS results.</p></div></details>
+                <p class="comparison-note" id="fo-comparison-note">You can convert without these files. Result agreement will not be checked.</p>
+              </div>
+            </section>
+          </div>
+          <aside class="context" id="fo-context" aria-label="Program context">
+            <section id="fo-before"><span class="context-kicker">YOUR REVIEW WORKSPACE</span><h2>See what will change.</h2><p>Review the available targets and any parts of the program that need attention.</p><ul><li>Inspect the converted code.</li><li>After running, check the output datasets.</li><li>Compare with SAS results when supplied.</li></ul><div class="privacy-note"><i data-lucide="folder-check" aria-hidden="true"></i><p>Work locally.<br>Keep your original files.</p></div></section>
+            <details class="source-panel" id="fo-source" open hidden><summary><span>SAS source</span><span class="source-filename">net_sales.sas</span></summary><div class="source-body"><pre><code><span><b>1</b><span><em>data</em> net_sales;</span></span><span><b>2</b><span>  <em>merge</em> orders returns;</span></span><span><b>3</b><span>  <em>by</em> order_id;</span></span><span><b>4</b><span>  net = gross - refunded;</span></span><span><b>5</b><span><em>run</em>;</span></span></code></pre><div class="source-details"><span class="field-label">Program reads</span><p><code>orders</code> and <code>returns</code></p><span class="field-label">Program creates</span><p><code>net_sales</code></p></div><p class="source-footnote">Source preview · original unchanged</p></div></details>
+          </aside>
+        </div>
+        <footer class="setup-footer"><div aria-live="polite"><strong id="fo-next-title">Open a program to begin</strong><p id="fo-next-note">Nothing runs until you choose Convert &amp; run.</p></div><button class="primary" id="fo-review" disabled>Review conversion options<i data-lucide="arrow-right" aria-hidden="true"></i></button></footer>
+      </div>
+      <section class="review-next" id="fo-review-screen" hidden aria-label="Conversion overview">
+        <button class="text-button" id="fo-back"><i data-lucide="arrow-left" aria-hidden="true"></i>Back to files</button><span class="eyebrow">CONVERSION OVERVIEW</span><h1>net_sales.sas</h1><p class="review-description">Review your setup before choosing a target and running.</p>
+        <div class="review-grid"><div><h2>Connected inputs</h2><div id="fo-review-inputs"></div></div><div><h2>Comparison with SAS results</h2><p id="fo-review-comparison"></p></div></div>
+        <div class="next-target"><div><span class="field-label">Conversion target</span><h2>Python</h2><p>Illustrative conversion option for this sample.</p></div><span class="tag">Review before running</span></div>
+        <div class="review-notice" id="fo-review-notice"></div><p class="next-note">Next: review the code and conversion requirements, choose where to save, then Convert &amp; run.</p><p class="helper">End of the first-open preview. No program has been executed.</p>
+      </section>
+      <div class="chooser-layer" id="fo-chooser-layer" hidden><section class="chooser" role="dialog" aria-modal="true" aria-labelledby="fo-chooser-title"><div class="chooser-heading"><div><span class="eyebrow">SAMPLE FILE CHOOSER</span><h2 id="fo-chooser-title">Open SAS program</h2></div><button class="icon-button" id="fo-close-chooser" aria-label="Close file chooser">✕</button></div><p id="fo-chooser-help"></p><div id="fo-choices"></div><p class="chooser-footnote">Sample selections only. This preview does not access your files.</p><div class="chooser-actions"><button class="secondary" id="fo-cancel">Cancel</button><button class="primary" id="fo-confirm">Open</button></div></section></div>
+    </section>
+  </div>
+  <p class="preview-note" id="fo-layout-note">Wide: setup and source preview sit side by side.</p>
+  <p class="preview-status">Proposed first-open interface for your review. Sample files only; no import, analysis or execution performed.</p>
+</div>
+<style>
+#saschi-first-open {--fo-bg:light-dark(#fafbf9,#171c1c);--fo-panel:light-dark(#f0f3f0,#202726);--fo-paper:light-dark(#fff,#1b2221);--fo-text:light-dark(#25332f,#e3ebe6);--fo-muted:light-dark(#56645e,#a9bbb1);--fo-border:light-dark(#dbe2dc,#3b4841);--fo-accent:light-dark(#265f50,#a3d5bf);--fo-accent-fill:light-dark(#e7f1eb,#2b4438);--fo-action:light-dark(#285b4d,#b4d8c7);--fo-action-text:light-dark(#fff,#193a2c);--fo-warn:light-dark(#795719,#edce8d);--fo-warn-bg:light-dark(#fbf2dc,#3f3521);--fo-code:light-dark(#496b93,#9fbee9);--fo-type:16px;width:100%;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--fo-text);}
+#saschi-first-open * {box-sizing:border-box;}
+#saschi-first-open [hidden] {display:none!important;}
+#saschi-first-open h1,#saschi-first-open h2,#saschi-first-open p {margin:0;}
+#saschi-first-open button,#saschi-first-open select,#saschi-first-open input {font:inherit;}
+#saschi-first-open button:focus-visible,#saschi-first-open select:focus-visible,#saschi-first-open summary:focus-visible {outline:3px solid var(--fo-accent);outline-offset:3px;}
+#saschi-first-open svg {width:18px;height:18px;flex-shrink:0;vertical-align:middle;}
+#saschi-first-open button:disabled {opacity:.5;cursor:not-allowed;}
+#saschi-first-open .preview-tools {display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;margin-bottom:14px;padding-right:80px;font-size:14px;}
+#saschi-first-open .preview-tools>span {margin-right:auto;font-weight:500;}
+#saschi-first-open .preview-tools label:not(:first-child) {margin-left:8px;}
+#saschi-first-open select {background:var(--fo-paper);color:var(--fo-text);border:1px solid var(--fo-border);border-radius:6px;padding:7px 10px;}
+#saschi-first-open .window-size {max-width:1024px;margin-inline:auto;container-type:inline-size;container-name:firstopen;}
+#saschi-first-open .app {background:var(--fo-bg);border:1px solid var(--fo-border);border-radius:12px;overflow:hidden;position:relative;font-size:var(--fo-type);line-height:1.5;}
+#saschi-first-open .chrome {display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;padding:14px 22px;border-bottom:1px solid var(--fo-border);background:var(--fo-paper);}
+#saschi-first-open .brand {display:flex;align-items:center;gap:10px;font-weight:600;letter-spacing:-.3px;}
+#saschi-first-open .brand-symbol {background:var(--fo-action);color:var(--fo-action-text);width:28px;height:28px;display:grid;place-items:center;border-radius:8px;font-size:16px;}
+#saschi-first-open .local {font-size:.875em;color:var(--fo-muted);display:flex;align-items:center;gap:7px;}
+#saschi-first-open .intro {padding:30px 30px 26px;}
+#saschi-first-open .eyebrow,#saschi-first-open .context-kicker {font-size:.72em;letter-spacing:.07em;color:var(--fo-muted);display:block;margin-bottom:7px;}
+#saschi-first-open h1 {font-size:1.6em;line-height:1.25;font-weight:600;letter-spacing:-.5px;}
+#saschi-first-open .intro>p {color:var(--fo-muted);margin-top:9px;}
+#saschi-first-open h2 {font-size:1em;line-height:1.4;font-weight:600;}
+#saschi-first-open .setup-layout {display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:30px;padding:0 30px 26px;align-items:start;}
+#saschi-first-open .steps {min-width:0;}
+#saschi-first-open .step {padding:22px 0;border-top:1px solid var(--fo-border);}
+#saschi-first-open .step:first-child {padding-top:0;border-top:0;}
+#saschi-first-open .step:last-child {padding-bottom:0;}
+#saschi-first-open .step-heading {display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;}
+#saschi-first-open .step-heading>div {flex:1;min-width:0;}
+#saschi-first-open .step-heading p {font-size:.875em;color:var(--fo-muted);margin-top:3px;}
+#saschi-first-open .step-number {width:26px;height:26px;border:1px solid var(--fo-border);border-radius:50%;display:grid;place-items:center;font-size:.8em;font-variant-numeric:tabular-nums;background:var(--fo-paper);flex-shrink:0;}
+#saschi-first-open .step-number.done {border-color:transparent;background:var(--fo-accent-fill);color:var(--fo-accent);}
+#saschi-first-open .step-content {padding:14px 0 0 38px;}
+#saschi-first-open .open-area {border:1px solid var(--fo-border);border-radius:9px;padding:23px 18px;background:var(--fo-paper);display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:12px;}
+#saschi-first-open .open-area>svg {color:var(--fo-muted);width:24px;height:24px;}
+#saschi-first-open .open-area p {width:100%;text-align:center;font-size:.875em;color:var(--fo-muted);}
+#saschi-first-open .primary,#saschi-first-open .secondary {display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--fo-action);border-radius:7px;padding:10px 14px;color:var(--fo-action-text);background:var(--fo-action);font-weight:500;text-align:center;}
+#saschi-first-open .secondary {background:var(--fo-paper);border-color:var(--fo-border);color:var(--fo-text);font-size:.875em;}
+#saschi-first-open .text-button {display:inline-flex;align-items:center;gap:7px;border:0;background:transparent;color:var(--fo-accent);padding:5px 0;font-size:.875em;font-weight:500;text-align:left;}
+#saschi-first-open .selected-file {display:flex;align-items:center;gap:10px;padding:13px 14px;border:1px solid var(--fo-border);border-radius:7px;background:var(--fo-paper);}
+#saschi-first-open .selected-file>div {min-width:0;flex:1;}
+#saschi-first-open .selected-file strong {display:block;overflow-wrap:anywhere;font-weight:500;font-size:.94em;}
+#saschi-first-open .selected-file span {display:block;color:var(--fo-muted);font-size:.8em;margin-top:3px;}
+#saschi-first-open .selected-file>svg {color:var(--fo-accent);}
+#saschi-first-open .source-jump {margin-top:5px;}
+#saschi-first-open .waiting {font-size:.875em;color:var(--fo-muted);}
+#saschi-first-open .step-state {font-size:.75em;color:var(--fo-muted);padding-top:4px;}
+#saschi-first-open .step-state.connected {color:var(--fo-accent);}
+#saschi-first-open .dataset-row {display:grid;grid-template-columns:80px minmax(0,1fr) auto;gap:12px;align-items:center;padding:13px 0;border-bottom:1px solid var(--fo-border);}
+#saschi-first-open .dataset-row:first-child {padding-top:0;}
+#saschi-first-open .field-label {display:block;font-size:.75em;color:var(--fo-muted);margin-bottom:4px;}
+#saschi-first-open code {font-family:ui-monospace,"DejaVu Sans Mono",Consolas,monospace;font-size:.92em;background:transparent;padding:0;color:inherit;}
+#saschi-first-open .dataset-identity strong {font-weight:500;}
+#saschi-first-open .dataset-file {min-width:0;font-size:.875em;overflow-wrap:anywhere;}
+#saschi-first-open .dataset-file .field-label {font-size:.86em;}
+#saschi-first-open .dataset-file small {display:block;font-size:.88em;color:var(--fo-muted);margin-top:4px;}
+#saschi-first-open .input-actions {display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;padding-top:10px;}
+#saschi-first-open .helper {color:var(--fo-muted);font-size:.8em;}
+#saschi-first-open .optional {display:inline-block;font-size:.75em;font-weight:400;color:var(--fo-muted);margin-left:7px;}
+#saschi-first-open .comparison-step summary {display:flex;justify-content:space-between;align-items:center;gap:10px;list-style:none;font-size:.875em;padding:10px 12px;background:var(--fo-panel);border-radius:6px;}
+#saschi-first-open .disclosure-cue {color:var(--fo-accent);font-size:.9em;}
+#saschi-first-open .compare-body {padding-top:12px;}
+#saschi-first-open .compare-body>p {font-size:.875em;color:var(--fo-muted);margin-bottom:12px;}
+#saschi-first-open .compare-body>.selected-file {margin-bottom:10px;}
+#saschi-first-open .compare-body>.helper {font-size:.8em;margin:10px 0 0;}
+#saschi-first-open .comparison-note {font-size:.8em;color:var(--fo-muted);margin-top:10px;}
+#saschi-first-open .context {background:var(--fo-panel);padding:22px;border-radius:8px;min-width:0;}
+#saschi-first-open .context h2 {font-size:1.1em;}
+#saschi-first-open .context section>p {font-size:.875em;color:var(--fo-muted);margin-top:10px;}
+#saschi-first-open .context ul {padding-left:19px;margin:18px 0;font-size:.875em;color:var(--fo-muted);}
+#saschi-first-open .context li {margin-bottom:10px;padding-left:3px;}
+#saschi-first-open .privacy-note {border-top:1px solid var(--fo-border);padding-top:18px;display:flex;align-items:flex-start;gap:10px;color:var(--fo-muted);font-size:.875em;}
+#saschi-first-open .privacy-note>svg {margin-top:3px;}
+#saschi-first-open .context.has-source {padding:0;overflow:hidden;}
+#saschi-first-open .source-panel>summary {display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;list-style:none;padding:16px;font-size:.9em;font-weight:500;}
+#saschi-first-open .source-filename {font-weight:400;font-size:.85em;color:var(--fo-muted);overflow-wrap:anywhere;}
+#saschi-first-open pre {font:calc(var(--fo-type) - 1px)/1.9 ui-monospace,"DejaVu Sans Mono",Consolas,monospace;margin:0;padding:12px 6px;background:var(--fo-paper);border-block:1px solid var(--fo-border);}
+#saschi-first-open pre code {font:inherit;}
+#saschi-first-open pre code>span {display:grid;grid-template-columns:25px minmax(0,1fr);}
+#saschi-first-open pre code>span>b {font-size:.8em;font-weight:400;color:var(--fo-muted);text-align:center;user-select:none;}
+#saschi-first-open pre code>span>span {white-space:pre-wrap;overflow-wrap:anywhere;}
+#saschi-first-open pre em {font-style:normal;color:var(--fo-code);}
+#saschi-first-open .source-details {padding:16px;}
+#saschi-first-open .source-details p {font-size:.9em;margin-bottom:14px;}
+#saschi-first-open .source-details p:last-child {margin-bottom:0;}
+#saschi-first-open .source-footnote {padding:0 16px 16px;font-size:.75em;color:var(--fo-muted);}
+#saschi-first-open .setup-footer {display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 30px;border-top:1px solid var(--fo-border);background:var(--fo-paper);}
+#saschi-first-open .setup-footer>div {min-width:0;}
+#saschi-first-open .setup-footer strong {display:block;font-size:.875em;font-weight:500;}
+#saschi-first-open .setup-footer p {font-size:.8em;color:var(--fo-muted);margin-top:4px;}
+#saschi-first-open .setup-footer .primary {max-width:310px;flex-shrink:0;font-size:.94em;}
+#saschi-first-open .review-next {padding:28px 30px 32px;}
+#saschi-first-open .review-next>.text-button {margin-bottom:24px;}
+#saschi-first-open .review-description {color:var(--fo-muted);margin-top:10px;}
+#saschi-first-open .review-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;margin-top:28px;}
+#saschi-first-open .review-grid p {font-size:.9em;color:var(--fo-muted);margin-top:10px;overflow-wrap:anywhere;}
+#saschi-first-open .next-target {margin-top:26px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;border:1px solid var(--fo-border);padding:18px;border-radius:8px;background:var(--fo-paper);}
+#saschi-first-open .next-target p {font-size:.875em;color:var(--fo-muted);margin-top:5px;}
+#saschi-first-open .tag {background:var(--fo-accent-fill);color:var(--fo-accent);padding:5px 9px;border-radius:5px;font-size:.8em;}
+#saschi-first-open .review-notice {margin-top:18px;padding:15px;border-radius:6px;background:var(--fo-panel);font-size:.9em;}
+#saschi-first-open .review-notice.needs-input {background:var(--fo-warn-bg);color:var(--fo-warn);}
+#saschi-first-open .next-note {font-size:.9em;margin:22px 0 12px;color:var(--fo-muted);}
+#saschi-first-open .chooser-layer {position:absolute;inset:0;z-index:10;background:light-dark(#233a2e55,#00000088);display:flex;justify-content:center;align-items:flex-start;padding:28px 18px;}
+#saschi-first-open .chooser {width:550px;max-width:100%;margin-top:35px;padding:24px;background:var(--fo-paper);border:1px solid var(--fo-border);border-radius:12px;box-shadow:0 16px 48px #00000022;}
+#saschi-first-open .chooser-heading {display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:14px;}
+#saschi-first-open .icon-button {padding:5px 8px;border:0;color:var(--fo-muted);background:transparent;}
+#saschi-first-open .chooser>p {font-size:.875em;color:var(--fo-muted);}
+#saschi-first-open .file-choice {display:flex;align-items:flex-start;gap:12px;border:1px solid var(--fo-border);border-radius:7px;padding:14px;margin-top:12px;}
+#saschi-first-open .file-choice:has(input:checked) {background:var(--fo-accent-fill);border-color:var(--fo-accent);}
+#saschi-first-open .file-choice input {margin-top:5px;width:17px;height:17px;accent-color:var(--fo-action);flex-shrink:0;}
+#saschi-first-open .file-choice strong {display:block;font-size:.94em;font-weight:500;overflow-wrap:anywhere;}
+#saschi-first-open .file-choice small {display:block;font-size:.8em;color:var(--fo-muted);margin-top:3px;}
+#saschi-first-open .chooser-footnote {margin-top:16px;}
+#saschi-first-open .chooser-actions {display:flex;justify-content:flex-end;gap:10px;margin-top:22px;}
+#saschi-first-open .preview-note {font-size:14px;color:var(--fo-muted);margin-top:12px;}
+#saschi-first-open .preview-status {font-size:13px;color:var(--fo-muted);margin-top:5px;}
+@container firstopen (max-width:780px){#saschi-first-open .setup-layout {grid-template-columns:minmax(0,1fr);gap:24px;}#saschi-first-open .context:not(.has-source){display:none;}#saschi-first-open .intro{padding:24px 22px;}#saschi-first-open .setup-layout {padding:0 22px 24px;}#saschi-first-open .setup-footer {padding:18px 22px;flex-wrap:wrap;}#saschi-first-open .setup-footer .primary {max-width:100%;}#saschi-first-open .review-grid {grid-template-columns:minmax(0,1fr);}}
+@container firstopen (max-width:480px){#saschi-first-open .chrome {padding:12px 16px;}#saschi-first-open .local {font-size:.8em;}#saschi-first-open .intro {padding:22px 16px;}#saschi-first-open h1 {font-size:1.45em;}#saschi-first-open .setup-layout {padding:0 16px 22px;}#saschi-first-open .step-content {padding-left:0;}#saschi-first-open .step-state {width:100%;padding:0 0 0 38px;}#saschi-first-open .dataset-row {grid-template-columns:80px minmax(0,1fr);gap:10px;}#saschi-first-open .dataset-row>.secondary {grid-column:2;justify-self:start;}#saschi-first-open .selected-file {flex-wrap:wrap;}#saschi-first-open .setup-footer {padding:18px 16px;}#saschi-first-open .setup-footer .primary {width:100%;}#saschi-first-open .chooser {padding:18px;margin-top:8px;}#saschi-first-open .review-next {padding:24px 18px;}}
+@media(pointer:coarse){#saschi-first-open button,#saschi-first-open select,#saschi-first-open summary {min-height:44px;}}
+</style>
+<script>
+(() => {
+  const root=document.getElementById('saschi-first-open');
+  const el=id=>root.querySelector('#'+id);
+  const state={program:false,orders:false,returns:false,sas:false,width:1024,text:16,review:false};
+  let mode='',previousFocus=null,compact=null;
+  const restore=data=>{if(data?.mock!=='saschi-first-open')return;for(const key of ['program','orders','returns','sas','review'])if(typeof data[key]==='boolean')state[key]=data[key];if([1024,640,360].includes(data.width))state.width=data.width;if([16,18,20].includes(data.text))state.text=data.text;if(!state.program){state.orders=false;state.returns=false;state.sas=false;state.review=false;}};
+  restore(window.openai?.widgetState?.modelContent);
+  function save(){window.openai?.setWidgetState?.({modelContent:{mock:'saschi-first-open',...state},privateContent:null})?.catch(()=>{});}
+  function count(){return Number(state.orders)+Number(state.returns);}
+  function render(){
+    root.style.setProperty('--fo-type',state.text+'px');el('fo-viewport').style.maxWidth=state.width+'px';el('fo-size').value=state.width;el('fo-text').value=state.text;
+    el('fo-program-empty').hidden=state.program;el('fo-program-selected').hidden=!state.program;el('fo-input-empty').hidden=state.program;el('fo-inputs').hidden=!state.program;
+    el('fo-step-one').classList.toggle('done',state.program);el('fo-step-two').classList.toggle('done',count()===2);el('fo-step-one').textContent=state.program?'✓':'1';el('fo-step-two').textContent=count()===2?'✓':'2';
+    el('fo-input-count').textContent=state.program?count()+' of 2 connected':'Waiting for program';el('fo-input-count').classList.toggle('connected',count()===2);
+    for(const name of ['orders','returns']){el('fo-'+name+'-name').textContent=state[name]?name+'.sas7bdat':'No file connected';el('fo-'+name+'-meta').textContent=state[name]?'6 observations · 2 variables':'';el('fo-'+name+'-action').textContent=state[name]?'Change':'Choose file';}
+    el('fo-add-sas').disabled=!state.program;el('fo-add-sas').hidden=state.sas;el('fo-sas-selected').hidden=!state.sas;el('fo-sas-state').textContent=state.sas?'1 SAS output dataset added':'No SAS results added';
+    el('fo-sas-helper').textContent=state.program?'Accepts .sas7bdat output datasets.':'Open a program first.';el('fo-sas-helper').hidden=state.sas;
+    el('fo-comparison-note').textContent=state.sas?'Comparison is set up. It will run after conversion and execution.':'You can convert without these files. Result agreement will not be checked.';
+    el('fo-review').disabled=!state.program;el('fo-next-title').textContent=!state.program?'Open a program to begin':count()===2?'Inputs connected. Ready to review.':(2-count())+' input dataset'+(count()===0?'s':'')+' still to connect';
+    el('fo-next-note').textContent=!state.program?'Nothing runs until you choose Convert & run.':'You can review conversion options now. The program will not run.';
+    el('fo-before').hidden=state.program;el('fo-source').hidden=!state.program;el('fo-context').classList.toggle('has-source',state.program);
+    el('fo-setup-screen').hidden=state.review;el('fo-review-screen').hidden=!state.review;
+    el('fo-review-inputs').replaceChildren();for(const name of ['orders','returns']){const p=document.createElement('p');p.textContent=name+' → '+(state[name]?name+'.sas7bdat':'Not connected');el('fo-review-inputs').append(p);}
+    el('fo-review-comparison').textContent=state.sas?'net_sales.sas7bdat is connected to output net_sales. Comparison has not run.':'No SAS results supplied. Result agreement will not be checked.';
+    el('fo-review-notice').textContent=count()===2?'Both input datasets are connected. Review the conversion before execution.':(2-count())+' input dataset'+(count()===0?'s are':' is')+' still missing. You can inspect conversion options, but execution waits until the inputs are connected.';
+    el('fo-review-notice').classList.toggle('needs-input',count()!==2);
+  }
+  function layout(){const small=el('fo-viewport').getBoundingClientRect().width<=780;if(small!==compact){compact=small;el('fo-source').open=!small;}el('fo-layout-note').textContent=small?'Small: setup becomes one column; the source preview folds away. Text keeps its size.':'Wide: setup and source preview sit side by side.';}
+  function openChooser(kind){mode=kind;previousFocus=document.activeElement;el('fo-choices').replaceChildren();
+    const titles={program:'Open SAS program',inputs:'Manage input datasets',orders:'Connect orders',returns:'Connect returns',sas:'Add SAS results'};
+    const helps={program:'Choose the program to review.',inputs:'Select the files to connect. Unchecking a file removes its connection; the original file is unchanged.',orders:'Choose the file that supplies the orders dataset.',returns:'Choose the file that supplies the returns dataset.',sas:'Choose output from an earlier SAS run, using the same program, inputs and settings.'};
+    el('fo-chooser-title').textContent=titles[kind];el('fo-chooser-help').textContent=helps[kind];
+    const choices=kind==='program'?[['program','net_sales.sas','Reads orders and returns; creates net_sales']]:kind==='sas'?[['sas','net_sales.sas7bdat','SAS output · 6 observations · 4 variables']]:kind==='inputs'?[['orders','orders.sas7bdat','Input data · 6 observations · 2 variables'],['returns','returns.sas7bdat','Input data · 6 observations · 2 variables']]:[[kind,kind+'.sas7bdat','Input data · 6 observations · 2 variables']];
+    choices.forEach(([key,name,desc])=>{const label=document.createElement('label');label.className='file-choice';const check=document.createElement('input');check.type='checkbox';check.value=key;check.checked=kind!=='inputs'||state[key];const text=document.createElement('span'),strong=document.createElement('strong'),small=document.createElement('small');strong.textContent=name;small.textContent=desc;text.append(strong,small);label.append(check,text);el('fo-choices').append(label);});
+    el('fo-confirm').textContent=kind==='program'?'Open program':kind==='sas'?'Add SAS results':kind==='inputs'?'Apply connections':'Connect selected';
+    const update=()=>el('fo-confirm').disabled=kind!=='inputs'&&!el('fo-choices').querySelector('input:checked');el('fo-choices').onchange=update;update();
+    el('fo-chooser-layer').hidden=false;el('fo-close-chooser').focus();
+  }
+  function closeChooser(){el('fo-chooser-layer').hidden=true;previousFocus?.focus();}
+  root.querySelectorAll('[data-choose]').forEach(button=>button.addEventListener('click',()=>openChooser(button.dataset.choose)));
+  el('fo-close-chooser').addEventListener('click',closeChooser);el('fo-cancel').addEventListener('click',closeChooser);
+  el('fo-chooser-layer').addEventListener('click',e=>{if(e.target===el('fo-chooser-layer'))closeChooser();});
+  el('fo-chooser-layer').addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();closeChooser();}if(e.key==='Tab'){const focusable=Array.from(el('fo-chooser-layer').querySelectorAll('button:not(:disabled),input'));const first=focusable[0],last=focusable[focusable.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}});
+  el('fo-confirm').addEventListener('click',()=>{const selected=Array.from(el('fo-choices').querySelectorAll('input:checked')).map(input=>input.value);if(mode==='inputs'){for(const name of ['orders','returns'])state[name]=selected.includes(name);}else selected.forEach(name=>state[name]=true);el('fo-chooser-layer').hidden=true;render();layout();save();if(mode==='program')el('fo-view-source').focus();else if(mode==='sas')el('fo-remove-sas').focus();else (previousFocus&&previousFocus.isConnected?previousFocus:el('fo-review')).focus();});
+  el('fo-remove-sas').addEventListener('click',()=>{state.sas=false;render();save();el('fo-add-sas').focus();});
+  el('fo-view-source').addEventListener('click',()=>{el('fo-source').open=true;el('fo-source').querySelector('summary').focus();});
+  el('fo-review').addEventListener('click',()=>{state.review=true;render();save();el('fo-back').focus();});
+  el('fo-back').addEventListener('click',()=>{state.review=false;render();save();el('fo-review').focus();});
+  el('fo-size').addEventListener('change',e=>{state.width=Number(e.target.value);render();save();});el('fo-text').addEventListener('change',e=>{state.text=Number(e.target.value);render();save();});
+  new ResizeObserver(layout).observe(el('fo-viewport'));
+  window.addEventListener('openai:set_globals',e=>{restore(e.detail?.globals?.widgetState?.modelContent);render();layout();});
+  render();layout();
+  if(globalThis.Tweak){const tweaks=new Tweak({container:el('fo-app'),onChange:()=>{render();save();}});tweaks.addSlider(state,'text',{label:'Reading text',min:16,max:20,step:2,unit:'px'});}
+})();
+</script>

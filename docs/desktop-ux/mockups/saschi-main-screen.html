@@ -1,0 +1,300 @@
+<div id="saschi-main-mock" aria-label="SASchi-Go desktop design preview">
+  <div class="preview-bar">
+    <span>Design preview · sample data</span>
+    <label>Window
+      <select id="sg-window"><option value="1024">Wide</option><option value="640">Small</option><option value="360">Narrow</option></select>
+    </label>
+    <label>Text
+      <select id="sg-type"><option value="16">Comfortable</option><option value="18">Larger</option><option value="20">Largest</option></select>
+    </label>
+  </div>
+  <div class="app-viewport" id="sg-viewport">
+    <div class="app-window" id="sg-app" aria-label="SASchi-Go main screen">
+      <header class="app-header">
+        <div class="brand"><span class="brand-mark">S</span><span>SASchi-Go</span></div>
+        <span class="local-note"><i data-lucide="hard-drive" aria-hidden="true"></i> Local workspace</span>
+      </header>
+      <div class="workspace">
+        <details class="setup" id="sg-setup" open>
+          <summary><span>Files &amp; setup</span><span class="setup-summary">1 program · 1 input · SAS results added</span><i data-lucide="chevron-down" aria-hidden="true"></i></summary>
+          <div class="setup-body">
+            <section class="file-group">
+              <h2>SAS program</h2>
+              <button class="file-item" data-dialog="program"><i data-lucide="file-code-2" aria-hidden="true"></i><span><strong>adjust_sales.sas</strong><small>Open program</small></span></button>
+            </section>
+            <section class="file-group">
+              <h2>Input datasets</h2>
+              <p>The data your program reads.</p>
+              <button class="file-item" data-dialog="inputs"><i data-lucide="table-2" aria-hidden="true"></i><span><strong>sales.sas7bdat</strong><small>Used as sales · 6 observations</small></span></button>
+              <button class="quiet-button" data-dialog="inputs"><i data-lucide="plus" aria-hidden="true"></i>Add datasets</button>
+            </section>
+            <section class="file-group compare-setup">
+              <h2>Compare with SAS results</h2>
+              <span class="optional">Optional</span>
+              <p>Already ran this program in SAS? Add its output datasets to check the converted results.</p>
+              <button class="file-item" data-dialog="sas"><i data-lucide="table-2" aria-hidden="true"></i><span><strong>adjusted.sas7bdat</strong><small>From your earlier SAS run</small></span></button>
+              <button class="quiet-button" data-dialog="sas">Change SAS results</button>
+              <p class="helper">Use the same input data and program settings.</p>
+            </section>
+            <section class="file-group save-group"><h2>Save location</h2><button class="file-item" data-dialog="save"><i data-lucide="folder" aria-hidden="true"></i><span><strong>SASchi-Go / Sales review</strong><small>A new folder for each run</small></span></button></section>
+          </div>
+        </details>
+        <button class="splitter" id="sg-splitter" aria-label="Resize files panel with left and right arrow keys"><span></span></button>
+        <main class="review">
+          <div class="review-heading"><div><span class="eyebrow">PROGRAM REVIEW</span><h1>Sales adjustment</h1></div><button class="primary-button" id="sg-run"><i data-lucide="play" aria-hidden="true"></i>Convert &amp; run</button></div>
+          <div class="target-row"><span>Target <strong>Python</strong></span><button class="text-button" data-dialog="targets">Review conversion options<i data-lucide="chevron-right" aria-hidden="true"></i></button></div>
+          <div class="run-state" aria-live="polite"><span><i data-lucide="circle-check" aria-hidden="true"></i><strong id="sg-execution">Execution completed</strong></span><button id="sg-verdict" class="status-link">1 value differs from SAS results<i data-lucide="arrow-up-right" aria-hidden="true"></i></button></div>
+          <nav class="review-nav" aria-label="Review views">
+            <button aria-pressed="true" data-view="review">Overview</button><button aria-pressed="false" data-view="code">Code</button><button aria-pressed="false" data-view="results">Results</button><button aria-pressed="false" data-view="comparison">Comparison <span class="count">1</span></button>
+          </nav>
+          <div class="review-content">
+            <section class="code-section" id="sg-code" aria-label="Source and converted code">
+              <div class="section-heading"><h2>Code review</h2><label class="check-label"><input id="sg-wrap" type="checkbox" checked>Wrap lines</label></div>
+              <div class="code-pair">
+                <section class="code-pane"><div class="pane-heading"><strong>SAS source</strong><span>adjust_sales.sas</span></div><pre><code><span class="code-line"><b>1</b><span><em>data</em> adjusted;</span></span><span class="code-line"><b>2</b><span>  <em>set</em> sales;</span></span><span class="code-line highlighted"><b>3</b><span>  net = gross - returns;</span></span><span class="code-line"><b>4</b><span><em>run</em>;</span></span></code></pre></section>
+                <section class="code-pane"><div class="pane-heading"><strong>Converted Python</strong><span>Illustrative code</span></div><pre><code><span class="code-line"><b>1</b><span>adjusted = sales.copy()</span></span><span class="code-line highlighted"><b>2</b><span>adjusted[<em>"net"</em>] = (</span></span><span class="code-line highlighted"><b>3</b><span>    sales[<em>"gross"</em>]</span></span><span class="code-line highlighted"><b>4</b><span>    - sales[<em>"returns"</em>]</span></span><span class="code-line highlighted"><b>5</b><span>)</span></span></code></pre></section>
+              </div>
+              <div class="code-note"><i data-lucide="corner-down-right" aria-hidden="true"></i><span>Highlighted: calculate net for each observation.</span></div>
+            </section>
+            <section class="results-section" id="sg-results" aria-label="Output dataset">
+              <div class="section-heading"><div><h2>Output data <span class="dataset-name">adjusted</span></h2><p>6 observations · 4 variables</p></div><button class="text-button" data-dialog="variables">Variables<i data-lucide="sliders-horizontal" aria-hidden="true"></i></button></div>
+              <div class="table-scroll"><table><caption class="sr-only">Sample converted output, with one value differing from the supplied SAS result.</caption><thead><tr><th scope="col">sale_id</th><th scope="col" class="numeric">gross</th><th scope="col" class="numeric">returns</th><th scope="col" class="numeric">net</th></tr></thead><tbody>
+                <tr><th scope="row">S001</th><td class="numeric">1,200.00</td><td class="numeric">50.00</td><td class="numeric">1,150.00</td></tr>
+                <tr><th scope="row">S002</th><td class="numeric">850.00</td><td class="numeric">0.00</td><td class="numeric">850.00</td></tr>
+                <tr class="difference-row"><th scope="row">S003</th><td class="numeric">1,000.00</td><td class="numeric">40.00</td><td class="numeric difference-cell"><button id="sg-diff-cell" aria-label="Inspect difference for S003 net, converted 960, SAS 950">960.00 <span>≠</span></button></td></tr>
+                <tr><th scope="row">S004</th><td class="numeric">600.00</td><td class="numeric">25.00</td><td class="numeric">575.00</td></tr>
+                <tr><th scope="row">S005</th><td class="numeric">1,450.00</td><td class="numeric">100.00</td><td class="numeric">1,350.00</td></tr>
+                <tr><th scope="row">S006</th><td class="numeric">920.00</td><td class="numeric">20.00</td><td class="numeric">900.00</td></tr>
+              </tbody></table></div>
+              <p class="table-note">≠ Value differs from the supplied SAS output. Numbers display with commas and two decimals; comparisons use stored values.</p>
+            </section>
+            <section id="sg-comparison" class="comparison-section" hidden aria-label="Comparison with SAS results">
+              <div class="section-heading"><div><h2>Compare with SAS results</h2><p>adjusted.sas7bdat → converted adjusted</p></div></div>
+              <div class="comparison-summary"><span>Observations <strong>6 / 6</strong></span><span>Variables <strong>4 / 4</strong></span><span>Values <strong id="sg-match-count">23 of 24 match</strong></span></div>
+              <div class="difference-detail" id="sg-difference"><div><span class="eyebrow">OBSERVATION 3 · sale_id S003</span><h3>net differs</h3></div><div class="value-comparison"><div><span>SAS result</span><strong>950.00</strong></div><div><span>Converted result</span><strong>960.00</strong></div><div><span>Difference</span><strong>+10.00</strong></div></div><p>Review this value before accepting the conversion.</p><button class="text-button" id="sg-back-code">View calculation in code<i data-lucide="arrow-up-right" aria-hidden="true"></i></button></div>
+              <p id="sg-no-comparison" hidden>No SAS results added. You can still convert and run; result agreement has not been checked.</p>
+              <details class="comparison-rules"><summary>What was compared?</summary><p>Sample scenario: all 6 observations and 4 variables, in observation order. Exact stored numeric values; no tolerance applied. Variable order and metadata match. This preview does not execute SAS or compare real files.</p></details>
+            </section>
+            <details class="run-record"><summary>Log &amp; run record</summary><p>Sample job · local execution · input files unchanged.</p><p>Execution: completed. Comparison: 1 value differs. No claim of live SAS validation.</p></details>
+          </div>
+          <footer class="review-footer"><span><i data-lucide="folder-check" aria-hidden="true"></i>Saved separately from source files</span><button class="text-button" data-dialog="save">Open output folder</button></footer>
+        </main>
+      </div>
+      <div class="dialog-layer" id="sg-dialog-layer" hidden><section class="dialog-box" role="dialog" aria-modal="true" aria-labelledby="sg-dialog-title"><div class="section-heading"><h2 id="sg-dialog-title"></h2><button class="icon-button" id="sg-close-dialog" aria-label="Close dialog">✕</button></div><div id="sg-dialog-body"></div><button class="secondary-button" id="sg-dialog-done">Done</button></section></div>
+    </div>
+  </div>
+  <div class="preview-caption" id="sg-layout-note" aria-live="polite">Wide: files stay beside the review; code uses two panes.</div>
+  <p class="preview-status">Proposed interface for your review. Sample code and values; no files imported or conversions performed.</p>
+</div>
+<style>
+#saschi-main-mock { --sg-bg:light-dark(#fafbf9,#171c1c); --sg-panel:light-dark(#f0f3f0,#202726); --sg-paper:light-dark(#ffffff,#1b2221); --sg-text:light-dark(#25332f,#e3ebe6); --sg-muted:light-dark(#56645e,#a9bbb1); --sg-border:light-dark(#dbe2dc,#3b4841); --sg-accent:light-dark(#265f50,#a3d5bf); --sg-accent-fill:light-dark(#e7f1eb,#2b4438); --sg-action:light-dark(#285b4d,#b4d8c7); --sg-action-text:light-dark(#ffffff,#193a2c); --sg-warn:light-dark(#795719,#edce8d); --sg-warn-bg:light-dark(#fbf2dc,#3f3521); --sg-code:light-dark(#496b93,#9fbee9); --sg-type:16px; --sg-code-type:15px; font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif; color:var(--sg-text); width:100%; }
+#saschi-main-mock * {box-sizing:border-box;}
+#saschi-main-mock [hidden] {display:none!important;}
+#saschi-main-mock button,#saschi-main-mock select,#saschi-main-mock input {font:inherit;}
+#saschi-main-mock button {cursor:pointer;}
+#saschi-main-mock button:focus-visible,#saschi-main-mock summary:focus-visible,#saschi-main-mock select:focus-visible {outline:3px solid var(--sg-accent);outline-offset:3px;}
+#saschi-main-mock .preview-bar {display:flex;align-items:center;flex-wrap:wrap;gap:12px 20px;margin-bottom:14px;font-size:14px;padding-right:80px;}
+#saschi-main-mock .preview-bar>span {margin-right:auto;font-weight:500;}
+#saschi-main-mock .preview-bar label {display:flex;align-items:center;gap:8px;}
+#saschi-main-mock select {background:var(--sg-paper);color:var(--sg-text);border:1px solid var(--sg-border);border-radius:6px;padding:7px 10px;}
+#saschi-main-mock .app-viewport {max-width:1024px;margin-inline:auto;container-type:inline-size;container-name:desktop;}
+#saschi-main-mock .app-window {background:var(--sg-bg);border:1px solid var(--sg-border);border-radius:12px;overflow:hidden;position:relative;font-size:var(--sg-type);line-height:1.5;}
+#saschi-main-mock .app-header {display:flex;gap:16px;align-items:center;justify-content:space-between;padding:14px 22px;border-bottom:1px solid var(--sg-border);background:var(--sg-paper);}
+#saschi-main-mock .brand {display:flex;align-items:center;gap:10px;font-weight:600;letter-spacing:-.3px;}
+#saschi-main-mock .brand-mark {background:var(--sg-action);color:var(--sg-action-text);width:28px;height:28px;display:grid;place-items:center;border-radius:8px;font-size:16px;}
+#saschi-main-mock .local-note {display:flex;align-items:center;gap:7px;color:var(--sg-muted);font-size:.875em;}
+#saschi-main-mock svg {width:17px;height:17px;flex-shrink:0;vertical-align:middle;}
+#saschi-main-mock .workspace {display:grid;grid-template-columns:var(--sg-sidebar,246px) 8px minmax(0,1fr);align-items:stretch;}
+#saschi-main-mock .setup {background:var(--sg-panel);min-width:0;}
+#saschi-main-mock .setup>summary {display:flex;gap:8px;align-items:center;padding:22px 18px 10px;font-weight:600;cursor:pointer;list-style:none;}
+#saschi-main-mock .setup>summary>svg {margin-left:auto;}
+#saschi-main-mock .setup-summary {display:none;}
+#saschi-main-mock .setup-body {padding:4px 18px 20px;}
+#saschi-main-mock h1,#saschi-main-mock h2,#saschi-main-mock h3,#saschi-main-mock p {margin:0;}
+#saschi-main-mock h1 {font-size:1.45em;line-height:1.25;font-weight:600;letter-spacing:-.5px;}
+#saschi-main-mock h2 {font-size:1em;font-weight:600;line-height:1.4;}
+#saschi-main-mock h3 {font-size:1.15em;font-weight:600;}
+#saschi-main-mock .file-group {padding:16px 0;border-bottom:1px solid var(--sg-border);}
+#saschi-main-mock .file-group:last-child {border-bottom:0;}
+#saschi-main-mock .file-group p {font-size:.875em;color:var(--sg-muted);margin-top:6px;line-height:1.5;}
+#saschi-main-mock .file-item {display:flex;gap:9px;align-items:flex-start;width:100%;text-align:left;border:0;background:transparent;color:var(--sg-text);padding:12px 0 4px;}
+#saschi-main-mock .file-item>svg {margin-top:4px;color:var(--sg-muted);}
+#saschi-main-mock .file-item span {min-width:0;}
+#saschi-main-mock .file-item strong {font-size:.9em;font-weight:500;overflow-wrap:anywhere;display:block;}
+#saschi-main-mock .file-item small {font-size:.8em;color:var(--sg-muted);display:block;margin-top:3px;}
+#saschi-main-mock .quiet-button,#saschi-main-mock .text-button {display:inline-flex;gap:6px;align-items:center;border:0;background:transparent;color:var(--sg-accent);padding:6px 0;font-size:.875em;font-weight:500;text-align:left;}
+#saschi-main-mock .quiet-button {margin-top:8px;}
+#saschi-main-mock .optional {font-size:.8em;color:var(--sg-muted);}
+#saschi-main-mock .splitter {padding:0;border:0;background:var(--sg-panel);border-right:1px solid var(--sg-border);cursor:col-resize;display:flex;align-items:center;justify-content:center;touch-action:none;}
+#saschi-main-mock .splitter span {height:32px;width:3px;border-radius:2px;background:var(--sg-border);}
+#saschi-main-mock .review {min-width:0;width:100%;margin:0;}
+#saschi-main-mock .review-heading {display:flex;align-items:center;justify-content:space-between;gap:16px;padding:24px 24px 12px;flex-wrap:wrap;}
+#saschi-main-mock .eyebrow {font-size:.72em;letter-spacing:.07em;color:var(--sg-muted);display:block;margin-bottom:6px;}
+#saschi-main-mock .primary-button,#saschi-main-mock .secondary-button {display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;border:1px solid var(--sg-action);border-radius:7px;background:var(--sg-action);color:var(--sg-action-text);font-weight:500;white-space:normal;}
+#saschi-main-mock .secondary-button {background:var(--sg-paper);border-color:var(--sg-border);color:var(--sg-text);}
+#saschi-main-mock .primary-button:disabled {opacity:.65;cursor:wait;}
+#saschi-main-mock .target-row {display:flex;gap:8px 20px;flex-wrap:wrap;align-items:center;padding:0 24px 18px;font-size:.875em;}
+#saschi-main-mock .target-row>span {color:var(--sg-muted);}
+#saschi-main-mock .target-row strong {font-weight:500;color:var(--sg-text);margin-left:6px;}
+#saschi-main-mock .target-row .text-button {font-size:1em;}
+#saschi-main-mock .run-state {display:flex;flex-wrap:wrap;gap:6px 16px;padding:13px 24px;border-top:1px solid var(--sg-border);border-bottom:1px solid var(--sg-border);background:var(--sg-paper);font-size:.875em;}
+#saschi-main-mock .run-state>span {display:flex;align-items:center;gap:7px;}
+#saschi-main-mock .run-state strong {font-weight:500;}
+#saschi-main-mock .run-state>span>svg {color:var(--sg-accent);}
+#saschi-main-mock .status-link {display:flex;align-items:center;gap:5px;font-size:1em;border:0;padding:0;background:transparent;color:var(--sg-warn);text-align:left;}
+#saschi-main-mock .review-nav {display:flex;flex-wrap:wrap;gap:4px;padding:12px 20px 0;border-bottom:1px solid var(--sg-border);}
+#saschi-main-mock .review-nav button {border:0;border-bottom:3px solid transparent;background:transparent;color:var(--sg-muted);padding:10px 12px;font-size:.9em;}
+#saschi-main-mock .review-nav button[aria-pressed=true] {color:var(--sg-accent);border-bottom-color:var(--sg-accent);font-weight:600;}
+#saschi-main-mock .count {font-size:.85em;background:var(--sg-warn-bg);color:var(--sg-warn);border-radius:4px;padding:1px 5px;margin-left:3px;}
+#saschi-main-mock .review-content {padding:20px 24px;min-width:0;}
+#saschi-main-mock .section-heading {display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px;}
+#saschi-main-mock .section-heading p {font-size:.875em;color:var(--sg-muted);margin-top:4px;}
+#saschi-main-mock .check-label {font-size:.8em;color:var(--sg-muted);display:flex;align-items:center;gap:6px;}
+#saschi-main-mock input[type=checkbox] {width:16px;height:16px;accent-color:var(--sg-action);}
+#saschi-main-mock .code-pair {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;}
+#saschi-main-mock .code-pane {min-width:0;border:1px solid var(--sg-border);border-radius:7px;overflow:hidden;background:var(--sg-paper);}
+#saschi-main-mock .pane-heading {display:flex;flex-wrap:wrap;gap:3px 10px;justify-content:space-between;background:var(--sg-panel);padding:9px 12px;font-size:.8em;border-bottom:1px solid var(--sg-border);}
+#saschi-main-mock .pane-heading strong {font-weight:500;}
+#saschi-main-mock .pane-heading>span {color:var(--sg-muted);font-size:.95em;}
+#saschi-main-mock pre {padding:14px 0;margin:0;font:var(--sg-code-type)/1.85 ui-monospace,"DejaVu Sans Mono",Consolas,monospace;overflow-x:auto;}
+#saschi-main-mock pre code {font:inherit;background:transparent;padding:0;color:var(--sg-text);}
+#saschi-main-mock .code-line {display:grid;grid-template-columns:28px minmax(0,1fr);padding:0 9px 0 4px;}
+#saschi-main-mock .code-line>b {font-weight:400;font-size:.8em;text-align:center;color:var(--sg-muted);user-select:none;}
+#saschi-main-mock .code-line>span {white-space:pre-wrap;overflow-wrap:anywhere;}
+#saschi-main-mock .no-wrap .code-line {grid-template-columns:28px max-content;}
+#saschi-main-mock .no-wrap .code-line>span {white-space:pre;overflow-wrap:normal;}
+#saschi-main-mock .code-line em {font-style:normal;color:var(--sg-code);}
+#saschi-main-mock .highlighted {background:var(--sg-accent-fill);}
+#saschi-main-mock .code-note {display:flex;align-items:center;gap:7px;font-size:.8em;color:var(--sg-muted);padding-top:10px;}
+#saschi-main-mock .results-section {margin-top:26px;}
+#saschi-main-mock .dataset-name {font-weight:400;color:var(--sg-muted);margin-left:8px;font-size:.9em;}
+#saschi-main-mock .table-scroll {overflow-x:auto;border:1px solid var(--sg-border);border-radius:7px;background:var(--sg-paper);}
+#saschi-main-mock table {border-collapse:collapse;width:100%;font-size:.94em;line-height:1.55;}
+#saschi-main-mock th,#saschi-main-mock td {padding:10px 13px;text-align:left;white-space:nowrap;border-bottom:1px solid var(--sg-border);font-weight:400;}
+#saschi-main-mock thead {background:var(--sg-panel);}
+#saschi-main-mock thead th {font-weight:500;}
+#saschi-main-mock tbody tr:last-child>* {border-bottom:0;}
+#saschi-main-mock .numeric {text-align:right;font-variant-numeric:tabular-nums;}
+#saschi-main-mock .difference-cell {background:var(--sg-warn-bg);color:var(--sg-warn);}
+#saschi-main-mock .difference-cell button {font:inherit;color:inherit;background:transparent;border:0;border-bottom:1px dotted currentColor;padding:0;}
+#saschi-main-mock .difference-cell span {margin-left:5px;}
+#saschi-main-mock .table-note {font-size:.8em;color:var(--sg-muted);margin-top:9px;}
+#saschi-main-mock .comparison-summary {display:flex;gap:12px 22px;flex-wrap:wrap;padding:14px 0;margin-bottom:15px;border-bottom:1px solid var(--sg-border);font-size:.875em;}
+#saschi-main-mock .comparison-summary span {display:flex;flex-direction:column;gap:3px;color:var(--sg-muted);}
+#saschi-main-mock .comparison-summary strong {font-weight:500;color:var(--sg-text);font-size:1.1em;}
+#saschi-main-mock .difference-detail {border:1px solid var(--sg-border);background:var(--sg-paper);border-left:4px solid var(--sg-warn);border-radius:6px;padding:18px;}
+#saschi-main-mock .value-comparison {display:flex;flex-wrap:wrap;gap:16px 32px;margin:18px 0;}
+#saschi-main-mock .value-comparison>div {display:flex;flex-direction:column;gap:4px;}
+#saschi-main-mock .value-comparison span {font-size:.875em;color:var(--sg-muted);}
+#saschi-main-mock .value-comparison strong {font-size:1.2em;font-variant-numeric:tabular-nums;font-weight:500;}
+#saschi-main-mock .difference-detail p {font-size:.875em;}
+#saschi-main-mock .comparison-rules,#saschi-main-mock .run-record {margin-top:22px;font-size:.875em;color:var(--sg-muted);}
+#saschi-main-mock .comparison-rules summary,#saschi-main-mock .run-record summary {cursor:pointer;padding:5px 0;}
+#saschi-main-mock .comparison-rules p,#saschi-main-mock .run-record p {margin-top:10px;}
+#saschi-main-mock .review-footer {display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 16px;border-top:1px solid var(--sg-border);padding:12px 24px;font-size:.8em;color:var(--sg-muted);}
+#saschi-main-mock .review-footer>span {display:flex;align-items:center;gap:6px;}
+#saschi-main-mock .review-footer .text-button {font-size:1em;}
+#saschi-main-mock .dialog-layer {position:absolute;inset:0;z-index:5;background:light-dark(#233a2e55,#00000088);padding:28px 20px;display:flex;align-items:flex-start;justify-content:center;}
+#saschi-main-mock .dialog-box {margin-top:35px;width:520px;max-width:100%;padding:24px;border:1px solid var(--sg-border);border-radius:12px;background:var(--sg-paper);box-shadow:0 16px 48px #00000022;}
+#saschi-main-mock .dialog-box p {margin:10px 0;color:var(--sg-muted);}
+#saschi-main-mock .dialog-box .secondary-button {margin-top:18px;}
+#saschi-main-mock .dialog-box table {font-size:.875em;}
+#saschi-main-mock .dialog-box th,#saschi-main-mock .dialog-box td {white-space:normal;padding:8px;}
+#saschi-main-mock .dialog-box .dialog-detail {padding:12px;background:var(--sg-panel);border-radius:6px;overflow-wrap:anywhere;}
+#saschi-main-mock .icon-button {border:0;background:transparent;color:var(--sg-muted);padding:4px 8px;}
+#saschi-main-mock .preview-caption {font-size:14px;margin-top:12px;color:var(--sg-muted);}
+#saschi-main-mock .preview-status {font-size:13px;color:var(--sg-muted);margin-top:5px;}
+#saschi-main-mock .sr-only {position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+@container desktop (max-width:850px) {
+  #saschi-main-mock .workspace {grid-template-columns:minmax(0,1fr);}
+  #saschi-main-mock .splitter {display:none;}
+  #saschi-main-mock .setup {border-bottom:1px solid var(--sg-border);}
+  #saschi-main-mock .setup>summary {padding:15px 20px;flex-wrap:wrap;}
+  #saschi-main-mock .setup-summary {display:block;font-size:.8em;font-weight:400;color:var(--sg-muted);}
+  #saschi-main-mock .setup-body {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 24px;padding-inline:20px;}
+}
+@container desktop (max-width:680px) {
+  #saschi-main-mock .code-pair {grid-template-columns:minmax(0,1fr);}
+  #saschi-main-mock .review-heading {padding:20px 18px 12px;}
+  #saschi-main-mock .review-content {padding:18px;}
+  #saschi-main-mock .target-row,#saschi-main-mock .run-state {padding-inline:18px;}
+  #saschi-main-mock .review-nav {padding-inline:10px;}
+  #saschi-main-mock .review-footer {padding-inline:18px;}
+}
+@container desktop (max-width:460px) {
+  #saschi-main-mock .app-header {padding:12px 16px;flex-wrap:wrap;gap:6px;}
+  #saschi-main-mock .local-note {font-size:.8em;}
+  #saschi-main-mock .setup-body {grid-template-columns:minmax(0,1fr);}
+  #saschi-main-mock .setup-summary {width:calc(100% - 30px);order:2;}
+  #saschi-main-mock .review-heading {align-items:stretch;}
+  #saschi-main-mock .review-nav button {padding-inline:9px;}
+  #saschi-main-mock .dialog-box {padding:16px;}
+}
+@media (pointer:coarse) {#saschi-main-mock button,#saschi-main-mock select,#saschi-main-mock summary {min-height:44px;}}
+</style>
+<script>
+(() => {
+  const root=document.getElementById('saschi-main-mock');
+  const el=id=>root.querySelector('#'+id);
+  const state={width:1024,text:16,view:'review',wrap:true,sidebar:246,scenario:'difference'};
+  let compact=false,previousFocus=null;
+  const saved=window.openai?.widgetState?.modelContent;
+  if(saved?.mock==='saschi-main') {
+    if([1024,640,360].includes(saved.width)) state.width=saved.width;
+    if([16,18,20].includes(saved.text)) state.text=saved.text;
+    if(['review','code','results','comparison'].includes(saved.view)) state.view=saved.view;
+  }
+  function persist(){window.openai?.setWidgetState?.({modelContent:{mock:'saschi-main',width:state.width,text:state.text,view:state.view},privateContent:{wrap:state.wrap,sidebar:state.sidebar}})?.catch(()=>{});}
+  function applyView(){
+    root.querySelectorAll('[data-view]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view===state.view)));
+    el('sg-code').hidden=!['review','code'].includes(state.view);
+    el('sg-results').hidden=!['review','results'].includes(state.view);
+    el('sg-results').style.marginTop=state.view==='results'?'0':'';
+    el('sg-comparison').hidden=state.view!=='comparison';
+  }
+  function render(){
+    el('sg-viewport').style.maxWidth=state.width+'px';
+    root.style.setProperty('--sg-type',state.text+'px');
+    root.style.setProperty('--sg-code-type',(state.text-1)+'px');
+    root.style.setProperty('--sg-sidebar',state.sidebar+'px');
+    el('sg-window').value=state.width;el('sg-type').value=state.text;
+    root.classList.toggle('no-wrap',!state.wrap);el('sg-wrap').checked=state.wrap;
+    applyView();
+  }
+  function showView(view,moveFocus=false){state.view=view;applyView();persist();if(moveFocus)root.querySelector('[data-view="'+view+'"]').focus();}
+  function measure(){const w=el('sg-viewport').getBoundingClientRect().width;const next=w<=850;if(next!==compact){compact=next;el('sg-setup').open=!compact;}
+    el('sg-layout-note').textContent=w<=680?'Small: files collapse above the workspace; code panes stack. Text stays the same size.':w<=850?'Medium: files collapse above the workspace; code stays side by side.':'Wide: files stay beside the review; drag the divider to resize them.';
+  }
+  el('sg-window').addEventListener('change',e=>{state.width=Number(e.target.value);render();persist();});
+  el('sg-type').addEventListener('change',e=>{state.text=Number(e.target.value);render();persist();});
+  el('sg-wrap').addEventListener('change',e=>{state.wrap=e.target.checked;render();persist();});
+  root.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));
+  el('sg-verdict').addEventListener('click',()=>showView('comparison',true));
+  el('sg-diff-cell').addEventListener('click',()=>showView('comparison',true));
+  el('sg-back-code').addEventListener('click',()=>showView('code',true));
+  const dialogs={
+    program:['Open SAS program','<p>Select a .sas program. Its code appears in the review workspace before execution.</p><div class="dialog-detail">Sample selected: adjust_sales.sas</div><p>This design preview uses illustrative files.</p>'],
+    inputs:['Input datasets','<p>Add .sas7bdat files or choose a dataset folder. Review which file supplies each dataset used by the program.</p><div class="dialog-detail"><strong>Program reads: sales</strong><br>Selected file: sales.sas7bdat<br>6 observations · 3 variables</div><p>Actual file import will be part of the analyst-facing application.</p>'],
+    sas:['Compare with SAS results','<p>Add the output datasets from an earlier SAS run of this program, using the same input data and settings.</p><div class="dialog-detail"><strong>SAS output:</strong> adjusted.sas7bdat<br><strong>Compare to:</strong> converted adjusted</div><p>You can convert and run without these files. Results comparison will remain “Not performed.”</p>'],
+    save:['Saved job','<p>Each run gets a separate folder containing its code, outputs, comparison details and run record.</p><div class="dialog-detail">SASchi-Go / Sales review / run-001</div><p>Sample location only. No files are written by this preview.</p>'],
+    targets:['Conversion options','<p>Readiness is shown for the selected program and its inputs.</p><div class="dialog-detail"><strong>Python</strong><br>Illustrative ready state: input dataset connected; calculation mapped.</div><p>Other targets appear here when the actual conversion path supports this program. No target support is established by this mockup.</p>'],
+    variables:['Variables in adjusted','<div class="table-scroll"><table><thead><tr><th>Name</th><th>Type</th><th>Length</th><th>Format</th></tr></thead><tbody><tr><td>sale_id</td><td>Character</td><td>4</td><td>None</td></tr><tr><td>gross</td><td>Numeric</td><td>8</td><td>COMMA12.2</td></tr><tr><td>returns</td><td>Numeric</td><td>8</td><td>COMMA12.2</td></tr><tr><td>net</td><td>Numeric</td><td>8</td><td>None</td></tr></tbody></table></div><p>Illustrative descriptors. The preview uses a numeric display setting; this does not change stored SAS formats or values.</p>']
+  };
+  function openDialog(key){previousFocus=document.activeElement;const [title,body]=dialogs[key];el('sg-dialog-title').textContent=title;el('sg-dialog-body').innerHTML=body;el('sg-dialog-layer').hidden=false;el('sg-close-dialog').focus();}
+  function closeDialog(){el('sg-dialog-layer').hidden=true;previousFocus?.focus();}
+  root.querySelectorAll('[data-dialog]').forEach(b=>b.addEventListener('click',()=>openDialog(b.dataset.dialog)));
+  el('sg-close-dialog').addEventListener('click',closeDialog);el('sg-dialog-done').addEventListener('click',closeDialog);
+  el('sg-dialog-layer').addEventListener('click',e=>{if(e.target===el('sg-dialog-layer'))closeDialog();});
+  el('sg-dialog-layer').addEventListener('keydown',e=>{if(e.key==='Escape')closeDialog();if(e.key==='Tab'){const first=el('sg-close-dialog'),last=el('sg-dialog-done');if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}});
+  el('sg-run').addEventListener('click',()=>{const button=el('sg-run');button.disabled=true;el('sg-execution').textContent='Previewing run';el('sg-verdict').textContent='Demonstration only';setTimeout(()=>{button.disabled=false;el('sg-execution').textContent='Execution completed';el('sg-verdict').textContent='1 value differs from SAS results';},700);});
+  const splitter=el('sg-splitter');let startX=0,startWidth=0;
+  splitter.addEventListener('pointerdown',e=>{startX=e.clientX;startWidth=state.sidebar;splitter.setPointerCapture(e.pointerId);});
+  splitter.addEventListener('pointermove',e=>{if(splitter.hasPointerCapture(e.pointerId)){state.sidebar=Math.max(220,Math.min(320,startWidth+e.clientX-startX));root.style.setProperty('--sg-sidebar',state.sidebar+'px');}});
+  splitter.addEventListener('pointerup',e=>{if(splitter.hasPointerCapture(e.pointerId))splitter.releasePointerCapture(e.pointerId);persist();});
+  splitter.addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight'].includes(e.key)){e.preventDefault();state.sidebar=Math.max(220,Math.min(320,state.sidebar+(e.key==='ArrowRight'?10:-10)));render();persist();}});
+  new ResizeObserver(measure).observe(el('sg-viewport'));
+  window.addEventListener('openai:set_globals',e=>{const s=e.detail?.globals?.widgetState?.modelContent;if(s?.mock==='saschi-main'){if([1024,640,360].includes(s.width))state.width=s.width;if([16,18,20].includes(s.text))state.text=s.text;if(['review','code','results','comparison'].includes(s.view))state.view=s.view;render();}});
+  render();measure();
+  if(globalThis.Tweak){const tweak=new Tweak({container:el('sg-app'),onChange:()=>{render();persist();}});tweak.addSlider(state,'text',{label:'Reading text',min:16,max:20,step:2,unit:'px'});tweak.addSlider(state,'sidebar',{label:'Files panel width',min:220,max:320,step:10,unit:'px'});}
+})();
+</script>

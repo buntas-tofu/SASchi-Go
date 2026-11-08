@@ -1,0 +1,207 @@
+<!-- Proposed recovery UX for the planned analyst release. All files and outcomes are synthetic. Structured error classification, input diagnostics, persistent setup, attempt history and comparison-only retry are proposed desktop behavior. Current engine evidence: runtime.py MERGE ordering refusal; job.py retains completed output on comparison errors; cli.py retains plan, receipt and observed output when available. Language scope remains Python/R/SQL with C++ advanced, Parquet data and DuckDB query layers. -->
+<div id="saschi-recovery" aria-label="SASchi-Go failure and recovery design">
+  <div class="preview-tools"><span>Future workflow preview · simulated failures and recovery</span><label for="fr-example">Example</label><select id="fr-example"><option value="run">Run stopped</option><option value="comparison">SAS comparison unavailable</option></select><label for="fr-width">Window</label><select id="fr-width"><option value="1024">Wide</option><option value="640">Small</option><option value="360">Narrow</option></select><label for="fr-text">Text</label><select id="fr-text"><option value="16">Comfortable</option><option value="18">Larger</option><option value="20">Largest</option></select></div>
+  <div class="window-size" id="fr-viewport">
+    <section class="app" id="fr-app" aria-label="SASchi-Go recovery workspace">
+      <header class="chrome"><div class="brand"><span class="brand-symbol">S</span>SASchi-Go</div><span class="local"><i data-lucide="hard-drive" aria-hidden="true"></i>Local workspace</span></header>
+      <div class="intro"><div><span class="eyebrow" id="fr-run-label">RUN 001 · REVIEW &amp; RECOVERY</span><h1>net_sales.sas</h1><p>Python<span class="dot">·</span>2 input datasets<span class="dot">·</span>Compare with SAS results</p></div><div class="saved-label"><i data-lucide="bookmark-check" aria-hidden="true"></i>Setup preserved</div></div>
+      <div class="stage-strip" aria-label="Attempt status"><div><span class="field-label">Code conversion</span><strong class="good">Completed</strong></div><div><span class="field-label">Execution</span><strong id="fr-execution" class="stopped">Stopped</strong></div><div><span class="field-label">SAS comparison</span><strong id="fr-comparison" class="muted">Not checked</strong></div></div>
+      <div class="workspace">
+        <main class="recovery-content">
+          <section id="fr-recovery-view" aria-label="Recovery steps">
+            <div class="notice stopped-notice" id="fr-notice" role="status" aria-live="polite"><span class="notice-icon" id="fr-notice-icon" aria-hidden="true">!</span><div><h2 id="fr-title">The inputs need to be sorted by order_id</h2><p id="fr-explanation">The MERGE step stopped because at least one input is out of order. This run did not produce a completed net_sales dataset.</p></div></div>
+            <div class="preserved"><i data-lucide="folder-check" aria-hidden="true"></i><div><h3 id="fr-preserved-title">Your setup and failure details are saved</h3><p id="fr-preserved-copy">The program, target, file connections and save location are still here. No completed output is available from Run 001.</p></div></div>
+            <section class="next-step" aria-labelledby="fr-next-heading"><span class="eyebrow">NEXT STEP</span><h2 id="fr-next-heading">Review the input order</h2><p id="fr-next-copy">Both orders and returns must be in ascending order by order_id. Review the files, then reconnect the intended corrected input.</p><div class="action-row"><button class="primary" id="fr-primary">Review inputs<i data-lucide="arrow-right" aria-hidden="true"></i></button><button class="text-button" id="fr-inspect">View source line 3</button></div><p class="action-note" id="fr-action-note">Changing an input requires a new run. The original files stay unchanged.</p></section>
+            <section class="editor" id="fr-editor" hidden aria-labelledby="fr-editor-title"><div class="section-heading"><h2 id="fr-editor-title">Review input connections</h2><span class="quiet">Sample file choices</span></div><p id="fr-editor-copy"></p><div id="fr-order-check" hidden><div class="order-row"><strong>orders</strong><span>1, 2, 3, 4, 5, 6</span><small>Ascending order</small></div><div class="order-row needs-order"><strong>returns</strong><span>1, 3, 2, 4, 5, 6</span><small>order_id decreases from 3 to 2</small></div></div><p class="connection-before" id="fr-before-connection"></p><label class="file-choice"><input type="radio" id="fr-choice" name="fr-file" checked><span><strong id="fr-choice-name">returns_sorted.sas7bdat</strong><small id="fr-choice-description"></small></span></label><p class="editor-note">This preview uses sample selections only. No files are accessed or altered.</p><div class="action-row"><button class="secondary" id="fr-cancel">Cancel</button><button class="primary" id="fr-apply">Apply input connection</button></div></section>
+            <div class="change-note" id="fr-change-note" hidden aria-live="polite"><strong id="fr-change-title"></strong><p id="fr-change-copy"></p></div>
+            <details class="source-context" id="fr-source"><summary id="fr-source-summary">SAS source <span class="quiet">MERGE and BY statement</span></summary><pre><code><span><b>1</b><span>data net_sales;</span></span><span class="mapped"><b>2</b><span>  merge orders returns;</span></span><span class="mapped"><b>3</b><span>  by order_id;</span></span><span><b>4</b><span>  net = gross - refunded;</span></span><span><b>5</b><span>run;</span></span></code></pre><p>Review context only. The source file has not been edited.</p></details>
+            <details class="saved-output" id="fr-output" hidden><summary id="fr-output-summary">Saved converted output <span class="quiet">6 observations · 4 variables</span></summary><p id="fr-output-note">This output is available for inspection. Agreement with SAS results has not been checked.</p><div class="table-scroll"><table><caption>net_sales · synthetic output</caption><thead><tr><th scope="col">order_id</th><th scope="col">gross</th><th scope="col">refunded</th><th scope="col">net</th></tr></thead><tbody><tr><td>1</td><td>1,200</td><td>100</td><td>1,100</td></tr><tr><td>2</td><td>800</td><td>0</td><td>800</td></tr><tr><td>3</td><td>1,000</td><td>40</td><td>960</td></tr><tr><td>4</td><td>450</td><td>25</td><td>425</td></tr><tr><td>5</td><td>250</td><td>0</td><td>250</td></tr><tr><td>6</td><td>1,600</td><td>200</td><td>1,400</td></tr></tbody></table></div></details>
+            <section class="result-difference" id="fr-difference" hidden><div class="section-heading"><div><span class="eyebrow">COMPARISON COMPLETED</span><h2>1 value differs</h2></div><span class="different">Differed</span></div><p>Observation 3 · order_id = 3 · variable net</p><div class="values"><div><span>SAS result</span><strong>950</strong></div><div><span>Converted</span><strong>960</strong></div><div><span>Difference</span><strong>+10</strong></div></div><p>23 of 24 values matched. The cause of this difference is not established. Recovery made comparison possible; it did not establish agreement.</p><p class="quiet">Exact stored values, observation order, variable order and metadata. SAS log and result provenance remain unchecked.</p></section>
+            <details class="technical-details" id="fr-technical"><summary id="fr-technical-summary">Original failure details · Run 001</summary><dl><div><dt>Stage</dt><dd id="fr-error-stage">Program execution</dd></div><div><dt>Recorded reason</dt><dd id="fr-error-reason">MERGE requires ascending BY-sorted inputs</dd></div><div><dt>Comparison coverage</dt><dd id="fr-error-coverage">0 values compared. Execution stopped before comparison.</dd></div></dl><p class="quiet">These details describe the original failed attempt.</p></details>
+          </section>
+          <section id="fr-setup-view" hidden aria-label="Preserved analyst setup"><button class="text-button" id="fr-back-recovery"><i data-lucide="arrow-left" aria-hidden="true"></i>Return to recovery</button><span class="eyebrow">SAVED WORKSPACE</span><h2>Your setup is still here</h2><p class="view-description">Review the saved choices below. Opening this view does not start a run or discard an attempt.</p><dl class="setup-list"><div><dt>SAS program</dt><dd>net_sales.sas</dd></div><div><dt>Target</dt><dd>Python</dd></div><div><dt>Input: orders</dt><dd>orders.sas7bdat</dd></div><div><dt>Input: returns</dt><dd id="fr-setup-returns">returns.sas7bdat</dd></div><div><dt>Compare with SAS results</dt><dd id="fr-setup-sas">SAS results / net_sales.sas7bdat</dd></div><div><dt>Save location</dt><dd>Documents / SASchi-Go / net_sales</dd></div></dl><div class="change-note"><strong>Changes stay local to this workspace</strong><p id="fr-setup-note">The next run uses the current connections. Earlier run records keep their original file selections.</p></div></section>
+          <section id="fr-record-view" hidden aria-label="Run and comparison history"><button class="text-button" id="fr-record-back"><i data-lucide="arrow-left" aria-hidden="true"></i>Return to recovery</button><span class="eyebrow">ATTEMPT HISTORY</span><h2>Earlier attempts stay available</h2><p class="view-description">Review a record without changing your current setup.</p><div class="history-choices" id="fr-history-choices" aria-label="Choose an attempt"></div><dl class="setup-list" id="fr-record-fields"></dl><p class="detail-note">Selecting a record does not restore its older connections or overwrite the current workspace.</p></section>
+        </main>
+        <aside class="setup-panel" aria-label="Preserved setup"><div class="section-heading"><h2>Setup preserved</h2><i data-lucide="bookmark-check" aria-hidden="true"></i></div><div class="setup-item"><span class="field-label">SAS program</span><strong>net_sales.sas</strong><small>Original unchanged</small></div><div class="setup-item"><span class="field-label">Target</span><strong>Python</strong></div><div class="setup-item"><span class="field-label">Input datasets</span><strong>orders → orders.sas7bdat</strong><strong id="fr-sidebar-returns">returns → returns.sas7bdat</strong><small id="fr-sidebar-input-note">2 connections retained</small></div><div class="setup-item"><span class="field-label">Compare with SAS results</span><strong id="fr-sidebar-sas">net_sales.sas7bdat</strong><small id="fr-sidebar-sas-note">Connected to output net_sales</small></div><div class="setup-item"><span class="field-label">Save location</span><strong>Documents / SASchi-Go / net_sales</strong><small id="fr-sidebar-destination">Next run gets a new folder.</small></div><button class="text-button" id="fr-open-setup">Review saved setup<i data-lucide="arrow-up-right" aria-hidden="true"></i></button></aside>
+      </div>
+      <footer class="footer"><span id="fr-footer-note">No completed output is available from this attempt.</span><button class="text-button" id="fr-open-record">View attempt history<i data-lucide="arrow-up-right" aria-hidden="true"></i></button></footer>
+    </section>
+  </div>
+  <p class="preview-note" id="fr-layout-note">Wide: recovery actions and preserved setup stay side by side.</p>
+  <p class="preview-note">Proposed desktop recovery for your review. All failures, file checks, saved states and retries are simulated. Persistent setup, detailed error classification, input diagnostics and comparison-only retry still need implementation. No real files were processed.</p>
+</div>
+<style>
+#saschi-recovery {--fr-bg:light-dark(#fafbf9,#171c1c);--fr-panel:light-dark(#f0f3f0,#202726);--fr-paper:light-dark(#fff,#1b2221);--fr-text:light-dark(#25332f,#e3ebe6);--fr-muted:light-dark(#56645e,#a9bbb1);--fr-border:light-dark(#dbe2dc,#3b4841);--fr-accent:light-dark(#265f50,#a3d5bf);--fr-accent-fill:light-dark(#e7f1eb,#2b4438);--fr-action:light-dark(#285b4d,#b4d8c7);--fr-action-text:light-dark(#fff,#193a2c);--fr-warn:light-dark(#795719,#edce8d);--fr-warn-bg:light-dark(#fbf2dc,#3f3521);--fr-error:light-dark(#914637,#efb4a7);--fr-error-bg:light-dark(#f9eae4,#3b2b28);--fr-map:light-dark(#eaf1fa,#26374b);--fr-type:16px;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--fr-text);width:100%;}
+#saschi-recovery * {box-sizing:border-box;}
+#saschi-recovery [hidden] {display:none!important;}
+#saschi-recovery h1,#saschi-recovery h2,#saschi-recovery h3,#saschi-recovery p,#saschi-recovery dl,#saschi-recovery dd {margin:0;}
+#saschi-recovery h1 {font-size:1.6em;line-height:1.25;font-weight:600;letter-spacing:-.5px;}
+#saschi-recovery h2 {font-size:1.08em;line-height:1.4;font-weight:600;}
+#saschi-recovery h3 {font-size:.94em;line-height:1.4;font-weight:500;}
+#saschi-recovery button,#saschi-recovery select,#saschi-recovery input {font:inherit;}
+#saschi-recovery svg {width:18px;height:18px;flex-shrink:0;vertical-align:middle;}
+#saschi-recovery button:disabled {opacity:.5;cursor:not-allowed;}
+#saschi-recovery .preview-tools {display:flex;align-items:center;flex-wrap:wrap;gap:8px 10px;padding-right:80px;margin-bottom:14px;font-size:14px;}
+#saschi-recovery .preview-tools>span {flex-basis:100%;font-weight:500;}
+#saschi-recovery select {padding:7px 9px;border:1px solid var(--fr-border);border-radius:6px;background:var(--fr-paper);color:var(--fr-text);max-width:100%;}
+#saschi-recovery .window-size {max-width:1024px;margin-inline:auto;container-type:inline-size;container-name:recovery;}
+#saschi-recovery .app {background:var(--fr-bg);border:1px solid var(--fr-border);border-radius:12px;overflow:hidden;font-size:var(--fr-type);line-height:1.5;}
+#saschi-recovery .chrome {display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:14px 22px;border-bottom:1px solid var(--fr-border);background:var(--fr-paper);}
+#saschi-recovery .brand {display:flex;align-items:center;gap:10px;font-weight:600;letter-spacing:-.3px;}
+#saschi-recovery .brand-symbol {width:28px;height:28px;display:grid;place-items:center;border-radius:8px;background:var(--fr-action);color:var(--fr-action-text);font-size:16px;}
+#saschi-recovery .local {font-size:.875em;color:var(--fr-muted);display:flex;align-items:center;gap:7px;}
+#saschi-recovery .intro {padding:28px 28px 23px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:18px;}
+#saschi-recovery .eyebrow {display:block;font-size:.72em;letter-spacing:.06em;color:var(--fr-muted);margin-bottom:7px;}
+#saschi-recovery .intro p {font-size:.875em;color:var(--fr-muted);margin-top:9px;}
+#saschi-recovery .dot {padding:0 8px;}
+#saschi-recovery .saved-label {display:flex;align-items:center;gap:8px;font-size:.85em;color:var(--fr-accent);}
+#saschi-recovery .stage-strip {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:0 28px 26px;padding:16px 0;border-block:1px solid var(--fr-border);}
+#saschi-recovery .field-label {display:block;font-size:.75em;color:var(--fr-muted);margin-bottom:4px;}
+#saschi-recovery .stage-strip strong {font-size:.9em;font-weight:500;}
+#saschi-recovery .good {color:var(--fr-accent);}
+#saschi-recovery .stopped {color:var(--fr-error);}
+#saschi-recovery .different {color:var(--fr-warn);}
+#saschi-recovery .muted {color:var(--fr-muted);}
+#saschi-recovery .workspace {display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);align-items:start;gap:28px;padding:0 28px 28px;}
+#saschi-recovery .recovery-content {min-width:0;}
+#saschi-recovery .notice {display:flex;align-items:flex-start;gap:12px;background:var(--fr-warn-bg);color:var(--fr-warn);border-radius:8px;padding:18px;}
+#saschi-recovery .notice.stopped-notice {background:var(--fr-error-bg);color:var(--fr-error);}
+#saschi-recovery .notice.resolved-notice {background:var(--fr-accent-fill);color:var(--fr-accent);}
+#saschi-recovery .notice-icon {display:grid;place-items:center;width:23px;height:23px;border:1px solid currentColor;border-radius:50%;font-size:.9em;flex-shrink:0;margin-top:2px;}
+#saschi-recovery .notice p {font-size:.875em;margin-top:9px;}
+#saschi-recovery .preserved {display:flex;align-items:flex-start;gap:11px;margin-top:18px;}
+#saschi-recovery .preserved>svg {color:var(--fr-accent);margin-top:2px;}
+#saschi-recovery .preserved p {font-size:.85em;color:var(--fr-muted);margin-top:5px;}
+#saschi-recovery .next-step {margin-top:25px;}
+#saschi-recovery .next-step>p {font-size:.9em;color:var(--fr-muted);margin-top:9px;}
+#saschi-recovery .action-row {display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:17px;}
+#saschi-recovery .primary,#saschi-recovery .secondary {display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--fr-action);border-radius:7px;padding:10px 14px;color:var(--fr-action-text);background:var(--fr-action);font-weight:500;font-size:.9em;text-align:center;}
+#saschi-recovery .secondary {border-color:var(--fr-border);background:var(--fr-paper);color:var(--fr-text);}
+#saschi-recovery .text-button {display:inline-flex;align-items:center;gap:7px;border:0;background:transparent;color:var(--fr-accent);padding:5px 0;font-size:.85em;font-weight:500;text-align:left;}
+#saschi-recovery .next-step .action-note {font-size:.8em;margin-top:11px;}
+#saschi-recovery .section-heading {display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:13px;}
+#saschi-recovery .quiet {font-size:.8em;color:var(--fr-muted);}
+#saschi-recovery .editor {margin-top:22px;border:1px solid var(--fr-border);border-radius:8px;padding:18px;background:var(--fr-paper);}
+#saschi-recovery .editor>p {font-size:.875em;color:var(--fr-muted);}
+#saschi-recovery .order-row {display:grid;grid-template-columns:75px minmax(0,1fr);gap:5px 12px;padding:12px 0;font-size:.85em;border-bottom:1px solid var(--fr-border);}
+#saschi-recovery .order-row strong {font-weight:500;}
+#saschi-recovery .order-row small {grid-column:2;font-size:.9em;color:var(--fr-muted);}
+#saschi-recovery .order-row.needs-order small {color:var(--fr-error);}
+#saschi-recovery .connection-before {padding-top:15px;overflow-wrap:anywhere;}
+#saschi-recovery .file-choice {display:flex;align-items:flex-start;gap:12px;background:var(--fr-accent-fill);border:1px solid var(--fr-accent);border-radius:7px;padding:13px;margin-top:12px;}
+#saschi-recovery .file-choice input {width:17px;height:17px;accent-color:var(--fr-action);flex-shrink:0;margin-top:5px;}
+#saschi-recovery .file-choice strong {display:block;font-size:.9em;font-weight:500;overflow-wrap:anywhere;}
+#saschi-recovery .file-choice small {display:block;font-size:.8em;color:var(--fr-muted);margin-top:4px;}
+#saschi-recovery .editor .editor-note {font-size:.75em;margin-top:12px;}
+#saschi-recovery .change-note {background:var(--fr-panel);border-radius:7px;padding:14px 16px;margin-top:20px;}
+#saschi-recovery .change-note strong {display:block;font-size:.875em;font-weight:500;}
+#saschi-recovery .change-note p {font-size:.85em;color:var(--fr-muted);margin-top:5px;}
+#saschi-recovery .source-context,#saschi-recovery .saved-output,#saschi-recovery .technical-details {margin-top:22px;border-top:1px solid var(--fr-border);}
+#saschi-recovery summary {font-size:.875em;padding:13px 0;}
+#saschi-recovery summary>.quiet {margin-left:7px;}
+#saschi-recovery pre {background:var(--fr-paper);border:1px solid var(--fr-border);border-radius:6px;margin:0;padding:12px 0;font:calc(var(--fr-type) - 1px)/1.85 ui-monospace,"DejaVu Sans Mono",Consolas,monospace;}
+#saschi-recovery pre code {font:inherit;}
+#saschi-recovery pre code>span {display:grid;grid-template-columns:30px minmax(0,1fr);padding-right:10px;}
+#saschi-recovery pre b {font-size:.8em;font-weight:400;color:var(--fr-muted);text-align:center;user-select:none;}
+#saschi-recovery pre code>span>span {white-space:pre-wrap;overflow-wrap:anywhere;}
+#saschi-recovery .mapped {background:var(--fr-map);}
+#saschi-recovery .source-context>p,#saschi-recovery .saved-output>p {font-size:.8em;color:var(--fr-muted);margin-top:11px;}
+#saschi-recovery .table-scroll {overflow-x:auto;margin-top:12px;}
+#saschi-recovery table {width:100%;border-collapse:collapse;font-size:.85em;font-variant-numeric:tabular-nums;min-width:360px;}
+#saschi-recovery caption {text-align:left;color:var(--fr-muted);font-size:.9em;padding-bottom:8px;}
+#saschi-recovery th,#saschi-recovery td {padding:10px 8px;text-align:right;border-bottom:1px solid var(--fr-border);}
+#saschi-recovery th {font-size:.9em;color:var(--fr-muted);font-weight:500;}
+#saschi-recovery td {background:var(--fr-paper);}
+#saschi-recovery th:first-child,#saschi-recovery td:first-child {text-align:left;}
+#saschi-recovery .result-difference {margin-top:22px;padding:18px;border-radius:8px;background:var(--fr-warn-bg);}
+#saschi-recovery .result-difference>.section-heading .different {font-size:.85em;}
+#saschi-recovery .result-difference>p {font-size:.85em;margin-top:12px;}
+#saschi-recovery .values {display:flex;gap:20px 28px;flex-wrap:wrap;margin-top:16px;}
+#saschi-recovery .values>div {display:flex;flex-direction:column;gap:4px;}
+#saschi-recovery .values span {font-size:.8em;color:var(--fr-muted);}
+#saschi-recovery .values strong {font-size:1.2em;font-weight:500;font-variant-numeric:tabular-nums;}
+#saschi-recovery .technical-details dl>div {padding:8px 0;}
+#saschi-recovery .technical-details dt {font-size:.8em;font-weight:500;}
+#saschi-recovery .technical-details dd {font-size:.85em;color:var(--fr-muted);margin-top:3px;overflow-wrap:anywhere;}
+#saschi-recovery .technical-details>.quiet {margin-top:12px;}
+#saschi-recovery .setup-panel {background:var(--fr-panel);border-radius:8px;padding:20px;min-width:0;}
+#saschi-recovery .setup-panel>.section-heading>svg {color:var(--fr-accent);margin-top:2px;}
+#saschi-recovery .setup-item {padding:14px 0;border-top:1px solid var(--fr-border);}
+#saschi-recovery .setup-item strong {display:block;font-size:.875em;font-weight:500;overflow-wrap:anywhere;}
+#saschi-recovery .setup-item strong+strong {margin-top:7px;}
+#saschi-recovery .setup-item small {display:block;font-size:.75em;color:var(--fr-muted);margin-top:5px;}
+#saschi-recovery .setup-list>div {padding:14px 0;border-bottom:1px solid var(--fr-border);}
+#saschi-recovery .setup-list dt {font-size:.8em;color:var(--fr-muted);}
+#saschi-recovery .setup-list dd {font-size:.94em;overflow-wrap:anywhere;margin-top:4px;}
+#saschi-recovery .view-description {font-size:.9em;color:var(--fr-muted);margin:10px 0 12px;}
+#saschi-recovery #fr-setup-view>.text-button,#saschi-recovery #fr-record-view>.text-button {margin-bottom:23px;}
+#saschi-recovery .history-choices {display:flex;flex-wrap:wrap;gap:10px;margin:18px 0;}
+#saschi-recovery .history-choices button {border:1px solid var(--fr-border);background:var(--fr-paper);color:var(--fr-text);border-radius:7px;padding:10px 12px;font-size:.85em;text-align:left;}
+#saschi-recovery .history-choices button[aria-pressed="true"] {border-color:var(--fr-accent);background:var(--fr-accent-fill);}
+#saschi-recovery .detail-note {font-size:.8em;color:var(--fr-muted);margin-top:18px;}
+#saschi-recovery .footer {display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:18px 28px;border-top:1px solid var(--fr-border);background:var(--fr-paper);}
+#saschi-recovery .footer>span {font-size:.8em;color:var(--fr-muted);}
+#saschi-recovery .preview-note {font-size:13px;color:var(--fr-muted);margin-top:10px;}
+@container recovery (max-width:780px){#saschi-recovery .intro{padding:24px 22px;}#saschi-recovery .stage-strip{margin-inline:22px;}#saschi-recovery .workspace{grid-template-columns:minmax(0,1fr);gap:24px;padding:0 22px 24px;}#saschi-recovery .footer{padding:18px 22px;}}
+@container recovery (max-width:480px){#saschi-recovery .chrome{padding:12px 16px;}#saschi-recovery .local{font-size:.8em;}#saschi-recovery h1{font-size:1.45em;}#saschi-recovery .intro{padding:22px 16px;}#saschi-recovery .stage-strip{margin-inline:16px;grid-template-columns:minmax(0,1fr);gap:12px;}#saschi-recovery .stage-strip>div{display:flex;justify-content:space-between;align-items:center;gap:12px;}#saschi-recovery .stage-strip .field-label{margin:0;}#saschi-recovery .workspace{padding:0 16px 22px;}#saschi-recovery .notice{padding:15px;gap:10px;}#saschi-recovery .editor,#saschi-recovery .setup-panel{padding:16px;}#saschi-recovery .order-row{grid-template-columns:minmax(0,1fr);}#saschi-recovery .order-row small{grid-column:1;}#saschi-recovery .footer{padding:16px;}}
+@media(pointer:coarse){#saschi-recovery button,#saschi-recovery select,#saschi-recovery summary{min-height:44px;}}
+</style>
+<script>
+(() => {
+  const root=document.getElementById('saschi-recovery'),el=id=>root.querySelector('#'+id);
+  const state={example:'run',repaired:false,retried:false,view:'recovery',record:'original',width:1024,text:16};
+  let editorOpen=false;
+  function restore(data){if(data?.mock!=='saschi-recovery')return;if(['run','comparison'].includes(data.example))state.example=data.example;for(const key of ['repaired','retried'])if(typeof data[key]==='boolean')state[key]=data[key];if(state.retried)state.repaired=true;if(['recovery','setup','record'].includes(data.view))state.view=data.view;if(['original','latest'].includes(data.record))state.record=data.record;if([1024,640,360].includes(data.width))state.width=data.width;if([16,18,20].includes(data.text))state.text=data.text;}
+  restore(window.openai?.widgetState?.modelContent);
+  function save(){window.openai?.setWidgetState?.({modelContent:{mock:'saschi-recovery',...state},privateContent:null})?.catch(()=>{});}
+  function runCase(){return state.example==='run';}
+  function returnsFile(){return runCase()&&state.repaired?'returns_sorted.sas7bdat':'returns.sas7bdat';}
+  function sasFile(){return !runCase()&&state.repaired?'SAS exports / net_sales.sas7bdat':'SAS results / net_sales.sas7bdat';}
+  function renderRecord(){
+    const latest=state.retried&&state.record==='latest',run=runCase(),choices=el('fr-history-choices');choices.replaceChildren();
+    const options=[['original',run?'Run 001 · stopped':'Run 001 · comparison 1 unavailable']];if(state.retried)options.push(['latest',run?'Run 002 · completed':'Run 001 · comparison 2 completed']);
+    options.forEach(([key,label])=>{const button=document.createElement('button');button.textContent=label;button.dataset.record=key;button.setAttribute('aria-pressed',latest?key==='latest':key==='original');button.addEventListener('click',()=>{state.record=key;renderRecord();save();el('fr-history-choices').querySelector('[data-record="'+key+'"]').focus();});choices.append(button);});
+    const fields=[['Record',latest?(run?'Run 002':'Run 001 · comparison attempt 2'):(run?'Run 001':'Run 001 · comparison attempt 1')],['Execution',run&&!latest?'Stopped before net_sales completed':'Completed; net_sales produced'],['SAS comparison',latest?'Differed: 23 of 24 values matched; 1 differed':run?'Not checked: execution stopped before comparison':'Not checked: SAS result file could not be read'],['Output',run&&!latest?'No completed dataset available':'net_sales: 6 observations, 4 variables'],['Input: returns',run&&latest?'returns_sorted.sas7bdat':'returns.sas7bdat'],['SAS results location',!run&&latest?'SAS exports / net_sales.sas7bdat':'SAS results / net_sales.sas7bdat'],['Recorded reason',latest?'net differs at observation 3: SAS 950; converted 960':run?'MERGE requires ascending BY-sorted inputs':'SAS results file unavailable at its saved location'],['Attempt destination',run&&latest?'net_sales / run-002':!run&&latest?'net_sales / run-001 / comparison-002':'net_sales / run-001']];
+    const list=el('fr-record-fields');list.replaceChildren();fields.forEach(([name,value])=>{const item=document.createElement('div'),dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=name;dd.textContent=value;item.append(dt,dd);list.append(item);});
+  }
+  function render(){
+    const run=runCase(),fixed=state.repaired,done=state.retried,output=!run||done;
+    root.style.setProperty('--fr-type',state.text+'px');el('fr-viewport').style.maxWidth=state.width+'px';el('fr-example').value=state.example;el('fr-width').value=state.width;el('fr-text').value=state.text;
+    for(const view of ['recovery','setup','record'])el('fr-'+view+'-view').hidden=state.view!==view;
+    el('fr-run-label').textContent=(run&&done?'RUN 002':'RUN 001')+' · REVIEW & RECOVERY';
+    el('fr-execution').textContent=output?'Completed':'Stopped';el('fr-execution').className=output?'good':'stopped';el('fr-comparison').textContent=done?'Differed':'Not checked';el('fr-comparison').className=done?'different':'muted';
+    el('fr-notice').className='notice'+(done?'':fixed?' resolved-notice':run?' stopped-notice':'');el('fr-notice-icon').textContent=done?'≠':fixed?'✓':'!';
+    el('fr-title').textContent=done?(run?'The new run completed; 1 value differs':'Comparison completed; 1 value differs'):fixed?(run?'Corrected input connected; ready for a new run':'SAS results reconnected; ready to compare'):run?'The inputs need to be sorted by order_id':'The SAS results file could not be read';
+    el('fr-explanation').textContent=done?(run?'Run 002 produced net_sales. The supplied SAS output differs in one value. Run 001 remains in the history.':'The saved output from Run 001 was compared with the reconnected SAS file. The program was not rerun.'):fixed?(run?'The next run will use returns_sorted.sas7bdat. Run 001 is still recorded as stopped.':'The next comparison will use the reconnected file and the output already saved from Run 001.'):run?'The MERGE step stopped because at least one input is out of order. This run did not produce a completed net_sales dataset.':'Your converted output is still available. We could not open net_sales.sas7bdat at its saved location, so result agreement was not checked.';
+    el('fr-preserved-title').textContent=output?'Your output, setup and earlier attempt are saved':'Your setup and failure details are saved';
+    el('fr-preserved-copy').textContent=output?'net_sales is available for review. The program, target, input connections and save location are retained.':'The program, target, file connections and save location are still here. No completed output is available from Run 001.';
+    el('fr-next-heading').textContent=done?'Review the result difference':fixed?(run?'Start a new run with the corrected input':'Compare the saved output'):run?'Review the input order':'Reconnect the intended SAS output';
+    el('fr-next-copy').textContent=done?'A completed retry does not mean the results matched. Inspect the differing value and its context.':fixed?(run?'Use the same program, Python target and other connections. Save the new attempt in run-002.':'Use net_sales from Run 001. Only the SAS comparison connection changed.'):run?'Both orders and returns must be in ascending order by order_id. Review the files, then reconnect the intended corrected input.':'Check the file location and read access, or select the intended SAS output. Use results from the same program, input data and settings.';
+    el('fr-primary').textContent=done?'Review result difference':fixed?(run?'Run again':'Compare saved output'):run?'Review inputs':'Reconnect SAS results';
+    el('fr-primary').disabled=editorOpen;el('fr-inspect').textContent=output?'View saved output':'View source line 3';
+    el('fr-action-note').textContent=done?'Exact comparison: 23 of 24 values matched. The reason for the difference is not established.':fixed?(run?'Creates Run 002. Run 001 and its failure details are preserved.':'Creates comparison attempt 2. Run 001 output and comparison attempt 1 are preserved.'):run?'Changing an input requires a new run. The original files stay unchanged.':'Changing only the SAS results connection does not require rerunning the program.';
+    el('fr-editor').hidden=!editorOpen;el('fr-change-note').hidden=!fixed||done;
+    el('fr-change-title').textContent=run?'Only the returns connection changed':'Only the SAS results location changed';el('fr-change-copy').textContent=run?'orders, the program, Python target, SAS results and save location are unchanged.':'The program, Python target, both input connections and saved converted output are unchanged.';
+    el('fr-output').hidden=!output;el('fr-output-note').textContent=done?'Comparison found one differing net value at observation 3. The output remains available for review.':'This output is available for inspection. Agreement with SAS results has not been checked.';
+    if(!done)el('fr-difference').hidden=true;
+    el('fr-technical-summary').textContent=run?'Original failure details · Run 001':'Original failure details · Run 001 · Comparison attempt 1';
+    el('fr-error-stage').textContent=run?'Program execution':'Opening SAS results for comparison';el('fr-error-reason').textContent=run?'MERGE requires ascending BY-sorted inputs':'SAS results file unavailable: SAS results / net_sales.sas7bdat';el('fr-error-coverage').textContent=run?'0 values compared. Execution stopped before comparison.':'0 values compared. The SAS result file could not be read; this is not a value mismatch.';
+    el('fr-sidebar-returns').textContent='returns → '+returnsFile();el('fr-sidebar-input-note').textContent=run&&fixed?'returns connection updated; orders retained':'2 connections retained';el('fr-sidebar-sas').textContent=sasFile();el('fr-sidebar-sas-note').textContent=!run&&!fixed?'Connection retained; file currently unreadable':'Connected to output net_sales';el('fr-sidebar-destination').textContent=run?(done?'Run 002 saved separately from Run 001.':'Next run: run-002, without replacing run-001.'):'Retry comparison within Run 001; output retained.';
+    el('fr-setup-returns').textContent=returnsFile();el('fr-setup-sas').textContent=sasFile();el('fr-setup-note').textContent=run?'The next run uses the current connections. Earlier run records keep their original file selections.':'A comparison-only retry uses the saved Run 001 output. Changing the program or inputs would require a new run.';
+    el('fr-footer-note').textContent=done?'The retry completed. Review the differing value before relying on this output.':output?'Converted output retained. Agreement with SAS results is not checked.':'No completed output is available from this attempt.';
+    renderRecord();
+  }
+  function openEditor(){editorOpen=true;const run=runCase();el('fr-editor-title').textContent=run?'Review input connections':'Reconnect SAS results';el('fr-editor-copy').textContent=run?'Sample input check: review order_id in each input. Choose the intended corrected file; this does not sort or edit the original.':'Reconnect the output dataset to net_sales. The existing converted output will be reused.';el('fr-order-check').hidden=!run;el('fr-before-connection').textContent='Current connection: '+(run?'returns → returns.sas7bdat':'SAS results / net_sales.sas7bdat');el('fr-choice-name').textContent=run?'returns_sorted.sas7bdat':'SAS exports / net_sales.sas7bdat';el('fr-choice-description').textContent=run?'Same 6 sample observations, now in ascending order by order_id.':'Sample SAS output · readable · compare with saved net_sales';el('fr-apply').textContent=run?'Apply input connection':'Use this SAS results file';render();el('fr-choice').focus();}
+  el('fr-primary').addEventListener('click',()=>{if(state.retried){el('fr-difference').hidden=false;el('fr-difference').scrollIntoView({block:'center'});return;}if(!state.repaired){openEditor();return;}state.retried=true;state.record='latest';render();save();el('fr-primary').focus();});
+  el('fr-cancel').addEventListener('click',()=>{editorOpen=false;render();el('fr-primary').focus();});
+  el('fr-apply').addEventListener('click',()=>{state.repaired=true;editorOpen=false;render();save();el('fr-primary').focus();});
+  el('fr-inspect').addEventListener('click',()=>{const output=!runCase()||state.retried;el(output?'fr-output':'fr-source').open=true;el(output?'fr-output-summary':'fr-source-summary').focus();});
+  function view(name,focusId){state.view=name;editorOpen=false;render();save();el(focusId).focus();}
+  el('fr-open-setup').addEventListener('click',()=>view('setup','fr-back-recovery'));el('fr-back-recovery').addEventListener('click',()=>view('recovery','fr-primary'));el('fr-open-record').addEventListener('click',()=>view('record','fr-record-back'));el('fr-record-back').addEventListener('click',()=>view('recovery','fr-primary'));
+  el('fr-example').addEventListener('change',e=>{state.example=e.target.value;state.repaired=false;state.retried=false;state.view='recovery';state.record='original';editorOpen=false;el('fr-source').open=false;el('fr-output').open=false;el('fr-technical').open=false;render();save();});
+  el('fr-width').addEventListener('change',e=>{state.width=Number(e.target.value);render();save();});el('fr-text').addEventListener('change',e=>{state.text=Number(e.target.value);render();save();});
+  function layout(){el('fr-layout-note').textContent=el('fr-viewport').getBoundingClientRect().width<=780?'Small: saved setup moves below recovery. Actions wrap and text keeps its size.':'Wide: recovery actions and preserved setup stay side by side.';}
+  new ResizeObserver(layout).observe(el('fr-viewport'));window.addEventListener('openai:set_globals',e=>{restore(e.detail?.globals?.widgetState?.modelContent);render();layout();});
+  render();layout();if(globalThis.Tweak){const tweaks=new Tweak({container:el('fr-app'),onChange:()=>{render();save();}});tweaks.addSlider(state,'text',{label:'Reading text',min:16,max:20,step:2,unit:'px'});}
+})();
+</script>

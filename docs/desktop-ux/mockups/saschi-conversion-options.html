@@ -1,0 +1,263 @@
+<!-- Release direction confirmed by the principal on 2026-11-07: Python, R and SQL for the first analyst-facing release; C++ advanced; Parquet and DuckDB as layers. Design inference: Parquet is the shared data layer, DuckDB the local query layer. Current capability evidence: saschi/cli.py, saschi/catalog.py, saschi/job.py and rulebook GP-03. This mockup is a planning artifact, not a readiness certification. -->
+<div id="saschi-conversion-options" aria-label="SASchi-Go conversion review design">
+  <div class="preview-tools"><span>Release planning preview · current build readiness · synthetic files</span><label for="co-example">Example</label><select id="co-example"><option value="missing">Needs an input</option><option value="ready">Inputs ready</option><option value="source">Unsupported source</option></select><label for="co-width">Window</label><select id="co-width"><option value="1024">Wide</option><option value="640">Small</option><option value="360">Narrow</option></select><label for="co-text">Text</label><select id="co-text"><option value="16">Comfortable</option><option value="18">Larger</option><option value="20">Largest</option></select></div>
+  <div class="window-size" id="co-viewport">
+    <section class="app" id="co-app" aria-label="Conversion options">
+      <div id="co-page">
+        <header class="chrome"><div class="brand"><span class="brand-symbol">S</span>SASchi-Go</div><span class="local"><i data-lucide="hard-drive" aria-hidden="true"></i>Local workspace</span></header>
+        <div class="intro"><button class="text-button" id="co-files"><i data-lucide="arrow-left" aria-hidden="true"></i>Files for this conversion</button><div class="title-row"><div><span class="eyebrow">REVIEW BEFORE RUNNING</span><h1>Conversion options</h1><p><code>net_sales.sas</code><span class="dot">·</span>2 input datasets<span class="dot">·</span>1 output dataset</p></div><span class="status-pill attention" id="co-top-status">1 item to resolve</span></div></div>
+        <div class="review-layout">
+          <main class="main-review">
+            <section aria-labelledby="co-targets-heading"><div class="section-heading"><h2 id="co-targets-heading">Output language</h2><span class="quiet">First analyst release</span></div>
+              <p class="target-intro">Choose a language to review its availability and requirements.</p>
+              <div class="target-list" role="group" aria-label="Conversion targets">
+                <label class="target selected" data-target="python"><input type="radio" name="co-target" id="co-python" value="python" checked aria-label="Review Python target"><span class="target-copy"><span class="target-heading"><strong>Python</strong><span class="target-label">Conversion available</span></span><span class="target-description">For supported SAS programs. Uses the SASchi-Go runtime.</span><span class="target-meta" id="co-python-state">This sample: source supported</span></span></label>
+                <label class="target" data-target="r"><input type="radio" name="co-target" id="co-r" value="r" aria-label="Review R target"><span class="target-copy"><span class="target-heading"><strong>R</strong><span class="target-label pending-label">Implementation needed</span></span><span class="target-description">Required for the first analyst release.</span></span></label>
+                <label class="target" data-target="sql"><input type="radio" name="co-target" id="co-sql" value="sql" aria-label="Review SQL target"><span class="target-copy"><span class="target-heading"><strong>SQL</strong><span class="target-label pending-label">Implementation needed</span></span><span class="target-description">Required for the first analyst release. Local execution through DuckDB.</span></span></label>
+              </div>
+              <details class="advanced-targets" id="co-advanced"><summary>Advanced options <span class="quiet">C++</span></summary><label class="target" data-target="cpp"><input type="radio" name="co-target" id="co-cpp" value="cpp" aria-label="Review advanced C++ target"><span class="target-copy"><span class="target-heading"><strong>C++</strong><span class="target-label muted-label">Limited pilot</span></span><span class="target-description">Scalar DATA _NULL_ programs only. This MERGE program is outside its supported scope.</span></span></label></details>
+              <div class="target-readiness" aria-live="polite"><span class="field-label">Selected target</span><h3 id="co-selected-title">Python conversion is available</h3><p id="co-selected-description">This source can be converted to Python. The direct SAS-file workflow still needs integration.</p></div>
+              <p class="support-note">Conversion support does not establish matching results.</p>
+            </section>
+            <section class="attention-section" aria-labelledby="co-attention-heading"><div class="section-heading"><h2 id="co-attention-heading">Your setup</h2><span class="quiet" id="co-required-count">1 item to resolve</span></div>
+              <div class="issue required" id="co-missing-issue"><div class="issue-title"><span class="issue-symbol" aria-hidden="true">!</span><div><span class="issue-category">REQUIRED</span><h3>Connect the returns dataset</h3></div></div><p>Line 2 reads <code>returns</code>, but no file is connected to that name.</p><button class="secondary" id="co-connect">Connect dataset<i data-lucide="folder-open" aria-hidden="true"></i></button></div>
+              <div class="issue required" id="co-source-issue" hidden><div class="issue-title"><span class="issue-symbol" aria-hidden="true">!</span><div><span class="issue-category">REQUIRED · LINE 7</span><h3>PROC REPORT cannot be converted yet</h3></div></div><p>The whole program is held. Revise the source or wait for support for this statement before running.</p><button class="secondary" id="co-view-issue">View line 7<i data-lucide="arrow-up-right" aria-hidden="true"></i></button></div>
+              <div class="ready-note" id="co-ready-note" hidden><i data-lucide="circle-check" aria-hidden="true"></i><div><strong>Sample files connected</strong><p id="co-ready-description">Your file setup is complete. Build readiness is shown separately.</p></div></div>
+              <details class="checks" id="co-checks"><summary><span>Program and input checks</span> <span class="quiet" id="co-check-state">Input checks pending</span></summary><div class="checks-body"><div class="check-row"><span id="co-source-icon" class="check-icon" aria-hidden="true">✓</span><div><strong>Source statements</strong><p id="co-source-check">All statements are supported by the Python target.</p></div></div><div class="check-row"><span id="co-data-icon" class="check-icon" aria-hidden="true">○</span><div><strong id="co-data-heading">Current Python MERGE requirements</strong><p id="co-data-check">Connect returns to check both inputs.</p><ul id="co-data-rules"><li>Numeric inputs, without tagged missing values</li><li>Ascending order by <code>order_id</code></li><li>No repeated BY group on both sides</li></ul></div></div><div class="check-row"><span id="co-runtime-icon" class="check-icon" aria-hidden="true">✓</span><div><strong id="co-runtime-title">Python runtime</strong><p id="co-runtime-description">Available in the sample environment.</p></div></div></div></details>
+            </section>
+            <section class="compare-section" aria-labelledby="co-compare-heading"><div class="section-heading"><h2 id="co-compare-heading">Compare with SAS results</h2><span class="optional">Optional</span></div><p id="co-compare-message">No SAS results supplied. These are optional; without them, agreement with SAS results will not be checked.</p><div class="comparison-file" id="co-comparison-file" hidden><i data-lucide="table-2" aria-hidden="true"></i><div><strong>net_sales.sas7bdat</strong><span>Compare with converted output: <code>net_sales</code></span></div></div><div class="comparison-actions"><button class="secondary" id="co-sas">Add SAS results</button><details id="co-comparison-details"><summary>What is compared?</summary><p>Output values, row order, variable order and dataset metadata. Values must match exactly.</p><p>Use SAS outputs from the same program, input data and settings. Adding a file sets up the comparison; it does not establish agreement.</p></details></div></section>
+          </main>
+          <aside class="run-context" aria-label="Files and output for this run">
+            <section class="shared-layers" aria-labelledby="co-layer-heading"><div class="section-heading"><h2 id="co-layer-heading">Data &amp; query layers</h2><span class="quiet">Release plan</span></div><div class="layer-row"><div class="layer-title"><strong>Parquet</strong><span class="pending-label">Implementation needed</span></div><p>Shared data files for the language targets.</p><small>SAS labels, formats and special missing values need accompanying metadata.</small></div><div class="layer-row"><div class="layer-title"><strong>DuckDB</strong><span class="pending-label">Integration incomplete</span></div><p>Local query engine for SQL and data inspection.</p><small>Already used for analysis and verification; analyst execution still needs integration.</small></div><p class="layer-footnote">Bring .sas7bdat files directly. The app will prepare the working data.</p><details id="co-release-work"><summary>What remains for release?</summary><ul><li>Direct SAS import and Parquet read/write, with SAS metadata preserved.</li><li>R code generation, execution and result checks.</li><li>SQL code generation and DuckDB execution, with SAS behavior checked.</li><li>Connect each target to the same results-comparison workflow.</li></ul></details></section>
+            <section class="run-summary"><h2>This run</h2><details class="input-summary" id="co-input-details" open><summary id="co-input-summary"><span>Input datasets</span> <span class="quiet" id="co-input-count">1 of 2 connected</span></summary><div class="input-row"><span class="check-icon" aria-hidden="true">✓</span><div><strong><code>orders</code></strong><p>orders.sas7bdat</p><small>6 observations · 2 variables</small></div></div><div class="input-row"><span class="check-icon" id="co-returns-icon" aria-hidden="true">○</span><div><strong><code>returns</code></strong><p id="co-returns-file">Not connected</p><small id="co-returns-meta">Needed before running</small></div></div></details><div class="output-summary"><span class="field-label">Program creates</span><strong><code>net_sales</code></strong><span class="quiet">Output is not available until the program runs.</span></div></section>
+            <details class="source-panel" id="co-source-panel"><summary id="co-source-summary"><span>SAS source</span> <span class="quiet" id="co-line-count">5 lines</span></summary><pre aria-label="SAS source with line numbers"><code id="co-source-code"><span><b>1</b><span><em>data</em> net_sales;</span></span><span><b>2</b><span>  <em>merge</em> orders returns;</span></span><span><b>3</b><span>  <em>by</em> order_id;</span></span><span><b>4</b><span>  net = gross - refunded;</span></span><span><b>5</b><span><em>run</em>;</span></span><span id="co-line6" hidden><b>6</b><span> </span></span><span id="co-line7" class="source-error" hidden><b>7</b><span><em>proc report</em> data=net_sales;</span></span><span id="co-line8" hidden><b>8</b><span><em>run</em>;</span></span></code></pre><p class="source-note" id="co-source-note">Source preview · original unchanged</p></details>
+            <section class="save-location"><div class="section-heading"><h2>Save this run</h2><button class="text-button" id="co-location">Change</button></div><span class="field-label">New folder</span><p class="folder-path" id="co-folder-path">Documents / SASchi-Go / net_sales / run-001</p><p class="quiet">Converted code, output datasets and a run report. Existing files stay unchanged.</p></section>
+          </aside>
+        </div>
+        <footer class="run-footer"><div class="run-readiness" aria-live="polite"><strong id="co-footer-title">Connect returns before running</strong><p id="co-footer-note">You can still inspect the source and conversion requirements.</p></div><button class="primary" id="co-run" disabled aria-describedby="co-footer-title co-footer-note">Convert &amp; run<i data-lucide="play" aria-hidden="true"></i></button></footer>
+      </div>
+      <div class="dialog-layer" id="co-dialog-layer" hidden><section class="dialog" role="dialog" aria-modal="true" aria-labelledby="co-dialog-title"><div class="dialog-heading"><div><span class="eyebrow" id="co-dialog-eyebrow">SAMPLE FILE CHOOSER</span><h2 id="co-dialog-title">Connect returns</h2></div><button class="close-button" id="co-close" aria-label="Close dialog">✕</button></div><p id="co-dialog-help"></p><div id="co-dialog-content"></div><p class="dialog-note" id="co-dialog-note">Sample selections only. No files are accessed.</p><div class="dialog-actions"><button class="secondary" id="co-cancel">Cancel</button><button class="primary" id="co-confirm">Connect file</button></div></section></div>
+    </section>
+  </div>
+  <p class="preview-note" id="co-layout-note">Wide: target review and run details sit side by side.</p>
+  <p class="preview-note">Release scope confirmed: Python, R and SQL; C++ advanced; Parquet and DuckDB as layers. Proposed interface for your review, with current implementation gaps shown. Synthetic file checks only; no import, execution or result comparison.</p>
+</div>
+<style>
+#saschi-conversion-options {--co-bg:light-dark(#fafbf9,#171c1c);--co-panel:light-dark(#f0f3f0,#202726);--co-paper:light-dark(#fff,#1b2221);--co-text:light-dark(#25332f,#e3ebe6);--co-muted:light-dark(#56645e,#a9bbb1);--co-border:light-dark(#dbe2dc,#3b4841);--co-accent:light-dark(#265f50,#a3d5bf);--co-accent-fill:light-dark(#e7f1eb,#2b4438);--co-action:light-dark(#285b4d,#b4d8c7);--co-action-text:light-dark(#fff,#193a2c);--co-warn:light-dark(#795719,#edce8d);--co-warn-bg:light-dark(#fbf2dc,#3f3521);--co-code:light-dark(#496b93,#9fbee9);--co-type:16px;color:var(--co-text);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;width:100%;}
+#saschi-conversion-options * {box-sizing:border-box;}
+#saschi-conversion-options [hidden] {display:none!important;}
+#saschi-conversion-options h1,#saschi-conversion-options h2,#saschi-conversion-options h3,#saschi-conversion-options p {margin:0;}
+#saschi-conversion-options button,#saschi-conversion-options select,#saschi-conversion-options input {font:inherit;}
+#saschi-conversion-options button:disabled {opacity:.5;cursor:not-allowed;}
+#saschi-conversion-options svg {width:18px;height:18px;flex-shrink:0;vertical-align:middle;}
+#saschi-conversion-options h1 {font-size:1.6em;line-height:1.25;font-weight:600;letter-spacing:-.5px;}
+#saschi-conversion-options h2 {font-size:1em;line-height:1.4;font-weight:600;}
+#saschi-conversion-options h3 {font-size:1em;font-weight:600;line-height:1.45;}
+#saschi-conversion-options code {font-family:ui-monospace,"DejaVu Sans Mono",Consolas,monospace;font-size:.92em;color:inherit;background:transparent;padding:0;}
+#saschi-conversion-options .preview-tools {display:flex;align-items:center;flex-wrap:wrap;gap:8px 10px;margin-bottom:14px;padding-right:80px;font-size:14px;}
+#saschi-conversion-options .preview-tools>span {font-weight:500;flex-basis:100%;}
+#saschi-conversion-options select {border:1px solid var(--co-border);border-radius:6px;background:var(--co-paper);color:var(--co-text);padding:7px 9px;max-width:100%;}
+#saschi-conversion-options .window-size {max-width:1024px;margin-inline:auto;container-type:inline-size;container-name:conversion;}
+#saschi-conversion-options .app {background:var(--co-bg);border:1px solid var(--co-border);border-radius:12px;position:relative;overflow:hidden;font-size:var(--co-type);line-height:1.5;}
+#saschi-conversion-options .chrome {display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;padding:14px 22px;border-bottom:1px solid var(--co-border);background:var(--co-paper);}
+#saschi-conversion-options .brand {display:flex;align-items:center;gap:10px;font-weight:600;letter-spacing:-.3px;}
+#saschi-conversion-options .brand-symbol {display:grid;place-items:center;width:28px;height:28px;border-radius:8px;background:var(--co-action);color:var(--co-action-text);font-size:16px;}
+#saschi-conversion-options .local {font-size:.875em;color:var(--co-muted);display:flex;align-items:center;gap:7px;}
+#saschi-conversion-options .intro {padding:22px 30px 26px;}
+#saschi-conversion-options .intro>.text-button {margin-bottom:20px;}
+#saschi-conversion-options .title-row {display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;}
+#saschi-conversion-options .title-row p {color:var(--co-muted);font-size:.9em;margin-top:10px;}
+#saschi-conversion-options .dot {padding:0 8px;}
+#saschi-conversion-options .eyebrow {display:block;font-size:.72em;letter-spacing:.07em;color:var(--co-muted);margin-bottom:7px;}
+#saschi-conversion-options .status-pill {font-size:.8em;padding:6px 10px;border-radius:5px;background:var(--co-accent-fill);color:var(--co-accent);}
+#saschi-conversion-options .status-pill.attention {background:var(--co-warn-bg);color:var(--co-warn);}
+#saschi-conversion-options .review-layout {display:grid;grid-template-columns:minmax(0,1.65fr) minmax(0,1fr);gap:30px;padding:0 30px 28px;align-items:start;}
+#saschi-conversion-options .main-review,#saschi-conversion-options .run-context {min-width:0;}
+#saschi-conversion-options .section-heading {display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:13px;}
+#saschi-conversion-options .quiet {font-size:.8em;color:var(--co-muted);}
+#saschi-conversion-options .target-list {display:grid;gap:10px;}
+#saschi-conversion-options .target-intro {font-size:.875em;color:var(--co-muted);margin-bottom:14px;}
+#saschi-conversion-options .target {display:flex;align-items:flex-start;gap:12px;padding:16px;border:1px solid var(--co-border);border-radius:8px;background:var(--co-paper);}
+#saschi-conversion-options .target.selected {border-color:var(--co-accent);background:var(--co-accent-fill);}
+#saschi-conversion-options .target input {margin:5px 0 0;width:17px;height:17px;flex-shrink:0;accent-color:var(--co-action);}
+#saschi-conversion-options .target-copy {display:block;min-width:0;flex:1;}
+#saschi-conversion-options .target-heading {display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;font-weight:500;}
+#saschi-conversion-options .target-heading strong {font-weight:600;}
+#saschi-conversion-options .target-label {font-size:.75em;font-weight:400;color:var(--co-accent);}
+#saschi-conversion-options .muted-label {color:var(--co-muted);}
+#saschi-conversion-options .pending-label {color:var(--co-warn);}
+#saschi-conversion-options .advanced-targets {margin-top:13px;}
+#saschi-conversion-options .advanced-targets>summary {font-size:.875em;color:var(--co-muted);padding:6px 0;}
+#saschi-conversion-options .advanced-targets .target {margin-top:8px;}
+#saschi-conversion-options .target-readiness {margin-top:16px;padding:14px;background:var(--co-panel);border-radius:7px;}
+#saschi-conversion-options .target-readiness>h3 {font-size:.94em;}
+#saschi-conversion-options .target-readiness>p {font-size:.85em;color:var(--co-muted);margin-top:6px;}
+#saschi-conversion-options .shared-layers {border-bottom:1px solid var(--co-border);padding-bottom:20px;margin-bottom:20px;}
+#saschi-conversion-options .layer-row {padding:12px 0;}
+#saschi-conversion-options .layer-row+.layer-row {border-top:1px solid var(--co-border);}
+#saschi-conversion-options .layer-title {display:flex;align-items:center;justify-content:space-between;gap:6px 10px;flex-wrap:wrap;}
+#saschi-conversion-options .layer-title>strong {font-weight:500;font-size:.94em;}
+#saschi-conversion-options .layer-title>span {font-size:.75em;}
+#saschi-conversion-options .layer-row p {font-size:.875em;margin-top:7px;}
+#saschi-conversion-options .layer-row small {display:block;font-size:.8em;color:var(--co-muted);margin-top:7px;}
+#saschi-conversion-options .layer-footnote {font-size:.8em;color:var(--co-muted);margin-top:8px;}
+#saschi-conversion-options .shared-layers details {margin-top:14px;font-size:.8em;}
+#saschi-conversion-options .shared-layers summary {color:var(--co-accent);}
+#saschi-conversion-options .shared-layers ul {padding-left:18px;margin:10px 0 0;color:var(--co-muted);}
+#saschi-conversion-options .shared-layers li {padding-left:3px;margin-top:9px;}
+#saschi-conversion-options .target-description {display:block;font-size:.875em;margin-top:8px;color:var(--co-text);}
+#saschi-conversion-options .target-meta {display:block;font-size:.75em;margin-top:7px;color:var(--co-muted);}
+#saschi-conversion-options .support-note {font-size:.8em;color:var(--co-muted);margin-top:12px;}
+#saschi-conversion-options .attention-section {margin-top:28px;}
+#saschi-conversion-options .issue {padding:16px;border-radius:8px;background:var(--co-warn-bg);color:var(--co-warn);margin-bottom:12px;}
+#saschi-conversion-options .issue-title {display:flex;align-items:center;gap:12px;}
+#saschi-conversion-options .issue-symbol {display:grid;place-items:center;width:24px;height:24px;border:1px solid currentColor;border-radius:50%;flex-shrink:0;font-size:.9em;font-weight:500;}
+#saschi-conversion-options .issue-category {display:block;font-size:.68em;letter-spacing:.05em;margin-bottom:3px;}
+#saschi-conversion-options .issue>p {font-size:.875em;margin:10px 0 13px;}
+#saschi-conversion-options .primary,#saschi-conversion-options .secondary {display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--co-action);border-radius:7px;padding:10px 14px;color:var(--co-action-text);background:var(--co-action);font-weight:500;text-align:center;}
+#saschi-conversion-options .secondary {border-color:var(--co-border);background:var(--co-paper);color:var(--co-text);font-size:.875em;}
+#saschi-conversion-options .text-button {display:inline-flex;align-items:center;gap:7px;border:0;background:transparent;color:var(--co-accent);padding:5px 0;font-size:.875em;font-weight:500;text-align:left;}
+#saschi-conversion-options .ready-note {display:flex;gap:12px;align-items:flex-start;padding:14px 0;}
+#saschi-conversion-options .ready-note>svg {color:var(--co-accent);margin-top:3px;}
+#saschi-conversion-options .ready-note strong {font-size:.9em;font-weight:500;}
+#saschi-conversion-options .ready-note p {font-size:.85em;color:var(--co-muted);margin-top:3px;}
+#saschi-conversion-options .checks {border-block:1px solid var(--co-border);}
+#saschi-conversion-options .checks>summary,#saschi-conversion-options .input-summary>summary,#saschi-conversion-options .source-panel>summary {padding:13px 0;font-size:.875em;}
+#saschi-conversion-options summary>.quiet {margin-left:9px;}
+#saschi-conversion-options .checks-body {padding:2px 0 13px;}
+#saschi-conversion-options .check-row {display:flex;align-items:flex-start;gap:10px;padding:10px 0;}
+#saschi-conversion-options .check-icon {color:var(--co-accent);width:18px;flex-shrink:0;font-size:1em;}
+#saschi-conversion-options .check-row>div {min-width:0;}
+#saschi-conversion-options .check-row strong {font-weight:500;font-size:.875em;}
+#saschi-conversion-options .check-row p {font-size:.85em;color:var(--co-muted);margin-top:3px;}
+#saschi-conversion-options .check-row ul {padding-left:18px;margin:8px 0 0;font-size:.8em;color:var(--co-muted);}
+#saschi-conversion-options .check-row li {padding-left:3px;margin-top:5px;}
+#saschi-conversion-options .compare-section {padding-top:24px;}
+#saschi-conversion-options .compare-section>p {font-size:.875em;color:var(--co-muted);}
+#saschi-conversion-options .optional {font-size:.8em;color:var(--co-muted);}
+#saschi-conversion-options .comparison-actions {margin-top:13px;display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap;}
+#saschi-conversion-options .comparison-actions>details {flex-basis:100%;}
+#saschi-conversion-options .comparison-actions summary {font-size:.8em;color:var(--co-accent);}
+#saschi-conversion-options .comparison-actions details p {font-size:.85em;color:var(--co-muted);margin-top:10px;}
+#saschi-conversion-options .comparison-file {display:flex;align-items:flex-start;gap:10px;margin-top:14px;}
+#saschi-conversion-options .comparison-file>svg {color:var(--co-accent);margin-top:3px;}
+#saschi-conversion-options .comparison-file strong {font-weight:500;display:block;font-size:.9em;overflow-wrap:anywhere;}
+#saschi-conversion-options .comparison-file span {display:block;font-size:.8em;color:var(--co-muted);margin-top:3px;}
+#saschi-conversion-options .run-context {background:var(--co-panel);padding:20px;border-radius:8px;}
+#saschi-conversion-options .run-summary>h2 {margin-bottom:6px;}
+#saschi-conversion-options .input-row {display:flex;gap:9px;align-items:flex-start;padding:8px 0;}
+#saschi-conversion-options .input-row>div {min-width:0;}
+#saschi-conversion-options .input-row strong {font-weight:500;}
+#saschi-conversion-options .input-row p {font-size:.85em;margin-top:3px;overflow-wrap:anywhere;}
+#saschi-conversion-options .input-row small {display:block;font-size:.75em;color:var(--co-muted);margin-top:4px;}
+#saschi-conversion-options .output-summary {padding:18px 0;margin-top:10px;border-block:1px solid var(--co-border);}
+#saschi-conversion-options .field-label {display:block;font-size:.75em;color:var(--co-muted);margin-bottom:5px;}
+#saschi-conversion-options .output-summary>strong {font-weight:500;display:block;margin-bottom:6px;}
+#saschi-conversion-options .output-summary>.quiet {display:block;}
+#saschi-conversion-options .source-panel {border-bottom:1px solid var(--co-border);}
+#saschi-conversion-options pre {margin:0 -10px;padding:10px 4px;font:calc(var(--co-type) - 1px)/1.85 ui-monospace,"DejaVu Sans Mono",Consolas,monospace;background:var(--co-paper);border-radius:5px;}
+#saschi-conversion-options pre code {font:inherit;}
+#saschi-conversion-options pre code>span {display:grid;grid-template-columns:24px minmax(0,1fr);}
+#saschi-conversion-options pre code>span>b {font-size:.8em;font-weight:400;color:var(--co-muted);text-align:center;user-select:none;}
+#saschi-conversion-options pre code>span>span {white-space:pre-wrap;overflow-wrap:anywhere;}
+#saschi-conversion-options pre em {font-style:normal;color:var(--co-code);}
+#saschi-conversion-options .source-error {background:var(--co-warn-bg);}
+#saschi-conversion-options .source-note {padding:12px 0;font-size:.75em;color:var(--co-muted);}
+#saschi-conversion-options .save-location {padding-top:20px;}
+#saschi-conversion-options .save-location .section-heading {margin-bottom:10px;}
+#saschi-conversion-options .folder-path {font-size:.875em;overflow-wrap:anywhere;}
+#saschi-conversion-options .save-location>.quiet {margin-top:10px;}
+#saschi-conversion-options .run-footer {display:flex;justify-content:space-between;align-items:center;gap:20px;padding:20px 30px;border-top:1px solid var(--co-border);background:var(--co-paper);}
+#saschi-conversion-options .run-readiness strong {font-size:.9em;font-weight:500;display:block;}
+#saschi-conversion-options .run-readiness p {font-size:.8em;color:var(--co-muted);margin-top:4px;}
+#saschi-conversion-options .run-footer>.primary {flex-shrink:0;font-size:.94em;}
+#saschi-conversion-options .dialog-layer {position:absolute;inset:0;z-index:10;background:light-dark(#233a2e55,#00000088);display:flex;justify-content:center;align-items:flex-start;padding:80px 18px 20px;}
+#saschi-conversion-options .dialog {width:530px;max-width:100%;background:var(--co-paper);border:1px solid var(--co-border);border-radius:12px;padding:24px;box-shadow:0 16px 48px light-dark(#00000022,#00000055);}
+#saschi-conversion-options .dialog-heading {display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:14px;}
+#saschi-conversion-options .close-button {border:0;background:transparent;color:var(--co-muted);padding:3px 6px;}
+#saschi-conversion-options .dialog>p {font-size:.875em;color:var(--co-muted);}
+#saschi-conversion-options .dialog .choice {display:flex;align-items:flex-start;gap:12px;padding:14px;margin-top:14px;border:1px solid var(--co-border);border-radius:7px;}
+#saschi-conversion-options .dialog .choice:has(input:checked) {border-color:var(--co-accent);background:var(--co-accent-fill);}
+#saschi-conversion-options .dialog input {width:17px;height:17px;margin-top:5px;accent-color:var(--co-action);flex-shrink:0;}
+#saschi-conversion-options .dialog .choice strong {display:block;font-weight:500;font-size:.94em;overflow-wrap:anywhere;}
+#saschi-conversion-options .dialog .choice small {display:block;font-size:.8em;color:var(--co-muted);margin-top:4px;}
+#saschi-conversion-options .dialog-note {margin-top:18px;}
+#saschi-conversion-options .dialog-actions {display:flex;justify-content:flex-end;flex-wrap:wrap;gap:10px;margin-top:22px;}
+#saschi-conversion-options .run-sequence {margin:18px 0 0;padding-left:24px;font-size:.9em;}
+#saschi-conversion-options .run-sequence li {padding-left:4px;margin-bottom:10px;}
+#saschi-conversion-options .preview-note {font-size:13px;color:var(--co-muted);margin-top:10px;}
+@container conversion (max-width:780px){#saschi-conversion-options .review-layout{grid-template-columns:minmax(0,1fr);gap:24px;padding:0 22px 24px;}#saschi-conversion-options .intro{padding:20px 22px 24px;}#saschi-conversion-options .run-footer{padding:18px 22px;flex-wrap:wrap;}#saschi-conversion-options .run-context{padding:20px;}#saschi-conversion-options .source-panel pre{margin-inline:0;}#saschi-conversion-options .target-heading{align-items:flex-start;}}
+@container conversion (max-width:480px){#saschi-conversion-options .chrome{padding:12px 16px;}#saschi-conversion-options .local{font-size:.8em;}#saschi-conversion-options .intro{padding:20px 16px;}#saschi-conversion-options h1{font-size:1.45em;}#saschi-conversion-options .review-layout{padding:0 16px 22px;}#saschi-conversion-options .target{padding:14px 12px;gap:10px;}#saschi-conversion-options .target-label{display:block;flex-basis:100%;}#saschi-conversion-options .run-context{padding:16px;}#saschi-conversion-options .run-footer{padding:18px 16px;}#saschi-conversion-options .run-footer>.primary{width:100%;}#saschi-conversion-options .dialog-layer{padding:28px 10px;}#saschi-conversion-options .dialog{padding:18px;}#saschi-conversion-options .dialog-actions>button{flex:1;}#saschi-conversion-options .status-pill{font-size:.8em;}}
+@media(pointer:coarse){#saschi-conversion-options button,#saschi-conversion-options select,#saschi-conversion-options summary{min-height:44px;}}
+</style>
+<script>
+(() => {
+  const root=document.getElementById('saschi-conversion-options');
+  const el=id=>root.querySelector('#'+id);
+  const state={connected:false,sas:false,report:false,width:1024,text:16,folder:'Documents',target:'python'};
+  let dialogMode='',lastFocus=null;
+  function restore(data){if(data?.mock!=='saschi-conversion-options')return;for(const key of ['connected','sas','report'])if(typeof data[key]==='boolean')state[key]=data[key];if([1024,640,360].includes(data.width))state.width=data.width;if([16,18,20].includes(data.text))state.text=data.text;if(['Documents','Downloads'].includes(data.folder))state.folder=data.folder;if(['python','r','sql','cpp'].includes(data.target))state.target=data.target;}
+  restore(window.openai?.widgetState?.modelContent);
+  function save(){window.openai?.setWidgetState?.({modelContent:{mock:'saschi-conversion-options',releaseTargets:['Python','R','SQL'],advancedTarget:'C++',layers:['Parquet','DuckDB'],...state},privateContent:null})?.catch(()=>{});}
+  function required(){return Number(!state.connected)+Number(state.report);}
+  function render(){
+    root.style.setProperty('--co-type',state.text+'px');el('co-viewport').style.maxWidth=state.width+'px';el('co-width').value=state.width;el('co-text').value=state.text;el('co-example').value=state.report?'source':state.connected?'ready':'missing';
+    const fixes=required(),python=state.target==='python',name={python:'Python',r:'R',sql:'SQL',cpp:'C++'}[state.target];
+    el('co-top-status').textContent=python?'Desktop integration pending':state.target==='cpp'?'Outside pilot scope':'Target implementation pending';el('co-top-status').classList.add('attention');el('co-required-count').textContent=fixes?fixes+' item'+(fixes===1?'':'s')+' to resolve':'Files connected';
+    el('co-python-state').textContent=state.report?'This sample: PROC REPORT needs review':'This sample: source supported';
+    root.querySelectorAll('[data-target]').forEach(row=>{const selected=row.dataset.target===state.target;row.classList.toggle('selected',selected);row.querySelector('input').checked=selected;});
+    if(state.target==='cpp')el('co-advanced').open=true;
+    const targetCopy={python:[state.report?'Python needs a source revision':'Python conversion is available',state.report?'PROC REPORT at line 7 is unsupported. The direct SAS-file workflow also needs integration.':'This numeric MERGE source can be converted to Python. Direct SAS import and the Parquet workflow still need integration.'],r:['R is required for the first release','R verification examples exist. Program conversion, execution and integration with the data layer still need implementation.'],sql:['SQL is required for the first release','SQL code generation and DuckDB execution still need implementation. SQL JOIN behavior must be checked against SAS MERGE semantics.'],cpp:['C++ cannot run this program','The limited pilot supports scalar DATA _NULL_ programs. This program reads and merges datasets.']};
+    el('co-selected-title').textContent=targetCopy[state.target][0];el('co-selected-description').textContent=targetCopy[state.target][1];
+    el('co-missing-issue').hidden=state.connected;el('co-source-issue').hidden=!state.report;el('co-ready-note').hidden=fixes>0;
+    el('co-check-state').textContent=!python?'Target unavailable':state.report?'Source needs review':state.connected?'Sample checks complete':'Input checks pending';el('co-source-icon').textContent=!python||state.report?'!':'✓';el('co-source-check').textContent=!python?(state.target==='cpp'?'Dataset operations are outside the C++ pilot.':name+' conversion has not been implemented; source compatibility is not established.'):state.report?'Line 7: PROC REPORT has no executable backend.':'All statements are supported by the Python target.';
+    el('co-runtime-icon').textContent=python?'✓':'○';el('co-runtime-title').textContent=state.target==='sql'?'DuckDB query execution':name+' runtime';el('co-runtime-description').textContent=python?'Available in the sample environment.':'Analyst execution is not available for this target and sample.';
+    el('co-data-heading').textContent=python?'Current Python MERGE requirements':name+' input requirements';el('co-data-rules').hidden=!python;
+    el('co-data-icon').textContent=python&&state.connected?'✓':'○';el('co-data-check').textContent=!python?(state.target==='cpp'?'Input datasets are outside the scalar pilot.':'Target-specific input checks are not available yet.'):state.connected?'Both sample inputs meet these requirements.':'Connect returns to check both inputs.';
+    el('co-input-count').textContent=(state.connected?'2':'1')+' of 2 connected';el('co-returns-icon').textContent=state.connected?'✓':'○';el('co-returns-file').textContent=state.connected?'returns.sas7bdat':'Not connected';el('co-returns-meta').textContent=state.connected?'6 observations · 2 variables':'Needed before running';
+    el('co-comparison-file').hidden=!state.sas;el('co-sas').textContent=state.sas?'Remove SAS results':'Add SAS results';el('co-compare-message').textContent=state.sas?'SAS output added. Comparison will run after execution; agreement has not been checked.':'No SAS results supplied. These are optional; without them, agreement with SAS results will not be checked.';
+    for(const line of [6,7,8])el('co-line'+line).hidden=!state.report;el('co-line-count').textContent=state.report?'8 lines':'5 lines';el('co-source-note').textContent=state.report?'Line 7 needs attention · original unchanged':'Source preview · original unchanged';
+    el('co-folder-path').textContent=state.folder+' / SASchi-Go / net_sales / run-001';el('co-run').disabled=true;
+    el('co-footer-title').textContent=python?'Direct SAS-file workflow is not ready in this build':state.target==='cpp'?'C++ cannot run this MERGE program':name+' conversion is not ready in this build';
+    el('co-footer-note').textContent=state.target==='cpp'?'Choose another target for this program. C++ remains an advanced, limited pilot.':fixes?'Build work remains, plus '+fixes+' setup item'+(fixes===1?'':'s')+' to resolve above.':'Sample setup complete. Implementation work must finish before this workflow can run.';
+  }
+  function layout(){el('co-layout-note').textContent=el('co-viewport').getBoundingClientRect().width<=780?'Small: run details move below the review. Text keeps its size; source code wraps.':'Wide: target review and run details sit side by side.';}
+  function addChoice(name,label,help,checked,type='checkbox'){
+    const box=document.createElement('label');box.className='choice';const input=document.createElement('input');input.type=type;input.name='co-dialog-choice';input.value=name;input.checked=checked;
+    const text=document.createElement('span'),strong=document.createElement('strong'),small=document.createElement('small');strong.textContent=label;small.textContent=help;text.append(strong,small);box.append(input,text);el('co-dialog-content').append(box);
+  }
+  function openDialog(mode){
+    dialogMode=mode;lastFocus=document.activeElement;el('co-dialog-content').replaceChildren();el('co-cancel').hidden=false;el('co-confirm').disabled=false;el('co-dialog-eyebrow').textContent=mode==='run'?'END OF DESIGN PREVIEW':mode==='files'?'SAMPLE FILE SETUP':'SAMPLE FILE CHOOSER';
+    el('co-dialog-note').textContent='Sample selections only. No files are accessed.';
+    if(mode==='returns'){el('co-dialog-title').textContent='Connect returns';el('co-dialog-help').textContent='Choose the file that supplies the returns dataset in line 2.';addChoice('returns','returns.sas7bdat','6 observations · 2 numeric variables · sorted by order_id',true);el('co-confirm').textContent='Connect file';}
+    if(mode==='sas'){el('co-dialog-title').textContent='Add SAS results';el('co-dialog-help').textContent='Use output from the same program, inputs and settings.';addChoice('sas','net_sales.sas7bdat','Compare with output net_sales · 6 observations · 4 variables',true);el('co-confirm').textContent='Add SAS results';}
+    if(mode==='folder'){el('co-dialog-title').textContent='Save this run';el('co-dialog-help').textContent='Choose where to create a new run folder.';for(const folder of ['Documents','Downloads'])addChoice(folder,folder+' / SASchi-Go','A new net_sales / run-001 folder',state.folder===folder,'radio');el('co-confirm').textContent='Use location';}
+    if(mode==='files'){el('co-dialog-title').textContent='Files for this conversion';el('co-dialog-help').textContent='net_sales.sas and orders.sas7bdat are selected. Manage the other connections below.';addChoice('returns','returns.sas7bdat','Input dataset: returns',state.connected);addChoice('sas','net_sales.sas7bdat','SAS output for comparison, optional',state.sas);el('co-dialog-note').textContent='Unchecking a file removes its connection. Original files stay unchanged.';el('co-confirm').textContent='Review conversion options';}
+    if(mode==='run'){
+      el('co-dialog-title').textContent='Ready for the run workspace';el('co-dialog-help').textContent='In the desktop app, Convert & run would start this sequence:';const steps=document.createElement('ol');steps.className='run-sequence';const labels=['Convert net_sales.sas to Python.','Run locally with orders and returns.',state.sas?'Compare net_sales with the supplied SAS output.':'Record that comparison with SAS results was not requested.','Open the code, results and run report for review.'];labels.forEach(label=>{const li=document.createElement('li');li.textContent=label;steps.append(li);});el('co-dialog-content').append(steps);el('co-dialog-note').textContent='This preview has not executed a program or established matching results.';el('co-cancel').hidden=true;el('co-confirm').textContent='Return to review';
+    }
+    updateDialog();el('co-page').inert=true;el('co-dialog-layer').hidden=false;el('co-close').focus();
+  }
+  function updateDialog(){el('co-confirm').disabled=['returns','sas'].includes(dialogMode)&&!el('co-dialog-content').querySelector('input:checked');}
+  function closeDialog(focus=lastFocus){el('co-dialog-layer').hidden=true;el('co-page').inert=false;if(focus?.isConnected&&!focus.hidden)focus.focus();}
+  el('co-dialog-content').addEventListener('change',updateDialog);
+  el('co-connect').addEventListener('click',()=>openDialog('returns'));el('co-files').addEventListener('click',()=>openDialog('files'));el('co-location').addEventListener('click',()=>openDialog('folder'));
+  el('co-sas').addEventListener('click',()=>{if(state.sas){state.sas=false;render();save();}else openDialog('sas');});
+  el('co-view-issue').addEventListener('click',()=>{el('co-source-panel').open=true;el('co-source-summary').focus();el('co-line7').scrollIntoView({block:'center'});});
+  root.querySelectorAll('input[name="co-target"]').forEach(input=>input.addEventListener('change',e=>{state.target=e.target.value;render();save();}));
+  el('co-close').addEventListener('click',()=>closeDialog());el('co-cancel').addEventListener('click',()=>closeDialog());
+  el('co-confirm').addEventListener('click',()=>{
+    const values=Array.from(el('co-dialog-content').querySelectorAll('input:checked')).map(x=>x.value);
+    if(dialogMode==='returns')state.connected=true;if(dialogMode==='sas')state.sas=true;if(dialogMode==='folder')state.folder=values[0]||state.folder;
+    if(dialogMode==='files'){state.connected=values.includes('returns');state.sas=values.includes('sas');}
+    const focus=dialogMode==='returns'?el('co-input-summary'):lastFocus;render();closeDialog(focus);if(dialogMode!=='run')save();
+  });
+  el('co-dialog-layer').addEventListener('click',e=>{if(e.target===el('co-dialog-layer'))closeDialog();});
+  el('co-dialog-layer').addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();closeDialog();}if(e.key==='Tab'){const items=Array.from(el('co-dialog-layer').querySelectorAll('button:not(:disabled),input')).filter(x=>!x.hidden);const first=items[0],last=items[items.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}});
+  el('co-example').addEventListener('change',e=>{state.connected=e.target.value!=='missing';state.report=e.target.value==='source';state.sas=false;el('co-source-panel').open=false;render();save();});
+  el('co-width').addEventListener('change',e=>{state.width=Number(e.target.value);render();save();});el('co-text').addEventListener('change',e=>{state.text=Number(e.target.value);render();save();});
+  new ResizeObserver(layout).observe(el('co-viewport'));window.addEventListener('openai:set_globals',e=>{restore(e.detail?.globals?.widgetState?.modelContent);render();layout();});
+  render();layout();
+  if(globalThis.Tweak){const tweaks=new Tweak({container:el('co-app'),onChange:()=>{render();save();}});tweaks.addSlider(state,'text',{label:'Reading text',min:16,max:20,step:2,unit:'px'});}
+})();
+</script>
