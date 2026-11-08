@@ -12,6 +12,7 @@ license = "MIT"
 dependencies = []
 
 [project.optional-dependencies]
+desktop = ["pandas>=2.3,<4", "duckdb>=1,<2"]
 tui = ["rich>=13,<14"]
 verify = ["numpy>=2,<3", "pandas>=3,<4", "scipy>=1.15,<2", "duckdb>=1,<2", "jsonschema>=4,<5", "setuptools>=77", "wheel>=0.44"]
 

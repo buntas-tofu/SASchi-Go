@@ -27,6 +27,12 @@ integration or target coverage for an arbitrary program.
 Reopening a saved run should preserve its original results and comparison,
 even when the linked SAS program or data files have moved or changed.
 
+## Implementation authorization
+
+The principal approved implementing the reviewed workflow on 2026-11-08.
+[Implementation scope](IMPLEMENTATION.md) records that authorization and the
+engineering boundaries. The original prototypes remain design evidence.
+
 ## Agent proposals
 
 The screens propose the detailed wording, layout, controls, progressive setup,

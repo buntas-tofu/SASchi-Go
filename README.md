@@ -1,6 +1,6 @@
 # SASchi-Go
 
-Ubuntu desktop: [native file selection and local saved jobs](docs/DESKTOP.md).
+Ubuntu desktop: [SAS dataset import, conversion review and saved comparisons](docs/DESKTOP.md).
 
 Reproducing SAS behavior in open languages (Python, R) with receipts.
 
@@ -18,8 +18,8 @@ policies. Receipts record what passed for the source and environment tested.
 ## Current verification
 
 Status: version 0.4.0 development evidence for maintainer review, updated on
-2026-11-03. The current registry contains 111 fixture gates and74 suites, including
-the desktop file-workflow suite. The full receipt
+2026-11-08. The current registry contains 111 fixture gates and77 suites, including
+the desktop workflow, data importer and saved-evidence suites. The full receipt
 records the discovered tests and their outcomes. With the pinned Roku corpus present, `python verify_all.py` records the
 source-bound unified verdict. Synthesis separately checks 60 faithful cases and
 60 naive variants. The accepted entry PR65/mainac9d800 covered93 gates,64 suites and

@@ -1,66 +1,139 @@
 # Ubuntu desktop
 
-Status: desktop frontend for maintainer test drives. Uses the existing bounded
-CLI job pipeline. No live SAS or completed human usability claim.
+Status: implemented desktop workflow for maintainer and analyst review. Automated
+checks exercise imports, execution, saved evidence and native window behavior.
+No live SAS equivalence or completed human usability claim is made.
+
+## Start the application
 
 Install the locally built package with Ubuntu's package manager:
 
 ```sh
-sudo apt install ./saschi-desktop_0.4.0+desktop1_all.deb
+sudo apt install ./saschi-desktop_0.4.0+desktop2_all.deb
 ```
 
-Launch SASchi-Go from Applications, or run `saschi-desktop`.
-For a source checkout, install `python3-tk` and run
-`/usr/bin/python3 -m saschi.desktop`. Use the distribution interpreter, not an
-isolated project environment: the packaged launcher runs on `/usr/bin/python3`,
-so the checkout run and the installed run load the same toolkit.
+Launch SASchi-Go from Applications, or run `saschi-desktop`. The package uses
+Ubuntu's Python, Tk and pandas. DuckDB is optional and is not bundled by this
+architecture-independent Debian package. The export dialog states whether
+Parquet is available in the running environment.
 
-Choose a SAS program, any supporting typed JSON input catalog, and an existing
-output folder using the file and folder dialogs. Optional JSON expectations
-cover datasets, reports, exports and ordered log records separately. Blank
-expectations mean no comparison was requested. Inputs use the same schema as
-`saschi run --inputs`; arbitrary CSV, SAS binary datasets, includes, macros and
-external libraries are not automatically imported. Unsupported source produces
-review tickets rather than a partial successful translation.
-
-Run selected program creates a unique `saschi-<UTC time>-<id>` child directory.
-The existing CLI publishes plan.json and receipt.json together, plus result.json
-for accepted execution or observed.json when execution produced rejected output.
-Accepted report and export files are saved in reports/ and exports/. Original
-selected files are read only. Previous jobs are retained. The app displays a
-bounded preview; complete artifacts remain on disk. Open saved job opens the
-result folder in the file manager. Wait for the current job before closing.
-
-ACCEPTED means execution and requested comparisons passed. It does not imply
-a per-job independent R comparison or native SAS equivalence. Failed requested
-comparisons remain distinct from not requested and not reached. The desktop
-starts no HTTP listener or assistant service.
-
-The Debian package contains the Python application and canonical rulebook.
-Ubuntu supplies Python, Tk and xdg-utils. Runtime execution is standard library;
-optional completeness accounting reports unavailable if DuckDB is absent.
-R, C++ and scientific Python packages remain verification dependencies rather
-than mandatory desktop runtime dependencies. The postal profile still needs its
-explicitly prepared external pinned USPS reference. No reference data is bundled.
-
-Build locally with the distribution interpreter and its packaged tooling:
-`/usr/bin/python3` carries pip and setuptools on Ubuntu, while an isolated
-project environment may carry neither and will fail inside the builder's
-wheel step. The version in the filename follows `pyproject.toml`; the package
-version adds a `+desktop1` suffix to that base.
+For a source checkout with the complete desktop dependencies:
 
 ```sh
-/usr/bin/python3 tools/build_desktop_deb.py --output output/saschi-desktop_0.4.0+desktop1_all.deb
-/usr/bin/python3 -m unittest saschi.test_desktop
+sudo apt install python3-tk python3-venv
+python3 -m venv --system-site-packages .venv-desktop
+.venv-desktop/bin/python -m pip install -e '.[desktop]'
+.venv-desktop/bin/python -m saschi.desktop
 ```
 
-The verification workflow's `package-smoke` job builds the same package,
-asserts its control metadata and payload paths, installs it in the runner and
-requires the headless entry point to exit 1 with the documented display
-message. A package that tests clean but cannot install is caught there rather
-than by the first person who downloads it.
+The application starts no HTTP listener or assistant service. Original selected
+files stay read only. The default workspace is `~/Documents/SASchi-Go`; choose a
+different folder in the header. Long-running file and execution work stays off
+the Tk event loop. Wait for the current operation before closing.
 
-The package has no automatic updater, network service or privileged runtime.
-Installing it is separate from building and reviewing it. Human testing should
-cover native chooser cancellation, long paths, removable drives, comparison
-errors, blocked source, saved artifacts, keyboard navigation and display scaling.
+## Files, review and execution
+
+Open a `.sas` program, connect input datasets and assign the member names used
+by the program. Direct `.sas7bdat` import requires no analyst JSON preparation.
+Single-member `.xpt`, CSV and typed JSON catalogs are also accepted. Library
+statements, includes, macros and unsupported constructs still produce review
+items; connecting a file does not expand the compiler's supported language.
+
+Use **Compare with SAS results** to add output datasets from SAS. Their names
+must correspond to converted outputs. Comparison is optional. Without supplied
+SAS results, agreement remains not checked. A program that executes is not
+therefore a verified conversion.
+
+**Review conversion options** reads the selected files and analyzes the program
+without executing it. It lists required and missing inputs, import limitations,
+conversion tickets and generated code. Execution rechecks file identities and
+uses the reviewed snapshots. Changed files require another review.
+
+- Python can run supported programs through the existing SASchi-Go runtime.
+- R and SQL remain visible as targets that need engine work. Their verification
+  fixtures are not general program emitters.
+- C++ is an advanced bounded scalar code preview and export. The desktop does
+  not execute C++.
+- Parquet is a data export layer. DuckDB supplies that layer locally. Neither is
+  presented as another conversion target. A general DuckDB query editor is not
+  part of this desktop implementation.
+
+The interface offers 12, 14 and 16 point text, including code. Code panels have
+drag handles and stack when the window narrows. Tables scroll horizontally and
+page through observations without reducing text size.
+
+## Import fidelity and limits
+
+Native SAS import retains raw numeric dates, ordinary and tagged missing values,
+character byte widths and padding, labels, format names and supported encodings.
+Display widths, format decimals and custom format catalog definitions are not
+imported. Metadata comparison covers imported fields only. Import caveats remain
+attached to saved runs and comparison reports.
+
+The typed runtime supports UTF-8, ASCII and Latin-1. Unsupported encodings,
+non-eight-byte SAS numeric storage and incomplete or ambiguous file conditions
+are refused. Choose an explicit encoding only when the file's encoding is known.
+CSV has no SAS descriptors; its inferred types and widths are disclosed. Leading
+zero identifiers remain character data. Imported SAS dates display as raw numbers.
+
+The adapter uses pandas' SAS reader internals to retain missing tags and complete
+character bytes before conversion to the typed runtime. Synthetic binary tests
+cover byte order, header width, RLE compression and missing values. This is bounded
+format coverage, not a claim that every SAS dataset encoding is supported.
+
+## Review, save and reopen
+
+Each execution receives a unique immutable run directory with a checksummed
+record. Execution status is separate from SAS result agreement. Completed output
+is retained when comparison differs. Failed execution records the error and
+preserves the setup for a new review.
+
+The run view presents output tables, saved source and converted code, comparisons,
+reports, the execution log and the underlying record. Comparisons use exact typed
+values, observation position, variable order and stored metadata. There is no
+implicit tolerance or key-based row alignment. Paired value differences, unpaired
+cells, shape differences and unchecked items are distinct.
+
+Additional comparisons append evidence without rerunning or replacing the first
+comparison. Reopen a saved run without its original files. **Check original files**
+distinguishes unchanged, moved, changed and missing files. Reconnect originals for
+optional export copies or a new setup. Using changed data requires an explicit
+choice and another review; saved output remains unchanged.
+
+Select two saved runs to compare program snapshots, file identities, available
+original input values, runtime details and output values. Unavailable original
+input versions remain not checked. A value that now matches the same SAS results
+is not an explanation of its earlier difference or an analyst signoff.
+
+## Export and validation
+
+Export creates a new ZIP with converted code, produced results, a portable record
+and an HTML comparison report. Complete typed JSON result files are always
+included; analysts do not prepare these themselves. Parquet and CSV are separate
+export choices. When DuckDB is unavailable, Parquet is visibly disabled and CSV
+is selected as a convenience copy. Optional copies include source, original input
+files and original SAS results. Original file copies are checked against their
+saved content digests before inclusion. Export never overwrites an existing file.
+Differences, unchecked evidence, import limitations and omitted copies travel with
+the package. Compared values remain included even when original files are omitted.
+
+Parquet exports require their metadata sidecars: tagged missing values are null in
+Parquet, while exact tags and SAS descriptors live in the sidecar. CSV is a
+convenience representation. Generated Python requires the recorded SASchi-Go
+runtime and an input catalog supplied by its caller; it is not a standalone data
+loading script. The runtime is not bundled in review ZIPs.
+
+Build without downloading dependencies, using an interpreter with pip, setuptools
+and wheel already installed:
+
+```sh
+python3 tools/build_desktop_deb.py --output output/saschi-desktop_0.4.0+desktop2_all.deb
+python3 -m unittest saschi.test_desktop saschi.test_desktop_service saschi.test_data_files saschi.test_workspace
+```
+
+The normal `python verify_all.py` gate includes the desktop service, data importer
+and workspace suites. Package smoke checks validate control metadata, installed
+payload, native SAS import and window behavior under Xvfb, plus the headless entry
+point error. Human review should still cover native
+chooser ergonomics, real display scaling, keyboard navigation and representative
+analyst programs and datasets before the first analyst-facing release.
