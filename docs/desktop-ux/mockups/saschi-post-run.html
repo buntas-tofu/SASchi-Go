@@ -1,0 +1,276 @@
+<!-- Design proposal for the planned analyst release. Python, R and SQL remain the primary target scope, with C++ advanced, Parquet for shared data and DuckDB for local queries. This screen illustrates one future Python run after integration work. Result data is synthetic. Python text is the current emitter output for the synthetic SAS source. No native SAS validation is claimed. -->
+<div id="saschi-post-run" aria-label="SASchi-Go post-run design">
+  <div class="preview-tools"><span>Future workflow preview · simulated Python run</span><label for="pr-example">Outcome</label><select id="pr-example"><option value="different">One value differs</option><option value="matched">Supplied dataset matches</option><option value="unchecked">No SAS results supplied</option></select><label for="pr-width">Window</label><select id="pr-width"><option value="1024">Wide</option><option value="640">Small</option><option value="360">Narrow</option></select><label for="pr-text">Text</label><select id="pr-text"><option value="16">Comfortable</option><option value="18">Larger</option><option value="20">Largest</option></select></div>
+  <div class="window-size" id="pr-viewport">
+    <section class="app" aria-label="SASchi-Go run review" id="pr-app">
+      <header class="chrome"><div class="brand"><span class="brand-symbol">S</span>SASchi-Go</div><span class="local"><i data-lucide="hard-drive" aria-hidden="true"></i>Local workspace</span></header>
+      <div class="intro"><div><span class="eyebrow">RUN REVIEW · RUN 001</span><h1>net_sales.sas</h1><p>Target: <strong>Python</strong><span class="dot">·</span>Output: <code>net_sales</code></p></div><div class="execution"><i data-lucide="circle-check" aria-hidden="true"></i><div><strong>Execution completed</strong><span>Output was produced</span></div></div></div>
+      <section class="verdict differs" id="pr-verdict" aria-label="Comparison outcome"><div class="verdict-heading"><span class="verdict-symbol" id="pr-verdict-symbol" aria-hidden="true">≠</span><div><h2 id="pr-verdict-title">1 value differs from the supplied SAS result</h2><p id="pr-verdict-message">23 of 24 values matched in net_sales. Review the difference before relying on this output.</p></div></div><p class="verdict-scope" id="pr-verdict-scope">Scope: net_sales only · 6 observations · 4 variables</p></section>
+      <nav class="review-nav" aria-label="Run review views"><button id="pr-tab-results" data-view="results" aria-pressed="true">Results comparison</button><button id="pr-tab-code" data-view="code" aria-pressed="false">Code diff</button><button id="pr-tab-details" data-view="details" aria-pressed="false">Run details</button></nav>
+      <main class="review-content">
+        <section id="pr-results" aria-label="Results comparison">
+          <div class="section-heading"><div><h2>Compare with SAS results</h2><p id="pr-file-pair">SAS: net_sales.sas7bdat → converted: net_sales</p></div><button class="secondary" id="pr-add-sas" hidden>Add sample SAS results</button></div>
+          <div class="status-summary" aria-label="Comparison scope"><div><span class="status-word matched" id="pr-matched-label">Matched</span><strong id="pr-matched-total">23 values</strong></div><div><span class="status-word differed" id="pr-differed-label">Differed</span><strong id="pr-differed-total">1 value</strong></div><div><span class="status-word unchecked">Not checked</span><strong id="pr-unchecked-total">SAS log and run provenance</strong></div></div>
+          <div id="pr-comparison-content">
+            <div class="table-toolbar"><label for="pr-variable">Variable<select id="pr-variable"><option value="net">net</option><option value="order_id">order_id</option><option value="gross">gross</option><option value="refunded">refunded</option></select></label><label class="check-label"><input type="checkbox" id="pr-only-diff" checked>Differences only</label><span class="quiet" id="pr-visible-count">1 of 6 observations shown</span></div>
+            <div class="comparison-table"><table><caption id="pr-table-caption">Variable net, compared in observation order.</caption><thead><tr><th scope="col">Observation</th><th scope="col">SAS result</th><th scope="col">Converted</th><th scope="col">Difference</th><th scope="col">Status</th></tr></thead><tbody id="pr-comparison-rows"></tbody></table></div>
+            <div class="empty-result" id="pr-empty-filter" hidden><i data-lucide="circle-check" aria-hidden="true"></i><p id="pr-empty-message"></p><button class="text-button" id="pr-show-matches">Show matching values</button></div>
+            <p class="table-note">Difference = converted − SAS. Comparisons use exact stored values, with no tolerance. Display rounding does not affect the comparison.</p>
+            <section class="difference-detail" id="pr-difference-detail" aria-labelledby="pr-difference-title"><div class="section-heading"><div><span class="eyebrow">OBSERVATION 3 · order_id = 3</span><h3 id="pr-difference-title">net differs by +10</h3></div><span class="status-word differed">Differed</span></div><div class="value-pair"><div><span>SAS result</span><strong>950</strong></div><div><span>Converted result</span><strong>960</strong></div></div><p>The cause is not established. Check that the SAS output used the same program, inputs and settings, then review the calculation.</p><button class="secondary" id="pr-trace">View calculation in code<i data-lucide="arrow-up-right" aria-hidden="true"></i></button></section>
+          </div>
+          <details class="dataset-checks" id="pr-dataset-checks"><summary>Dataset checks <span class="quiet" id="pr-check-summary">Values differ; structure matches</span></summary><div id="pr-check-rows"></div><p class="detail-note">This sample has numeric variables and no assigned labels or formats. A match here does not exercise preservation of those attributes.</p></details>
+          <div class="not-checked"><span class="status-word unchecked">Not checked</span><p><strong>SAS log:</strong> no SAS log was supplied.</p><p id="pr-provenance-note"><strong>SAS run provenance:</strong> matching program, inputs and settings have not been independently confirmed.</p></div>
+          <details class="output-data" id="pr-output-data"><summary>Full converted dataset <span class="quiet">6 observations · 4 variables</span></summary><div class="output-table"><table><caption>Converted net_sales, synthetic output.</caption><thead><tr><th scope="col">order_id</th><th scope="col">gross</th><th scope="col">refunded</th><th scope="col">net</th></tr></thead><tbody id="pr-output-rows"></tbody></table></div></details>
+        </section>
+        <section id="pr-code" aria-label="Source and generated code" hidden>
+          <div class="section-heading"><div><h2>Code diff</h2><p>Review how the SAS statements are represented in the generated Python.</p></div><button class="text-button" id="pr-return-results">Return to results<i data-lucide="arrow-right" aria-hidden="true"></i></button></div>
+          <div class="trace-context" id="pr-trace-context" hidden><span class="status-word differed">Result difference</span><span>Observation 3 · net: SAS 950, converted 960. Highlighted code shows the related calculation; the cause is still unknown.</span></div>
+          <div class="code-toolbar"><label for="pr-mapping">Review<select id="pr-mapping"><option value="calculation">net calculation · SAS line 4</option><option value="merge">Read and merge · SAS lines 2–3</option></select></label><label class="check-label"><input type="checkbox" id="pr-full-code">Show full generated file</label></div>
+          <div class="code-pair"><section class="code-pane"><div class="pane-heading"><strong>SAS source</strong><span>net_sales.sas · original</span></div><pre><code id="pr-sas-code"></code></pre></section><section class="code-pane"><div class="pane-heading"><strong>Generated Python</strong><span id="pr-python-caption">Excerpt · lines 18–26</span></div><pre><code id="pr-python-code"></code></pre></section></div>
+          <p class="code-legend"><span class="mapping-key" aria-hidden="true"></span>Highlighted sections correspond across languages. A code mapping is not a result match.</p>
+          <p class="detail-note" id="pr-code-note">Excerpt indentation is compacted for reading. Full file preserves the emitted code and original line numbers.</p>
+          <details class="code-explanation"><summary>Why does the Python look like this?</summary><p>The current emitter represents the SAS program as an execution plan, then calls the SASchi-Go runtime. The selected operation keeps its SAS source-line number, so it can be traced back during review.</p></details>
+        </section>
+        <section id="pr-details" aria-label="Run details and evidence" hidden>
+          <div class="section-heading"><div><h2>Run details</h2><p>The execution result and each comparison are recorded separately.</p></div><span class="quiet">Run 001 · sample record</span></div>
+          <dl class="run-record"><div><dt>Execution</dt><dd><span class="status-word matched">Completed</span>Python produced net_sales.</dd></div><div><dt>Dataset comparison</dt><dd id="pr-record-comparison"></dd></div><div><dt>Comparison scope</dt><dd id="pr-record-scope"></dd></div><div><dt>Comparison policy</dt><dd>Exact typed values, observation order, variable order and stored metadata. No tolerance or key-based row realignment.</dd></div><div><dt>SAS log comparison</dt><dd><span class="status-word unchecked">Not checked</span>No SAS log supplied.</dd></div><div><dt>Native SAS execution</dt><dd><span class="status-word unchecked">Not performed</span>This workflow uses supplied SAS results; it does not rerun SAS.</dd></div><div><dt>SAS result provenance</dt><dd><span class="status-word unchecked">Not checked</span>Origin and matching program, inputs and settings are not independently established.</dd></div></dl>
+          <details class="files-record"><summary>Files and processing layers</summary><dl class="run-record"><div><dt>Original program</dt><dd>net_sales.sas</dd></div><div><dt>Input datasets</dt><dd>orders.sas7bdat<br>returns.sas7bdat</dd></div><div><dt>Supplied SAS result</dt><dd id="pr-record-sas-file">net_sales.sas7bdat</dd></div><div><dt>Working data</dt><dd>Parquet with accompanying SAS metadata</dd></div><div><dt>Local query layer</dt><dd>DuckDB</dd></div><div><dt>Converted output</dt><dd>net_sales.parquet</dd></div></dl><p class="detail-note">The Parquet and DuckDB workflow is shown as the planned release experience.</p></details>
+        </section>
+      </main>
+      <footer class="run-footer"><span id="pr-footer-state">Review the differing value before relying on this output.</span><button class="text-button" id="pr-review-record">View run details<i data-lucide="arrow-up-right" aria-hidden="true"></i></button></footer>
+    </section>
+  </div>
+  <p class="preview-note" id="pr-layout-note">Wide: source and generated code sit side by side.</p>
+  <p class="preview-note">Proposed post-run interface for your review after the planned desktop integration. All outcomes are simulated from synthetic data; no real SAS files were imported or validated. Code is from the current Python emitter. Detailed comparison views are proposed functionality.</p>
+</div>
+<style>
+#saschi-post-run {--pr-bg:light-dark(#fafbf9,#171c1c);--pr-panel:light-dark(#f0f3f0,#202726);--pr-paper:light-dark(#fff,#1b2221);--pr-text:light-dark(#25332f,#e3ebe6);--pr-muted:light-dark(#56645e,#a9bbb1);--pr-border:light-dark(#dbe2dc,#3b4841);--pr-accent:light-dark(#265f50,#a3d5bf);--pr-accent-fill:light-dark(#e7f1eb,#2b4438);--pr-action:light-dark(#285b4d,#b4d8c7);--pr-action-text:light-dark(#fff,#193a2c);--pr-warn:light-dark(#795719,#edce8d);--pr-warn-bg:light-dark(#fbf2dc,#3f3521);--pr-map:light-dark(#eaf1fa,#26374b);--pr-type:16px;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--pr-text);width:100%;}
+#saschi-post-run * {box-sizing:border-box;}
+#saschi-post-run [hidden] {display:none!important;}
+#saschi-post-run h1,#saschi-post-run h2,#saschi-post-run h3,#saschi-post-run p,#saschi-post-run dl,#saschi-post-run dd {margin:0;}
+#saschi-post-run h1 {font-size:1.6em;line-height:1.25;font-weight:600;letter-spacing:-.5px;}
+#saschi-post-run h2 {font-size:1.06em;line-height:1.4;font-weight:600;}
+#saschi-post-run h3 {font-size:1em;line-height:1.4;font-weight:600;}
+#saschi-post-run button,#saschi-post-run select,#saschi-post-run input {font:inherit;}
+#saschi-post-run button:disabled,#saschi-post-run input:disabled {opacity:.5;cursor:not-allowed;}
+#saschi-post-run svg {width:18px;height:18px;flex-shrink:0;vertical-align:middle;}
+#saschi-post-run code {font-family:ui-monospace,"DejaVu Sans Mono",Consolas,monospace;font-size:.92em;color:inherit;background:transparent;padding:0;}
+#saschi-post-run .preview-tools {display:flex;align-items:center;flex-wrap:wrap;gap:8px 10px;padding-right:80px;margin-bottom:14px;font-size:14px;}
+#saschi-post-run .preview-tools>span {flex-basis:100%;font-weight:500;}
+#saschi-post-run select {padding:7px 9px;border:1px solid var(--pr-border);border-radius:6px;background:var(--pr-paper);color:var(--pr-text);max-width:100%;}
+#saschi-post-run .window-size {max-width:1024px;margin-inline:auto;container-type:inline-size;container-name:postrun;}
+#saschi-post-run .app {background:var(--pr-bg);border:1px solid var(--pr-border);border-radius:12px;overflow:hidden;font-size:var(--pr-type);line-height:1.5;}
+#saschi-post-run .chrome {display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:14px 22px;border-bottom:1px solid var(--pr-border);background:var(--pr-paper);}
+#saschi-post-run .brand {display:flex;align-items:center;gap:10px;font-weight:600;letter-spacing:-.3px;}
+#saschi-post-run .brand-symbol {width:28px;height:28px;display:grid;place-items:center;border-radius:8px;background:var(--pr-action);color:var(--pr-action-text);font-size:16px;}
+#saschi-post-run .local {font-size:.875em;color:var(--pr-muted);display:flex;align-items:center;gap:7px;}
+#saschi-post-run .intro {padding:28px 28px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:18px;}
+#saschi-post-run .eyebrow {display:block;font-size:.72em;letter-spacing:.06em;color:var(--pr-muted);margin-bottom:7px;}
+#saschi-post-run .intro p {font-size:.875em;color:var(--pr-muted);margin-top:9px;}
+#saschi-post-run .intro strong {font-weight:500;}
+#saschi-post-run .dot {padding:0 8px;}
+#saschi-post-run .execution {display:flex;align-items:flex-start;gap:9px;color:var(--pr-accent);}
+#saschi-post-run .execution>svg {margin-top:3px;}
+#saschi-post-run .execution strong {font-size:.875em;display:block;}
+#saschi-post-run .execution span {display:block;font-size:.75em;color:var(--pr-muted);margin-top:2px;}
+#saschi-post-run .verdict {margin:0 28px 24px;padding:17px 18px;border-radius:8px;background:var(--pr-panel);}
+#saschi-post-run .verdict.differs {background:var(--pr-warn-bg);color:var(--pr-warn);}
+#saschi-post-run .verdict.matches {background:var(--pr-accent-fill);color:var(--pr-accent);}
+#saschi-post-run .verdict-heading {display:flex;align-items:flex-start;gap:12px;}
+#saschi-post-run .verdict-symbol {font-size:1.35em;line-height:1.2;flex-shrink:0;}
+#saschi-post-run .verdict p {font-size:.875em;margin-top:7px;}
+#saschi-post-run .verdict .verdict-scope {font-size:.75em;margin-top:10px;}
+#saschi-post-run .review-nav {display:flex;gap:4px;flex-wrap:wrap;padding:0 28px;border-bottom:1px solid var(--pr-border);}
+#saschi-post-run .review-nav button {border:0;border-bottom:3px solid transparent;padding:11px 15px;background:transparent;color:var(--pr-muted);font-size:.9em;font-weight:500;}
+#saschi-post-run .review-nav button[aria-pressed="true"] {border-bottom-color:var(--pr-accent);color:var(--pr-accent);}
+#saschi-post-run .review-content {padding:24px 28px 28px;}
+#saschi-post-run .section-heading {display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:18px;}
+#saschi-post-run .section-heading p {font-size:.85em;color:var(--pr-muted);margin-top:5px;overflow-wrap:anywhere;}
+#saschi-post-run .secondary {display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--pr-border);border-radius:7px;padding:9px 13px;color:var(--pr-text);background:var(--pr-paper);font-size:.875em;font-weight:500;text-align:center;}
+#saschi-post-run .text-button {display:inline-flex;align-items:center;gap:7px;border:0;background:transparent;color:var(--pr-accent);padding:5px 0;font-size:.875em;font-weight:500;text-align:left;}
+#saschi-post-run .status-summary {display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:20px;padding:0 0 20px;margin-bottom:18px;border-bottom:1px solid var(--pr-border);}
+#saschi-post-run .status-summary>div {display:flex;flex-direction:column;align-items:flex-start;gap:5px;}
+#saschi-post-run .status-summary strong {font-size:.94em;font-weight:500;}
+#saschi-post-run .status-word {display:inline-flex;align-items:center;gap:6px;font-size:.78em;font-weight:500;}
+#saschi-post-run .status-word::before {content:'○';font-size:1.1em;}
+#saschi-post-run .status-word.matched {color:var(--pr-accent);}
+#saschi-post-run .status-word.matched::before {content:'✓';}
+#saschi-post-run .status-word.differed {color:var(--pr-warn);}
+#saschi-post-run .status-word.differed::before {content:'≠';}
+#saschi-post-run .status-word.unchecked {color:var(--pr-muted);}
+#saschi-post-run .quiet {font-size:.8em;color:var(--pr-muted);}
+#saschi-post-run .table-toolbar,#saschi-post-run .code-toolbar {display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px;}
+#saschi-post-run .table-toolbar>label:first-child,#saschi-post-run .code-toolbar>label:first-child {display:flex;align-items:center;gap:9px;font-size:.875em;max-width:100%;}
+#saschi-post-run .table-toolbar>.quiet {margin-left:auto;}
+#saschi-post-run .check-label {display:flex;align-items:center;gap:8px;font-size:.85em;}
+#saschi-post-run input {width:17px;height:17px;accent-color:var(--pr-action);flex-shrink:0;}
+#saschi-post-run table {width:100%;border-collapse:collapse;font-size:.875em;font-variant-numeric:tabular-nums;}
+#saschi-post-run caption {text-align:left;font-size:.9em;color:var(--pr-muted);padding-bottom:10px;}
+#saschi-post-run th,#saschi-post-run td {padding:11px 12px;text-align:right;border-bottom:1px solid var(--pr-border);}
+#saschi-post-run th {font-weight:500;color:var(--pr-muted);font-size:.9em;}
+#saschi-post-run td {background:var(--pr-paper);}
+#saschi-post-run th:first-child,#saschi-post-run td:first-child {text-align:left;}
+#saschi-post-run td small {display:block;color:var(--pr-muted);font-size:.85em;margin-top:3px;}
+#saschi-post-run .comparison-table td:last-child {text-align:right;}
+#saschi-post-run .comparison-table td .status-word {font-size:.9em;}
+#saschi-post-run .different-cell {background:var(--pr-warn-bg);color:var(--pr-warn);font-weight:500;}
+#saschi-post-run .table-note {font-size:.75em;color:var(--pr-muted);margin-top:12px;}
+#saschi-post-run .empty-result {padding:22px 0;display:flex;align-items:center;gap:10px;flex-wrap:wrap;color:var(--pr-accent);font-size:.9em;}
+#saschi-post-run .difference-detail {margin-top:22px;padding:18px;background:var(--pr-panel);border-radius:8px;}
+#saschi-post-run .difference-detail .section-heading {margin-bottom:12px;}
+#saschi-post-run .difference-detail>p {font-size:.85em;color:var(--pr-muted);margin-top:14px;max-width:76ch;}
+#saschi-post-run .difference-detail>.secondary {margin-top:14px;}
+#saschi-post-run .value-pair {display:flex;gap:36px;flex-wrap:wrap;}
+#saschi-post-run .value-pair>div {display:flex;flex-direction:column;gap:4px;}
+#saschi-post-run .value-pair span {font-size:.8em;color:var(--pr-muted);}
+#saschi-post-run .value-pair strong {font-size:1.25em;font-variant-numeric:tabular-nums;font-weight:500;}
+#saschi-post-run .dataset-checks {margin-top:24px;border-block:1px solid var(--pr-border);}
+#saschi-post-run .dataset-checks>summary,#saschi-post-run .output-data>summary,#saschi-post-run .files-record>summary,#saschi-post-run .code-explanation>summary {font-size:.9em;padding:14px 0;}
+#saschi-post-run summary .quiet {margin-left:8px;}
+#saschi-post-run .check-row {display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 20px;padding:12px 0;border-top:1px solid var(--pr-border);font-size:.9em;}
+#saschi-post-run .check-row strong {font-weight:500;}
+#saschi-post-run .check-row p {font-size:.9em;color:var(--pr-muted);margin-top:3px;}
+#saschi-post-run .detail-note {font-size:.8em;color:var(--pr-muted);padding:12px 0;}
+#saschi-post-run .not-checked {padding:18px 0;}
+#saschi-post-run .not-checked>p {font-size:.85em;color:var(--pr-muted);margin-top:6px;}
+#saschi-post-run .not-checked strong {font-weight:500;color:var(--pr-text);}
+#saschi-post-run .output-data {border-top:1px solid var(--pr-border);}
+#saschi-post-run .output-table th,#saschi-post-run .output-table td {padding-inline:9px;}
+#saschi-post-run .trace-context {background:var(--pr-warn-bg);border-radius:7px;padding:13px 16px;margin-bottom:18px;display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;color:var(--pr-warn);font-size:.875em;}
+#saschi-post-run .trace-context>.status-word {font-size:.9em;white-space:nowrap;}
+#saschi-post-run .trace-context>span:last-child {flex:1;min-width:200px;}
+#saschi-post-run .code-pair {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:16px;align-items:start;}
+#saschi-post-run .code-pane {min-width:0;border:1px solid var(--pr-border);border-radius:7px;background:var(--pr-paper);overflow:hidden;}
+#saschi-post-run .pane-heading {padding:12px 14px;background:var(--pr-panel);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;border-bottom:1px solid var(--pr-border);}
+#saschi-post-run .pane-heading strong {font-size:.9em;font-weight:500;}
+#saschi-post-run .pane-heading>span {font-size:.75em;color:var(--pr-muted);}
+#saschi-post-run pre {margin:0;padding:12px 0;font:calc(var(--pr-type) - 1px)/1.8 ui-monospace,"DejaVu Sans Mono",Consolas,monospace;}
+#saschi-post-run pre code {font:inherit;}
+#saschi-post-run .code-line {display:grid;grid-template-columns:36px minmax(0,1fr);padding-right:12px;}
+#saschi-post-run .code-line>b {font-size:.8em;font-weight:400;color:var(--pr-muted);text-align:center;user-select:none;}
+#saschi-post-run .code-line>span {white-space:pre-wrap;overflow-wrap:anywhere;}
+#saschi-post-run .code-line.mapped {background:var(--pr-map);}
+#saschi-post-run .code-legend {display:flex;gap:9px;align-items:center;font-size:.8em;color:var(--pr-muted);margin-top:14px;}
+#saschi-post-run .mapping-key {display:block;width:14px;height:14px;flex-shrink:0;background:var(--pr-map);}
+#saschi-post-run .code-explanation {border-top:1px solid var(--pr-border);margin-top:10px;}
+#saschi-post-run .code-explanation>p {font-size:.85em;color:var(--pr-muted);}
+#saschi-post-run .run-record>div {display:grid;grid-template-columns:195px minmax(0,1fr);gap:18px;padding:15px 0;border-bottom:1px solid var(--pr-border);}
+#saschi-post-run .run-record dt {font-size:.875em;font-weight:500;}
+#saschi-post-run .run-record dd {font-size:.875em;color:var(--pr-muted);overflow-wrap:anywhere;}
+#saschi-post-run .run-record dd>.status-word {display:block;font-size:.94em;margin-bottom:5px;}
+#saschi-post-run .files-record {margin-top:18px;}
+#saschi-post-run .run-footer {display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:18px 28px;border-top:1px solid var(--pr-border);background:var(--pr-paper);}
+#saschi-post-run .run-footer>span {font-size:.8em;color:var(--pr-muted);}
+#saschi-post-run .preview-note {font-size:13px;color:var(--pr-muted);margin-top:10px;}
+@container postrun (max-width:780px){#saschi-post-run .intro{padding:24px 22px;}#saschi-post-run .verdict{margin-inline:22px;}#saschi-post-run .review-nav{padding-inline:18px;}#saschi-post-run .review-content{padding:22px;}#saschi-post-run .code-pair{grid-template-columns:minmax(0,1fr);}#saschi-post-run .run-footer{padding:18px 22px;}#saschi-post-run .run-record>div{grid-template-columns:155px minmax(0,1fr);}}
+@container postrun (max-width:560px){#saschi-post-run .status-summary{grid-template-columns:1fr 1fr;gap:16px;}#saschi-post-run .status-summary>div:last-child{grid-column:1/-1;}#saschi-post-run .comparison-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);}#saschi-post-run .comparison-table table,#saschi-post-run .comparison-table tbody{display:block;}#saschi-post-run .comparison-table tr{display:block;margin-bottom:14px;border:1px solid var(--pr-border);border-radius:7px;overflow:hidden;}#saschi-post-run .comparison-table td{display:flex;align-items:center;justify-content:space-between;gap:12px;text-align:right;padding:10px 12px;}#saschi-post-run .comparison-table td::before{content:attr(data-label);font-size:.9em;font-weight:400;color:var(--pr-muted);text-align:left;}#saschi-post-run .comparison-table td:last-child{border-bottom:0;}#saschi-post-run .comparison-table td:first-child{display:block;text-align:left;background:var(--pr-panel);}#saschi-post-run .comparison-table td:first-child::before{display:none;}#saschi-post-run .run-record>div{grid-template-columns:minmax(0,1fr);gap:6px;}#saschi-post-run .table-toolbar>.quiet{margin-left:0;width:100%;}#saschi-post-run .code-toolbar>label:first-child{flex-wrap:wrap;}#saschi-post-run .output-table{overflow-x:auto;}#saschi-post-run .output-table table{min-width:385px;}}
+@container postrun (max-width:420px){#saschi-post-run .chrome{padding:12px 16px;}#saschi-post-run .local{font-size:.8em;}#saschi-post-run .intro{padding:22px 16px;}#saschi-post-run h1{font-size:1.4em;}#saschi-post-run .verdict{margin:0 16px 20px;padding:15px;}#saschi-post-run .review-nav{padding-inline:8px;}#saschi-post-run .review-nav button{padding:10px 8px;font-size:.85em;}#saschi-post-run .review-content{padding:20px 16px;}#saschi-post-run .difference-detail{padding:16px;}#saschi-post-run .run-footer{padding:16px;}#saschi-post-run .check-row{gap:5px 10px;}}
+@media(pointer:coarse){#saschi-post-run button,#saschi-post-run select,#saschi-post-run summary{min-height:44px;}}
+</style>
+<script>
+(() => {
+  const root=document.getElementById('saschi-post-run'),el=id=>root.querySelector('#'+id);
+  const state={outcome:'different',view:'results',variable:'net',onlyDiff:true,width:1024,text:16,mapping:'calculation',fullCode:false,traced:false};
+  const columns=['order_id','gross','refunded','net'];
+  const rows=[[1,1200,100,1100],[2,800,0,800],[3,1000,40,960],[4,450,25,425],[5,250,0,250],[6,1600,200,1400]].map(values=>Object.fromEntries(columns.map((name,i)=>[name,values[i]])));
+  const sasSource=['data net_sales;','  merge orders returns;','  by order_id;','  net = gross - refunded;','run;'];
+  const pythonSource=String.raw`# SASchi plan version 2, Python target.
+# Scope: numeric DATA steps and typed character catalogs; bounded stateful events,
+# OUTPUT, WHERE/IF, retained state, SET, numeric MERGE, ascending SORT.
+# Evidence: repository fixtures; not a live-SAS comparison.
+# SAS line 1: merge net_sales
+# SAS line 2: read
+# SAS line 4: assign
+from saschi.runtime import run_plan
+
+_plan = {'steps': [{'kind': 'merge',
+            'name': 'net_sales',
+            'line': 1,
+            'inputs': ['orders', 'returns'],
+            'by': ['order_id'],
+            'operations': [{'kind': 'read',
+                            'line': 2,
+                            'args': {'datasets': ['orders', 'returns']}},
+                           {'kind': 'assign',
+                            'line': 4,
+                            'args': {'name': 'net',
+                                     'value': {'kind': 'arithmetic',
+                                               'left': {'kind': 'variable',
+                                                        'value': 'gross'},
+                                               'op': '-',
+                                               'right': {'kind': 'variable',
+                                                         'value': 'refunded'}}}}],
+            'nodupkey': False,
+            'where': None,
+            'retained': {},
+            'lengths': {},
+            'display_names': {'net': 'net',
+                              'gross': 'gross',
+                              'refunded': 'refunded'}}],
+ 'tickets': [],
+ 'matched': [('merge', 'DS-002', 2)],
+ 'version': 2}
+result = run_plan(_plan, globals().get('inputs', {}), allow_partial=False)
+for _line in result['log']:
+    print(_line)`.split('\n');
+  const names={different:'Differed',matched:'Matched',unchecked:'Not checked'};
+  const number=value=>new Intl.NumberFormat('en-US',{maximumFractionDigits:2}).format(value);
+  function supplied(){return state.outcome!=='unchecked';}
+  function expected(row,index,column){return state.outcome==='different'&&index===2&&column==='net'?950:row[column];}
+  function totals(){if(!supplied())return {matched:0,differed:0};let matched=0,differed=0;rows.forEach((row,i)=>columns.forEach(c=>{if(row[c]===expected(row,i,c))matched++;else differed++;}));return {matched,differed};}
+  function restore(data){if(data?.mock!=='saschi-post-run')return;for(const key of ['onlyDiff','fullCode','traced'])if(typeof data[key]==='boolean')state[key]=data[key];if(['different','matched','unchecked'].includes(data.outcome))state.outcome=data.outcome;if(['results','code','details'].includes(data.view))state.view=data.view;if(columns.includes(data.variable))state.variable=data.variable;if(['calculation','merge'].includes(data.mapping))state.mapping=data.mapping;if([1024,640,360].includes(data.width))state.width=data.width;if([16,18,20].includes(data.text))state.text=data.text;}
+  restore(window.openai?.widgetState?.modelContent);
+  function save(){window.openai?.setWidgetState?.({modelContent:{mock:'saschi-post-run',...state},privateContent:null})?.catch(()=>{});}
+  function status(label,kind){const span=document.createElement('span');span.className='status-word '+kind;span.textContent=label;return span;}
+  function tableCell(row,label,value,className=''){const cell=document.createElement('td');cell.dataset.label=label;cell.textContent=value;cell.className=className;row.append(cell);return cell;}
+  function renderTable(){
+    const body=el('pr-comparison-rows');body.replaceChildren();let shown=0;rows.forEach((row,i)=>{if(!supplied())return;const sas=expected(row,i,state.variable),diff=row[state.variable]-sas;if(state.onlyDiff&&diff===0)return;shown++;const tr=document.createElement('tr');const identity=tableCell(tr,'Observation','Observation '+(i+1));const small=document.createElement('small');small.textContent='order_id = '+row.order_id;identity.append(small);tableCell(tr,'SAS result',number(sas));tableCell(tr,'Converted',number(row[state.variable]),diff?'different-cell':'');tableCell(tr,'Difference',(diff>0?'+':'')+number(diff),diff?'different-cell':'');const result=tableCell(tr,'Status','');result.append(status(diff?'Differed':'Matched',diff?'differed':'matched'));body.append(tr);});
+    el('pr-visible-count').textContent=shown+' of 6 observations shown';el('pr-empty-filter').hidden=shown>0||!supplied();el('pr-empty-message').textContent='All 6 values of '+state.variable+' match exactly.';el('pr-table-caption').textContent='Variable '+state.variable+', compared in observation order.';
+  }
+  function renderChecks(){
+    const list=el('pr-check-rows');list.replaceChildren();const t=totals();
+    const checks=[['Stored values',supplied()?t.matched+' of 24 matched; '+t.differed+' differed.':'24 output values produced; none compared with SAS.',state.outcome==='different'?'Differed':'Matched'],['Observation count',supplied()?'6 converted and 6 supplied SAS observations.':'6 converted observations; no SAS result supplied.','Matched'],['Variable definitions',supplied()?'4 numeric variables; names, types and variable order match.':'4 numeric variables; SAS definitions not supplied.','Matched'],['Observation order',supplied()?'order_id values 1 through 6 occur in the same order.':'No SAS observation order available for comparison.','Matched'],['Stored metadata',supplied()?'No stored metadata differs; labels and formats are absent in both sample tables.':'SAS metadata not available for comparison.','Matched']];
+    checks.forEach(([label,description,verdict])=>{const row=document.createElement('div');row.className='check-row';const copy=document.createElement('div'),strong=document.createElement('strong'),p=document.createElement('p');strong.textContent=label;p.textContent=description;copy.append(strong,p);const text=supplied()?verdict:'Not checked';row.append(copy,status(text,text==='Matched'?'matched':text==='Differed'?'differed':'unchecked'));list.append(row);});
+  }
+  function line(container,num,text,mapped){const item=document.createElement('span');item.className='code-line'+(mapped?' mapped':'');const n=document.createElement('b'),content=document.createElement('span');n.textContent=num;n.setAttribute('aria-hidden','true');content.textContent=text||' ';item.append(n,content);container.append(item);}
+  function renderCode(){
+    const calc=state.mapping==='calculation',range=calc?[18,26]:[10,17];el('pr-sas-code').replaceChildren();sasSource.forEach((text,i)=>line(el('pr-sas-code'),i+1,text,calc?i===3:i===1||i===2));
+    const source=pythonSource.map((text,i)=>({text,num:i+1})).filter(x=>state.fullCode||(x.num>=range[0]&&x.num<=range[1]));const levels=[...new Set(source.filter(x=>x.text.trim()).map(x=>x.text.match(/^ */)[0].length))].sort((a,b)=>a-b);
+    el('pr-python-code').replaceChildren();source.forEach(({text,num})=>{if(!state.fullCode&&text.trim())text=' '.repeat(levels.indexOf(text.match(/^ */)[0].length)*2)+text.trimStart();line(el('pr-python-code'),num,text,num>=range[0]&&num<=range[1]);});
+    el('pr-python-caption').textContent=state.fullCode?'Full emitted file · 39 lines':'Excerpt · lines '+range[0]+'–'+range[1];el('pr-code-note').textContent=state.fullCode?'Full output from the current Python emitter. Wrapped lines retain their original line number.':'Excerpt indentation is compacted for reading. Full file preserves the emitted code and original line numbers.';
+    el('pr-trace-context').hidden=!(state.traced&&state.outcome==='different');
+  }
+  function render(){
+    root.style.setProperty('--pr-type',state.text+'px');el('pr-viewport').style.maxWidth=state.width+'px';el('pr-width').value=state.width;el('pr-text').value=state.text;el('pr-example').value=state.outcome;el('pr-variable').value=state.variable;el('pr-only-diff').checked=state.onlyDiff;el('pr-mapping').value=state.mapping;el('pr-full-code').checked=state.fullCode;
+    for(const view of ['results','code','details']){el('pr-'+view).hidden=view!==state.view;el('pr-tab-'+view).setAttribute('aria-pressed',view===state.view);}
+    const has=supplied(),t=totals();el('pr-verdict').classList.toggle('differs',state.outcome==='different');el('pr-verdict').classList.toggle('matches',state.outcome==='matched');
+    el('pr-verdict-symbol').textContent={different:'≠',matched:'✓',unchecked:'○'}[state.outcome];
+    el('pr-verdict-title').textContent={different:'1 value differs from the supplied SAS result',matched:'The supplied SAS dataset matched',unchecked:'Results were not checked against SAS'}[state.outcome];
+    el('pr-verdict-message').textContent={different:'23 of 24 values matched in net_sales. Review the difference before relying on this output.',matched:'All 24 values, variable definitions, observation order and stored metadata matched for net_sales.',unchecked:'The program produced output, but no SAS results were supplied. Execution success does not establish result agreement.'}[state.outcome];
+    el('pr-verdict-scope').textContent=has?'Compared: 1 of 1 output datasets · net_sales only · SAS log not checked':'Compared: 0 of 1 output datasets · 6 observations and 4 variables produced';
+    el('pr-file-pair').textContent=has?'SAS: net_sales.sas7bdat → converted: net_sales':'Converted net_sales is available below. Add SAS results to compare this saved output.';
+    el('pr-matched-label').className='status-word '+(has?'matched':'unchecked');el('pr-differed-label').className='status-word '+(has&&t.differed?'differed':'unchecked');
+    el('pr-matched-total').textContent=has?t.matched+' values':'Not assessed';el('pr-differed-total').textContent=has?t.differed+' value'+(t.differed===1?'':'s'):'Not assessed';el('pr-unchecked-total').textContent=has?'SAS log and run provenance':'Dataset, SAS log and provenance';
+    el('pr-add-sas').hidden=has;el('pr-comparison-content').hidden=!has;el('pr-difference-detail').hidden=state.outcome!=='different'||state.variable!=='net';el('pr-check-summary').textContent={different:'Values differ; structure matches',matched:'All supplied dataset checks matched',unchecked:'No SAS result supplied'}[state.outcome];
+    const comparison=el('pr-record-comparison');comparison.replaceChildren(status(names[state.outcome],has?state.outcome==='matched'?'matched':'differed':'unchecked'));comparison.append(document.createTextNode(has?t.matched+' of 24 values matched; '+t.differed+' differed.':'No SAS output dataset supplied.'));
+    el('pr-record-scope').textContent=has?'net_sales only. 1 of 1 output datasets compared. The SAS log was not compared.':'No output datasets compared. Output remains available for inspection.';el('pr-record-sas-file').textContent=has?'net_sales.sas7bdat':'Not supplied';
+    el('pr-footer-state').textContent={different:'Review the differing value before relying on this output.',matched:'Match applies to the supplied dataset and comparison policy only.',unchecked:'Output is available. Agreement with SAS results remains unchecked.'}[state.outcome];
+    renderTable();renderChecks();renderCode();
+  }
+  const out=el('pr-output-rows');rows.forEach(row=>{const tr=document.createElement('tr');columns.forEach(c=>tableCell(tr,c,number(row[c])));out.append(tr);});
+  function setView(view,focus=false){state.view=view;render();save();if(focus)el('pr-tab-'+view).focus();}
+  root.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click',()=>setView(button.dataset.view)));
+  el('pr-trace').addEventListener('click',()=>{state.traced=true;state.mapping='calculation';state.fullCode=false;setView('code',true);});
+  el('pr-return-results').addEventListener('click',()=>setView('results',true));el('pr-review-record').addEventListener('click',()=>setView('details',true));
+  el('pr-example').addEventListener('change',e=>{state.outcome=e.target.value;state.view='results';state.variable='net';state.onlyDiff=state.outcome==='different';state.traced=false;el('pr-output-data').open=!supplied();render();save();});
+  el('pr-variable').addEventListener('change',e=>{state.variable=e.target.value;render();save();});el('pr-only-diff').addEventListener('change',e=>{state.onlyDiff=e.target.checked;render();save();});
+  el('pr-show-matches').addEventListener('click',()=>{state.onlyDiff=false;render();save();el('pr-only-diff').focus();});
+  el('pr-mapping').addEventListener('change',e=>{state.mapping=e.target.value;render();save();});el('pr-full-code').addEventListener('change',e=>{state.fullCode=e.target.checked;render();save();});
+  el('pr-add-sas').addEventListener('click',()=>{state.outcome='different';state.onlyDiff=true;state.variable='net';el('pr-output-data').open=false;render();save();el('pr-variable').focus();});
+  el('pr-width').addEventListener('change',e=>{state.width=Number(e.target.value);render();save();});el('pr-text').addEventListener('change',e=>{state.text=Number(e.target.value);render();save();});
+  function layout(){el('pr-layout-note').textContent=el('pr-viewport').getBoundingClientRect().width<=780?'Small: code panes stack and comparison rows reflow. Text keeps its size.':'Wide: source and generated code sit side by side.';}
+  new ResizeObserver(layout).observe(el('pr-viewport'));window.addEventListener('openai:set_globals',e=>{restore(e.detail?.globals?.widgetState?.modelContent);render();layout();});
+  render();if(!supplied())el('pr-output-data').open=true;layout();
+  if(globalThis.Tweak){const tweaks=new Tweak({container:el('pr-app'),onChange:()=>{render();save();}});tweaks.addSlider(state,'text',{label:'Reading text',min:16,max:20,step:2,unit:'px'});}
+})();
+</script>

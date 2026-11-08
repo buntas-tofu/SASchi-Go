@@ -1,0 +1,239 @@
+<!-- Proposed analyst desktop UX for principal review. All run, input and result evidence is synthetic. The Python text is the emitter output already used in the post-run mockup. Input-to-result trace, per-value comparison and SAS evidence inventory are proposed UI behavior, not implemented native SAS validation. -->
+<div id="saschi-difference" aria-label="SASchi-Go review a difference design">
+  <div class="preview-tools"><span>Future workflow preview · synthetic Run 001</span><label for="df-width">Window</label><select id="df-width"><option value="1024">Wide</option><option value="640">Small</option><option value="360">Narrow</option></select><label for="df-text">Text</label><select id="df-text"><option value="16">Comfortable</option><option value="18">Larger</option><option value="20">Largest</option></select></div>
+  <div class="window-size" id="df-viewport">
+    <section class="app" id="df-app" aria-label="SASchi-Go difference review">
+      <header class="chrome"><div class="brand"><span class="brand-symbol">S</span>SASchi-Go</div><span class="local"><i data-lucide="hard-drive" aria-hidden="true"></i>Local workspace</span></header>
+      <div class="intro"><div><span class="eyebrow">RUN 001 · net_sales.sas · PYTHON</span><h1 id="df-title">Review a difference</h1><p>Output: <code>net_sales</code><span class="dot">·</span>Observation 3<span class="dot">·</span><code>net</code></p></div><button class="text-button" id="df-return"><i data-lucide="arrow-left" aria-hidden="true"></i>Return to results</button></div>
+      <section class="outcome" aria-label="Selected result difference"><div class="outcome-heading"><span class="badge differed">≠ Differed</span><span class="quiet">1 of 24 values differs</span></div><div class="value-strip"><div><span>Supplied SAS result</span><strong>950</strong></div><div><span>Converted result</span><strong>960</strong></div><div><span>Difference</span><strong>+10</strong><small>Converted − SAS</small></div></div><p>Difference confirmed. <strong>Cause not established.</strong></p><p class="alignment">Compared by observation position. <code>order_id = 3</code> appears in both rows; it was not used to realign them.</p></section>
+      <nav class="review-nav" id="df-nav" aria-label="Difference review sections"><button id="df-tab-inputs" data-view="inputs" aria-pressed="true">Inputs &amp; code</button><button id="df-tab-method" data-view="method" aria-pressed="false">Comparison method</button><button id="df-tab-findings" data-view="findings" aria-pressed="false">Findings &amp; next steps</button></nav>
+      <main class="content">
+        <section id="df-inputs" aria-label="Relevant inputs and code">
+          <div class="section-heading"><div><h2>Inputs behind the converted value</h2><p>Connected inputs for this run · <code>order_id = 3</code></p></div><span class="quiet">Original files unchanged</span></div>
+          <div class="input-pair"><section class="input-file"><span class="field-label">orders.sas7bdat</span><div><code>gross</code><strong>1,000</strong></div><p>Input observation 3 · order_id 3</p></section><section class="input-file"><span class="field-label">returns.sas7bdat</span><div><code>refunded</code><strong>40</strong></div><p>Input observation 3 · order_id 3</p></section></div>
+          <div class="calculation"><span>Recalculated from these inputs</span><strong>1,000 − 40 = 960</strong><p>This accounts for the converted value. The inputs used by the earlier SAS run are not confirmed.</p></div>
+          <details class="context" id="df-output-context"><summary>See both output rows <span class="quiet">3 matching values; net differs</span></summary><p>These are output values. They do not establish which inputs or program produced the SAS file.</p><div class="table-scroll"><table><caption>Observation 3 in both output datasets</caption><thead><tr><th scope="col">Variable</th><th scope="col">SAS result</th><th scope="col">Converted</th><th scope="col">Status</th></tr></thead><tbody><tr><th scope="row">order_id</th><td>3</td><td>3</td><td class="good">Matched</td></tr><tr><th scope="row">gross</th><td>1,000</td><td>1,000</td><td class="good">Matched</td></tr><tr><th scope="row">refunded</th><td>40</td><td>40</td><td class="good">Matched</td></tr><tr class="different-row"><th scope="row">net</th><td>950</td><td>960</td><td class="warn">Differed</td></tr></tbody></table></div><p>The supplied SAS row contains 1,000 and 40, but its net value is 950. That does not follow the displayed subtraction; the reason remains unknown.</p></details>
+          <div class="section-heading code-heading"><div><h2>Relevant code</h2><p>The highlighted statements describe the same selected operation.</p></div></div>
+          <div class="code-controls"><label for="df-mapping">Operation<select id="df-mapping"><option value="calculation">net calculation · SAS line 4</option><option value="merge">MERGE inputs · SAS lines 2–3</option></select></label><label class="check-label"><input type="checkbox" id="df-full">Show full Python file</label></div>
+          <div class="code-pair"><section class="code-pane"><div class="pane-heading"><strong>SAS source</strong><span>net_sales.sas · this run</span></div><pre><code id="df-sas-code"></code></pre></section><section class="code-pane"><div class="pane-heading"><strong>Generated Python</strong><span id="df-python-caption">Excerpt · lines 18–26</span></div><pre><code id="df-python-code"></code></pre></section></div>
+          <p class="code-note" id="df-code-note">Excerpt indentation is compacted for reading. Line numbers match the generated file.</p>
+          <details class="context"><summary>Why does the Python look like this?</summary><p>The emitter stores the SAS operations in a Python execution plan and calls the SASchi-Go runtime. The assignment retains SAS source line 4. This mapping helps locate the calculation; it does not prove agreement with the earlier SAS run.</p></details>
+          <div class="section-action"><span>The displayed calculation explains 960. It does not explain the origin of 950.</span><button class="primary" id="df-see-findings">Review what still needs checking<i data-lucide="arrow-right" aria-hidden="true"></i></button></div>
+        </section>
+        <section id="df-method" hidden aria-label="How this comparison was made">
+          <div class="section-heading"><div><h2>How this comparison was made</h2><p>Policy recorded for Run 001 · comparison attempt 1</p></div><span class="quiet">Read only</span></div>
+          <dl class="method-list"><div><dt>Datasets</dt><dd><strong>SAS:</strong> SAS results / net_sales.sas7bdat<br><strong>Converted:</strong> Run 001 / net_sales.parquet<br><small>6 observations and 4 numeric variables in each dataset.</small></dd></div><div><dt>Row alignment</dt><dd>Observation 1 with observation 1, continuing in file order. No sorting or matching by key.<small>Both datasets have order_id values 1 through 6 in the same order.</small></dd></div><div><dt>Numeric values</dt><dd>Exact stored values. No tolerance was applied.<small>950 and 960 differ by 10 before display formatting.</small></dd></div><div><dt>Display precision</dt><dd>Formatting does not change the comparison.<small>Thousands separators are for readability. This example has whole-number values.</small></dd></div><div><dt>Missing values</dt><dd>None occur in this example.<small>Missing-value behavior, including SAS special missing values, is not exercised by this comparison.</small></dd></div><div><dt>Variables and metadata</dt><dd>Names, numeric types, variable order and stored metadata match.<small>No labels or formats are assigned in either sample; their preservation is not demonstrated here.</small></dd></div><div><dt>Scope</dt><dd>net_sales only. 23 of 24 values matched; 1 differed.<small>The SAS log was not supplied. The program, inputs and settings behind the SAS result remain unconfirmed.</small></dd></div></dl>
+          <details class="context" id="df-alignment"><summary>Inspect observation alignment</summary><p>order_id is shown for context. The comparator pairs rows by position.</p><div class="table-scroll"><table><caption>Order of observations in the two result files</caption><thead><tr><th scope="col">Observation</th><th scope="col">SAS order_id</th><th scope="col">Converted order_id</th></tr></thead><tbody><tr><th scope="row">1</th><td>1</td><td>1</td></tr><tr><th scope="row">2</th><td>2</td><td>2</td></tr><tr class="mapped-row"><th scope="row">3 · selected</th><td>3</td><td>3</td></tr><tr><th scope="row">4</th><td>4</td><td>4</td></tr><tr><th scope="row">5</th><td>5</td><td>5</td></tr><tr><th scope="row">6</th><td>6</td><td>6</td></tr></tbody></table></div></details>
+          <details class="context"><summary>Files and processing layers</summary><dl class="evidence-list"><div><dt>Program and inputs</dt><dd>net_sales.sas<br>orders.sas7bdat<br>returns.sas7bdat</dd></div><div><dt>Target language</dt><dd>Python</dd></div><div><dt>Working data</dt><dd>Parquet with accompanying SAS metadata</dd></div><div><dt>Local query layer</dt><dd>DuckDB</dd></div></dl><p>Parquet and DuckDB are shown as the planned analyst workflow.</p></details>
+          <div class="section-action"><span>This view leaves the recorded comparison policy unchanged.</span><button class="secondary" id="df-method-findings">Review findings<i data-lucide="arrow-right" aria-hidden="true"></i></button></div>
+        </section>
+        <section id="df-findings" hidden aria-label="What is known and what needs checking">
+          <div class="section-heading"><div><h2>What we know, and what remains open</h2><p>Reviewing the evidence does not change the comparison outcome.</p></div></div>
+          <div class="findings-pair"><section class="findings-known"><div class="findings-title"><i data-lucide="circle-check" aria-hidden="true"></i><h3>Known from this comparison</h3></div><ul><li>Observation 3 contains <code>order_id = 3</code> in both results.</li><li><code>net</code> is 950 in the supplied SAS output and 960 in the converted output.</li><li>The other three values in that row match, including gross 1,000 and refunded 40.</li><li>The connected inputs and displayed subtraction account for 960.</li></ul><p class="scope-note">These findings describe the supplied files and this run.</p></section><section class="findings-open"><div class="findings-title"><i data-lucide="circle-help" aria-hidden="true"></i><h3>Still needs checking</h3></div><ul><li>Whether SAS used the same program version.</li><li>Whether SAS used the same input files and settings.</li><li>Whether the SAS log or earlier processing explains 950.</li><li>Whether the supplied SAS output was changed after that run.</li></ul><p class="scope-note">No cause has been confirmed.</p></section></div>
+          <div class="next-check"><span class="eyebrow">SUGGESTED NEXT STEP</span><h3>Confirm the origin of the SAS result</h3><p>Locate the program, input versions and log from the SAS run that created this file. Compare those with this saved run before deciding what needs correcting.</p><button class="primary" id="df-evidence-button" aria-expanded="false" aria-controls="df-evidence">Review available SAS evidence<i data-lucide="arrow-right" aria-hidden="true"></i></button></div>
+          <section class="evidence" id="df-evidence" hidden aria-labelledby="df-evidence-title"><div class="section-heading"><h3 id="df-evidence-title">Evidence attached to this comparison</h3><span class="quiet">Sample inventory</span></div><dl class="evidence-list"><div><dt>SAS output dataset</dt><dd><span class="good">Supplied</span>net_sales.sas7bdat. Values are available for comparison; its originating run is unconfirmed.</dd></div><div><dt>SAS program used</dt><dd><span class="muted">Not supplied</span>The local net_sales.sas is available. An exact copy from the earlier SAS run has not been attached.</dd></div><div><dt>SAS input versions and settings</dt><dd><span class="muted">Not supplied</span>The conversion input connections are retained. Their identity with the earlier SAS inputs has not been established.</dd></div><div><dt>SAS log</dt><dd><span class="muted">Not supplied</span>Native SAS execution and log review have not been performed.</dd></div></dl><p>Filenames alone do not confirm that two runs used the same files.</p></section>
+          <div class="uncertain"><h3>What we cannot conclude yet</h3><p>This difference does not, on its own, identify a conversion defect or establish that either result is correct for the intended analysis.</p></div>
+          <div class="section-action"><span>Your program, file connections, output and comparison record remain available.</span><button class="secondary" id="df-findings-code">Return to inputs &amp; code<i data-lucide="arrow-right" aria-hidden="true"></i></button></div>
+        </section>
+        <section id="df-results" hidden aria-label="Results comparison overview">
+          <div class="section-heading"><div><h2>Compare with SAS results</h2><p>Run 001 · net_sales · 6 observations · 4 variables</p></div><span class="quiet">Differences only</span></div>
+          <div class="result-summary"><span><strong class="good">Matched</strong>23 values</span><span><strong class="warn">Differed</strong>1 value</span><span><strong>Not checked</strong>SAS log and result origin</span></div>
+          <div class="selected-result"><div><h3>Observation 3 · net</h3><p>order_id = 3 · SAS 950 · converted 960 · difference +10</p></div><button class="primary" id="df-reopen">Review this difference<i data-lucide="arrow-right" aria-hidden="true"></i></button></div><p class="code-note">The selected difference and review position are retained.</p>
+        </section>
+      </main>
+      <footer class="footer"><span>Run 001 preserved · comparison outcome: <strong>Differed</strong></span><span>Review does not edit source data or results.</span></footer>
+    </section>
+  </div>
+  <p class="preview-note" id="df-layout-note">Wide: input and code pairs sit side by side.</p>
+  <p class="preview-note">Design proposal for your review. Inputs, outputs and evidence states are synthetic; no real SAS files were processed. Detailed tracing, comparison views and the Parquet/DuckDB workflow are proposed functionality. The Python excerpt comes from the existing emitter example.</p>
+</div>
+<style>
+#saschi-difference {--df-bg:light-dark(#fafbf9,#171c1c);--df-panel:light-dark(#f0f3f0,#202726);--df-paper:light-dark(#fff,#1b2221);--df-text:light-dark(#25332f,#e3ebe6);--df-muted:light-dark(#56645e,#a9bbb1);--df-border:light-dark(#dbe2dc,#3b4841);--df-accent:light-dark(#265f50,#a3d5bf);--df-accent-fill:light-dark(#e7f1eb,#2b4438);--df-action:light-dark(#285b4d,#b4d8c7);--df-action-text:light-dark(#fff,#193a2c);--df-warn:light-dark(#795719,#edce8d);--df-warn-bg:light-dark(#fbf2dc,#3f3521);--df-map:light-dark(#eaf1fa,#26374b);--df-type:16px;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--df-text);width:100%;}
+#saschi-difference * {box-sizing:border-box;}
+#saschi-difference [hidden] {display:none!important;}
+#saschi-difference h1,#saschi-difference h2,#saschi-difference h3,#saschi-difference p,#saschi-difference dl,#saschi-difference dd {margin:0;}
+#saschi-difference h1 {font-size:1.6em;line-height:1.25;font-weight:600;letter-spacing:-.5px;}
+#saschi-difference h2 {font-size:1.08em;line-height:1.4;font-weight:600;}
+#saschi-difference h3 {font-size:1em;line-height:1.4;font-weight:500;}
+#saschi-difference button,#saschi-difference select,#saschi-difference input {font:inherit;}
+#saschi-difference svg {width:18px;height:18px;flex-shrink:0;vertical-align:middle;}
+#saschi-difference code {font-family:ui-monospace,"DejaVu Sans Mono",Consolas,monospace;font-size:.94em;color:inherit;background:transparent;padding:0;overflow-wrap:anywhere;}
+#saschi-difference .preview-tools {display:flex;align-items:center;flex-wrap:wrap;gap:8px 10px;padding-right:80px;margin-bottom:14px;font-size:14px;}
+#saschi-difference .preview-tools>span {flex-basis:100%;font-weight:500;}
+#saschi-difference select {padding:7px 9px;border:1px solid var(--df-border);border-radius:6px;background:var(--df-paper);color:var(--df-text);max-width:100%;}
+#saschi-difference .window-size {max-width:1024px;margin-inline:auto;container-type:inline-size;container-name:difference;}
+#saschi-difference .app {background:var(--df-bg);border:1px solid var(--df-border);border-radius:12px;overflow:hidden;font-size:var(--df-type);line-height:1.5;}
+#saschi-difference .chrome {display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:14px 22px;border-bottom:1px solid var(--df-border);background:var(--df-paper);}
+#saschi-difference .brand {display:flex;align-items:center;gap:10px;font-weight:600;letter-spacing:-.3px;}
+#saschi-difference .brand-symbol {width:28px;height:28px;display:grid;place-items:center;border-radius:8px;background:var(--df-action);color:var(--df-action-text);font-size:16px;}
+#saschi-difference .local {font-size:.875em;color:var(--df-muted);display:flex;align-items:center;gap:7px;}
+#saschi-difference .intro {padding:26px 28px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:18px;}
+#saschi-difference .eyebrow {display:block;font-size:.75em;letter-spacing:.04em;color:var(--df-muted);margin-bottom:7px;overflow-wrap:anywhere;}
+#saschi-difference .intro p {font-size:.9em;color:var(--df-muted);margin-top:9px;}
+#saschi-difference .dot {padding:0 8px;}
+#saschi-difference .primary,#saschi-difference .secondary {display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--df-action);border-radius:7px;padding:10px 14px;color:var(--df-action-text);background:var(--df-action);font-weight:500;font-size:.9em;text-align:center;}
+#saschi-difference .secondary {border-color:var(--df-border);background:var(--df-paper);color:var(--df-text);}
+#saschi-difference .text-button {display:inline-flex;align-items:center;gap:7px;border:0;background:transparent;color:var(--df-accent);padding:5px 0;font-size:.875em;font-weight:500;text-align:left;}
+#saschi-difference .outcome {margin:0 28px 24px;background:var(--df-warn-bg);border-radius:8px;padding:18px 22px;}
+#saschi-difference .outcome-heading {display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+#saschi-difference .badge {font-size:.85em;font-weight:500;}
+#saschi-difference .differed,#saschi-difference .warn {color:var(--df-warn);}
+#saschi-difference .good {color:var(--df-accent);}
+#saschi-difference .muted,#saschi-difference .quiet {color:var(--df-muted);}
+#saschi-difference .quiet {font-size:.8em;}
+#saschi-difference .value-strip {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin:16px 0 13px;}
+#saschi-difference .value-strip>div {display:flex;flex-direction:column;align-items:flex-start;}
+#saschi-difference .value-strip span {font-size:.85em;color:var(--df-muted);}
+#saschi-difference .value-strip strong {font-size:1.85em;font-weight:500;font-variant-numeric:tabular-nums;}
+#saschi-difference .value-strip small {font-size:.75em;color:var(--df-muted);}
+#saschi-difference .outcome>p {font-size:.9em;}
+#saschi-difference .outcome>p>strong {font-weight:500;}
+#saschi-difference .outcome .alignment {font-size:.8em;color:var(--df-muted);margin-top:8px;}
+#saschi-difference .review-nav {display:flex;flex-wrap:wrap;gap:3px;padding-inline:28px;border-bottom:1px solid var(--df-border);}
+#saschi-difference .review-nav button {border:0;border-bottom:3px solid transparent;padding:11px 14px;background:transparent;color:var(--df-muted);font-size:.9em;font-weight:500;text-align:left;}
+#saschi-difference .review-nav button[aria-pressed="true"] {color:var(--df-accent);border-color:var(--df-accent);}
+#saschi-difference .content {padding:24px 28px 28px;}
+#saschi-difference .content>section {min-width:0;}
+#saschi-difference .section-heading {display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:17px;}
+#saschi-difference .section-heading p {font-size:.875em;color:var(--df-muted);margin-top:5px;}
+#saschi-difference .input-pair {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;}
+#saschi-difference .input-file {background:var(--df-panel);border-radius:7px;padding:15px 18px;min-width:0;}
+#saschi-difference .field-label {display:block;font-size:.8em;color:var(--df-muted);overflow-wrap:anywhere;}
+#saschi-difference .input-file>div {display:flex;align-items:baseline;justify-content:space-between;gap:14px;margin-top:8px;}
+#saschi-difference .input-file strong {font-size:1.3em;font-weight:500;font-variant-numeric:tabular-nums;}
+#saschi-difference .input-file p {font-size:.8em;color:var(--df-muted);margin-top:6px;}
+#saschi-difference .calculation {display:flex;align-items:baseline;gap:6px 16px;flex-wrap:wrap;padding:16px 0 0;}
+#saschi-difference .calculation>span {font-size:.9em;}
+#saschi-difference .calculation>strong {font-size:1.15em;font-weight:500;font-variant-numeric:tabular-nums;}
+#saschi-difference .calculation p {flex-basis:100%;font-size:.875em;color:var(--df-muted);}
+#saschi-difference .context {border-top:1px solid var(--df-border);margin-top:20px;}
+#saschi-difference summary {font-size:.9em;padding:13px 0;}
+#saschi-difference summary .quiet {margin-left:8px;}
+#saschi-difference .context>p {font-size:.875em;color:var(--df-muted);margin:0 0 12px;}
+#saschi-difference .context>p:last-child {margin:12px 0 0;}
+#saschi-difference .table-scroll {overflow-x:auto;}
+#saschi-difference table {width:100%;min-width:440px;border-collapse:collapse;font-size:.94em;font-variant-numeric:tabular-nums;}
+#saschi-difference caption {text-align:left;font-size:.85em;color:var(--df-muted);padding-bottom:10px;}
+#saschi-difference th,#saschi-difference td {padding:11px 12px;text-align:right;border-bottom:1px solid var(--df-border);}
+#saschi-difference th {font-weight:500;}
+#saschi-difference thead th {font-size:.85em;color:var(--df-muted);}
+#saschi-difference th:first-child {text-align:left;}
+#saschi-difference .different-row {background:var(--df-warn-bg);}
+#saschi-difference .mapped-row {background:var(--df-map);}
+#saschi-difference .code-heading {margin-top:25px;}
+#saschi-difference .code-controls {display:flex;align-items:center;flex-wrap:wrap;gap:14px 22px;margin-bottom:15px;font-size:.875em;}
+#saschi-difference .code-controls>label {display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+#saschi-difference .check-label input {width:17px;height:17px;accent-color:var(--df-action);}
+#saschi-difference .code-pair {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:16px;align-items:start;}
+#saschi-difference .code-pane {min-width:0;border:1px solid var(--df-border);border-radius:7px;background:var(--df-paper);overflow:hidden;}
+#saschi-difference .pane-heading {display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:12px 14px;border-bottom:1px solid var(--df-border);background:var(--df-panel);}
+#saschi-difference .pane-heading strong {font-size:.9em;font-weight:500;}
+#saschi-difference .pane-heading span {font-size:.75em;color:var(--df-muted);}
+#saschi-difference pre {margin:0;padding:12px 0;font:var(--df-type)/1.75 ui-monospace,"DejaVu Sans Mono",Consolas,monospace;}
+#saschi-difference pre code {font:inherit;}
+#saschi-difference .code-line {display:grid;grid-template-columns:34px minmax(0,1fr);padding-right:10px;}
+#saschi-difference .code-line>b {font-size:.75em;font-weight:400;color:var(--df-muted);text-align:center;user-select:none;}
+#saschi-difference .code-line>span {white-space:pre-wrap;overflow-wrap:anywhere;}
+#saschi-difference .code-line.mapped {background:var(--df-map);}
+#saschi-difference .code-note {font-size:.8em;color:var(--df-muted);margin-top:12px;}
+#saschi-difference .section-action {display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;border-top:1px solid var(--df-border);padding-top:19px;margin-top:24px;}
+#saschi-difference .section-action>span {font-size:.875em;color:var(--df-muted);flex:1 1 260px;}
+#saschi-difference .method-list>div {display:grid;grid-template-columns:170px minmax(0,1fr);gap:18px;padding:17px 0;border-bottom:1px solid var(--df-border);font-size:.94em;}
+#saschi-difference .method-list dt {font-weight:500;}
+#saschi-difference .method-list dd {overflow-wrap:anywhere;}
+#saschi-difference .method-list dd strong {font-weight:500;}
+#saschi-difference .method-list small {display:block;color:var(--df-muted);font-size:.9em;margin-top:7px;}
+#saschi-difference .findings-pair {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;}
+#saschi-difference .findings-title {display:flex;align-items:flex-start;gap:9px;}
+#saschi-difference .findings-title>svg {margin-top:3px;}
+#saschi-difference .findings-known .findings-title {color:var(--df-accent);}
+#saschi-difference ul {padding-left:22px;margin:14px 0 0;font-size:.94em;}
+#saschi-difference li {padding-left:3px;margin-bottom:12px;}
+#saschi-difference .scope-note {font-size:.8em;color:var(--df-muted);}
+#saschi-difference .next-check {background:var(--df-panel);border-radius:8px;padding:20px;margin-top:25px;}
+#saschi-difference .next-check>p {font-size:.94em;color:var(--df-muted);margin-top:9px;}
+#saschi-difference .next-check>button {margin-top:16px;}
+#saschi-difference .evidence {margin-top:22px;border:1px solid var(--df-border);border-radius:8px;padding:18px;background:var(--df-paper);}
+#saschi-difference .evidence-list>div {display:grid;grid-template-columns:185px minmax(0,1fr);gap:16px;border-bottom:1px solid var(--df-border);padding:14px 0;}
+#saschi-difference .evidence-list dt {font-size:.875em;font-weight:500;}
+#saschi-difference .evidence-list dd {font-size:.9em;overflow-wrap:anywhere;}
+#saschi-difference .evidence-list dd>span {display:block;font-size:.9em;font-weight:500;margin-bottom:5px;}
+#saschi-difference .evidence>p {font-size:.85em;color:var(--df-muted);margin-top:14px;}
+#saschi-difference .uncertain {margin-top:24px;}
+#saschi-difference .uncertain p {font-size:.94em;color:var(--df-muted);margin-top:8px;}
+#saschi-difference .result-summary {display:flex;flex-wrap:wrap;gap:22px 40px;border-bottom:1px solid var(--df-border);padding-bottom:20px;margin-bottom:22px;}
+#saschi-difference .result-summary>span {font-size:.94em;}
+#saschi-difference .result-summary strong {display:block;font-size:.85em;font-weight:500;margin-bottom:5px;}
+#saschi-difference .selected-result {display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;background:var(--df-panel);border-radius:7px;padding:19px;}
+#saschi-difference .selected-result p {font-size:.875em;color:var(--df-muted);margin-top:7px;}
+#saschi-difference .footer {display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:18px 28px;border-top:1px solid var(--df-border);background:var(--df-paper);font-size:.8em;color:var(--df-muted);}
+#saschi-difference .footer strong {font-weight:500;color:var(--df-warn);}
+#saschi-difference .preview-note {font-size:13px;color:var(--df-muted);margin-top:10px;}
+@container difference (max-width:780px){#saschi-difference .intro{padding:24px 22px;}#saschi-difference .outcome{margin-inline:22px;}#saschi-difference .review-nav{padding-inline:15px;}#saschi-difference .content{padding:22px;}#saschi-difference .code-pair,#saschi-difference .findings-pair{grid-template-columns:minmax(0,1fr);}#saschi-difference .findings-open{padding-top:18px;border-top:1px solid var(--df-border);}#saschi-difference .footer{padding:18px 22px;}}
+@container difference (max-width:520px){#saschi-difference .input-pair{grid-template-columns:minmax(0,1fr);gap:12px;}#saschi-difference .method-list>div,#saschi-difference .evidence-list>div{grid-template-columns:minmax(0,1fr);gap:6px;}#saschi-difference .value-strip{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}#saschi-difference .value-strip>div:last-child{grid-column:1/-1;flex-direction:row;align-items:baseline;gap:10px;flex-wrap:wrap;}#saschi-difference .value-strip>div:last-child strong{font-size:1.4em;}#saschi-difference .value-strip span{font-size:.8em;}#saschi-difference .outcome{padding:16px;}#saschi-difference .review-nav button{padding:10px 9px;}#saschi-difference .next-check,#saschi-difference .evidence{padding:16px;}}
+@container difference (max-width:400px){#saschi-difference .chrome{padding:12px 16px;}#saschi-difference .local{font-size:.8em;}#saschi-difference .intro{padding:22px 16px;}#saschi-difference h1{font-size:1.4em;}#saschi-difference .outcome{margin-inline:16px;}#saschi-difference .content{padding:20px 16px;}#saschi-difference .footer{padding:16px;}}
+@media(pointer:coarse){#saschi-difference button,#saschi-difference select,#saschi-difference summary{min-height:44px;}}
+</style>
+<script>
+(() => {
+  const root=document.getElementById('saschi-difference'),el=id=>root.querySelector('#'+id);
+  const state={view:'inputs',overview:false,mapping:'calculation',full:false,evidence:false,width:1024,text:16};
+  const sasSource=['data net_sales;','  merge orders returns;','  by order_id;','  net = gross - refunded;','run;'];
+  const pythonSource=[
+    '# SASchi plan version 2, Python target.',
+    '# Scope: numeric DATA steps and typed character catalogs; bounded stateful events,',
+    '# OUTPUT, WHERE/IF, retained state, SET, numeric MERGE, ascending SORT.',
+    '# Evidence: repository fixtures; not a live-SAS comparison.',
+    '# SAS line 1: merge net_sales',
+    '# SAS line 2: read',
+    '# SAS line 4: assign',
+    'from saschi.runtime import run_plan',
+    '',
+    "_plan = {'steps': [{'kind': 'merge',",
+    "            'name': 'net_sales',",
+    "            'line': 1,",
+    "            'inputs': ['orders', 'returns'],",
+    "            'by': ['order_id'],",
+    "            'operations': [{'kind': 'read',",
+    "                            'line': 2,",
+    "                            'args': {'datasets': ['orders', 'returns']}},",
+    "                           {'kind': 'assign',",
+    "                            'line': 4,",
+    "                            'args': {'name': 'net',",
+    "                                     'value': {'kind': 'arithmetic',",
+    "                                               'left': {'kind': 'variable',",
+    "                                                        'value': 'gross'},",
+    "                                               'op': '-',",
+    "                                               'right': {'kind': 'variable',",
+    "                                                         'value': 'refunded'}}}}],",
+    "            'nodupkey': False,",
+    "            'where': None,",
+    "            'retained': {},",
+    "            'lengths': {},",
+    "            'display_names': {'net': 'net',",
+    "                              'gross': 'gross',",
+    "                              'refunded': 'refunded'}}],",
+    " 'tickets': [],",
+    " 'matched': [('merge', 'DS-002', 2)],",
+    " 'version': 2}",
+    "result = run_plan(_plan, globals().get('inputs', {}), allow_partial=False)",
+    "for _line in result['log']:",
+    '    print(_line)'
+  ];
+  function restore(data){if(data?.mock!=='saschi-review-difference')return;if(['inputs','method','findings'].includes(data.view))state.view=data.view;if(['calculation','merge'].includes(data.mapping))state.mapping=data.mapping;for(const key of ['overview','full','evidence'])if(typeof data[key]==='boolean')state[key]=data[key];if([1024,640,360].includes(data.width))state.width=data.width;if([16,18,20].includes(data.text))state.text=data.text;}
+  restore(window.openai?.widgetState?.modelContent);
+  function save(){window.openai?.setWidgetState?.({modelContent:{mock:'saschi-review-difference',...state},privateContent:null})?.catch(()=>{});}
+  function line(container,num,text,mapped){const item=document.createElement('span'),n=document.createElement('b'),copy=document.createElement('span');item.className='code-line'+(mapped?' mapped':'');n.textContent=num;n.setAttribute('aria-hidden','true');copy.textContent=text||' ';item.append(n,copy);container.append(item);}
+  function renderCode(){const calc=state.mapping==='calculation',range=calc?[18,26]:[10,17];el('df-sas-code').replaceChildren();sasSource.forEach((text,i)=>line(el('df-sas-code'),i+1,text,calc?i===3:i===1||i===2));const lines=pythonSource.map((text,i)=>({text,num:i+1})).filter(x=>state.full||(x.num>=range[0]&&x.num<=range[1]));const levels=[...new Set(lines.filter(x=>x.text.trim()).map(x=>x.text.match(/^ */)[0].length))].sort((a,b)=>a-b);el('df-python-code').replaceChildren();lines.forEach(({num,text})=>{if(!state.full&&text.trim())text=' '.repeat(levels.indexOf(text.match(/^ */)[0].length)*2)+text.trimStart();line(el('df-python-code'),num,text,num>=range[0]&&num<=range[1]);});el('df-python-caption').textContent=state.full?'Full emitted file · 39 lines':'Excerpt · lines '+range[0]+'–'+range[1];el('df-code-note').textContent=state.full?'Full emitted file. Wrapped lines retain their original line number; highlighted operations retain their SAS source line.':'Excerpt indentation is compacted for reading. Line numbers match the generated file.';}
+  function render(){root.style.setProperty('--df-type',state.text+'px');el('df-viewport').style.maxWidth=state.width+'px';el('df-width').value=state.width;el('df-text').value=state.text;el('df-mapping').value=state.mapping;el('df-full').checked=state.full;el('df-title').textContent=state.overview?'Results comparison':'Review a difference';el('df-nav').hidden=state.overview;el('df-return').hidden=state.overview;el('df-results').hidden=!state.overview;for(const view of ['inputs','method','findings']){el('df-'+view).hidden=state.overview||state.view!==view;el('df-tab-'+view).setAttribute('aria-pressed',state.view===view);}el('df-evidence').hidden=!state.evidence;el('df-evidence-button').setAttribute('aria-expanded',state.evidence);el('df-evidence-button').textContent=state.evidence?'Hide SAS evidence inventory':'Review available SAS evidence';renderCode();}
+  function setView(view,focus=false){state.view=view;state.overview=false;render();save();if(focus)el('df-tab-'+view).focus();}
+  root.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click',()=>setView(button.dataset.view)));
+  el('df-see-findings').addEventListener('click',()=>setView('findings',true));el('df-method-findings').addEventListener('click',()=>setView('findings',true));el('df-findings-code').addEventListener('click',()=>setView('inputs',true));
+  el('df-evidence-button').addEventListener('click',()=>{state.evidence=!state.evidence;render();save();});
+  el('df-return').addEventListener('click',()=>{state.overview=true;render();save();el('df-reopen').focus();});el('df-reopen').addEventListener('click',()=>{state.overview=false;render();save();el('df-tab-'+state.view).focus();});
+  el('df-mapping').addEventListener('change',e=>{state.mapping=e.target.value;render();save();});el('df-full').addEventListener('change',e=>{state.full=e.target.checked;render();save();});el('df-width').addEventListener('change',e=>{state.width=Number(e.target.value);render();save();});el('df-text').addEventListener('change',e=>{state.text=Number(e.target.value);render();save();});
+  function layout(){el('df-layout-note').textContent=el('df-viewport').getBoundingClientRect().width<=780?'Small: code and findings stack. Text keeps its size; tables scroll within their panels.':'Wide: input and code pairs sit side by side.';}
+  new ResizeObserver(layout).observe(el('df-viewport'));window.addEventListener('openai:set_globals',e=>{restore(e.detail?.globals?.widgetState?.modelContent);render();layout();});render();layout();
+  if(globalThis.Tweak){const tweaks=new Tweak({container:el('df-app'),onChange:()=>{render();save();}});tweaks.addSlider(state,'text',{label:'Reading text',min:16,max:20,step:2,unit:'px'});}
+})();
+</script>
