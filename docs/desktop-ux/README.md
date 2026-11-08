@@ -32,9 +32,10 @@ even when the linked SAS program or data files have moved or changed.
 The screens propose the detailed wording, layout, controls, progressive setup,
 input connections, recovery states and evidence presentation. Per-program target
 readiness, import and data-layer integration, persistent setup, comparison-only
-retry, detailed difference views, export mechanics and saved-run reopening remain implementation
-work wherever the mockups identify it. A successful simulation does not establish
-engine support or agreement with an actual SAS run.
+retry, detailed difference views, export mechanics, saved-run reopening and
+comparison between runs remain implementation work wherever the mockups identify
+it. A successful simulation does not establish engine support or agreement with
+an actual SAS run.
 
 ## Screen inventory
 
@@ -47,10 +48,10 @@ engine support or agreement with an actual SAS run.
 | [Recovery](mockups/saschi-recovery.html) | Preserve setup, explain a stopped run or unavailable comparison file, and review a separate retry. |
 | [Review a difference](mockups/saschi-review-difference.html) | Inspect a differing value, its calculation, comparison rules and supplied evidence. |
 | [Save and export](mockups/saschi-save-export.html) | Review destinations, export contents and evidence status before saving a separate copy. |
-
 | [Reopen a saved run](mockups/saschi-reopen-run.html) | Keep the saved review intact, reconnect moved files, select changed files for a separate setup, and preserve saved setup until changes are explicitly saved. |
+| [Compare saved runs](mockups/saschi-compare-runs.html) | Inspect program and input changes, distinguish output changes from SAS mismatches, and preserve original evidence across additional comparison attempts. |
 
-These eight screens are separate prototypes, not one connected application.
+These nine screens are separate prototypes, not one connected application.
 
 ## Viewing and preservation
 
