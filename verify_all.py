@@ -230,6 +230,9 @@ SUITES = [
     ("suite-postal-reference", "saschi.test_postal_reference"),
     ("suite-postal-function", "saschi.test_postal_function"),
     ("suite-desktop", "saschi.test_desktop"),
+    ("suite-data-files", "saschi.test_data_files"),
+    ("suite-workspace", "saschi.test_workspace"),
+    ("suite-desktop-service", "saschi.test_desktop_service"),
 ]
 
 

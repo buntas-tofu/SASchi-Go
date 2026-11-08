@@ -5,12 +5,15 @@ from pathlib import Path
 import subprocess
 import sys
 import tempfile
+import tomllib
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
+DESKTOP_REVISION = 'desktop2'
 
 
 def build(destination):
+    version = tomllib.loads((ROOT / 'pyproject.toml').read_text())['project']['version']
     destination = destination.resolve()
     destination.parent.mkdir(parents=True, exist_ok=True)
     if destination.exists():
@@ -37,7 +40,7 @@ def build(destination):
         (docs / 'README').write_bytes((ROOT / 'docs/DESKTOP.md').read_bytes())
         control = stage / 'DEBIAN/control'
         control.parent.mkdir()
-        control.write_text('Package: saschi-desktop\nVersion: 0.4.0+desktop1\nSection: science\nPriority: optional\nArchitecture: all\nMaintainer: SASchi-Go maintainers\nDepends: python3 (>= 3.11), python3-tk, xdg-utils\nDescription: Local SASchi-Go desktop workflow\n Native file dialogs, bounded local execution and saved job receipts.\n')
+        control.write_text('Package: saschi-desktop\nVersion: ' + version + '+' + DESKTOP_REVISION + '\nSection: science\nPriority: optional\nArchitecture: all\nMaintainer: SASchi-Go maintainers\nDepends: python3 (>= 3.11), python3-tk, python3-pandas, xdg-utils\nDescription: Local SASchi-Go desktop workflow\n Native file dialogs, bounded local execution and saved job receipts.\n')
         subprocess.run(['dpkg-deb', '--root-owner-group', '--build', str(stage), str(destination)], check=True)
     return destination
 
