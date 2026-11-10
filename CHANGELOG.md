@@ -3,6 +3,15 @@
 Status: development changes with original pins and Python/base-R evidence; no
 live SAS comparison. Branch synchronization is separate from a release.
 
+- Clear estate identity from the published surface: the token gate found
+  eighteen raw hits across thirteen pattern groups in tracked docs, module
+  docstrings, and the census generator's own prose; every leak line is
+  re-voiced to neutral wording and the generator stays in lockstep with its
+  generated report, so the published tree now scans clean. Add that gate to
+  this lane, byte-identical to the sister's, register it as a third Governance
+  job and a manifest tool, and allowlist the one adjudicated subject-matter row
+  (the R forecasting package name in the rulebook).
+
 - Tighten the new format source boundaries: LOW/HIGH must be closed outer
   endpoints; exclusions apply to literal endpoints. Add refusal controls for
   finite-domain reinterpretation while retaining frozen original expectations.

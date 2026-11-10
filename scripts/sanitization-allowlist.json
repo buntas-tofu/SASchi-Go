@@ -1,0 +1,8 @@
+[
+  {
+    "path": "^docs/sasconversionrulebook\\.json$",
+    "pattern": "\\bfable\\b",
+    "reason": "SUBJECT MATTER: the CRAN time-series forecasting package named as the R target for a rule, not the model-vendor string the public-lane ruling forbids (the token is not repeated in this prose by the gate's own doctrine)",
+    "ruling": "classification per the review doctrine (a token match is not a finding); operator ruling 2026-09-12 targeted vendor strings. The same collision is allowlisted with the same reason in SASchi-Roku."
+  }
+]
