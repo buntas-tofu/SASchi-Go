@@ -200,7 +200,7 @@ python3 tools/macro_census.py
 Regenerates `docs/macro_surface_census.csv` and
 `docs/macro_surface_census.md` from the licensed public testbed
 (point `--testbed` at your checkout of it). Deterministic: identical output on
-identical input. The estate bench under `testbed/local/` is never written
+identical input. The private bench under `testbed/local/` is never written
 to the shipped output; `--include-local` prints a private comparison to
 stdout only.
 

@@ -2,8 +2,8 @@
 
 Status: measurement of a private clone set, not a claim about
 upstream, not a license opinion. Counts macro feature tokens
-in 1,755 .sas files across 22 public repositories. The estate
-bench under testbed/local/ was compared privately and is not
+in 1,755 .sas files across 22 public repositories. A private
+bench under testbed/local/ was compared separately and is not
 reported here. Corrections land as new commits.
 
 ## Method
@@ -107,4 +107,4 @@ Four clones carry no license file at any depth and their
 upstream license must be verified before any reuse beyond
 token counting: eleanormurray_CausalSurvivalAnalysisWorkshop,
 friendly_SAS-macros, HHS-AHRQ_MEPS, PaulSchmidtGit_Heritability.
-The estate bench is private and stays out of this report.
+A private bench stays out of this report.

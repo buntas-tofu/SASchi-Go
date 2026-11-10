@@ -141,16 +141,18 @@ never means arbitrary SAS programs are equivalent.
 
 ## Repository peers
 
-The development host is wutai. At the start of this change, cloud and fahrenheit
-both held baseline commit 3a678ef4b50b09bf59c452de5a347ee044bab5cf.
+A change is qualified on more than one peer. Each peer records the baseline
+commit it started from, 3a678ef4b50b09bf59c452de5a347ee044bab5cf, so a reader
+can tell which state a receipt describes.
 
-- cloud: SSH alias `cloud`, working checkout at
-  `/home/the-pgh-cid/besaid/bunta/saschi-go`.
-- fahrenheit: configured remote at
-  `the_pgh_cid@fahrenheit.tail1571d6.ts.net:/spira/repos/saschi-go.git`.
+- the working peer: a local checkout, addressed by the SSH alias in that
+  operator's own configuration rather than by a published name.
+- the sync peer: a bare repository configured as a second remote, so the
+  public head and the private mirror can be compared by full commit ID.
 
-Sync a named development branch after the gates pass. A push to cloud must not
-replace its checked-out branch. Compare full branch commit IDs on each peer.
-Machine paths are configuration, not assumptions inside the execution plan.
-Runtime validation performed on one host does not establish runtime parity on
-another. Each execution receipt identifies the host that actually ran it.
+Sync a named development branch after the gates pass. A push to the working
+peer must not replace its checked-out branch. Compare full branch commit IDs
+on each peer. Machine paths are configuration, not assumptions inside the
+execution plan. Runtime validation performed on one host does not establish
+runtime parity on another. Each execution receipt identifies the host that
+actually ran it.

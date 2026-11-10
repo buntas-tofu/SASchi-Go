@@ -48,3 +48,14 @@ jobs:
               raise SystemExit(1)
           print("Manifest validates against the schema.")
           PY
+
+  sanitization:
+    name: Sanitization token gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: The tree carries no tokens beyond this instance's allowed identity
+        run: python3 scripts/check_sanitization.py buntas

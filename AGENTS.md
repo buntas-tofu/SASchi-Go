@@ -321,8 +321,12 @@ right.
   estate-derived or third-party material into the tree; changing the four
   core invariants without an issue first.
 - **CI**: two workflows, both on every push and pull request to main. The
-  governance workflow runs the invariant linter and validates
-  `agent-manifest.json` against `agent-manifest.schema.json`. The verification
+  governance workflow runs the invariant linter, validates
+  `agent-manifest.json` against `agent-manifest.schema.json`, and runs the
+  sanitization token gate (`scripts/check_sanitization.py buntas`), which
+  fails on any identity token outside this instance's allowed set unless the
+  hit is an adjudicated subject-matter row in
+  `scripts/sanitization-allowlist.json`. The verification
   workflow runs `python verify_all.py`: every fixture gate, the capability
   manifest gate, plus the parser, router, and emitter suites, so ALL VERIFIED
   covers the translator and not only the fixture surface.
@@ -342,8 +346,8 @@ right.
 ### Sibling lane: the professional cut
 
 SASchi-Go ships in two public lanes. This repository is the persona lane. The
-second lane is `the-pgh-cid/sas-campaign`, the professional lane, cut from a
-named commit here. The two lanes are not forks, and they never merge.
+second lane is the professional lane, cut from a named commit here. The two
+lanes are not forks, and they never merge.
 
 - **Principal and naming**: this lane is the `buntas-tofu` principal with
   package `saschi`; the professional lane is the Matthew Haubach principal

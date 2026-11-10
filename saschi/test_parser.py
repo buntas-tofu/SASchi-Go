@@ -1,9 +1,9 @@
 """Tests for saschi.parser: the fence-robust statement splitter.
 
-The estate C-005 lesson is the load-bearing requirement: fence robustness
-first. Comments, string literals, and macro quotes must never break the
-splitter's boundaries. A statement containing a comment or a string with
-semicolons or /* markers must survive intact.
+Fence robustness is the load-bearing requirement: comments, string literals,
+and macro quotes must never break the splitter's boundaries. A statement
+containing a comment or a string with semicolons or /* markers must survive
+intact.
 
 Runs against the 56-task Roku corpus where noted. Pure stdlib unittest.
 

@@ -45,6 +45,10 @@
     {
       "tool_id": "verify_all",
       "description": "Runs every gold-pair fixture gate and emits a checksummed receipt under telemetry/."
+    },
+    {
+      "tool_id": "check-sanitization",
+      "description": "Sanitization token gate for this instance's allowed identity, with declared exemptions and an adjudicated allowlist (scripts/check_sanitization.py buntas)."
     }
   ],
   "provenance": {
