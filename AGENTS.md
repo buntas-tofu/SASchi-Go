@@ -331,8 +331,9 @@ right.
   manifest gate, plus the parser, router, and emitter suites, so ALL VERIFIED
   covers the translator and not only the fixture surface.
 - **File conventions**: one R twin plus one `verify_*.py` gate per construct
-  in `examples/`; `sas_semantics.py` and `kb01/sas_semantics_reference.txt`
-  stay in lockstep; receipts live in `telemetry/` (gitignored).
+  in `examples/`; `sas_semantics.py` is the single source of the semantics
+  reference, and the readable plain-text twin lives in the reference home
+  rather than in this tree; receipts live in `telemetry/` (gitignored).
 - **Workflow**: the gates run before any push, and ALL VERIFIED is the bar;
   a change that touches the semantics reference, the rulebook, or a gate
   lands as one commit with its receipt.

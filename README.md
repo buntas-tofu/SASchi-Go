@@ -259,8 +259,6 @@ fixed expected output and base-R evidence. Special missings retain their tags.
 - [saschi/showcase.py](saschi/showcase.py) : the showcase generator. `saschi showcase` renders a
   job as a self-contained single-file HTML document with the checksummed
   receipt embedded.
-- [kb01/sas_semantics_reference.txt](kb01/sas_semantics_reference.txt) : the semantics reference as plain
-  text, for humans and for diffs.
 - [manifest.py](manifest.py) : pin a SAS corpus with content hashes and provenance.
 - [synth.py](synth.py) : program-level synthesis across characterized construct
   families, seeded and deterministic. Runs cross-language and reference

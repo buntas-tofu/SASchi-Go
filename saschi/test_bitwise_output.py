@@ -271,9 +271,8 @@ class BitwiseOutputTests(unittest.TestCase):
     def test_atomic_invalid_width_and_late_invalid_call(self):
         self.assertEqual(atomic_cli(), 2)
 
-    def test_old_helper_and_mirrored_reference_remain_exact(self):
+    def test_old_helper_remains_exact(self):
         raw = (ROOT/'sas_semantics.py').read_bytes()
-        self.assertEqual(raw, (ROOT/'kb01/sas_semantics_reference.txt').read_bytes())
         self.assertEqual(hashlib.sha256(raw).hexdigest(), '5b1fc6fe484fac23fd9e8df5e43b6eff8365d73555151f2fff4e19232cc196ef')
         nodes = [n for n in ast.walk(ast.parse(raw)) if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))]
         self.assertEqual(len(nodes), 151); self.assertEqual(len({n.name for n in nodes}), 149)

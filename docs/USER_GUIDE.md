@@ -25,7 +25,8 @@ evidence; the gate suite is the proof; nothing is verified by assertion.
 ## Repository layout
 
 - `sas_semantics.py` : the reference implementations of SAS-quirk
-  functions. This is the law the verifiers check against.
+  functions. This is the law the verifiers check against; the readable
+  plain-text twin lives in the reference home, not in this tree.
 - `examples/` : the gold pairs. One SAS construct family per fixture:
   a Python verifier (`verify_*.py`), an R twin (`*.R`), and in most cases
   fixture data embedded in the verifier.
@@ -41,9 +42,6 @@ evidence; the gate suite is the proof; nothing is verified by assertion.
   licensed public testbed, at what density, and under which licenses.
 - `docs/rosetta_wiki_coverage.md` : the 2018 worked-example census mapped
   to current coverage: which rule or fixture gate carries each example.
-- `kb01/sas_semantics_reference.txt` : the semantics reference as plain
-  text, for humans and for diffs. It stays in lockstep with
-  `sas_semantics.py`.
 - `manifest.py` : pin a SAS corpus with content hashes and provenance.
 - `synth.py` : program-level synthesis across characterized construct
   families, seeded and deterministic. Runs cross-language and reference
@@ -288,18 +286,19 @@ ticket rather than generated code:
 
 ## Verifying a new construct family
 
-A new family lands as the seven-file change set, and every gate must pass
+A new family lands as the six-file change set, and every gate must pass
 before it is real:
 
 1. `sas_semantics.py` : the reference function(s), with a section comment
-   naming the SAS surface and the landmine.
-2. `kb01/sas_semantics_reference.txt` : the same in plain text, same pass.
-3. `examples/<fam>.R` : the R twin.
-4. `examples/verify_<fam>.py` : the gate. Reference pins first, then R
+   naming the SAS surface and the landmine. The plain-text mirror in the
+   reference home is derived from this file at sync time, so no second copy
+   moves here.
+2. `examples/<fam>.R` : the R twin.
+3. `examples/verify_<fam>.py` : the gate. Reference pins first, then R
    lane agreement, then landmine demonstrations.
-5. `docs/sasconversionrulebook.json` : the rule entry.
-6. `verify_all.py` : register the verifier in the VERIFIERS list.
-7. `README.md` : one known-landmine bullet.
+4. `docs/sasconversionrulebook.json` : the rule entry.
+5. `verify_all.py` : register the verifier in the VERIFIERS list.
+6. `README.md` : one known-landmine bullet.
 
 Pins come from three engines agreeing (pure reference, scipy, R) before
 anything is written; a gate whose pins came from one engine is a
@@ -350,8 +349,9 @@ The README carries the current list. The shape of the list:
 - `receipt ... crashed` on a fresh clone : the telemetry directories were
   missing in an older version; run `mkdir -p telemetry/verify telemetry/runs`
   or update past the fix in verify_all.py.
-- A gate fails after you changed `sas_semantics.py` : the kb01 plain-text
-  mirror must change in the same pass; the two are in lockstep by design.
+- A gate fails after you changed `sas_semantics.py` : the plain-text mirror
+  is derived from this module in the reference home, so there is no second
+  copy here to update; re-sync the reference home to carry the change.
 - The linter flags an em dash in a file you did not touch : the file
   predates the floor; fix the character, do not add an ignore.
 

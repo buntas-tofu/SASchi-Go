@@ -3,6 +3,13 @@
 Status: development changes with original pins and Python/base-R evidence; no
 live SAS comparison. Branch synchronization is separate from a release.
 
+- Retire `kb01/`. Its lone file was a byte-identical copy of
+  `sas_semantics.py`, so the module is now the single source of the semantics
+  reference; the readable plain-text twin belongs to the reference home, which
+  derives it from the synced module. The mirrored-reference assertion in the
+  bitwise suite is retired with the mirror, and the sha pin plus the function
+  count carry that test on their own.
+
 - Clear estate identity from the published surface: the token gate found
   eighteen raw hits across thirteen pattern groups in tracked docs, module
   docstrings, and the census generator's own prose; every leak line is
