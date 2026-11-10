@@ -2,7 +2,10 @@
 """check_sanitization.py : the token gate for the sanitization floor.
 
 Design doc section 9: the tree carries no host/infra/persona identity
-beyond the instance's allowed tokens. Two instance profiles:
+beyond the instance's allowed tokens. Three classes are forbidden in EVERY
+instance: estate and fabric terms, identifiers of people (a work account, a
+work filesystem root, a byline carrying a personal name), and the lane the
+tree does not belong to. Sibling-lane names are forbidden per profile.
 
   desk    (buntas-tofu): allowed identity is the-pgh-cid / Matthew Haubach.
             Forbidden: estate and fabric terms, and the public-lane persona
@@ -54,8 +57,18 @@ PERSONA = [
     r"redrum", r"inertia-drift", r"\broku\b", r"initial d\b", r"fujiwara",
 ]
 
-DESK_FORBIDDEN = ESTATE + PERSONA + [r"\bseats?\b"]
-BUNTAS_FORBIDDEN = ESTATE + [
+# Identifiers of people rather than lanes: a work account, a work filesystem
+# root, and a byline that carries a personal name. The byline rule exists
+# because a list of names cannot catch a name that is not on the list; the
+# pattern catches the SHAPE, and every hit is classified.
+PERSONAL = [
+    r"\bhauba\d{3}\b",
+    r"/fsx/home/[a-z]",
+    r"^\s*(?:author|written by)\s*:\s*[A-Z][a-z]+(?:\s+[A-Z]\.?)?\s+[A-Z][a-z]+",
+]
+
+DESK_FORBIDDEN = ESTATE + PERSONAL + PERSONA + [r"\bseats?\b"]
+BUNTAS_FORBIDDEN = ESTATE + PERSONAL + [
     r"the-pgh-cid", r"\bclaude\b", r"\banthropic\b", r"\bfable\b",
 ]
 
