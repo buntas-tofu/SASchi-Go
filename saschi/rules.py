@@ -191,6 +191,12 @@ CONSTRUCT_MAP: dict[str, str] = {
     "put-character-list": "DS-024",
     "put-mixed-numeric": "DS-042",
     "trim-strip": "DS-043",
+    "case-search": "DS-096",
+    "word-functions": "DS-097",
+    "character-rewriting": "DS-098",
+    "missing-summaries": "DS-099",
+    "numeric-helpers": "DS-100",
+    "calendar-intervals": "DS-101",
     "input-list": "DS-044",
     "multiplication": "DS-045",
     "put-numeric-discovery": "DS-046",
@@ -349,6 +355,12 @@ STATEMENT_ROUTER: list[tuple[re.Pattern, str]] = [
 
 # Function-level routing: function call regex -> construct name.
 FUNCTION_ROUTER: list[tuple[re.Pattern, str]] = [
+    (re.compile(r'\b(?:YEAR|MONTH|DAY|INTCK|INTNX)\s*\(',re.I),'calendar-intervals'),
+    (re.compile(r'\b(?:ABS|SIGN|CEIL|FLOOR)\s*\(',re.I),'numeric-helpers'),
+    (re.compile(r'\b(?:MISSING|N|NMISS|CMISS|COALESCE|COALESCEC|MEAN)\s*\(',re.I),'missing-summaries'),
+    (re.compile(r'\b(?:COMPRESS|TRANSLATE|TRANWRD)\s*\(',re.I),'character-rewriting'),
+    (re.compile(r'\b(?:SCAN|COUNTW)\s*\(',re.I),'word-functions'),
+    (re.compile(r'\b(?:UPCASE|LOWCASE|INDEX|FIND)\s*\(',re.I),'case-search'),
     (re.compile(r'\bINT\s*\(', re.I), 'int'),
     (re.compile(r"\b(?:MDY|WEEKDAY)\s*\(", re.I), "calendar"),
     (re.compile(r"\b(?:BAND|BOR|BXOR|BNOT|BLSHIFT|BRSHIFT)\s*\(", re.I), "bitwise"),

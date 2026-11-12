@@ -27,7 +27,7 @@ class LoaderTests(unittest.TestCase):
         self.rules = load_rulebook(REPO_ROOT / "docs" / "sasconversionrulebook.json")
 
     def test_registered_rule_count(self):
-        self.assertEqual(len(self.rules), 145)
+        self.assertEqual(len(self.rules), 151)
         self.assertIn(f"rulebook. {len(self.rules)} rules", (REPO_ROOT / "README.md").read_text())
         self.assertIn('verify_multiply.py',self.rules['DS-045'].validation_test)
         self.assertIn('verify_numeric_discovery.py',self.rules['DS-046'].validation_test)
@@ -68,7 +68,7 @@ class LoaderTests(unittest.TestCase):
 
     def test_family_counts(self):
         counts = family_counts(self.rules)
-        self.assertEqual(counts["DS"], 95)
+        self.assertEqual(counts["DS"], 101)
         self.assertEqual(counts["SQL"], 4)
         self.assertEqual(counts["ST"], 30)
         self.assertEqual(counts["SV"], 6)
@@ -176,14 +176,14 @@ class RouterTests(unittest.TestCase):
 
     def test_intck_function_routes(self):
         construct, rule_id = route_function("d = intck('month', a, b);")
-        self.assertEqual(rule_id, "DS-011")
+        self.assertEqual(rule_id, "DS-101")
 
     def test_lag_function_routes(self):
         construct, rule_id = route_function("prev = lag(x);")
         self.assertEqual(rule_id, "DS-007")
 
     def test_char_function_routes(self):
-        construct, rule_id = route_function("w = tranwrd(s, 'a', 'b');")
+        construct, rule_id = route_function("w = put(x, 8.2);")
         self.assertEqual(rule_id, "DS-015")
 
     def test_sum_function_routes(self):

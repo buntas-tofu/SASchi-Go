@@ -314,7 +314,7 @@ class NumericFunctionTests(unittest.TestCase):
                 self.assertTrue(compile_plan(source).blocked)
 
     def test_function_without_a_gate_stays_a_ticket(self):
-        plan = compile_plan("data d; x=upcase('a'); run;")
+        plan = compile_plan("data d; x=propcase('a'); run;")
         self.assertTrue(plan.blocked)
         self.assertEqual(plan.tickets[0].construct, "assignment")
         self.assertIn("unsupported expression", plan.tickets[0].reason)

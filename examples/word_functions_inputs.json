@@ -1,0 +1,21 @@
+{
+  "raw": {
+    "schema": {
+      "text": {
+        "type": "character",
+        "length": 8
+      }
+    },
+    "rows": [
+      {
+        "text": "a||B|  C"
+      },
+      {
+        "text": "  X|Y||Z"
+      },
+      {
+        "text": "A|B"
+      }
+    ]
+  }
+}

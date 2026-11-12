@@ -2311,3 +2311,275 @@ def sas_multiply(left, right):
     if abs(exact) > 2147483647 or not math.isfinite(result) or Fraction(result) != exact:
         raise ValueError('multiplication requires an exact binary64 product within2147483647')
     return 0.0 if result == 0 else result
+
+
+def sas_upcase(value):
+    """DS-096 printable-ASCII case mapping, preserving every fixed-width blank."""
+    return _sas_concat_text(value).upper()
+
+
+def sas_lowcase(value):
+    """DS-096 printable-ASCII lowercasing with unchanged character width."""
+    return _sas_concat_text(value).lower()
+
+
+def sas_index(source, excerpt):
+    """DS-096 exact one-based substring search, including stored blanks."""
+    return _sas_concat_text(source).find(_sas_concat_text(excerpt)) + 1
+
+
+def sas_find(source, substring, *optional):
+    """DS-096 bounded I/T search and integral forward starts in either order."""
+    source, substring = _sas_concat_text(source), _sas_concat_text(substring)
+    if len(optional) > 2:
+        raise ValueError('FIND accepts at most one modifier and one start')
+    modifiers = None
+    start = None
+    for value in optional:
+        if type(value) is str:
+            if modifiers is not None or len(value) > 8 or any(c not in 'iItT' for c in value):
+                raise ValueError('FIND supports one bounded I/T modifier argument')
+            modifiers = value
+        else:
+            if (start is not None or type(value) not in (int, float) or not 0 <= value <= 2147483647 or not math.isfinite(value)
+                    or value != int(value)):
+                raise ValueError('FIND requires one finite integral forward start,0..2147483647')
+            start = int(value)
+    modifiers = (modifiers or '').lower()
+    if 't' in modifiers:
+        source, substring = source.rstrip(' '), substring.rstrip(' ')
+    if not substring:
+        raise ValueError('FIND empty trimmed needle requires separate characterization')
+    if 'i' in modifiers:
+        source, substring = source.upper(), substring.upper()
+    start = 1 if start is None else start
+    return 0 if start == 0 else source.find(substring, start - 1) + 1
+
+
+def _sas_word_parts(source, characters, modifier=''):
+    """DS-097 explicit ASCII delimiters; M retains zero-length fields."""
+    import re
+    source, characters = _sas_concat_text(source), _sas_concat_text(characters)
+    if len(characters) > 64 or type(modifier) is not str or modifier.upper() not in ('', 'M'):
+        raise ValueError('word functions require explicit bounded delimiters and optional M')
+    parts = re.split('[' + re.escape(characters) + ']', source)
+    return parts if modifier else [part for part in parts if part]
+
+
+def sas_scan(source, count, characters, modifier=''):
+    """DS-097 nonzero integral word positions, with source-width assignments."""
+    if (type(count) not in (int, float) or abs(count) > 2147483647 or not math.isfinite(count) or count != int(count)
+            or count == 0):
+        raise ValueError('SCAN requires a finite nonzero integral count')
+    parts = _sas_word_parts(source, characters, modifier)
+    index = int(count) - 1 if count > 0 else len(parts) + int(count)
+    return parts[index] if 0 <= index < len(parts) else '' if modifier else ' '
+
+
+def sas_countw(source, characters, modifier=''):
+    """DS-097 word count sharing the explicit delimiter/M definition."""
+    return len(_sas_word_parts(source, characters, modifier))
+
+
+def sas_compress(source, characters=' ', modifier=''):
+    """DS-098 ASCII deletion or I/K selection, preserving selected byte order."""
+    source, characters = _sas_concat_text(source), _sas_concat_text(characters)
+    if (len(characters)>64 or type(modifier) is not str or any(c not in 'iIkK' for c in modifier)
+            or modifier.upper() not in ('','I','K','IK','KI')):
+        raise ValueError('COMPRESS requires a bounded literal set and I/K modifiers')
+    modifier=modifier.upper()
+    selected=set(characters.upper() if 'I' in modifier else characters)
+    return ''.join(c for c in source if ((c.upper() if 'I' in modifier else c) in selected)==('K' in modifier))
+
+
+def sas_translate(source, target, characters):
+    """DS-098 one equal-length ASCII pair, with distinct FROM bytes."""
+    source, target, characters = map(_sas_concat_text,(source,target,characters))
+    if not len(target)==len(characters)<=64 or len(set(characters))!=len(characters):
+        raise ValueError('TRANSLATE requires equal bounded lists and distinct FROM bytes')
+    return source.translate(str.maketrans(characters,target))
+
+
+def sas_tranwrd(source, target, replacement):
+    """DS-098 nonoverlapping replacements; empty replacement supplies one blank."""
+    source, target = _sas_concat_text(source), _sas_concat_text(target)
+    if type(replacement) is not str or len(replacement)>64 or len(target)>64:
+        raise ValueError('TRANWRD requires bounded character controls')
+    if replacement:_sas_concat_text(replacement)
+    result=source.replace(target,replacement or ' ')
+    if len(result)>200:raise ValueError('TRANWRD raw result exceeds200bytes')
+    return result
+
+
+def _sas_summary_number(value, *, tags=False, integral=False):
+    """DS-099 typed bounded numbers, with separately admitted missing tags."""
+    if value is None:return None
+    if type(value) is dict:
+        if not tags or set(value)!={'missing'}:raise ValueError('summary tagged missing is outside this return contract')
+        sas_numeric_order(value)
+        return None
+    if type(value) not in (int,float) or abs(value)>2147483647 or not math.isfinite(value):
+        raise ValueError('summary requires finite bounded numeric values without coercion')
+    if integral and value!=int(value):raise ValueError('row MEAN requires integral nonmissing inputs')
+    return float(value)
+
+
+def _sas_summary_text(value):
+    """DS-099 empty or printable-ASCII character values, without conversion."""
+    if type(value) is not str:raise ValueError('summary requires character values without conversion')
+    return '' if value=='' else _sas_concat_text(value)
+
+
+def _sas_summary_args(values):
+    if not 1<=len(values)<=32:raise ValueError('summary requires1..32arguments')
+
+
+def sas_missing_function(value):
+    """DS-099 typed numeric/character missing classification, including tags."""
+    if type(value) is str:return int(not _sas_summary_text(value).strip(' '))
+    return int(_sas_summary_number(value,tags=True) is None)
+
+
+def sas_n(*values):
+    """DS-099 count numeric values after validating every operand."""
+    _sas_summary_args(values)
+    numbers=[_sas_summary_number(value,tags=True) for value in values]
+    return sum(value is not None for value in numbers)
+
+
+def sas_nmiss(*values):
+    """DS-099 numeric missing count, preserving numeric/character type boundaries."""
+    _sas_summary_args(values)
+    numbers=[_sas_summary_number(value,tags=True) for value in values]
+    return sum(value is None for value in numbers)
+
+
+def sas_cmiss(*values):
+    """DS-099 mixed missing count with no implicit conversion."""
+    _sas_summary_args(values)
+    return sum(sas_missing_function(value) for value in values)
+
+
+def sas_coalesce(*values):
+    """DS-099 first ordinary numeric value; all operands validate eagerly."""
+    _sas_summary_args(values)
+    numbers=[_sas_summary_number(value) for value in values]
+    return next((value for value in numbers if value is not None),None)
+
+
+def sas_coalescec(*values):
+    """DS-099 first nonblank character value; selected raw result at most200."""
+    _sas_summary_args(values)
+    characters=[_sas_summary_text(value) for value in values]
+    result=next((value for value in characters if value.strip(' ')),'')
+    if len(result)>200:raise ValueError('COALESCEC selected result exceeds200bytes')
+    return result
+
+
+def sas_row_mean(*values):
+    """DS-099 exact bounded integral sum followed by its binary64 quotient."""
+    _sas_summary_args(values)
+    numbers=[_sas_summary_number(value,integral=True) for value in values]
+    present=[value for value in numbers if value is not None]
+    return sum(present)/len(present) if present else None
+
+
+def _sas_normal_operand(value):
+    """DS-100 ordinary missing,zero or bounded normal binary64 values."""
+    value=_sas_summary_number(value)
+    if value is not None and value!=0 and abs(value)<float.fromhex('0x1p-1022'):
+        raise ValueError('numeric helper subnormal values require a separate contract')
+    return value
+
+
+def sas_abs(value):
+    """DS-100 bounded numeric magnitude with ordinary-missing propagation."""
+    value=_sas_normal_operand(value)
+    return None if value is None else abs(value)
+
+
+def sas_sign(value):
+    """DS-100 numeric direction, with zero and missing kept distinct."""
+    value=_sas_normal_operand(value)
+    return None if value is None else int(value>0)-int(value<0)
+
+
+def sas_ceil(value):
+    """DS-100 ceiling with the characterized absolute1E-12 integer fuzz band."""
+    value=_sas_normal_operand(value)
+    if value is None:return None
+    nearest=round(value)
+    return nearest if abs(value-nearest)<=1e-12 else math.ceil(value)
+
+
+def sas_floor(value):
+    """DS-100 floor with the characterized absolute1E-12 integer fuzz band."""
+    value=_sas_normal_operand(value)
+    if value is None:return None
+    nearest=round(value)
+    return nearest if abs(value-nearest)<=1e-12 else math.floor(value)
+
+
+def _sas_source_date(value):
+    """DS-101 integral SAS dates in the qualified Gregorian1753..3999 domain."""
+    if value is None:return None
+    if (type(value) not in (int,float) or not SAS_CALENDAR_MIN_DAY<=value<=SAS_CALENDAR_MAX_DAY
+            or not math.isfinite(value) or value!=int(value)):
+        raise ValueError('calendar requires integral SAS dates in1753..3999')
+    return SAS_EPOCH+datetime.timedelta(days=int(value))
+
+
+def _sas_interval_increment(value):
+    """DS-101 finite integral increments within10000,or ordinary missing."""
+    if value is None:return None
+    if (type(value) not in (int,float) or not -10000<=value<=10000
+            or not math.isfinite(value) or value!=int(value)):
+        raise ValueError('calendar increment requires an integer within10000')
+    return int(value)
+
+
+def _sas_interval_option(value,allowed):
+    """DS-101 strict ASCII interval controls, before case normalization."""
+    if (type(value) is not str or len(value)>64 or any(not 32<=ord(c)<=126 for c in value)
+            or value.upper() not in allowed):
+        raise ValueError('calendar interval/method/alignment is outside the characterized subset')
+    return value.upper()
+
+
+def sas_year(value):
+    """DS-101 year component,with ordinary-missing propagation."""
+    value=_sas_source_date(value)
+    return None if value is None else value.year
+
+
+def sas_month(value):
+    """DS-101 month component of an integral SAS date."""
+    value=_sas_source_date(value)
+    return None if value is None else value.month
+
+
+def sas_day(value):
+    """DS-101 day-of-month component of an integral SAS date."""
+    value=_sas_source_date(value)
+    return None if value is None else value.day
+
+
+def sas_source_intck(interval,start,end,method='D'):
+    """DS-101 discrete DAY/MONTH/QTR/YEAR boundaries over validated dates."""
+    interval=_sas_interval_option(interval,{'DAY','MONTH','QTR','YEAR'})
+    start,end=_sas_source_date(start),_sas_source_date(end)
+    _sas_interval_option(method,{'D','DISCRETE'})
+    return None if start is None or end is None else sas_intck(interval,start,end)
+
+
+def sas_source_intnx(interval,start,increment,alignment='B'):
+    """DS-101 validated B/E/S source wrapper, preserving the earlier helper."""
+    interval=_sas_interval_option(interval,{'DAY','MONTH','QTR','YEAR'})
+    start,increment=_sas_source_date(start),_sas_interval_increment(increment)
+    alignment=_sas_interval_option(alignment,{'B','BEGINNING','E','END','S','SAME','SAMEDAY'})
+    if start is None or increment is None:return None
+    try:result=sas_intnx(interval,date_to_sas(start),increment,alignment[0])
+    except (ValueError,OverflowError) as error:raise ValueError('calendar result is outside1753..3999') from error
+    if not SAS_CALENDAR_MIN_DAY<=result<=SAS_CALENDAR_MAX_DAY:
+        raise ValueError('calendar result is outside1753..3999')
+    return result

@@ -1,0 +1,108 @@
+{
+  "datasets": {
+    "raw": {
+      "schema": {
+        "name": {
+          "type": "character",
+          "length": 4
+        },
+        "backup": {
+          "type": "character",
+          "length": 4
+        },
+        "a": "number",
+        "b": "number"
+      },
+      "rows": [
+        {
+          "name": " A  ",
+          "backup": "B   ",
+          "a": 2.0,
+          "b": 4.0
+        },
+        {
+          "name": "    ",
+          "backup": " Q  ",
+          "a": null,
+          "b": 6.0
+        },
+        {
+          "name": "    ",
+          "backup": "    ",
+          "a": null,
+          "b": null
+        }
+      ]
+    },
+    "filled": {
+      "schema": {
+        "name": {
+          "type": "character",
+          "length": 4
+        },
+        "backup": {
+          "type": "character",
+          "length": 4
+        },
+        "a": "number",
+        "b": "number",
+        "flag": "number",
+        "count": "number",
+        "miss": "number",
+        "mixed": "number",
+        "choice": "number",
+        "label": {
+          "type": "character",
+          "length": 200
+        },
+        "avg": "number"
+      },
+      "rows": [
+        {
+          "name": " A  ",
+          "backup": "B   ",
+          "a": 2.0,
+          "b": 4.0,
+          "flag": 0.0,
+          "count": 2.0,
+          "miss": 0.0,
+          "mixed": 0.0,
+          "choice": 2.0,
+          "label": " A                                                                                                                                                                                                      ",
+          "avg": 3.0
+        },
+        {
+          "name": "    ",
+          "backup": " Q  ",
+          "a": null,
+          "b": 6.0,
+          "flag": 1.0,
+          "count": 1.0,
+          "miss": 1.0,
+          "mixed": 2.0,
+          "choice": 6.0,
+          "label": " Q                                                                                                                                                                                                      ",
+          "avg": 6.0
+        },
+        {
+          "name": "    ",
+          "backup": "    ",
+          "a": null,
+          "b": null,
+          "flag": 1.0,
+          "count": 0.0,
+          "miss": 2.0,
+          "mixed": 3.0,
+          "choice": null,
+          "label": "NA                                                                                                                                                                                                      ",
+          "avg": null
+        }
+      ]
+    }
+  },
+  "log": [
+    "A ",
+    "Q ",
+    "NA "
+  ]
+}

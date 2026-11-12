@@ -1,0 +1,21 @@
+{
+  "raw": {
+    "schema": {
+      "text": {
+        "type": "character",
+        "length": 8
+      }
+    },
+    "rows": [
+      {
+        "text": "Ab cab  "
+      },
+      {
+        "text": "A-B_ab  "
+      },
+      {
+        "text": "   abc  "
+      }
+    ]
+  }
+}

@@ -4494,6 +4494,175 @@
         "https://postalpro.usps.com/ZIP_Locale_Detail",
         "https://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/a002473631.htm"
       ]
+    },
+    {
+      "rule_id": "DS-096",
+      "scope": "DATA step direct scalar assignments",
+      "sas_pattern": "UPCASE, LOWCASE, INDEX and bounded FIND",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": "Gate-backed printable-ASCII scalar helpers and strict source/portable context checks.",
+      "r_target": "Independent ASCII byte mapping and position-scanning witness.",
+      "required_settings": [
+        "Printable ASCII character operands length1..32767; preserve stored blanks and source-derived case widths.",
+        "Direct assignment RHS in version2 ordinary DATA with at most one SET,existing simple IF/counting/OUTPUT/PUT; no WHERE,BY,RETAIN,arrays,rounded profiles,nested consumers or C++.",
+        "FIND admits literal I/T modifiers and integral forward literal starts0..2147483647 in either order; T-empty needles refuse.",
+        "Static literal/type checks cover skipped/empty paths; reached dynamic invalid values fail atomically."
+      ],
+      "forbidden_patterns": [
+        "Implicit character/numeric conversion",
+        "Inherit Python zero-based or negative-not-found search positions",
+        "Trim stored arguments without an explicit supported modifier",
+        "Generalize postal-family UPCASE or old profile admission"
+      ],
+      "silent_difference_checks": [
+        "Leading/trailing blanks,one-based positions,zero absence,case width,truncation,row snapshots,static refusals and late atomic failure."
+      ],
+      "validation_test": "examples/verify_case_search.py",
+      "confidence": "Requires current full source-bound repository/base-R receipt; no native SAS comparison.",
+      "sources": [
+        "https://documentation.sas.com/api/docsets/lefunctionsref/9.4/content/lefunctionsref.pdf"
+      ]
+    },
+    {
+      "rule_id": "DS-097",
+      "scope": "DATA step direct scalar assignments",
+      "sas_pattern": "Explicit-delimiter SCAN and COUNTW with optional M",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": "Gate-backed explicit ASCII delimiter splitting with fixed source-derived SCAN destination width.",
+      "r_target": "Independent delimiter-byte boundary enumeration and complete sequential original witness.",
+      "required_settings": [
+        "Pin SAS9.4 Fifth Edition P11: SCAN new destination inherits first argument width; do not inherit the older200-byte default.",
+        "Explicit literal delimiter set1..64ASCII bytes; optional literal M; source1..32767ASCII bytes.",
+        "SCAN nonzero integral count with magnitude at most2147483647,literal or numeric variable; positive/negative directions and empty words independently pinned.",
+        "Direct version2 ordinary DATA assignments under the wave profile; preserve old contexts and numeric array names."
+      ],
+      "forbidden_patterns": [
+        "Default or platform-dependent delimiters",
+        "General quoted-word handling or other modifiers",
+        "Treat empty M words as absent",
+        "Use an unpinned older SCAN result width"
+      ],
+      "silent_difference_checks": [
+        "Repeated/edge delimiters,negative and out-of-range positions,blank source,significant padding,result descriptors,source/portable/static refusals and atomic failures."
+      ],
+      "validation_test": "examples/verify_word_functions.py",
+      "confidence": "Conditional on current full source-bound repository/base-R receipt; no native SAS comparison.",
+      "sources": [
+        "https://documentation.sas.com/api/docsets/lefunctionsref/9.4/content/lefunctionsref.pdf"
+      ]
+    },
+    {
+      "rule_id": "DS-098",
+      "scope": "DATA step direct scalar assignments",
+      "sas_pattern": "Bounded COMPRESS,TRANSLATE and TRANWRD",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": "Strict ASCII editing helpers,source-width COMPRESS/TRANSLATE and200-byte TRANWRD destinations.",
+      "r_target": "Independent byte filtering,position mapping and nonoverlapping replacement witnesses.",
+      "required_settings": [
+        "Printable ASCII source1..32767; literal control lists1..64; COMPRESS optional I/K.",
+        "TRANSLATE one equal-length pair with distinct FROM bytes; TRANWRD empty replacement supplies one blank.",
+        "TRANWRD raw result at most200bytes even with a shorter declared destination; dynamic failures are atomic.",
+        "Direct version2 ordinary DATA wave assignments; no unqualified temporary consumers or profile expansion."
+      ],
+      "forbidden_patterns": [
+        "Unicode or implicit conversion",
+        "General COMPRESS modifiers or multiple TRANSLATE pairs",
+        "Rescan inserted TRANWRD text or trim significant blanks",
+        "Mask overflowing raw results by destination truncation"
+      ],
+      "silent_difference_checks": [
+        "Exact stored bytes,widths,empty replacements,nonoverlap,200-byte boundary,skipped static controls and late atomic failure."
+      ],
+      "validation_test": "examples/verify_character_rewriting.py",
+      "confidence": "Conditional on current full source-bound repository/base-R receipt; no native SAS comparison.",
+      "sources": [
+        "https://documentation.sas.com/api/docsets/lefunctionsref/9.4/content/lefunctionsref.pdf"
+      ]
+    },
+    {
+      "rule_id": "DS-099",
+      "scope": "DATA step direct scalar assignments",
+      "sas_pattern": "Typed MISSING,N,NMISS,CMISS,COALESCE,COALESCEC and row MEAN",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": "Strict typed missing/count and first-present helpers; integral row MEAN with binary64 quotient.",
+      "r_target": "Independent typed missing classification and complete row-summary witness.",
+      "required_settings": [
+        "One MISSING argument; other summaries1..32primitive typed arguments; no implicit conversion.",
+        "Numeric classification/counts admit ordinary and valid tagged missings; COALESCE and MEAN admit ordinary missing only.",
+        "MEAN bounded integral inputs with magnitude2147483647; numeric classification otherwise finite bounded values.",
+        "COALESCEC ASCII length0..32767,new width200,selected raw result at most200; all arguments validate.",
+        "Direct ordinary version2 DATA wave contexts; preserved profile and namespace boundaries."
+      ],
+      "forbidden_patterns": [
+        "Convert character missing to numeric missing implicitly",
+        "Return an early choice before validating remaining arguments",
+        "Infer fractional MEAN or tagged COALESCE return behavior",
+        "Generalize the MISSING function to CALL MISSING"
+      ],
+      "silent_difference_checks": [
+        "Empty/blank/period/tagged distinctions,32-argument limits,all-missing rows,exact widths and order,empty/skipped checks and late atomic failure."
+      ],
+      "validation_test": "examples/verify_missing_summaries.py",
+      "confidence": "Conditional on current full source-bound repository/base-R receipt; no native SAS comparison.",
+      "sources": [
+        "https://documentation.sas.com/api/docsets/lefunctionsref/9.4/content/lefunctionsref.pdf"
+      ]
+    },
+    {
+      "rule_id": "DS-100",
+      "scope": "DATA step direct scalar assignments",
+      "sas_pattern": "Bounded ABS,SIGN,CEIL and FLOOR",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": "Typed normal-binary64 helpers with ordinary missing and absolute1E-12 fuzz.",
+      "r_target": "Independent sign/directional arithmetic,exact binary fuzz pins and complete original witness.",
+      "required_settings": [
+        "Ordinary missing,zero or normal finite binary64 inputs with magnitude at most2147483647.",
+        "CEIL/FLOOR return the nearest integer within absolute1E-12,otherwise the directional ceiling/floor.",
+        "Primitive literal/numeric-variable arguments in ordinary version2 DATA wave assignments.",
+        "Static malformed/literal checks include empty/skipped paths; reached dynamic errors fail atomically."
+      ],
+      "forbidden_patterns": [
+        "Subnormal,tagged,boolean or implicit character conversion",
+        "Replace fuzzed functions with unfuzzed host defaults",
+        "Generalize to CEILZ,FLOORZ or a broader INT profile",
+        "Nested argument expressions or unqualified consumers"
+      ],
+      "silent_difference_checks": [
+        "Positive/negative fuzz bands,near-zero direction,minimum normal,missing,range bounds,complete formatted records and late atomic errors."
+      ],
+      "validation_test": "examples/verify_numeric_helpers.py",
+      "confidence": "Conditional on current full source-bound repository/base-R receipt; no native SAS comparison.",
+      "sources": [
+        "https://documentation.sas.com/api/docsets/lefunctionsref/9.4/content/lefunctionsref.pdf"
+      ]
+    },
+    {
+      "rule_id": "DS-101",
+      "scope": "DATA step direct scalar date assignments",
+      "sas_pattern": "YEAR,MONTH,DAY and bounded INTCK/INTNX source calls",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": "Validated integral SAS-date component and interval wrappers; earlier reference helpers remain unchanged.",
+      "r_target": "Independent Gregorian component,index-boundary and month-clipping witness.",
+      "required_settings": [
+        "Integral epoch-day dates in1753..3999; ordinary missing propagates after all operands validate.",
+        "Literal DAY,MONTH,QTR,YEAR; INTCK D/DISCRETE boundary counts; INTNX B/BEGINNING,E/END,S/SAME/SAMEDAY.",
+        "INTNX integral increments within10000 and result in the qualified date domain.",
+        "Primitive numeric literals/variables,ordinary version2 DATA wave assignments and separate existing DATE9 PUT consumers."
+      ],
+      "forbidden_patterns": [
+        "Continuous methods,MIDDLE,WEEK,shifted/multiple/custom or datetime intervals",
+        "Infer clocks,timezones or implicit date-string conversion",
+        "Fractional,tagged,boolean or out-of-domain dates",
+        "Generalize specialized week-callback source support to this profile"
+      ],
+      "silent_difference_checks": [
+        "Leap anniversaries,reverse discrete boundaries,quarter month-offsets,short-month clipping,domain endpoints,missing/eager validation,static skipped checks and late atomic errors."
+      ],
+      "validation_test": "examples/verify_calendar_intervals.py",
+      "confidence": "Conditional on current full source-bound repository/base-R receipt; no native SAS comparison.",
+      "sources": [
+        "https://documentation.sas.com/api/docsets/lefunctionsref/9.4/content/lefunctionsref.pdf"
+      ]
     }
   ],
   "runtime_capabilities": {

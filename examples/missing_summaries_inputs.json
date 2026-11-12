@@ -1,0 +1,36 @@
+{
+  "raw": {
+    "schema": {
+      "name": {
+        "type": "character",
+        "length": 4
+      },
+      "backup": {
+        "type": "character",
+        "length": 4
+      },
+      "a": "number",
+      "b": "number"
+    },
+    "rows": [
+      {
+        "name": " A ",
+        "backup": "B",
+        "a": 2,
+        "b": 4
+      },
+      {
+        "name": "",
+        "backup": " Q ",
+        "a": null,
+        "b": 6
+      },
+      {
+        "name": "",
+        "backup": "",
+        "a": null,
+        "b": null
+      }
+    ]
+  }
+}

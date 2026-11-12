@@ -11,6 +11,7 @@ from dataclasses import asdict, dataclass, field
 from sas_semantics import sas_put_literals, sas_put_character_list, sas_put_numeric_list, sas_do_counted, SAS_BITWISE_ARITY
 from .functions import FUNCTIONS, format_token, FORMATS, function_call_lines, substr_context_errors, catx_arguments_allowed, LAG_FUNCTIONS, validate_lag_calls, expression_nodes
 from .trim_strip import validate_step as validate_trim_step
+from .function_wave import validate_step as validate_wave_step, FAMILIES as WAVE_FAMILIES
 from .parser import Kind, ParseError, Statement, split_statements, tokenize
 from .operations import walk_operations as _walk_operations
 from .rules import route_function, route_statement
@@ -1179,6 +1180,10 @@ def _compile_legacy_body(source: str) -> Plan:
             validate_trim_step(asdict(compiled))
         except ValueError as exc:
             plan.tickets.append(Ticket(compiled.line, 'TRIM/STRIP', 'trim-strip', str(exc)))
+        try:
+            validate_wave_step(asdict(compiled),plan.version)
+        except ValueError as exc:
+            plan.tickets.append(Ticket(compiled.line,'function-wave',getattr(exc,'family','case-search'),str(exc)))
         # Preserve the old serialized shape unless new DO OVER needs source mode.
         over_names = {op.args['name'] for op in walk_operations(compiled.operations) if op.kind == 'do_over'}
         for op in walk_operations(compiled.operations):
@@ -1232,7 +1237,10 @@ def _compile_legacy_body(source: str) -> Plan:
     for name in ('trim', 'strip'):
         plan.matched.extend(('trim-strip', 'DS-043', line or 1)
                             for line in function_call_lines(plan.to_dict(), name))
-    has_strings = any(item[0] in ('concat-catx', 'trim-strip') for item in plan.matched)
+    for family,(rule,names) in WAVE_FAMILIES.items():
+        for name in sorted(names):
+            plan.matched.extend((family,rule,line or 1) for line in function_call_lines(plan.to_dict(),name))
+    has_strings = any(item[0] in ('concat-catx', 'trim-strip') or item[0] in WAVE_FAMILIES for item in plan.matched)
     if has_strings or any(contains_put(compiled.operations, {'put_character_list', 'put_numeric_list', 'put_mixed_numeric', 'put_all'}) for compiled in plan.steps):
         # Macros resolve before DATA execution. Without taint tracking, even
         # unused or prior-step literals can affect this output contract.

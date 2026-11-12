@@ -273,9 +273,14 @@ class BitwiseOutputTests(unittest.TestCase):
 
     def test_old_helper_remains_exact(self):
         raw = (ROOT/'sas_semantics.py').read_bytes()
-        self.assertEqual(hashlib.sha256(raw).hexdigest(), '5b1fc6fe484fac23fd9e8df5e43b6eff8365d73555151f2fff4e19232cc196ef')
+        # The approved wave appends helpers; every byte of the prior reference stays pinned.
+        legacy=raw[:103888]
+        self.assertEqual(hashlib.sha256(legacy).hexdigest(), '5b1fc6fe484fac23fd9e8df5e43b6eff8365d73555151f2fff4e19232cc196ef')
+        old_nodes=[n for n in ast.walk(ast.parse(legacy)) if isinstance(n,(ast.FunctionDef,ast.AsyncFunctionDef))]
+        self.assertEqual(len(old_nodes),151);self.assertEqual(len({n.name for n in old_nodes}),149)
+        self.assertEqual(hashlib.sha256(raw).hexdigest(), 'a01eb9f0e8baf9aab1588d6cdf0b6fcdafc637898b4fac1a8c684536c0d047ce')
         nodes = [n for n in ast.walk(ast.parse(raw)) if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))]
-        self.assertEqual(len(nodes), 151); self.assertEqual(len({n.name for n in nodes}), 149)
+        self.assertEqual(len(nodes), 184); self.assertEqual(len({n.name for n in nodes}), 182)
         with self.assertRaisesRegex(ValueError, 'beyond 64 columns'):
             sas_put_all([{'name': 'x', 'kind': 'character', 'value': 'q'*46}])
 

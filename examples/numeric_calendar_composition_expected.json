@@ -1,0 +1,150 @@
+{
+  "datasets": {
+    "raw": {
+      "schema": {
+        "amount": "number",
+        "backup": "number",
+        "ratio": "number",
+        "d": "number",
+        "ending": "number",
+        "move": "number"
+      },
+      "rows": [
+        {
+          "amount": null,
+          "backup": 4,
+          "ratio": -1.25,
+          "d": 21974,
+          "ending": 21975,
+          "move": 1
+        },
+        {
+          "amount": -2,
+          "backup": 6,
+          "ratio": 2.5,
+          "d": 30,
+          "ending": 31,
+          "move": 1
+        },
+        {
+          "amount": null,
+          "backup": null,
+          "ratio": 1.0000000000001,
+          "d": 22370,
+          "ending": 22339,
+          "move": -1
+        }
+      ]
+    },
+    "summary": {
+      "schema": {
+        "amount": "number",
+        "backup": "number",
+        "ratio": "number",
+        "d": "number",
+        "ending": "number",
+        "move": "number",
+        "present": "number",
+        "absent": "number",
+        "chosen": "number",
+        "average": "number",
+        "magnitude": "number",
+        "direction": "number",
+        "up": "number",
+        "down": "number",
+        "year": "number",
+        "month": "number",
+        "day": "number",
+        "months": "number",
+        "shift": "number",
+        "date_text": {
+          "type": "character",
+          "length": 9
+        },
+        "value_text": {
+          "type": "character",
+          "length": 8
+        }
+      },
+      "rows": [
+        {
+          "amount": null,
+          "backup": 4,
+          "ratio": -1.25,
+          "d": 21974,
+          "ending": 21975,
+          "move": 1,
+          "present": 1.0,
+          "absent": 1.0,
+          "chosen": 4.0,
+          "average": 4.0,
+          "magnitude": 4.0,
+          "direction": 1.0,
+          "up": -1.0,
+          "down": -2.0,
+          "year": 2020.0,
+          "month": 2.0,
+          "day": 29.0,
+          "months": 1.0,
+          "shift": 22003,
+          "date_text": "29MAR2020",
+          "value_text": "    4.00"
+        },
+        {
+          "amount": -2,
+          "backup": 6,
+          "ratio": 2.5,
+          "d": 30,
+          "ending": 31,
+          "move": 1,
+          "present": 2.0,
+          "absent": 0.0,
+          "chosen": -2.0,
+          "average": 2.0,
+          "magnitude": 2.0,
+          "direction": -1.0,
+          "up": 3.0,
+          "down": 2.0,
+          "year": 1960.0,
+          "month": 1.0,
+          "day": 31.0,
+          "months": 1.0,
+          "shift": 59.0,
+          "date_text": "29FEB1960",
+          "value_text": "    2.00"
+        },
+        {
+          "amount": null,
+          "backup": null,
+          "ratio": 1.0000000000001,
+          "d": 22370,
+          "ending": 22339,
+          "move": -1,
+          "present": 0.0,
+          "absent": 2.0,
+          "chosen": null,
+          "average": null,
+          "magnitude": null,
+          "direction": null,
+          "up": 1.0,
+          "down": 1.0,
+          "year": 2021.0,
+          "month": 3.0,
+          "day": 31.0,
+          "months": -1.0,
+          "shift": 22339,
+          "date_text": "28FEB2021",
+          "value_text": "       ."
+        }
+      ]
+    }
+  },
+  "log": [
+    "29MAR2020 ",
+    "4.00 ",
+    "29FEB1960 ",
+    "2.00 ",
+    "28FEB2021 ",
+    ". "
+  ]
+}

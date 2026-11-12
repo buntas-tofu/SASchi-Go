@@ -46,6 +46,7 @@ from dataclasses import dataclass
 from sas_semantics import sas_divide, sas_int, sas_multiply, sas_numeric_array_add, sas_numeric_array_value, sas_numeric_order
 from sas_semantics import sas_trim, sas_strip
 from .trim_strip import call_width as trim_width
+from .function_wave import NAMES as WAVE_FUNCTIONS, call_width as wave_width
 import math
 import re
 
@@ -112,6 +113,25 @@ FUNCTIONS: dict[str, FunctionSpec] = {
         FunctionSpec("strip", "character", GATE_TRIM_STRIP, 1, 1),
         FunctionSpec("catx", "character", GATE_CONCAT, 2, 33),
         FunctionSpec("count", "number", GATE_COUNT, 2, 3),
+        FunctionSpec("upcase", "character", "examples/verify_case_search.py", 1, 1),
+        FunctionSpec("lowcase", "character", "examples/verify_case_search.py", 1, 1),
+        FunctionSpec("index", "number", "examples/verify_case_search.py", 2, 2),
+        FunctionSpec("find", "number", "examples/verify_case_search.py", 2, 4),
+        FunctionSpec("scan", "character", "examples/verify_word_functions.py", 3, 4),
+        FunctionSpec("countw", "number", "examples/verify_word_functions.py", 2, 3),
+        FunctionSpec("compress", "character", "examples/verify_character_rewriting.py", 1, 3),
+        FunctionSpec("translate", "character", "examples/verify_character_rewriting.py", 3, 3),
+        FunctionSpec("tranwrd", "character", "examples/verify_character_rewriting.py", 3, 3),
+        FunctionSpec("missing", "number", "examples/verify_missing_summaries.py", 1, 1),
+        *(FunctionSpec(name, "number", "examples/verify_missing_summaries.py", 1, 32)
+          for name in ('n','nmiss','cmiss','coalesce','mean')),
+        FunctionSpec("coalescec", "character", "examples/verify_missing_summaries.py", 1, 32),
+        *(FunctionSpec(name, "number", "examples/verify_numeric_helpers.py", 1, 1)
+          for name in ('abs','sign','ceil','floor')),
+        *(FunctionSpec(name, "number", "examples/verify_calendar_intervals.py", 1, 1)
+          for name in ('year','month','day')),
+        *(FunctionSpec(name, "number", "examples/verify_calendar_intervals.py", 3, 4)
+          for name in ('intck','intnx')),
         FunctionSpec("mod", "number", GATE_MOD, 2, 2),
         FunctionSpec("int", "number", GATE_INT, 1, 1),
         *(FunctionSpec(name, "number", GATE_BINARY64, 1, 1) for name in sorted(BINARY64_FUNCTIONS)),
@@ -167,6 +187,19 @@ def _width_decimals(fmt) -> tuple[int, int]:
 
 def apply(name: str, values: list):
     """Evaluate one wired function over already-evaluated argument values."""
+    if name in WAVE_FUNCTIONS:
+        from sas_semantics import sas_upcase, sas_lowcase, sas_index, sas_find, sas_scan, sas_countw, sas_compress, sas_translate, sas_tranwrd
+        from sas_semantics import sas_missing_function, sas_n, sas_nmiss, sas_cmiss, sas_coalesce, sas_coalescec, sas_row_mean
+        from sas_semantics import sas_abs, sas_sign, sas_ceil, sas_floor
+        from sas_semantics import sas_year, sas_month, sas_day, sas_source_intck, sas_source_intnx
+        function={'upcase':sas_upcase,'lowcase':sas_lowcase,'index':sas_index,'find':sas_find,'scan':sas_scan,'countw':sas_countw,
+                  'compress':sas_compress,'translate':sas_translate,'tranwrd':sas_tranwrd,
+                  'missing':sas_missing_function,'n':sas_n,'nmiss':sas_nmiss,'cmiss':sas_cmiss,
+                  'coalesce':sas_coalesce,'coalescec':sas_coalescec,'mean':sas_row_mean,
+                  'abs':sas_abs,'sign':sas_sign,'ceil':sas_ceil,'floor':sas_floor,
+                  'year':sas_year,'month':sas_month,'day':sas_day,'intck':sas_source_intck,'intnx':sas_source_intnx}[name]
+        try:return function(*values)
+        except TypeError as exc:raise ValueError('function wave argument shape is outside its bounded contract') from exc
     if name in LAG_FUNCTIONS:
         raise ValueError("LAG/DIF requires a scoped DATA-step occurrence queue")
     if name in SAS_BITWISE_ARITY:
@@ -268,6 +301,8 @@ def character_width(expr, schema=None) -> int | None:
             raise ValueError('character concatenation exceeds 32767 bytes')
         return width
     name = expr.get("name")
+    if name in WAVE_FUNCTIONS:
+        return wave_width(expr,schema)
     if name in ('trim', 'strip'):
         return trim_width(expr, schema)
     if name == 'reverse':
