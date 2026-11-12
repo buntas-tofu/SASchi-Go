@@ -86,7 +86,7 @@ jobs:
           version=$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")
           control=$(dpkg-deb -I "$deb")
           grep -q '^ Package: saschi-desktop$' <<<"$control"
-          grep -q "^ Version: ${version}+desktop2$" <<<"$control"
+          grep -q "^ Version: ${version}+desktop3$" <<<"$control"
           grep -q '^ Architecture: all$' <<<"$control"
           grep -q 'Depends:.*python3-tk' <<<"$control"
           grep -q 'Depends:.*python3-pandas' <<<"$control"
@@ -100,7 +100,7 @@ jobs:
           do
             grep -qx -- "$path" <<<"$contents" || { echo "missing payload path: $path"; exit 1; }
           done
-          echo "metadata and payload verified for version ${version}+desktop2"
+          echo "metadata and payload verified for version ${version}+desktop3"
       - name: Install and start the entry point headless
         shell: bash
         run: |

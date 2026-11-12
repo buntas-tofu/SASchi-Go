@@ -90,7 +90,7 @@ def tree_view(parent, columns, *, height=5, selectmode='browse'):
 
 
 class ScrollPage(ttk.Frame):
-    """A setup page that remains reachable at larger fonts and short heights."""
+    """Fill available space while keeping overflow reachable in short windows."""
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -104,8 +104,22 @@ class ScrollPage(ttk.Frame):
         self.body = ttk.Frame(self.canvas, padding=16)
         self.window = self.canvas.create_window(0, 0, anchor='nw', window=self.body)
         self.body.columnconfigure(0, weight=1)
-        self.canvas.bind('<Configure>', lambda event: self.canvas.itemconfigure(self.window, width=event.width))
-        self.body.bind('<Configure>', lambda _: self.canvas.configure(scrollregion=self.canvas.bbox('all')))
+        self._size_pending = None
+        self.canvas.bind('<Configure>', self._schedule_size)
+        self.body.bind('<Configure>', self._schedule_size)
+
+    def _schedule_size(self, _=None):
+        if self._size_pending is None:
+            self._size_pending = self.after_idle(self._fit_body)
+
+    def _fit_body(self):
+        self._size_pending = None
+        width = max(1, self.canvas.winfo_width())
+        # Requested height is the content minimum, not its previously allocated
+        # height. Using actual height here would prevent shrinking after growth.
+        height = max(self.canvas.winfo_height(), self.body.winfo_reqheight())
+        self.canvas.itemconfigure(self.window, width=width, height=height)
+        self.canvas.configure(scrollregion=(0, 0, width, height))
 
     def connect_navigation(self):
         def focus(event):
@@ -116,6 +130,9 @@ class ScrollPage(ttk.Frame):
             return 'break'
         def connect(widget):
             widget.bind('<FocusIn>', focus, add='+')
+            # Font changes and wrapped labels can change content requirements
+            # even while the canvas and its allocated body size stay unchanged.
+            widget.bind('<Configure>', self._schedule_size, add='+')
             if not isinstance(widget, (tk.Text, ttk.Treeview, ttk.Combobox, ttk.Scrollbar)):
                 for event in ('<MouseWheel>', '<Button-4>', '<Button-5>'):
                     widget.bind(event, wheel, add='+')
@@ -384,6 +401,7 @@ class ComparisonView(ScrollPage):
     def __init__(self, parent, app):
         super().__init__(parent)
         body = self.body
+        body.rowconfigure(3, weight=1)
         self.summary, self.page = {}, 0
         self.heading = app.label(body, 'No comparison is open.')
         self.heading.grid(row=0, column=0, sticky='ew', pady=(0, 8))
@@ -622,8 +640,9 @@ class Desktop:
         self.label(area, 'Without SAS results, you can inspect and run the conversion. Result agreement remains not compared.').grid(row=8, column=0, sticky='ew', pady=8)
         self.button(self.setup_page, 'Review conversion options', self.review, primary=True).grid(row=1, column=0, sticky='w', padx=16, pady=10)
         ttk.Label(area, text='Program preview', style='Subheading.TLabel').grid(row=10, column=0, sticky='w', pady=6)
+        area.rowconfigure(11, weight=1)
         box, self.source_preview = text_view(area, self.code_font, height=10)
-        box.grid(row=11, column=0, sticky='ew')
+        box.grid(row=11, column=0, sticky='nsew')
         self.setup_page.connect_navigation()
 
     def _build_options(self):
@@ -660,8 +679,9 @@ class Desktop:
         self.button(target_bar, 'Advanced: preview C++', lambda: self.review('cpp')).pack(side='left', padx=6)
         self.label(body, 'C++ is a bounded scalar code preview. Desktop execution is available for Python. Generated code requires the SASchi-Go runtime or target support described in the code.').grid(row=3, column=0, sticky='ew', pady=6)
         ttk.Label(body, text='Items to review', style='Subheading.TLabel').grid(row=4, column=0, sticky='w', pady=8)
+        body.rowconfigure(5, weight=1)
         box, self.review_notes = text_view(body, self.body_font, height=14, wrap='word')
-        box.grid(row=5, column=0, sticky='ew')
+        box.grid(row=5, column=0, sticky='nsew')
         review.connect_navigation()
         self.review_code = CodePair(details, self)
         details.add(self.review_code, text='Code')

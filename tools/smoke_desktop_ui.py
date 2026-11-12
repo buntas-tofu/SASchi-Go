@@ -6,6 +6,7 @@ This is UI integration evidence, not native SAS validation.
 from __future__ import annotations
 
 import json
+from copy import deepcopy
 from pathlib import Path
 import tempfile
 import time
@@ -49,6 +50,122 @@ def settle(root):
 
 def dialog(root, title):
     return next(child for child in root.winfo_children() if isinstance(child, tk.Toplevel) and child.title() == title)
+
+
+def check_vertical_growth(root, app):
+    """Increasing window height must increase the active evidence viewport."""
+    options = app.review_code.master
+    cases = [
+        ('run data', app.run_page, app.run_tabs, app.data_view, [app.data_view.tree]),
+        ('run comparison', app.run_page, app.run_tabs, app.comparison_area, [app.comparison_view]),
+        ('run code', app.run_page, app.run_tabs, app.run_code, app.run_code.views),
+        ('run reports', app.run_page, app.run_tabs, app.reports_view.master, [app.reports_view]),
+        ('run record', app.run_page, app.run_tabs, app.receipt_view.master, [app.receipt_view]),
+        ('option code', app.options_page, options, app.review_code, app.review_code.views),
+        ('option plan', app.options_page, options, app.plan_view.master, [app.plan_view]),
+    ]
+    for size in ('12', '16'):
+        app.font_size.set(size)
+        app.resize_fonts()
+        for label, page, notebook, tab, readers in cases:
+            app.tabs.select(page)
+            notebook.select(tab)
+            root.geometry('1180x850')
+            settle(root)
+            short = [reader.winfo_height() for reader in readers]
+            root.geometry('1180x1400')
+            settle(root)
+            tall = [reader.winfo_height() for reader in readers]
+            assert all(b > a + 100 for a, b in zip(short, tall)), (
+                f'{label} at {size}pt does not use added window height: {short} -> {tall}')
+            root.geometry('1180x850')
+            settle(root)
+            shrunk = [reader.winfo_height() for reader in readers]
+            assert all(abs(a - b) <= 2 for a, b in zip(short, shrunk)), (
+                f'{label} at {size}pt does not shrink back: {short} -> {shrunk}')
+            root.geometry('1180x1400')
+            settle(root)
+            regrown = [reader.winfo_height() for reader in readers]
+            assert all(abs(a - b) <= 2 for a, b in zip(tall, regrown)), (
+                f'{label} at {size}pt does not grow back: {tall} -> {regrown}')
+
+        # At a screenshot-sized wide viewport, the table inside the scrolling
+        # comparison page must receive the surplus height too.
+        app.tabs.select(app.run_page)
+        app.run_tabs.select(app.comparison_area)
+        root.geometry('3066x1608')
+        settle(root)
+        short = app.comparison_view.differences.winfo_height()
+        assert app.comparison_view.canvas.winfo_height() >= app.comparison_view.body.winfo_reqheight()
+        root.geometry('3066x1800')
+        settle(root)
+        tall = app.comparison_view.differences.winfo_height()
+        assert tall > short + 100, (
+            f'Comparison values at {size}pt do not use added window height: {short} -> {tall}')
+
+        readiness = next(options.nametowidget(tab) for tab in options.tabs()
+                         if options.tab(tab, 'text') == 'Readiness')
+        for label, page, notebook, tab, reader in (
+                ('setup program', app.setup_page, None, None, app.source_preview),
+                ('option review notes', app.options_page, options, readiness, app.review_notes)):
+            app.tabs.select(page)
+            if notebook is not None:
+                notebook.select(tab)
+            root.geometry('3066x1608')
+            settle(root)
+            scroll = readiness if notebook is not None else page
+            # Both input lists are open in this scenario. At large text sizes
+            # the complete form may be taller than the initial viewport.
+            height = 1648 + max(0, scroll.body.winfo_reqheight() - scroll.canvas.winfo_height())
+            root.geometry(f'3066x{height}')
+            settle(root)
+            assert scroll.canvas.winfo_height() >= scroll.body.winfo_reqheight()
+            short = reader.winfo_height()
+            root.geometry(f'3066x{height + 240}')
+            settle(root)
+            tall = reader.winfo_height()
+            assert tall >= short + 200, (
+                f'{label} at {size}pt does not use added window height: {short} -> {tall}')
+
+        # Long evidence may require scrolling, but removing it at the same
+        # window size must restore usable space instead of retaining a stale
+        # oversized scroll region.
+        app.tabs.select(app.run_page)
+        app.run_tabs.select(app.comparison_area)
+        settle(root)
+        original = deepcopy(app.comparison_view.summary)
+        short_content_height = app.comparison_view.differences.winfo_height()
+        expanded = deepcopy(original)
+        expanded['limits'] = original.get('limits', []) + [
+            'Synthetic import limitation for checking long evidence and scroll recovery.'
+        ] * 200
+        app.comparison_view.show(expanded)
+        settle(root)
+        assert app.comparison_view.canvas.yview()[1] - app.comparison_view.canvas.yview()[0] < .95
+        app.comparison_view.canvas.yview_moveto(1)
+        settle(root)
+        app.comparison_view.show(original)
+        settle(root)
+        restored_height = app.comparison_view.differences.winfo_height()
+        assert abs(short_content_height - restored_height) <= 2, (
+            f'Comparison at {size}pt retained stale content height: '
+            f'{short_content_height} -> {restored_height}')
+        assert app.comparison_view.canvas.yview() == (0.0, 1.0), (
+            f'Comparison at {size}pt retained a scroll offset after content shrank')
+
+    # Text size changes without a resize also participate in layout updates.
+    app.font_size.set('12')
+    app.resize_fonts()
+    settle(root)
+    base_height = app.comparison_view.differences.winfo_height()
+    app.font_size.set('16')
+    app.resize_fonts()
+    settle(root)
+    app.font_size.set('12')
+    app.resize_fonts()
+    settle(root)
+    assert abs(base_height - app.comparison_view.differences.winfo_height()) <= 2
+    print('PASS vertical growth, shrink and regrow across active evidence tabs at 12/16pt', flush=True)
 
 
 def main():
@@ -201,6 +318,8 @@ def main():
             comparison_dialog.destroy()
             print('PASS moved inputs, explicit changed-file choice and saved-run comparison', flush=True)
 
+            check_vertical_growth(root, app)
+
             # Narrow, large-text navigation keeps primary actions in the viewport.
             root.geometry('640x540')
             app.font_size.set('16')
@@ -230,7 +349,7 @@ def main():
             assert review_button.winfo_width() > 100
             print('PASS 640x540 layout with 16-point text and stacked code', flush=True)
             assert not errors, '\n'.join(errors)
-        print('NATIVE UI VERIFIED: 6 workflow groups passed', flush=True)
+        print('NATIVE UI VERIFIED: 7 workflow groups passed', flush=True)
         return 0
     finally:
         root.destroy()
