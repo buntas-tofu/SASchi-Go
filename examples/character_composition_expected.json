@@ -1,0 +1,145 @@
+{
+  "datasets": {
+    "raw": {
+      "schema": {
+        "text": {
+          "type": "character",
+          "length": 8
+        },
+        "backup": {
+          "type": "character",
+          "length": 4
+        },
+        "n": "number"
+      },
+      "rows": [
+        {
+          "text": "Ab|cab  ",
+          "backup": "    ",
+          "n": null
+        },
+        {
+          "text": " a|B    ",
+          "backup": " B  ",
+          "n": 0.0
+        },
+        {
+          "text": "x|ab    ",
+          "backup": "    ",
+          "n": 5.0
+        }
+      ]
+    },
+    "prepared": {
+      "schema": {
+        "text": {
+          "type": "character",
+          "length": 8
+        },
+        "backup": {
+          "type": "character",
+          "length": 4
+        },
+        "n": "number",
+        "upper": {
+          "type": "character",
+          "length": 8
+        },
+        "lower": {
+          "type": "character",
+          "length": 8
+        },
+        "first": {
+          "type": "character",
+          "length": 8
+        },
+        "last": {
+          "type": "character",
+          "length": 8
+        },
+        "words": "number",
+        "at": "number",
+        "found": "number",
+        "tight": {
+          "type": "character",
+          "length": 8
+        },
+        "mapped": {
+          "type": "character",
+          "length": 8
+        },
+        "replaced": {
+          "type": "character",
+          "length": 200
+        },
+        "blank": "number",
+        "gaps": "number",
+        "chosen": {
+          "type": "character",
+          "length": 200
+        }
+      },
+      "rows": [
+        {
+          "text": "Ab|cab  ",
+          "backup": "    ",
+          "n": null,
+          "upper": "AB|CAB  ",
+          "lower": "ab|cab  ",
+          "first": "AB      ",
+          "last": "CAB     ",
+          "words": 2.0,
+          "at": 1.0,
+          "found": 1.0,
+          "tight": "AB      ",
+          "mapped": "12      ",
+          "replaced": "XY                                                                                                                                                                                                      ",
+          "blank": 1.0,
+          "gaps": 2.0,
+          "chosen": "XY                                                                                                                                                                                                      "
+        },
+        {
+          "text": " a|B    ",
+          "backup": " B  ",
+          "n": 0.0,
+          "upper": " A|B    ",
+          "lower": " a|b    ",
+          "first": " A      ",
+          "last": "B       ",
+          "words": 2.0,
+          "at": 0.0,
+          "found": 0.0,
+          "tight": "A       ",
+          "mapped": "1       ",
+          "replaced": "1                                                                                                                                                                                                       ",
+          "blank": 0.0,
+          "gaps": 0.0,
+          "chosen": " B                                                                                                                                                                                                      "
+        },
+        {
+          "text": "x|ab    ",
+          "backup": "    ",
+          "n": 5.0,
+          "upper": "X|AB    ",
+          "lower": "x|ab    ",
+          "first": "X       ",
+          "last": "AB      ",
+          "words": 2.0,
+          "at": 3.0,
+          "found": 3.0,
+          "tight": "X       ",
+          "mapped": "X       ",
+          "replaced": "X                                                                                                                                                                                                       ",
+          "blank": 1.0,
+          "gaps": 1.0,
+          "chosen": "X                                                                                                                                                                                                       "
+        }
+      ]
+    }
+  },
+  "log": [
+    "XY ",
+    "B ",
+    "X "
+  ]
+}

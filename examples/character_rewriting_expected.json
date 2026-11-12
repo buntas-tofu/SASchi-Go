@@ -1,0 +1,78 @@
+{
+  "datasets": {
+    "raw": {
+      "schema": {
+        "text": {
+          "type": "character",
+          "length": 8
+        }
+      },
+      "rows": [
+        {
+          "text": "Ab cab  "
+        },
+        {
+          "text": "A-B_ab  "
+        },
+        {
+          "text": "   abc  "
+        }
+      ]
+    },
+    "edits": {
+      "schema": {
+        "text": {
+          "type": "character",
+          "length": 8
+        },
+        "tight": {
+          "type": "character",
+          "length": 8
+        },
+        "kept": {
+          "type": "character",
+          "length": 8
+        },
+        "mapped": {
+          "type": "character",
+          "length": 8
+        },
+        "changed": {
+          "type": "character",
+          "length": 200
+        }
+      },
+      "rows": [
+        {
+          "text": "Ab cab  ",
+          "tight": "Abcab   ",
+          "kept": "Abab    ",
+          "mapped": "A2 c12  ",
+          "changed": "Ab cXY                                                                                                                                                                                                  "
+        },
+        {
+          "text": "A-B_ab  ",
+          "tight": "A-B_ab  ",
+          "kept": "ABab    ",
+          "mapped": "A-B_12  ",
+          "changed": "A-B_XY                                                                                                                                                                                                  "
+        },
+        {
+          "text": "   abc  ",
+          "tight": "abc     ",
+          "kept": "ab      ",
+          "mapped": "   12c  ",
+          "changed": "   XYc                                                                                                                                                                                                  "
+        }
+      ]
+    }
+  },
+  "log": [
+    "Abcab ",
+    "A2 c12 ",
+    "A-B_ab ",
+    "A-B_12 ",
+    "abc ",
+    "12c "
+  ]
+}

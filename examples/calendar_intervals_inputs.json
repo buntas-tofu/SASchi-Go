@@ -1,0 +1,29 @@
+{
+  "raw": {
+    "schema": {
+      "d": {
+        "type": "number",
+        "format": "DATE9."
+      },
+      "ending": "number",
+      "move": "number"
+    },
+    "rows": [
+      {
+        "d": 21974,
+        "ending": 21975,
+        "move": 1
+      },
+      {
+        "d": 30,
+        "ending": 31,
+        "move": 1
+      },
+      {
+        "d": 22370,
+        "ending": 22339,
+        "move": -1
+      }
+    ]
+  }
+}

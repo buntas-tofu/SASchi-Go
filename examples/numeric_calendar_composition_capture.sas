@@ -1,0 +1,22 @@
+/* Original numeric summary and calendar composition witness. */
+data summary;
+  set raw;
+  present=n(amount,backup);
+  absent=nmiss(amount,backup);
+  chosen=coalesce(amount,backup);
+  average=mean(amount,backup);
+  magnitude=abs(chosen);
+  direction=sign(chosen);
+  up=ceil(ratio);
+  down=floor(ratio);
+  year=year(d);
+  month=month(d);
+  day=day(d);
+  months=intck('MONTH',d,ending);
+  shift=intnx('MONTH',d,move,'S');
+  date_text=put(shift,date9.);
+  value_text=put(average,8.2);
+  output;
+  put date_text;
+  put value_text;
+run;

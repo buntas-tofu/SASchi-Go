@@ -1,0 +1,32 @@
+{
+  "raw": {
+    "schema": {
+      "text": {
+        "type": "character",
+        "length": 8
+      },
+      "backup": {
+        "type": "character",
+        "length": 4
+      },
+      "n": "number"
+    },
+    "rows": [
+      {
+        "text": "Ab|cab",
+        "backup": "",
+        "n": null
+      },
+      {
+        "text": " a|B",
+        "backup": " B ",
+        "n": 0
+      },
+      {
+        "text": "x|ab",
+        "backup": "",
+        "n": 5
+      }
+    ]
+  }
+}

@@ -1,0 +1,141 @@
+[
+  [
+    "missing",
+    [
+      null
+    ],
+    1
+  ],
+  [
+    "missing",
+    [
+      {
+        "missing": "A"
+      }
+    ],
+    1
+  ],
+  [
+    "missing",
+    [
+      "  "
+    ],
+    1
+  ],
+  [
+    "missing",
+    [
+      ""
+    ],
+    1
+  ],
+  [
+    "missing",
+    [
+      0
+    ],
+    0
+  ],
+  [
+    "missing",
+    [
+      " . "
+    ],
+    0
+  ],
+  [
+    "n",
+    [
+      null,
+      {
+        "missing": "_"
+      },
+      0,
+      2
+    ],
+    2
+  ],
+  [
+    "nmiss",
+    [
+      null,
+      {
+        "missing": "Z"
+      },
+      0
+    ],
+    2
+  ],
+  [
+    "cmiss",
+    [
+      null,
+      {
+        "missing": "_"
+      },
+      " ",
+      0,
+      "X"
+    ],
+    3
+  ],
+  [
+    "coalesce",
+    [
+      null,
+      0,
+      7
+    ],
+    0
+  ],
+  [
+    "coalesce",
+    [
+      null,
+      null
+    ],
+    null
+  ],
+  [
+    "coalescec",
+    [
+      "",
+      "  ",
+      " X "
+    ],
+    " X "
+  ],
+  [
+    "coalescec",
+    [
+      "",
+      " "
+    ],
+    ""
+  ],
+  [
+    "mean",
+    [
+      2,
+      4
+    ],
+    3
+  ],
+  [
+    "mean",
+    [
+      null,
+      null
+    ],
+    null
+  ],
+  [
+    "mean",
+    [
+      1,
+      null,
+      2
+    ],
+    1.5
+  ]
+]

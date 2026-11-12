@@ -1,0 +1,21 @@
+/* Original case/search source and row-snapshot witness. */
+data clean;
+  length short $3;
+  set raw;
+  upper=upcase(key);
+  lower=lowcase(key);
+  short=upcase(key);
+  first=index(key,needle);
+  folded=find(key,needle,'IT');
+  after=find(key,'a',2,'I');
+  if first then output;
+  output;
+  put upper;
+  put folded;
+run;
+data reset;
+  key='Q';
+  upper=upcase(key);
+  first=index(key,'q');
+  output;
+run;

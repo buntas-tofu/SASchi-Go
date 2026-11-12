@@ -1,0 +1,29 @@
+{
+  "raw": {
+    "schema": {
+      "key": {
+        "type": "character",
+        "length": 8,
+        "label": "Original key"
+      },
+      "needle": {
+        "type": "character",
+        "length": 2
+      }
+    },
+    "rows": [
+      {
+        "key": "ab AB",
+        "needle": "ab"
+      },
+      {
+        "key": "xx ab",
+        "needle": "AB"
+      },
+      {
+        "key": "A z",
+        "needle": "A"
+      }
+    ]
+  }
+}

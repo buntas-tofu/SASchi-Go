@@ -1,0 +1,72 @@
+{
+  "datasets": {
+    "raw": {
+      "schema": {
+        "text": {
+          "type": "character",
+          "length": 8
+        }
+      },
+      "rows": [
+        {
+          "text": "a||B|  C"
+        },
+        {
+          "text": "  X|Y||Z"
+        },
+        {
+          "text": "A|B     "
+        }
+      ]
+    },
+    "words": {
+      "schema": {
+        "text": {
+          "type": "character",
+          "length": 8
+        },
+        "head": {
+          "type": "character",
+          "length": 8
+        },
+        "tail": {
+          "type": "character",
+          "length": 8
+        },
+        "n": "number",
+        "m": "number"
+      },
+      "rows": [
+        {
+          "text": "a||B|  C",
+          "head": "a       ",
+          "tail": "  C     ",
+          "n": 3.0,
+          "m": 4.0
+        },
+        {
+          "text": "  X|Y||Z",
+          "head": "  X     ",
+          "tail": "Z       ",
+          "n": 3.0,
+          "m": 4.0
+        },
+        {
+          "text": "A|B     ",
+          "head": "A       ",
+          "tail": "B       ",
+          "n": 2.0,
+          "m": 2.0
+        }
+      ]
+    }
+  },
+  "log": [
+    "a ",
+    "C ",
+    "X ",
+    "Z ",
+    "A ",
+    "B "
+  ]
+}

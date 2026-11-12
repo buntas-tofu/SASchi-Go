@@ -1,0 +1,98 @@
+{
+  "datasets": {
+    "raw": {
+      "schema": {
+        "d": {
+          "type": "number",
+          "format": "DATE9."
+        },
+        "ending": "number",
+        "move": "number"
+      },
+      "rows": [
+        {
+          "d": 21974,
+          "ending": 21975,
+          "move": 1
+        },
+        {
+          "d": 30,
+          "ending": 31,
+          "move": 1
+        },
+        {
+          "d": 22370,
+          "ending": 22339,
+          "move": -1
+        }
+      ]
+    },
+    "cohorts": {
+      "schema": {
+        "d": {
+          "type": "number",
+          "format": "DATE9."
+        },
+        "ending": "number",
+        "move": "number",
+        "year": "number",
+        "month": "number",
+        "day": "number",
+        "months": "number",
+        "back": "number",
+        "shifted": "number",
+        "boundary": "number",
+        "shown": {
+          "type": "character",
+          "length": 9
+        }
+      },
+      "rows": [
+        {
+          "d": 21974,
+          "ending": 21975,
+          "move": 1,
+          "year": 2020.0,
+          "month": 2.0,
+          "day": 29.0,
+          "months": 1.0,
+          "back": -1.0,
+          "shifted": 22003,
+          "boundary": 22005,
+          "shown": "29MAR2020"
+        },
+        {
+          "d": 30,
+          "ending": 31,
+          "move": 1,
+          "year": 1960.0,
+          "month": 1.0,
+          "day": 31.0,
+          "months": 1.0,
+          "back": -1.0,
+          "shifted": 59,
+          "boundary": 59,
+          "shown": "29FEB1960"
+        },
+        {
+          "d": 22370,
+          "ending": 22339,
+          "move": -1,
+          "year": 2021.0,
+          "month": 3.0,
+          "day": 31.0,
+          "months": -1.0,
+          "back": 1.0,
+          "shifted": 22339,
+          "boundary": 22339,
+          "shown": "28FEB2021"
+        }
+      ]
+    }
+  },
+  "log": [
+    "29MAR2020 ",
+    "29FEB1960 ",
+    "28FEB2021 "
+  ]
+}

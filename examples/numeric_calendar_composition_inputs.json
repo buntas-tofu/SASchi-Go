@@ -1,0 +1,38 @@
+{
+  "raw": {
+    "schema": {
+      "amount": "number",
+      "backup": "number",
+      "ratio": "number",
+      "d": "number",
+      "ending": "number",
+      "move": "number"
+    },
+    "rows": [
+      {
+        "amount": null,
+        "backup": 4,
+        "ratio": -1.25,
+        "d": 21974,
+        "ending": 21975,
+        "move": 1
+      },
+      {
+        "amount": -2,
+        "backup": 6,
+        "ratio": 2.5,
+        "d": 30,
+        "ending": 31,
+        "move": 1
+      },
+      {
+        "amount": null,
+        "backup": null,
+        "ratio": 1.0000000000001,
+        "d": 22370,
+        "ending": 22339,
+        "move": -1
+      }
+    ]
+  }
+}

@@ -3,6 +3,34 @@
 Status: development changes with original pins and Python/base-R evidence; no
 live SAS comparison. Branch synchronization is separate from a release.
 
+- Add complete character/missing and numeric/calendar composition programs,
+  independent whole-program R witnesses,typed ordered comparisons and actual
+  CLI receipt checks. Preserve all earlier fixture source and admission boundaries.
+
+- Repair this wave's wrong-output CLI controls to use fresh output directories
+  and assert the actual comparison-failure receipts,including column order.
+
+- Add DS-101 integral-date YEAR/MONTH/DAY and bounded discrete INTCK/B-E-S INTNX
+  source calls, preserving earlier reference and week-callback contracts.
+
+- Add DS-100 bounded ABS/SIGN and fuzzed CEIL/FLOOR, including minimum-normal,
+  near-zero, malformed-plan and complete formatted-program evidence.
+
+- Add DS-099 typed missing-value functions and row summaries, preserving numeric
+  versus character missing, tagged classification and bounded row-MEAN semantics.
+
+- Add DS-098 bounded COMPRESS, TRANSLATE and TRANWRD with independent byte-editing
+  witnesses, exact stored widths, blank replacement and atomic overflow controls.
+
+- Add DS-097 explicit-delimiter SCAN/COUNTW with optional M, negative positions,
+  fixed-width storage and current SAS9.4 P11 source-derived SCAN widths. Independent
+  hand/base-R, source/portable, whole-program and actual CLI controls gate the slice.
+
+- Add DS-096 bounded ASCII UPCASE/LOWCASE and one-based INDEX/FIND source
+  assignments, with fixed descriptors, forward literal search controls, independent
+  base-R evidence and original complete-program/CLI comparisons. Preserve existing
+  numeric array names and the earlier LENGTH-before-SET source boundary.
+
 - Retire `kb01/`. Its lone file was a byte-identical copy of
   `sas_semantics.py`, so the module is now the single source of the semantics
   reference; the readable plain-text twin belongs to the reference home, which

@@ -1,0 +1,139 @@
+{
+  "datasets": {
+    "raw": {
+      "schema": {
+        "key": {
+          "type": "character",
+          "length": 8,
+          "label": "Original key"
+        },
+        "needle": {
+          "type": "character",
+          "length": 2
+        }
+      },
+      "rows": [
+        {
+          "key": "ab AB   ",
+          "needle": "ab"
+        },
+        {
+          "key": "xx ab   ",
+          "needle": "AB"
+        },
+        {
+          "key": "A z     ",
+          "needle": "A "
+        }
+      ]
+    },
+    "clean": {
+      "schema": {
+        "short": {
+          "type": "character",
+          "length": 3
+        },
+        "key": {
+          "type": "character",
+          "length": 8,
+          "label": "Original key"
+        },
+        "needle": {
+          "type": "character",
+          "length": 2
+        },
+        "upper": {
+          "type": "character",
+          "length": 8
+        },
+        "lower": {
+          "type": "character",
+          "length": 8
+        },
+        "first": "number",
+        "folded": "number",
+        "after": "number"
+      },
+      "rows": [
+        {
+          "short": "AB ",
+          "key": "ab AB   ",
+          "needle": "ab",
+          "upper": "AB AB   ",
+          "lower": "ab ab   ",
+          "first": 1.0,
+          "folded": 1.0,
+          "after": 4.0
+        },
+        {
+          "short": "AB ",
+          "key": "ab AB   ",
+          "needle": "ab",
+          "upper": "AB AB   ",
+          "lower": "ab ab   ",
+          "first": 1.0,
+          "folded": 1.0,
+          "after": 4.0
+        },
+        {
+          "short": "XX ",
+          "key": "xx ab   ",
+          "needle": "AB",
+          "upper": "XX AB   ",
+          "lower": "xx ab   ",
+          "first": 0.0,
+          "folded": 4.0,
+          "after": 4.0
+        },
+        {
+          "short": "A Z",
+          "key": "A z     ",
+          "needle": "A ",
+          "upper": "A Z     ",
+          "lower": "a z     ",
+          "first": 1.0,
+          "folded": 1.0,
+          "after": 0.0
+        },
+        {
+          "short": "A Z",
+          "key": "A z     ",
+          "needle": "A ",
+          "upper": "A Z     ",
+          "lower": "a z     ",
+          "first": 1.0,
+          "folded": 1.0,
+          "after": 0.0
+        }
+      ]
+    },
+    "reset": {
+      "schema": {
+        "key": {
+          "type": "character",
+          "length": 1
+        },
+        "upper": {
+          "type": "character",
+          "length": 1
+        },
+        "first": "number"
+      },
+      "rows": [
+        {
+          "key": "Q",
+          "upper": "Q",
+          "first": 0.0
+        }
+      ]
+    }
+  },
+  "log": [
+    "AB AB ",
+    "1 ",
+    "XX AB ",
+    "4 ",
+    "A Z ",
+    "1 "
+  ]
+}

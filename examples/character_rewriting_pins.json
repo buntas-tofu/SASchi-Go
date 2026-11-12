@@ -1,0 +1,106 @@
+[
+  [
+    "compress",
+    [
+      " A b  "
+    ],
+    "Ab"
+  ],
+  [
+    "compress",
+    [
+      "AbAa",
+      "a",
+      "I"
+    ],
+    "b"
+  ],
+  [
+    "compress",
+    [
+      "AbAa",
+      "a",
+      "K"
+    ],
+    "a"
+  ],
+  [
+    "compress",
+    [
+      "AbAa",
+      "a",
+      "IK"
+    ],
+    "AAa"
+  ],
+  [
+    "compress",
+    [
+      "   "
+    ],
+    ""
+  ],
+  [
+    "translate",
+    [
+      "abca",
+      "XY",
+      "ab"
+    ],
+    "XYcX"
+  ],
+  [
+    "translate",
+    [
+      "ABab",
+      "12",
+      "ab"
+    ],
+    "AB12"
+  ],
+  [
+    "tranwrd",
+    [
+      "ababa",
+      "ab",
+      "X"
+    ],
+    "XXa"
+  ],
+  [
+    "tranwrd",
+    [
+      "abc",
+      "b",
+      ""
+    ],
+    "a c"
+  ],
+  [
+    "tranwrd",
+    [
+      "a b ",
+      "b ",
+      "X"
+    ],
+    "a X"
+  ],
+  [
+    "tranwrd",
+    [
+      "abc",
+      "b ",
+      "X"
+    ],
+    "abc"
+  ],
+  [
+    "tranwrd",
+    [
+      "aaa",
+      "a",
+      "aa"
+    ],
+    "aaaaaa"
+  ]
+]

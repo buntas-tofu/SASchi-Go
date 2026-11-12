@@ -79,7 +79,7 @@ class IntTests(unittest.TestCase):
             with self.assertRaises(ValueError):run_plan(p,allow_partial=True)
 
     def test_unwired_related_calls_and_legacy_targets_stay_refused(self):
-        for expr in ('int()','int(1,2)','intz(2.5)','floor(2.5)'):
+        for expr in ('int()','int(1,2)','intz(2.5)','floorz(2.5)','ceilz(2.5)'):
             self.assertTrue(compile_plan('data d; x='+expr+'; run;').blocked)
         for target,body in (('cpp','x=int(2.5);'),('python','x=int(2.5); put _all_;')):
             job=build_job('data _null_; '+body+' run;',target=target)

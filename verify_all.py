@@ -149,6 +149,14 @@ VERIFIERS = [
     ("postal-reference", HERE / "examples" / "verify_postal_reference.py"),
     ("postal-function", HERE / "examples" / "verify_postal_function.py"),
     ("vendor-postal-function", HERE / "examples" / "verify_vendor_postal_function.py"),
+    ("case-search", HERE / "examples" / "verify_case_search.py"),
+    ("word-functions", HERE / "examples" / "verify_word_functions.py"),
+    ("character-rewriting", HERE / "examples" / "verify_character_rewriting.py"),
+    ("missing-summaries", HERE / "examples" / "verify_missing_summaries.py"),
+    ("numeric-helpers", HERE / "examples" / "verify_numeric_helpers.py"),
+    ("calendar-intervals", HERE / "examples" / "verify_calendar_intervals.py"),
+    ("character-function-composition", HERE / "examples" / "verify_character_composition.py"),
+    ("numeric-calendar-composition", HERE / "examples" / "verify_numeric_calendar_composition.py"),
 ]
 
 # The translator suites, run as unittest modules. They carry the same weight as
@@ -233,6 +241,13 @@ SUITES = [
     ("suite-data-files", "saschi.test_data_files"),
     ("suite-workspace", "saschi.test_workspace"),
     ("suite-desktop-service", "saschi.test_desktop_service"),
+    ("suite-case-search", "saschi.test_case_search"),
+    ("suite-word-functions", "saschi.test_word_functions"),
+    ("suite-character-rewriting", "saschi.test_character_rewriting"),
+    ("suite-missing-summaries", "saschi.test_missing_summaries"),
+    ("suite-numeric-helpers", "saschi.test_numeric_helpers"),
+    ("suite-calendar-intervals", "saschi.test_calendar_intervals"),
+    ("suite-function-wave-composition", "saschi.test_function_wave_composition"),
 ]
 
 

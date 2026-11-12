@@ -1,0 +1,76 @@
+{
+  "datasets": {
+    "raw": {
+      "schema": {
+        "x": "number"
+      },
+      "rows": [
+        {
+          "x": -1.25
+        },
+        {
+          "x": 0.0
+        },
+        {
+          "x": 2.5
+        },
+        {
+          "x": null
+        }
+      ]
+    },
+    "metrics": {
+      "schema": {
+        "x": "number",
+        "magnitude": "number",
+        "direction": "number",
+        "ceiling": "number",
+        "floor": "number",
+        "shown": {
+          "type": "character",
+          "length": 8
+        }
+      },
+      "rows": [
+        {
+          "x": -1.25,
+          "magnitude": 1.25,
+          "direction": -1.0,
+          "ceiling": -1.0,
+          "floor": -2.0,
+          "shown": "    1.25"
+        },
+        {
+          "x": 0.0,
+          "magnitude": 0.0,
+          "direction": 0.0,
+          "ceiling": 0.0,
+          "floor": 0.0,
+          "shown": "    0.00"
+        },
+        {
+          "x": 2.5,
+          "magnitude": 2.5,
+          "direction": 1.0,
+          "ceiling": 3.0,
+          "floor": 2.0,
+          "shown": "    2.50"
+        },
+        {
+          "x": null,
+          "magnitude": null,
+          "direction": null,
+          "ceiling": null,
+          "floor": null,
+          "shown": "       ."
+        }
+      ]
+    }
+  },
+  "log": [
+    "1.25 ",
+    "0.00 ",
+    "2.50 ",
+    ". "
+  ]
+}

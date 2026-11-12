@@ -18,13 +18,36 @@ policies. Receipts record what passed for the source and environment tested.
 ## Current verification
 
 Status: version 0.4.0 development evidence for maintainer review, updated on
-2026-11-08. The current registry contains 111 fixture gates and77 suites, including
+2026-11-12. The current registry contains 119 fixture gates and84 suites, including
 the desktop workflow, data importer and saved-evidence suites. The full receipt
 records the discovered tests and their outcomes. With the pinned Roku corpus present, `python verify_all.py` records the
 source-bound unified verdict. Synthesis separately checks 60 faithful cases and
 60 naive variants. The accepted entry PR65/mainac9d800 covered93 gates,64 suites and
 1446 tests with zero skips; current passing outcomes require a matching receipt.
 Live-SAS validation remains outstanding.
+
+[The approved DATA-step wave](docs/NEXT_FUNCTION_WAVE.md) is implemented in six
+bounded profiles,with [two complete composition programs](docs/FUNCTION_WAVE_COMPOSITION.md).
+Its first profile is the
+[bounded case/search profile](docs/CASE_SEARCH.md). Its current full receipt
+decides acceptance; original source and base-R evidence remain separate from
+live SAS validation.
+
+[Explicit word parsing](docs/WORD_FUNCTIONS.md) adds SCAN/COUNTW with an explicit
+delimiter set and optional M. The source-width SCAN policy is pinned to the current
+SAS9.4 P11 reference rather than the older200-byte default.
+
+[Character rewriting](docs/CHARACTER_REWRITING.md) adds bounded COMPRESS, TRANSLATE
+and TRANWRD, including fixed storage widths and atomic overflow refusal.
+
+[Typed missing values and row summaries](docs/MISSING_SUMMARIES.md) add strict
+classification, first-present selection and bounded integral-input MEAN.
+
+[Numeric helpers](docs/NUMERIC_HELPERS.md) add ABS/SIGN and fuzzed CEIL/FLOOR
+with explicit finite-domain and subnormal boundaries.
+
+[Calendar components and intervals](docs/CALENDAR_INTERVALS.md) add integral-date
+YEAR/MONTH/DAY and discrete INTCK plus B/E/S INTNX source assignments.
 
 [FMT-01 date foundations](docs/DATE_FOUNDATIONS.md) and the separate
 [DATE9/nested-date source profile](docs/DATE_PROGRAM.md) add canonical input,
@@ -222,7 +245,7 @@ fixed expected output and base-R evidence. Special missings retain their tags.
   sibling plus a fixture verifier (`verify_*.py`). Run any verifier directly,
   or all of them through [verify_all.py](verify_all.py).
 - [docs/sasconversionrulebook.json](docs/sasconversionrulebook.json) : the machine-consumable translation
-  rulebook. 145 rules with equivalence classes (EXACT,
+  rulebook. 151 rules with equivalence classes (EXACT,
   EQUIVALENT-WITH-SETTINGS, APPROXIMATE, NO-DIRECT-EQUIVALENT), required
   settings, forbidden patterns, and validation tests.
 - [docs/capability-manifest.json](docs/capability-manifest.json) : the coverage manifest. Enumerated entries of

@@ -13,15 +13,27 @@ reconciliation. Rankings,
 diagnostic categories and projected unlocks are explicitly analyst inferences.
 This document does not authorize additional implementation or publication scope.
 
+## Selected planning direction
+
+On 2026-11-11 the principal selected reusable DATA-step function families as the
+next planning focus. The [function-wave plan](NEXT_FUNCTION_WAVE.md) proposes
+six groups and 25 named targets, with environment restoration and a fresh passing
+baseline first. The principal subsequently approved that plan on the same date.
+Implementation proceeds in its recorded order with separate acceptance evidence;
+approval adds no capability or verification claim. The six bounded profiles and
+two original composition programs are now implemented; their
+[evidence register](FUNCTION_WAVE_COMPOSITION.md) requires the matching current
+full verification and workload receipts.
+
 ## Inventory reconciled against actual evidence
 
-The golden command registers111 fixture runners,74 application/translator suites and1
+The golden command registers119 fixture runners,84 application/translator suites and1
 synthesis runner. These are registration counts, not passing outcomes. The
 source-bound full receipt records the discovered test count. A source-bound full receipt records actual skips and
 results. Accepted run entry PR66/main0abf161 contained97 fixtures,65 suites and1491
 tests with zero skips,60 faithful synthesis checks and60 naive controls. The
 separate1k workload checks total39:18 ledger and21 text. These counts have
-different units. Neither145 rulebook rules nor186 golden-command runners is a
+different units. Neither151 rulebook rules nor204 golden-command runners is a
 SAS capability denominator.
 
 [The capability manifest](capability-manifest.json) still enumerates108 statements
