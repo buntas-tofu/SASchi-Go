@@ -67,3 +67,14 @@ results and the comparison report remain exportable without that dependency.
 This is an explicit implementation choice for the architecture-independent Debian
 package. A general DuckDB query workspace and general R/SQL emission remain
 future engine and interface work, visibly unavailable in this implementation.
+
+## Active pane sizing correction
+
+The principal reported on 2026-11-11 that the active tab kept its short height
+when the window was maximized. The scrolling body now fills at least the canvas
+viewport while retaining its natural minimum for readable small windows. Spare
+height reaches the active notebook, code and report readers, comparison table,
+setup preview and review notes. Resize checks cover growing, shrinking and
+regrowing windows, larger fonts, and changing content at a fixed window size.
+The package revision is `0.4.0+desktop3`; conversion and saved evidence behavior
+are unchanged by this presentation correction.

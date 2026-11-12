@@ -9,7 +9,7 @@ import tomllib
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
-DESKTOP_REVISION = 'desktop2'
+DESKTOP_REVISION = 'desktop3'
 
 
 def build(destination):

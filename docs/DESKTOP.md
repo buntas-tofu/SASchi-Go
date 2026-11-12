@@ -9,7 +9,7 @@ No live SAS equivalence or completed human usability claim is made.
 Install the locally built package with Ubuntu's package manager:
 
 ```sh
-sudo apt install ./saschi-desktop_0.4.0+desktop2_all.deb
+sudo apt install ./saschi-desktop_0.4.0+desktop3_all.deb
 ```
 
 Launch SASchi-Go from Applications, or run `saschi-desktop`. The package uses
@@ -60,7 +60,9 @@ uses the reviewed snapshots. Changed files require another review.
 
 The interface offers 12, 14 and 16 point text, including code. Code panels have
 drag handles and stack when the window narrows. Tables scroll horizontally and
-page through observations without reducing text size.
+page through observations without reducing text size. The active tab and its
+readers grow vertically with the window. Short windows retain scrolling without
+keeping a large scroll area after the window or content shrinks.
 
 ## Import fidelity and limits
 
@@ -127,7 +129,7 @@ Build without downloading dependencies, using an interpreter with pip, setuptool
 and wheel already installed:
 
 ```sh
-python3 tools/build_desktop_deb.py --output output/saschi-desktop_0.4.0+desktop2_all.deb
+python3 tools/build_desktop_deb.py --output output/saschi-desktop_0.4.0+desktop3_all.deb
 python3 -m unittest saschi.test_desktop saschi.test_desktop_service saschi.test_data_files saschi.test_workspace
 ```
 
