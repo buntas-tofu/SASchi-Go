@@ -1,0 +1,11 @@
+data quantities;
+set raw;
+raised=ceilz(x);
+lowered=floorz(x);
+integral=intz(x);
+nearest=roundz(x,unit);
+remainder=modz(x,divisor);
+output;
+put raised;
+put integral;
+run;

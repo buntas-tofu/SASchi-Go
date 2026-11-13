@@ -4887,6 +4887,196 @@
       "sources": [
         "https://documentation.sas.com/api/docsets/lefunctionsref/9.4/content/lefunctionsref.pdf"
       ]
+    },
+    {
+      "rule_id": "DS-109",
+      "scope": "Bounded ordinary DATA-step scalar assignments",
+      "sas_pattern": "PROPCASE,QUOTE,DEQUOTE,COUNTC,TRANSTRN direct primitive calls",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "strategy": "Canonical bounded reference helpers with independent source/portable type and width checks."
+      },
+      "r_target": {
+        "strategy": "Independent base-R kernels, hand pins and complete original-program witness."
+      },
+      "required_settings": [
+        "Printable ASCII only. Primitive direct assignments first. PROPCASE requires explicit 1..64-byte delimiters, argument-derived destination. QUOTE uses default double or a literal single/double quote, output <=200 bytes and inferred width 200; destination exhaustion refuses diagnostic/error state rather than truncating. DEQUOTE scans doubled quotes, terminates at the first unpaired quote and retains the remainder when no closing quote occurs; width inherits its argument. COUNTC uses explicit <=64-byte character set and literal I/V/T modifiers, at most three bytes, including empty-after-T returns zero. TRANSTRN nonoverlapping exact-byte matches, target 1..64 bytes, replacement 0..64 helper bytes, result <=200 bytes and inferred width 200. Direct empty literals remain held. Zero-length replacement source form is deferred to the consumer phase. Ordinary character assignment truncates except QUOTE buffer exhaustion.",
+        "Printable ASCII character storage, ordinary version 2 DATA profile, eager literal/descriptor checks and atomic reached failures."
+      ],
+      "forbidden_patterns": [
+        "Locale, Unicode, default PROPCASE delimiters, COUNTC class/state modifiers, implicit conversion, nested calls and new profiles."
+      ],
+      "silent_difference_checks": [
+        "Complete values/types/schema/widths/metadata/table/column/row order and qualified logical records across runtime, emitted Python and actual CLI. Empty/skipped paths, invalid portable forms, deterministic emission, caller nonmutation and late failure."
+      ],
+      "validation_test": "examples/verify_text_quoting.py",
+      "confidence": "Conditional on matching source-stable full repository/base-R and unchanged workload receipts; no native SAS comparison.",
+      "sources": [
+        "https://documentation.sas.com/api/docsets/lefunctionsref/9.4/content/lefunctionsref.pdf"
+      ]
+    },
+    {
+      "rule_id": "DS-110",
+      "scope": "Bounded ordinary DATA-step scalar assignments",
+      "sas_pattern": "ANYLOWER,ANYUPPER,ANYPUNCT,ANYXDIGIT,NOTALPHA,NOTALNUM,NOTSPACE direct primitive calls",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "strategy": "Canonical bounded reference helpers with independent source/portable type and width checks."
+      },
+      "r_target": {
+        "strategy": "Independent base-R kernels, hand pins and complete original-program witness."
+      },
+      "required_settings": [
+        "Printable ASCII 0..32767 helper bytes, nonempty primitive literals or descriptor-backed source operands. Seven exact masks; one-based first match, no match/zero/beyond-end start returns zero; negative starts search left from min(abs(start),length). Starts integral within +/-2147483647. Missing start means 1 except ANYPUNCT missing start is held. Stored padding participates.",
+        "Printable ASCII character storage, ordinary version 2 DATA profile, eager literal/descriptor checks and atomic reached failures."
+      ],
+      "forbidden_patterns": [
+        "Locale, nonprintable bytes, multilingual functions, fractional starts, tagged missing and all new consumers. ANYPUNCT missing start is deliberately refused because pinned PDF page 261 says both begin-at-start and return-zero for missing. No native observation resolves that documentary conflict. Earlier character-validation contract remains unchanged."
+      ],
+      "silent_difference_checks": [
+        "Complete values/types/schema/widths/metadata/table/column/row order and qualified logical records across runtime, emitted Python and actual CLI. Empty/skipped paths, invalid portable forms, deterministic emission, caller nonmutation and late failure."
+      ],
+      "validation_test": "examples/verify_ascii_positions.py",
+      "confidence": "Conditional on matching source-stable full repository/base-R and unchanged workload receipts; no native SAS comparison.",
+      "sources": [
+        "https://documentation.sas.com/api/docsets/lefunctionsref/9.4/content/lefunctionsref.pdf"
+      ]
+    },
+    {
+      "rule_id": "DS-111",
+      "scope": "Bounded ordinary DATA-step scalar assignments",
+      "sas_pattern": "IFN,IFC,CHOOSEN,CHOOSEC,WHICHN,WHICHC direct primitive calls",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "strategy": "Canonical bounded reference helpers with independent source/portable type and width checks."
+      },
+      "r_target": {
+        "strategy": "Independent base-R kernels, hand pins and complete original-program witness."
+      },
+      "required_settings": [
+        "Direct primitive arguments. All reached arguments validate eagerly, including unselected values. Finite numeric operands within +/-1000000 and ordinary missing. IFN/IFC use true/nonzero, false/zero and optional missing branch; missing without fourth argument selects the false branch. CHOOSE uses 1..31 candidates and a nonzero signed integral index whose absolute value is within list length. Zero/missing/fractional/out-of-range index forms refuse diagnostic/error state. Character operands printable ASCII <=200 bytes; IFC and CHOOSEC infer 200-byte destinations. WHICHC compares padded character equality, WHICHN numeric equality; first duplicate wins, missing search returns ordinary missing, no match zero.",
+        "Printable ASCII character storage, ordinary version 2 DATA profile, eager literal/descriptor checks and atomic reached failures."
+      ],
+      "forbidden_patterns": [
+        "Tagged missing, implicit conversions, OF lists, queues, nested arguments and profile joins."
+      ],
+      "silent_difference_checks": [
+        "Complete values/types/schema/widths/metadata/table/column/row order and qualified logical records across runtime, emitted Python and actual CLI. Empty/skipped paths, invalid portable forms, deterministic emission, caller nonmutation and late failure."
+      ],
+      "validation_test": "examples/verify_selection_lookup.py",
+      "confidence": "Conditional on matching source-stable full repository/base-R and unchanged workload receipts; no native SAS comparison.",
+      "sources": [
+        "https://documentation.sas.com/api/docsets/lefunctionsref/9.4/content/lefunctionsref.pdf"
+      ]
+    },
+    {
+      "rule_id": "DS-112",
+      "scope": "Bounded ordinary DATA-step scalar assignments",
+      "sas_pattern": "LARGEST,SMALLEST,CSS,USS direct primitive calls",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "strategy": "Canonical bounded reference helpers with independent source/portable type and width checks."
+      },
+      "r_target": {
+        "strategy": "Independent base-R kernels, hand pins and complete original-program witness."
+      },
+      "required_settings": [
+        "1..32 bounded integral values within +/-1000000 or ordinary missing. Validate all values eagerly. Rank is an integral k in 1..argument-count; missing, zero, negative, fractional and above-total ranks refuse error state. A valid rank above nonmissing count returns ordinary missing; ties occupy distinct ranks. All-missing CSS/USS return missing, singleton CSS zero. USS exact integer sum-of-squares. CSS canonical binary64 quotient of exact integer n*sum(x*x)-sum(x)^2 divided by n. Independent R uses pairwise squared differences divided by n; all intermediate integers remain below 2^51. Exact structure/CLI results and exact numeric equality in this domain, with no transfer of VAR/STD tolerance.",
+        "Printable ASCII character storage, ordinary version 2 DATA profile, eager literal/descriptor checks and atomic reached failures."
+      ],
+      "forbidden_patterns": [
+        "OF lists, tagged missing, fractional measurements, wider bounds, arbitrary numerical statistics and unqualified consumers."
+      ],
+      "silent_difference_checks": [
+        "Complete values/types/schema/widths/metadata/table/column/row order and qualified logical records across runtime, emitted Python and actual CLI. Empty/skipped paths, invalid portable forms, deterministic emission, caller nonmutation and late failure."
+      ],
+      "validation_test": "examples/verify_rank_squares.py",
+      "confidence": "Conditional on matching source-stable full repository/base-R and unchanged workload receipts; no native SAS comparison.",
+      "sources": [
+        "https://documentation.sas.com/api/docsets/lefunctionsref/9.4/content/lefunctionsref.pdf"
+      ]
+    },
+    {
+      "rule_id": "DS-113",
+      "scope": "Bounded ordinary DATA-step scalar assignments",
+      "sas_pattern": "CEILZ,FLOORZ,INTZ,ROUNDZ,MODZ direct primitive calls",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "strategy": "Canonical bounded reference helpers with independent source/portable type and width checks."
+      },
+      "r_target": {
+        "strategy": "Independent base-R kernels, hand pins and complete original-program witness."
+      },
+      "required_settings": [
+        "Numeric binary64 operands, absolute value <=1000000 and either zero or >=2^-40; ordinary missing propagates after validating every argument. CEILZ/FLOORZ/INTZ perform mathematical integer rounding with no fuzz. ROUNDZ defaults to unit 1 and otherwise admits positive power-of-two units 2^-10..2^10; exact half ties select an even multiple, adjacent floats remain distinct. MODZ independently admits signed power-of-two divisors with the same magnitudes, nonzero result has dividend sign and no fuzz. This slice has exact scaling and remainders. New helper results canonicalize numeric zero to +0, a stated transport policy with signed-zero tests, not an IEEE zero-sign claim about native SAS. Exact numeric/CLI comparison.",
+        "Printable ASCII character storage, ordinary version 2 DATA profile, eager literal/descriptor checks and atomic reached failures."
+      ],
+      "forbidden_patterns": [
+        "Decimal or arbitrary divisors/rounding units, smaller nonzero operands, overflow, underflow, tagged missing, implicit conversions and new consumers."
+      ],
+      "silent_difference_checks": [
+        "Complete values/types/schema/widths/metadata/table/column/row order and qualified logical records across runtime, emitted Python and actual CLI. Empty/skipped paths, invalid portable forms, deterministic emission, caller nonmutation and late failure."
+      ],
+      "validation_test": "examples/verify_zero_fuzz_numeric.py",
+      "confidence": "Conditional on matching source-stable full repository/base-R and unchanged workload receipts; no native SAS comparison.",
+      "sources": [
+        "https://documentation.sas.com/api/docsets/lefunctionsref/9.4/content/lefunctionsref.pdf"
+      ]
+    },
+    {
+      "rule_id": "DS-114",
+      "scope": "Bounded ordinary DATA-step scalar assignments",
+      "sas_pattern": "HMS,YYQ,DATEJUL,JULDATE7 direct primitive calls",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "strategy": "Canonical bounded reference helpers with independent source/portable type and width checks."
+      },
+      "r_target": {
+        "strategy": "Independent base-R kernels, hand pins and complete original-program witness."
+      },
+      "required_settings": [
+        "Integral HMS hours0..23, minutes/seconds0..59, resulting seconds0..86399. YYQ uses explicit four-digit years1753..3999 and quarters1..4, first civil day of the quarter. DATEJUL uses strict integral seven-digit yyyyddd with valid day-of-year and leap-year checks in1753..3999. JULDATE7 accepts integral SAS epoch days in the same civil date range and returns numeric yyyyddd. Ordinary missing propagates after every operand is validated; invalid components refuse. Full ordered original output has independent hand/base-R expectations.",
+        "Printable ASCII character storage, ordinary version 2 DATA profile, eager literal/descriptor checks and atomic reached failures."
+      ],
+      "forbidden_patterns": [
+        "Two-digit years, YEARCUTOFF, JULDATE, system clocks, timezones, fractional/normalized time components and new consumers."
+      ],
+      "silent_difference_checks": [
+        "Complete values/types/schema/widths/metadata/table/column/row order and qualified logical records across runtime, emitted Python and actual CLI. Empty/skipped paths, invalid portable forms, deterministic emission, caller nonmutation and late failure."
+      ],
+      "validation_test": "examples/verify_calendar_constructors.py",
+      "confidence": "Conditional on matching source-stable full repository/base-R and unchanged workload receipts; no native SAS comparison.",
+      "sources": [
+        "https://documentation.sas.com/api/docsets/lefunctionsref/9.4/content/lefunctionsref.pdf"
+      ]
+    },
+    {
+      "rule_id": "DS-115",
+      "scope": "Exact separately marked function-consumers-v2 ordinary DATA program",
+      "sas_pattern": "Finite IFC/NOTALNUM zero comparison, IFN false-branch LARGEST, CATS PROPCASE/DEQUOTE, TRANSTRN TRIMN(single blank), selected validator/MISSING IF comparisons",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "strategy": "Canonical bounded reference helpers with independent source/portable type and width checks."
+      },
+      "r_target": {
+        "strategy": "Independent base-R kernels, hand pins and complete original-program witness."
+      },
+      "required_settings": [
+        "Separately marked function-consumers-v2 ordinary DATA steps. Root IFC with NOTALNUM(primitive)=0 or EQ 0 and primitive character choices; root IFN(primitive,primitive,LARGEST(primitive,...primitive)); root CATS with primitive items or one primitive-argument PROPCASE/DEQUOTE item, at least one such new call; root TRANSTRN(primitive,primitive,TRIMN(single literal blank)). Selected direct validator/MISSING IF comparisons use existing numeric aliases and right literal integer0..32767. Other direct calls retain their own family domains. Reached selector arguments evaluate eagerly; statement branches remain reached-only. Static literal/descriptor checks run on empty/skipped paths. New stored IFC/CATS/TRANSTRN widths200.",
+        "Engineering caps:16ordinaryDATAsteps,256operations/step,128calls/step,16384containers/step,structuraldepth64,two call levels,one driving input and4096provenance rows. Exact version2 program/step/operation/marker fields.",
+        "Retain function-consumers-v1 bytes and source selection. Eager reached call arguments; reached-only statement IF/ELSE IF; static literal/descriptor checks on skipped/empty paths."
+      ],
+      "forbidden_patterns": [
+        "General WHERE, subsetting IF, compound Boolean, bare-call truth, swapped comparisons, deeper/unlisted nesting, loops, arrays, queues, BY, RETAIN, multiple driving inputs, SQL, C++, mixed marker versions and specialized numeric profiles."
+      ],
+      "silent_difference_checks": [
+        "Complete values/types/schema/widths/metadata/table/column/row order and qualified logical records across runtime, emitted Python and actual CLI. Empty/skipped paths, invalid portable forms, deterministic emission, caller nonmutation and late failure."
+      ],
+      "validation_test": "examples/verify_selection_consumers.py",
+      "confidence": "Conditional on matching source-stable full repository/base-R and unchanged workload receipts; no native SAS comparison.",
+      "sources": [
+        "https://documentation.sas.com/api/docsets/lefunctionsref/9.4/content/lefunctionsref.pdf"
+      ]
     }
   ],
   "runtime_capabilities": {

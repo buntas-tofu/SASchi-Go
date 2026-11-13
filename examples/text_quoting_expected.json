@@ -1,0 +1,144 @@
+{
+  "datasets": {
+    "raw": {
+      "schema": {
+        "label": {
+          "type": "character",
+          "length": 12,
+          "label": "Supplied label"
+        },
+        "code": {
+          "type": "character",
+          "length": 10
+        }
+      },
+      "rows": [
+        {
+          "label": " aB-cD      ",
+          "code": "\"A\"\"B\"x   "
+        },
+        {
+          "label": "ALPHA  beta ",
+          "code": "plain     "
+        },
+        {
+          "label": "            ",
+          "code": "\"\"tail    "
+        },
+        {
+          "label": "9ABC-XYZ    ",
+          "code": "'a''b'gone"
+        },
+        {
+          "label": "A--b        ",
+          "code": "\"open     "
+        },
+        {
+          "label": "mixed CASE  ",
+          "code": "\"Q\"       "
+        }
+      ]
+    },
+    "quoted": {
+      "schema": {
+        "label": {
+          "type": "character",
+          "length": 12,
+          "label": "Supplied label"
+        },
+        "code": {
+          "type": "character",
+          "length": 10
+        },
+        "proper": {
+          "type": "character",
+          "length": 12
+        },
+        "quoted": {
+          "type": "character",
+          "length": 200
+        },
+        "unquoted": {
+          "type": "character",
+          "length": 10
+        },
+        "marks": "number",
+        "folded": "number",
+        "rewritten": {
+          "type": "character",
+          "length": 200
+        }
+      },
+      "rows": [
+        {
+          "label": " aB-cD      ",
+          "code": "\"A\"\"B\"x   ",
+          "proper": " Ab-Cd      ",
+          "quoted": "\"\"\"A\"\"\"\"B\"\"x   \"                                                                                                                                                                                        ",
+          "unquoted": "A\"B       ",
+          "marks": 8,
+          "folded": 1,
+          "rewritten": " aB__cD                                                                                                                                                                                                 "
+        },
+        {
+          "label": "ALPHA  beta ",
+          "code": "plain     ",
+          "proper": "Alpha  Beta ",
+          "quoted": "\"plain     \"                                                                                                                                                                                            ",
+          "unquoted": "plain     ",
+          "marks": 3,
+          "folded": 3,
+          "rewritten": "ALPHA  beta                                                                                                                                                                                             "
+        },
+        {
+          "label": "            ",
+          "code": "\"\"tail    ",
+          "proper": "            ",
+          "quoted": "\"\"\"\"\"tail    \"                                                                                                                                                                                          ",
+          "unquoted": "          ",
+          "marks": 12,
+          "folded": 0,
+          "rewritten": "                                                                                                                                                                                                        "
+        },
+        {
+          "label": "9ABC-XYZ    ",
+          "code": "'a''b'gone",
+          "proper": "9abc-Xyz    ",
+          "quoted": "\"'a''b'gone\"                                                                                                                                                                                            ",
+          "unquoted": "a'b       ",
+          "marks": 5,
+          "folded": 1,
+          "rewritten": "9ABC__XYZ                                                                                                                                                                                               "
+        },
+        {
+          "label": "A--b        ",
+          "code": "\"open     ",
+          "proper": "A--B        ",
+          "quoted": "\"\"\"open     \"                                                                                                                                                                                           ",
+          "unquoted": "open      ",
+          "marks": 10,
+          "folded": 1,
+          "rewritten": "A____b                                                                                                                                                                                                  "
+        },
+        {
+          "label": "mixed CASE  ",
+          "code": "\"Q\"       ",
+          "proper": "Mixed Case  ",
+          "quoted": "\"\"\"Q\"\"       \"                                                                                                                                                                                          ",
+          "unquoted": "Q         ",
+          "marks": 3,
+          "folded": 1,
+          "rewritten": "mixed CASE                                                                                                                                                                                              "
+        }
+      ]
+    }
+  },
+  "log": [
+    "\"\"\"A\"\"\"\"B\"\"x   \" ",
+    "\"plain     \" ",
+    "\"\"\"\"\"tail    \" ",
+    "\"'a''b'gone\" ",
+    "\"\"\"open     \" ",
+    "\"\"\"Q\"\"       \" "
+  ]
+}

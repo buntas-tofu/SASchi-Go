@@ -1,0 +1,73 @@
+{
+  "raw": {
+    "schema": {
+      "tag": {
+        "type": "character",
+        "length": 4,
+        "label": "Supplied row"
+      },
+      "k": "number",
+      "a": "number",
+      "b": "number",
+      "c": "number"
+    },
+    "rows": [
+      {
+        "tag": "ties",
+        "k": 2,
+        "a": 3,
+        "b": 3,
+        "c": 1
+      },
+      {
+        "tag": "few",
+        "k": 3,
+        "a": null,
+        "b": 5,
+        "c": null
+      },
+      {
+        "tag": "none",
+        "k": 1,
+        "a": null,
+        "b": null,
+        "c": null
+      },
+      {
+        "tag": "one",
+        "k": 1,
+        "a": null,
+        "b": -4,
+        "c": null
+      },
+      {
+        "tag": "wide",
+        "k": 2,
+        "a": 999998,
+        "b": 999999,
+        "c": 1000000
+      },
+      {
+        "tag": "mix",
+        "k": 2,
+        "a": -2,
+        "b": 0,
+        "c": 2
+      },
+      {
+        "tag": "thir",
+        "k": 2,
+        "a": 0,
+        "b": 1,
+        "c": 1
+      },
+      {
+        "tag": "near",
+        "k": 2,
+        "a": 999999,
+        "b": 1000000,
+        "c": 1000000
+      }
+    ]
+  }
+}

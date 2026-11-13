@@ -156,7 +156,7 @@ class CountFunctionTests(unittest.TestCase):
 
     def test_wrong_arities_and_other_count_functions_remain_tickets(self):
         for call in ("count()", "count('a')", "count('a','a','i','t')",
-                     "countc('abc','a')", "countw('a b')"):
+                     "countc('abc','a','d')", "countw('a b')"):
             with self.subTest(call=call):
                 self.assertTrue(compile_plan(f"data d; x={call}; run;").blocked)
 
@@ -250,7 +250,9 @@ class ModFunctionTests(unittest.TestCase):
         # Preserve the formerly refused source as a value proof under DS-037.
         self.assertEqual(one('data d; x=int(-2.7); run;')['x'], -2.)
         self.assertEqual(FUNCTIONS['int'].gate, 'examples/verify_int.py')
-        self.assertNotIn('modz', FUNCTIONS)
+        # DS-113 qualifies dyadic MODZ separately; the divisor3 refusal above stays.
+        self.assertEqual(FUNCTIONS['modz'].gate, 'examples/verify_zero_fuzz_numeric.py')
+        self.assertEqual(one('data d; x=modz(3.5,2); run;')['x'], 1.5)
 
     def test_rule_and_gate_provenance_describe_only_bounded_mod(self):
         self.assertEqual(route_function('x=MOD(-7,3);'), ('mod-int', 'DS-013'))
@@ -314,7 +316,7 @@ class NumericFunctionTests(unittest.TestCase):
                 self.assertTrue(compile_plan(source).blocked)
 
     def test_function_without_a_gate_stays_a_ticket(self):
-        plan = compile_plan("data d; x=propcase('a'); run;")
+        plan = compile_plan("data d; x=soundex('a'); run;")
         self.assertTrue(plan.blocked)
         self.assertEqual(plan.tickets[0].construct, "assignment")
         self.assertIn("unsupported expression", plan.tickets[0].reason)

@@ -204,6 +204,13 @@ CONSTRUCT_MAP: dict[str, str] = {
     "row-statistics": "DS-106",
     "datetime-components": "DS-107",
     "function-consumers": "DS-108",
+    "selection-consumers": "DS-115",
+    'calendar-constructors': 'DS-114',
+    'zero-fuzz-numeric': 'DS-113',
+    'ranks-and-sums-of-squares': 'DS-112',
+    "selection-and-lookup": "DS-111",
+    "ascii-positions": "DS-110",
+    "text-and-quoting": "DS-109",
     "input-list": "DS-044",
     "multiplication": "DS-045",
     "put-numeric-discovery": "DS-046",
@@ -362,6 +369,12 @@ STATEMENT_ROUTER: list[tuple[re.Pattern, str]] = [
 
 # Function-level routing: function call regex -> construct name.
 FUNCTION_ROUTER: list[tuple[re.Pattern, str]] = [
+    (re.compile(r'\b(?:HMS|YYQ|DATEJUL|JULDATE7)\s*\(',re.I),'calendar-constructors'),
+    (re.compile(r'\b(?:CEILZ|FLOORZ|INTZ|ROUNDZ|MODZ)\s*\(',re.I),'zero-fuzz-numeric'),
+    (re.compile(r'\b(?:LARGEST|SMALLEST|CSS|USS)\s*\(',re.I),'ranks-and-sums-of-squares'),
+    (re.compile(r'\b(?:IFN|IFC|CHOOSEN|CHOOSEC|WHICHN|WHICHC)\s*\(',re.I),'selection-and-lookup'),
+    (re.compile(r'\b(?:ANYLOWER|ANYUPPER|ANYPUNCT|ANYXDIGIT|NOTALPHA|NOTALNUM|NOTSPACE)\s*\(',re.I),'ascii-positions'),
+    (re.compile(r'\b(?:PROPCASE|QUOTE|DEQUOTE|COUNTC|TRANSTRN)\s*\(',re.I),'text-and-quoting'),
     (re.compile(r'\b(?:VERIFY|ANYALPHA|ANYDIGIT|ANYALNUM|ANYSPACE|NOTDIGIT)\s*\(',re.I),'character-validation'),
     (re.compile(r'\b(?:FINDC|FINDW|INDEXC|INDEXW|SUBSTRN)\s*\(',re.I),'search-extraction'),
     (re.compile(r'\b(?:MEDIAN|RANGE|VAR|STD)\s*\(',re.I),'row-statistics'),

@@ -1,0 +1,10 @@
+data reconciled;
+set raw;
+high=largest(k,a,b,c);
+low=smallest(k,a,b,c);
+centered=css(a,b,c);
+uncentered=uss(a,b,c);
+output;
+put high;
+put low;
+run;

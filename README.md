@@ -18,7 +18,7 @@ policies. Receipts record what passed for the source and environment tested.
 ## Current verification
 
 Status: version 0.4.0 development evidence for maintainer review, updated on
-2026-11-12. The current registry contains 128 fixture gates and92 suites, including
+2026-11-13. The current registry contains 137 fixture gates and 101 suites, including
 the desktop workflow, data importer and saved-evidence suites. The full receipt
 records the discovered tests and their outcomes. With the pinned Roku corpus present, `python verify_all.py` records the
 source-bound unified verdict. Synthesis separately checks 60 faithful cases and
@@ -51,6 +51,16 @@ The [consumer profile](docs/FUNCTION_CONSUMERS.md) qualifies bounded character
 chains, CATS items and selected validator/MISSING IF comparisons separately.
 The [two complete compositions](docs/FUNCTION_WAVE_2_COMPOSITION.md) qualify
 record cleaning and timestamp/measurement reconciliation across the wave.
+
+The [31-function third wave](docs/FUNCTION_WAVE_3_COMPOSITION.md) adds bounded
+text/quoting, ASCII positions, selection/lookup, rank/squares, zero-fuzz numeric
+and calendar-constructor families. Its separate
+[selection consumer profile](docs/SELECTION_CONSUMERS.md) and both complete
+[quoted-record](docs/QUOTED_RECORD_CLASSIFICATION.md) and
+[quarterly reconciliation](docs/QUARTERLY_RECONCILIATION.md) originals have
+independent hand/base-R witnesses. Nine new program gates retain the previous
+profiles and the null functions/CALL denominator. Matching full verification
+and both unchanged workload receipts decide acceptance.
 
 [Explicit word parsing](docs/WORD_FUNCTIONS.md) adds SCAN/COUNTW with an explicit
 delimiter set and optional M. The source-width SCAN policy is pinned to the current
@@ -264,7 +274,7 @@ fixed expected output and base-R evidence. Special missings retain their tags.
   sibling plus a fixture verifier (`verify_*.py`). Run any verifier directly,
   or all of them through [verify_all.py](verify_all.py).
 - [docs/sasconversionrulebook.json](docs/sasconversionrulebook.json) : the machine-consumable translation
-  rulebook. 158 rules with equivalence classes (EXACT,
+  rulebook. 165 rules with equivalence classes (EXACT,
   EQUIVALENT-WITH-SETTINGS, APPROXIMATE, NO-DIRECT-EQUIVALENT), required
   settings, forbidden patterns, and validation tests.
 - [docs/capability-manifest.json](docs/capability-manifest.json) : the coverage manifest. Enumerated entries of

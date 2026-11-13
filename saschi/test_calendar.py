@@ -120,8 +120,11 @@ class CalendarTests(unittest.TestCase):
         self.assertEqual(table['rows'], [{'day': 0., 'w': 6.}])
 
     def test_wrong_arity_unwired_functions_and_cpp_remain_blocked(self):
-        for expression in ('mdy(1,1)', 'mdy(1,1,2000,1)', 'weekday()', 'weekday(0,1)', 'hms(0,0,0)'):
+        for expression in ('mdy(1,1)', 'mdy(1,1,2000,1)', 'weekday()', 'weekday(0,1)', 'hms(24,0,0)'):
             self.assertTrue(compile_plan('data d; x=' + expression + '; run;').blocked)
+        # DS-114 qualifies the original HMS form with its own bounded gate.
+        self.assertEqual(execute('data d; x=hms(0,0,0); run;')[0]['datasets']['d']['rows'][0]['x'],0.)
+        self.assertEqual(FUNCTIONS['hms'].gate,'examples/verify_calendar_constructors.py')
         # QTR source admission is DS-107; the older calendar dispatcher stays closed.
         with self.assertRaisesRegex(ValueError, 'calendar'):
             sas_calendar('qtr', 0)

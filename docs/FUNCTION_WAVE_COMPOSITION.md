@@ -50,7 +50,7 @@ failures may retain a complete observed result for diagnosis.
 
 ## Acceptance and limits
 
-The golden command now registers128fixtures,92suites and one synthesis runner,
+The golden command now registers137fixtures,101suites and one synthesis runner,
 including the subsequent approved continuation slices.
 Registration counts are not passing outcomes. A source-stable ALL VERIFIED
 receipt and matching18ledger/21text workload checks decide acceptance. Receipts

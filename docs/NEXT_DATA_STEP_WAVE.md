@@ -1,5 +1,12 @@
 # Next DATA step function wave after PR76
 
+This wave merged through [PR77](https://github.com/buntas-tofu/SASchi-Go/pull/77)
+as `044b44311816a21d0032f5c1fa2900ca02ba91eb` on 2026-11-13 after all five PR
+checks passed. The [third-wave plan](NEXT_DATA_STEP_WAVE_3.md) now has its own approval and
+[implementation register](FUNCTION_WAVE_3_COMPOSITION.md), covering 31 selected
+names, a separate finite consumer phase and both complete originals. The
+approval below still applies to this completed 29-function wave.
+
 Status: principal-approved implementation plan, based on merged commit
 `6cdaea41002c002aba49be84ecac00c05f4717f7` on 2026-11-12. The principal approved
 all 29 selected functions, nested calls, IF conditions and both composition

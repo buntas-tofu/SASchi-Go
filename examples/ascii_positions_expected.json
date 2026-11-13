@@ -1,0 +1,132 @@
+{
+  "datasets": {
+    "raw": {
+      "schema": {
+        "code": {
+          "type": "character",
+          "length": 8,
+          "label": "Supplied identifier"
+        }
+      },
+      "rows": [
+        {
+          "code": "aZ9_ f  "
+        },
+        {
+          "code": "ABC     "
+        },
+        {
+          "code": "123     "
+        },
+        {
+          "code": "        "
+        },
+        {
+          "code": "!?~     "
+        },
+        {
+          "code": " gF0-z  "
+        }
+      ]
+    },
+    "classified": {
+      "schema": {
+        "code": {
+          "type": "character",
+          "length": 8,
+          "label": "Supplied identifier"
+        },
+        "lower": "number",
+        "upper": "number",
+        "punct": "number",
+        "hexadecimal": "number",
+        "nonalpha": "number",
+        "nonalnum": "number",
+        "nonspace": "number",
+        "back": "number"
+      },
+      "rows": [
+        {
+          "code": "aZ9_ f  ",
+          "lower": 1,
+          "upper": 2,
+          "punct": 4,
+          "hexadecimal": 1,
+          "nonalpha": 3,
+          "nonalnum": 4,
+          "nonspace": 1,
+          "back": 6
+        },
+        {
+          "code": "ABC     ",
+          "lower": 0,
+          "upper": 1,
+          "punct": 0,
+          "hexadecimal": 1,
+          "nonalpha": 4,
+          "nonalnum": 4,
+          "nonspace": 1,
+          "back": 0
+        },
+        {
+          "code": "123     ",
+          "lower": 0,
+          "upper": 0,
+          "punct": 0,
+          "hexadecimal": 1,
+          "nonalpha": 1,
+          "nonalnum": 4,
+          "nonspace": 1,
+          "back": 0
+        },
+        {
+          "code": "        ",
+          "lower": 0,
+          "upper": 0,
+          "punct": 0,
+          "hexadecimal": 0,
+          "nonalpha": 1,
+          "nonalnum": 1,
+          "nonspace": 0,
+          "back": 0
+        },
+        {
+          "code": "!?~     ",
+          "lower": 0,
+          "upper": 0,
+          "punct": 1,
+          "hexadecimal": 0,
+          "nonalpha": 1,
+          "nonalnum": 1,
+          "nonspace": 1,
+          "back": 0
+        },
+        {
+          "code": " gF0-z  ",
+          "lower": 2,
+          "upper": 3,
+          "punct": 5,
+          "hexadecimal": 3,
+          "nonalpha": 1,
+          "nonalnum": 1,
+          "nonspace": 2,
+          "back": 6
+        }
+      ]
+    }
+  },
+  "log": [
+    "4 ",
+    "6 ",
+    "0 ",
+    "0 ",
+    "0 ",
+    "0 ",
+    "0 ",
+    "0 ",
+    "1 ",
+    "0 ",
+    "5 ",
+    "6 "
+  ]
+}

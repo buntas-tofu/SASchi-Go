@@ -79,8 +79,12 @@ class IntTests(unittest.TestCase):
             with self.assertRaises(ValueError):run_plan(p,allow_partial=True)
 
     def test_unwired_related_calls_and_legacy_targets_stay_refused(self):
-        for expr in ('int()','int(1,2)','intz(2.5)','floorz(2.5)','ceilz(2.5)'):
+        for expr in ('int()','int(1,2)','intz()','floorz(2.5,1)','ceilz(1e-20)'):
             self.assertTrue(compile_plan('data d; x='+expr+'; run;').blocked)
+        # DS-113 gives these original forms their own bounded gate and value proof.
+        for name,wanted in (('intz',2.),('floorz',2.),('ceilz',3.)):
+            self.assertEqual(FUNCTIONS[name].gate,'examples/verify_zero_fuzz_numeric.py')
+            self.assertEqual(execute('data d; x='+name+'(2.5); run;')[0]['datasets']['d']['rows'][0]['x'],wanted)
         for target,body in (('cpp','x=int(2.5);'),('python','x=int(2.5); put _all_;')):
             job=build_job('data _null_; '+body+' run;',target=target)
             self.assertNotEqual(job.code,0);self.assertIsNone(job.result)

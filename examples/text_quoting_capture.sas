@@ -1,0 +1,11 @@
+data quoted;
+set raw;
+proper=propcase(label,' -');
+quoted=quote(code);
+unquoted=dequote(code);
+marks=countc(label,'- ');
+folded=countc(label,'a','it');
+rewritten=transtrn(label,'-','__');
+output;
+put quoted;
+run;

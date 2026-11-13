@@ -1,0 +1,73 @@
+{
+  "raw": {
+    "schema": {
+      "tag": {
+        "type": "character",
+        "length": 4,
+        "label": "Supplied calendar"
+      },
+      "year": "number",
+      "quarter": "number",
+      "ordinal": "number",
+      "hour": "number",
+      "minute": "number",
+      "second": "number"
+    },
+    "rows": [
+      {
+        "tag": "base",
+        "year": 1960,
+        "quarter": 1,
+        "ordinal": 1960001,
+        "hour": 0,
+        "minute": 0,
+        "second": 0
+      },
+      {
+        "tag": "prev",
+        "year": 1959,
+        "quarter": 4,
+        "ordinal": 1959365,
+        "hour": 23,
+        "minute": 59,
+        "second": 59
+      },
+      {
+        "tag": "leap",
+        "year": 2000,
+        "quarter": 1,
+        "ordinal": 2000060,
+        "hour": 12,
+        "minute": 34,
+        "second": 56
+      },
+      {
+        "tag": "end",
+        "year": 2024,
+        "quarter": 2,
+        "ordinal": 2024366,
+        "hour": 6,
+        "minute": 7,
+        "second": 8
+      },
+      {
+        "tag": "year",
+        "year": 2023,
+        "quarter": 4,
+        "ordinal": 2023365,
+        "hour": 23,
+        "minute": 0,
+        "second": 0
+      },
+      {
+        "tag": "miss",
+        "year": null,
+        "quarter": null,
+        "ordinal": null,
+        "hour": null,
+        "minute": null,
+        "second": null
+      }
+    ]
+  }
+}

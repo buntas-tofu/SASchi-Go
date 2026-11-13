@@ -1,0 +1,70 @@
+{
+  "raw": {
+    "schema": {
+      "tag": {
+        "type": "character",
+        "length": 4,
+        "label": "Supplied quantity"
+      },
+      "x": "number",
+      "unit": "number",
+      "divisor": "number"
+    },
+    "rows": [
+      {
+        "tag": "even",
+        "x": 2.5,
+        "unit": 1,
+        "divisor": 2
+      },
+      {
+        "tag": "odd",
+        "x": 3.5,
+        "unit": 1,
+        "divisor": 2
+      },
+      {
+        "tag": "nege",
+        "x": -2.5,
+        "unit": 1,
+        "divisor": 2
+      },
+      {
+        "tag": "nego",
+        "x": -3.5,
+        "unit": 1,
+        "divisor": 2
+      },
+      {
+        "tag": "frac",
+        "x": 0.5,
+        "unit": 0.25,
+        "divisor": -0.5
+      },
+      {
+        "tag": "down",
+        "x": 0.9999999999999999,
+        "unit": 1,
+        "divisor": 1
+      },
+      {
+        "tag": "up",
+        "x": 1.0000000000000002,
+        "unit": 1,
+        "divisor": 1
+      },
+      {
+        "tag": "miss",
+        "x": null,
+        "unit": 1,
+        "divisor": 1
+      },
+      {
+        "tag": "zero",
+        "x": -0.0,
+        "unit": 1,
+        "divisor": -1
+      }
+    ]
+  }
+}

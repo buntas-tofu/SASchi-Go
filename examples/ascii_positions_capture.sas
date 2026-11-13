@@ -1,0 +1,14 @@
+data classified;
+set raw;
+lower=anylower(code);
+upper=anyupper(code);
+punct=anypunct(code);
+hexadecimal=anyxdigit(code);
+nonalpha=notalpha(code);
+nonalnum=notalnum(code);
+nonspace=notspace(code);
+back=anylower(code,-99);
+output;
+put punct;
+put back;
+run;

@@ -1,0 +1,211 @@
+{
+  "datasets": {
+    "raw": {
+      "schema": {
+        "flag": "number",
+        "idx": "number",
+        "a": "number",
+        "b": "number",
+        "c": "number",
+        "code": {
+          "type": "character",
+          "length": 4,
+          "label": "Supplied lookup key"
+        }
+      },
+      "rows": [
+        {
+          "flag": 1,
+          "idx": 1,
+          "a": 5,
+          "b": 9,
+          "c": -1,
+          "code": "A   "
+        },
+        {
+          "flag": 0,
+          "idx": -1,
+          "a": 5,
+          "b": 5,
+          "c": 8,
+          "code": "B   "
+        },
+        {
+          "flag": null,
+          "idx": 2,
+          "a": null,
+          "b": 7,
+          "c": 6,
+          "code": "    "
+        },
+        {
+          "flag": -2,
+          "idx": -2,
+          "a": 2,
+          "b": 3,
+          "c": 4,
+          "code": "C   "
+        },
+        {
+          "flag": 0,
+          "idx": 3,
+          "a": -1,
+          "b": null,
+          "c": 2,
+          "code": "A   "
+        },
+        {
+          "flag": 1,
+          "idx": -3,
+          "a": 0,
+          "b": 0,
+          "c": null,
+          "code": "A   "
+        }
+      ]
+    },
+    "resolved": {
+      "schema": {
+        "flag": "number",
+        "idx": "number",
+        "a": "number",
+        "b": "number",
+        "c": "number",
+        "code": {
+          "type": "character",
+          "length": 4,
+          "label": "Supplied lookup key"
+        },
+        "numeric": "number",
+        "defaulted": "number",
+        "label": {
+          "type": "character",
+          "length": 200
+        },
+        "defaultlabel": {
+          "type": "character",
+          "length": 200
+        },
+        "selected": "number",
+        "picked": {
+          "type": "character",
+          "length": 200
+        },
+        "where_n": "number",
+        "where_c": "number"
+      },
+      "rows": [
+        {
+          "flag": 1,
+          "idx": 1,
+          "a": 5,
+          "b": 9,
+          "c": -1,
+          "code": "A   ",
+          "numeric": 5,
+          "defaulted": 5,
+          "label": "YES                                                                                                                                                                                                     ",
+          "defaultlabel": "Y                                                                                                                                                                                                       ",
+          "selected": 5,
+          "picked": "A                                                                                                                                                                                                       ",
+          "where_n": 2,
+          "where_c": 1
+        },
+        {
+          "flag": 0,
+          "idx": -1,
+          "a": 5,
+          "b": 5,
+          "c": 8,
+          "code": "B   ",
+          "numeric": 5,
+          "defaulted": 5,
+          "label": "NO                                                                                                                                                                                                      ",
+          "defaultlabel": "N                                                                                                                                                                                                       ",
+          "selected": 8,
+          "picked": "END                                                                                                                                                                                                     ",
+          "where_n": 1,
+          "where_c": 2
+        },
+        {
+          "flag": null,
+          "idx": 2,
+          "a": null,
+          "b": 7,
+          "c": 6,
+          "code": "    ",
+          "numeric": 6,
+          "defaulted": 7,
+          "label": "MISSING                                                                                                                                                                                                 ",
+          "defaultlabel": "N                                                                                                                                                                                                       ",
+          "selected": 7,
+          "picked": "TWO                                                                                                                                                                                                     ",
+          "where_n": null,
+          "where_c": null
+        },
+        {
+          "flag": -2,
+          "idx": -2,
+          "a": 2,
+          "b": 3,
+          "c": 4,
+          "code": "C   ",
+          "numeric": 2,
+          "defaulted": 2,
+          "label": "YES                                                                                                                                                                                                     ",
+          "defaultlabel": "Y                                                                                                                                                                                                       ",
+          "selected": 3,
+          "picked": "TWO                                                                                                                                                                                                     ",
+          "where_n": 2,
+          "where_c": 0
+        },
+        {
+          "flag": 0,
+          "idx": 3,
+          "a": -1,
+          "b": null,
+          "c": 2,
+          "code": "A   ",
+          "numeric": null,
+          "defaulted": null,
+          "label": "NO                                                                                                                                                                                                      ",
+          "defaultlabel": "N                                                                                                                                                                                                       ",
+          "selected": 2,
+          "picked": "END                                                                                                                                                                                                     ",
+          "where_n": 2,
+          "where_c": 1
+        },
+        {
+          "flag": 1,
+          "idx": -3,
+          "a": 0,
+          "b": 0,
+          "c": null,
+          "code": "A   ",
+          "numeric": 0,
+          "defaulted": 0,
+          "label": "YES                                                                                                                                                                                                     ",
+          "defaultlabel": "Y                                                                                                                                                                                                       ",
+          "selected": 0,
+          "picked": "A                                                                                                                                                                                                       ",
+          "where_n": 1,
+          "where_c": 1
+        }
+      ]
+    }
+  },
+  "log": [
+    "5 ",
+    "YES ",
+    "5 ",
+    "NO ",
+    "6 ",
+    "MISSING ",
+    "2 ",
+    "YES ",
+    ". ",
+    "NO ",
+    "0 ",
+    "YES "
+  ]
+}

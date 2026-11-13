@@ -1,0 +1,161 @@
+[
+  [
+    "propcase",
+    [
+      "mIXED-CASE/WORD",
+      " -"
+    ],
+    "Mixed-Case/word"
+  ],
+  [
+    "propcase",
+    [
+      "9ABC.XYZ",
+      "."
+    ],
+    "9abc.Xyz"
+  ],
+  [
+    "propcase",
+    [
+      "ABC DEF",
+      "-"
+    ],
+    "Abc def"
+  ],
+  [
+    "quote",
+    [
+      "A\"B"
+    ],
+    "\"A\"\"B\""
+  ],
+  [
+    "quote",
+    [
+      "a'b",
+      "'"
+    ],
+    "'a''b'"
+  ],
+  [
+    "quote",
+    [
+      "x  "
+    ],
+    "\"x  \""
+  ],
+  [
+    "quote",
+    [
+      "                                                                                                                                                                                                      "
+    ],
+    "\"                                                                                                                                                                                                      \""
+  ],
+  [
+    "dequote",
+    [
+      "\"A\"\"B\"tail"
+    ],
+    "A\"B"
+  ],
+  [
+    "dequote",
+    [
+      "\"\"tail"
+    ],
+    ""
+  ],
+  [
+    "dequote",
+    [
+      "\"open"
+    ],
+    "open"
+  ],
+  [
+    "dequote",
+    [
+      " \"x\""
+    ],
+    " \"x\""
+  ],
+  [
+    "dequote",
+    [
+      "\"\"\"A"
+    ],
+    "\"A"
+  ],
+  [
+    "countc",
+    [
+      "Aa a  ",
+      "a"
+    ],
+    2
+  ],
+  [
+    "countc",
+    [
+      "Aa a  ",
+      "a",
+      "it"
+    ],
+    3
+  ],
+  [
+    "countc",
+    [
+      "abc   ",
+      "a",
+      "v"
+    ],
+    5
+  ],
+  [
+    "countc",
+    [
+      "a   ",
+      " ",
+      "vt"
+    ],
+    0
+  ],
+  [
+    "transtrn",
+    [
+      "aaa",
+      "aa",
+      "X"
+    ],
+    "Xa"
+  ],
+  [
+    "transtrn",
+    [
+      "a-b-",
+      "-",
+      " "
+    ],
+    "a b "
+  ],
+  [
+    "transtrn",
+    [
+      "a-b-",
+      "-",
+      ""
+    ],
+    "ab"
+  ],
+  [
+    "transtrn",
+    [
+      "CATFISH",
+      "FISH ",
+      "X"
+    ],
+    "CATFISH"
+  ]
+]

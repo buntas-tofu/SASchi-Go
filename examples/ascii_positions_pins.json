@@ -1,0 +1,215 @@
+[
+  [
+    "anylower",
+    [
+      "aZ9_ f"
+    ],
+    1
+  ],
+  [
+    "anylower",
+    [
+      "aZ9_ f",
+      0
+    ],
+    0
+  ],
+  [
+    "anylower",
+    [
+      "aZ9_ f",
+      99
+    ],
+    0
+  ],
+  [
+    "anyupper",
+    [
+      "aZ9_ f"
+    ],
+    2
+  ],
+  [
+    "anyupper",
+    [
+      "aZ9_ f",
+      0
+    ],
+    0
+  ],
+  [
+    "anyupper",
+    [
+      "aZ9_ f",
+      99
+    ],
+    0
+  ],
+  [
+    "anypunct",
+    [
+      "aZ9_ f"
+    ],
+    4
+  ],
+  [
+    "anypunct",
+    [
+      "aZ9_ f",
+      0
+    ],
+    0
+  ],
+  [
+    "anypunct",
+    [
+      "aZ9_ f",
+      99
+    ],
+    0
+  ],
+  [
+    "anyxdigit",
+    [
+      "aZ9_ f"
+    ],
+    1
+  ],
+  [
+    "anyxdigit",
+    [
+      "aZ9_ f",
+      0
+    ],
+    0
+  ],
+  [
+    "anyxdigit",
+    [
+      "aZ9_ f",
+      99
+    ],
+    0
+  ],
+  [
+    "notalpha",
+    [
+      "aZ9_ f"
+    ],
+    3
+  ],
+  [
+    "notalpha",
+    [
+      "aZ9_ f",
+      0
+    ],
+    0
+  ],
+  [
+    "notalpha",
+    [
+      "aZ9_ f",
+      99
+    ],
+    0
+  ],
+  [
+    "notalnum",
+    [
+      "aZ9_ f"
+    ],
+    4
+  ],
+  [
+    "notalnum",
+    [
+      "aZ9_ f",
+      0
+    ],
+    0
+  ],
+  [
+    "notalnum",
+    [
+      "aZ9_ f",
+      99
+    ],
+    0
+  ],
+  [
+    "notspace",
+    [
+      "aZ9_ f"
+    ],
+    1
+  ],
+  [
+    "notspace",
+    [
+      "aZ9_ f",
+      0
+    ],
+    0
+  ],
+  [
+    "notspace",
+    [
+      "aZ9_ f",
+      99
+    ],
+    0
+  ],
+  [
+    "anylower",
+    [
+      "aZ9_ f",
+      -99
+    ],
+    6
+  ],
+  [
+    "anylower",
+    [
+      "aZ9_ f",
+      null
+    ],
+    1
+  ],
+  [
+    "anyupper",
+    [
+      "aZ9_ f",
+      -1
+    ],
+    0
+  ],
+  [
+    "notalnum",
+    [
+      "ABC  "
+    ],
+    4
+  ],
+  [
+    "notspace",
+    [
+      "   "
+    ],
+    0
+  ],
+  [
+    "anyxdigit",
+    [
+      "GgF"
+    ],
+    3
+  ],
+  [
+    "anypunct",
+    [
+      " _"
+    ],
+    2
+  ]
+]

@@ -1,0 +1,11 @@
+data civil;
+set raw;
+clock=hms(hour,minute,second);
+quarterdate=yyq(year,quarter);
+date=datejul(ordinal);
+quarterordinal=juldate7(quarterdate);
+recovered=juldate7(date);
+output;
+put clock;
+put recovered;
+run;
