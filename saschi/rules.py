@@ -197,6 +197,13 @@ CONSTRUCT_MAP: dict[str, str] = {
     "missing-summaries": "DS-099",
     "numeric-helpers": "DS-100",
     "calendar-intervals": "DS-101",
+    "whitespace-alignment": "DS-102",
+    "cat-functions": "DS-103",
+    "character-validation": "DS-104",
+    "search-extraction": "DS-105",
+    "row-statistics": "DS-106",
+    "datetime-components": "DS-107",
+    "function-consumers": "DS-108",
     "input-list": "DS-044",
     "multiplication": "DS-045",
     "put-numeric-discovery": "DS-046",
@@ -355,6 +362,12 @@ STATEMENT_ROUTER: list[tuple[re.Pattern, str]] = [
 
 # Function-level routing: function call regex -> construct name.
 FUNCTION_ROUTER: list[tuple[re.Pattern, str]] = [
+    (re.compile(r'\b(?:VERIFY|ANYALPHA|ANYDIGIT|ANYALNUM|ANYSPACE|NOTDIGIT)\s*\(',re.I),'character-validation'),
+    (re.compile(r'\b(?:FINDC|FINDW|INDEXC|INDEXW|SUBSTRN)\s*\(',re.I),'search-extraction'),
+    (re.compile(r'\b(?:MEDIAN|RANGE|VAR|STD)\s*\(',re.I),'row-statistics'),
+    (re.compile(r'\b(?:QTR|DHMS|DATEPART|TIMEPART|HOUR|MINUTE|SECOND)\s*\(',re.I),'datetime-components'),
+    (re.compile(r'\b(?:CAT|CATS|CATT)\s*\(',re.I),'cat-functions'),
+    (re.compile(r'\b(?:LEFT|RIGHT|COMPBL|TRIMN)\s*\(',re.I),'whitespace-alignment'),
     (re.compile(r'\b(?:YEAR|MONTH|DAY|INTCK|INTNX)\s*\(',re.I),'calendar-intervals'),
     (re.compile(r'\b(?:ABS|SIGN|CEIL|FLOOR)\s*\(',re.I),'numeric-helpers'),
     (re.compile(r'\b(?:MISSING|N|NMISS|CMISS|COALESCE|COALESCEC|MEAN)\s*\(',re.I),'missing-summaries'),

@@ -1,0 +1,28 @@
+{
+  "raw": {
+    "schema": {
+      "text": {
+        "type": "character",
+        "length": 10,
+        "label": "Synthetic padded text"
+      }
+    },
+    "rows": [
+      {
+        "text": "  a  b  "
+      },
+      {
+        "text": "    "
+      },
+      {
+        "text": "a   b"
+      },
+      {
+        "text": "  A B"
+      },
+      {
+        "text": "x"
+      }
+    ]
+  }
+}

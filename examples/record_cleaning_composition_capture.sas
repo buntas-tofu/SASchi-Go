@@ -1,0 +1,16 @@
+data cleaned;
+set raw;
+normalized=upcase(compbl(strip(label)));
+key=cats(substrn(code,1,3),'-',lowcase(tag));
+words=countw(normalized,' ');
+first=scan(normalized,1,' ');
+compact=compress(code,' ');
+pos=anydigit(code);
+if verify(code,'0123456789 ')=0 then accepted=1;
+else accepted=0;
+if missing(label)=1 then blank_label=1;
+else blank_label=0;
+output;
+put key;
+put accepted;
+run;

@@ -1,13 +1,14 @@
 # Next DATA step function wave
 
-Status: principal-approved plan of2026-11-11, implemented locally through the six
-profiles and two original composition programs on2026-11-12. Acceptance requires
-the current full source-bound receipt and both workload suites.
+Status: completed principal-approved plan of 2026-11-11. The six profiles and
+two original composition programs passed the required verification and workload
+gates and landed through [PR76](https://github.com/buntas-tofu/SASchi-Go/pull/76)
+on 2026-11-12 as `6cdaea41002c002aba49be84ecac00c05f4717f7`.
 See the [implementation evidence register](FUNCTION_WAVE_COMPOSITION.md).
-The principal authorized the six groups in their recorded order and the final
-composition programs. Expected usefulness remains an engineering inference;
-acceptance requires each slice's independent oracle and passing verification.
-Publication remains a separate action.
+These are repository/base-R outcomes, with native SAS comparison outstanding.
+The [subsequent 29-function wave](NEXT_DATA_STEP_WAVE.md) records its approved
+scope and implementation evidence. The authorization and entry conditions below remain the record
+of this completed wave.
 
 Principal selection recorded 2026-11-11: in response to the choice between broadly
 useful DATA-step function families and remaining official example programs,

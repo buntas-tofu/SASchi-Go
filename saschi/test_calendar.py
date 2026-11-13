@@ -120,8 +120,15 @@ class CalendarTests(unittest.TestCase):
         self.assertEqual(table['rows'], [{'day': 0., 'w': 6.}])
 
     def test_wrong_arity_unwired_functions_and_cpp_remain_blocked(self):
-        for expression in ('mdy(1,1)', 'mdy(1,1,2000,1)', 'weekday()', 'weekday(0,1)', 'qtr(0)'):
+        for expression in ('mdy(1,1)', 'mdy(1,1,2000,1)', 'weekday()', 'weekday(0,1)', 'hms(0,0,0)'):
             self.assertTrue(compile_plan('data d; x=' + expression + '; run;').blocked)
+        # QTR source admission is DS-107; the older calendar dispatcher stays closed.
+        with self.assertRaisesRegex(ValueError, 'calendar'):
+            sas_calendar('qtr', 0)
+        admitted = compile_plan('data d; x=qtr(0); run;')
+        self.assertFalse(admitted.blocked, admitted.tickets)
+        self.assertIn(('datetime-components', 'DS-107', 1), admitted.matched)
+        self.assertEqual(FUNCTIONS['qtr'].gate, 'examples/verify_datetime_components.py')
         job = build_job('data _null_; d=mdy(1,1,1960); run;', target='cpp')
         self.assertEqual(job.code, 2)
         self.assertIsNone(job.result)

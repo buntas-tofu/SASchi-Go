@@ -70,7 +70,7 @@ class CaseSearchTests(unittest.TestCase):
             self.assertEqual(job_with_inputs('data d;set raw;if 0 then b=upcase(a);run;',catalog(rows,spec='number')).code,1)
 
     def test_nested_and_other_consumers_refuse(self):
-        for source in ["data d;a=lowcase(upcase('a'));run;","data d;a=length(upcase('a'));run;",
+        for source in ["data d;a=lowcase(upcase(trim(strip('a'))));run;","data d;a=length(upcase('a'));run;",
                        "data d;a=upcase('a')||'b';run;","data d;if index('a','a') then x=1;run;",
                        "data d;set raw;where index(a,'a');run;","data d;retain n 0;x=upcase('a');run;",
                        "data d;array x a;b=upcase('a');run;","data d;x=upcase('a');put _all_;run;",

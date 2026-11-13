@@ -1,0 +1,136 @@
+{
+  "datasets": {
+    "raw": {
+      "schema": {
+        "text": {
+          "type": "character",
+          "length": 12,
+          "label": "Synthetic search text"
+        },
+        "position": "number",
+        "take": "number"
+      },
+      "rows": [
+        {
+          "text": "ab x        ",
+          "position": 1,
+          "take": 2
+        },
+        {
+          "text": "z,ab,Z      ",
+          "position": 3,
+          "take": 2
+        },
+        {
+          "text": "AB ab       ",
+          "position": 0,
+          "take": 3
+        },
+        {
+          "text": "tabs        ",
+          "position": -1,
+          "take": 4
+        },
+        {
+          "text": "            ",
+          "position": null,
+          "take": 2
+        },
+        {
+          "text": "x ab        ",
+          "position": 99,
+          "take": 5
+        }
+      ]
+    },
+    "located": {
+      "schema": {
+        "text": {
+          "type": "character",
+          "length": 12,
+          "label": "Synthetic search text"
+        },
+        "position": "number",
+        "take": "number",
+        "chars": "number",
+        "words": "number",
+        "indexed": "number",
+        "bounded": "number",
+        "piece": {
+          "type": "character",
+          "length": 12
+        }
+      },
+      "rows": [
+        {
+          "text": "ab x        ",
+          "position": 1,
+          "take": 2,
+          "chars": 1,
+          "words": 1,
+          "indexed": 4,
+          "bounded": 1,
+          "piece": "ab          "
+        },
+        {
+          "text": "z,ab,Z      ",
+          "position": 3,
+          "take": 2,
+          "chars": 3,
+          "words": 3,
+          "indexed": 6,
+          "bounded": 0,
+          "piece": "ab          "
+        },
+        {
+          "text": "AB ab       ",
+          "position": 0,
+          "take": 3,
+          "chars": 1,
+          "words": 4,
+          "indexed": 0,
+          "bounded": 4,
+          "piece": "AB          "
+        },
+        {
+          "text": "tabs        ",
+          "position": -1,
+          "take": 4,
+          "chars": 2,
+          "words": 0,
+          "indexed": 0,
+          "bounded": 0,
+          "piece": "ta          "
+        },
+        {
+          "text": "            ",
+          "position": null,
+          "take": 2,
+          "chars": 0,
+          "words": 0,
+          "indexed": 0,
+          "bounded": 0,
+          "piece": "            "
+        },
+        {
+          "text": "x ab        ",
+          "position": 99,
+          "take": 5,
+          "chars": 3,
+          "words": 3,
+          "indexed": 1,
+          "bounded": 3,
+          "piece": "            "
+        }
+      ]
+    }
+  },
+  "log": [
+    "located",
+    "located",
+    "located",
+    "located",
+    "located",
+    "located"
+  ]
+}

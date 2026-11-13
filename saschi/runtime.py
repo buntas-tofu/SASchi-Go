@@ -20,6 +20,7 @@ from sas_semantics import sas_put_mixed_numeric
 from .put_mixed import validate_items as validate_mixed_put_items
 from .trim_strip import is_call as is_trim_call, validate_expression as validate_trim_expression, validate_step as validate_trim_step
 from .function_wave import validate_expression as validate_wave_expression, validate_step as validate_wave_step
+from . import function_consumers as consumers
 from .input_list import validate_step as validate_input_step
 from .input_numeric import validate_step as validate_numeric_input_step
 from .projection import validate_step as validate_projection_step, selected_names, project_table
@@ -290,6 +291,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
         raise ValueError('unsupported plan version')
     if plan['tickets'] and not allow_partial:
         raise RuntimeError('saschi: blocked translation. Nothing from this program was executed.')
+    consumer_steps = consumers.validate_program(plan)
     from .postal_function import validate_program as validate_postal, run_program as run_postal
     if validate_postal(plan, catalog) is not None:
         return run_postal(plan, catalog)
@@ -408,6 +410,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
             tables[step['name']] = table
             continue
         inputs, keys, ops = step['inputs'], step['by'], step['operations']
+        function_consumer = id(step) in consumer_steps
         pipeline = numeric_pipeline.validate_step(step, plan['version'])
         pipeline_engine = numeric_math if pipeline is not None and pipeline.get('math_profile') else numeric_pipeline
         rounded_profile = pipeline is not None or binary64.validate_step(step, plan['version'])
@@ -425,8 +428,9 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
             inline_rows = validate_input_step(step, plan['version'])
         if inline_rows is not None and pipeline is None:
             validate_inline_types(list(operations(ops)), None, step.get('retained', {}))
-        validate_trim_step(step, plan['version'])
-        validate_wave_step(step,plan['version'])
+        if not function_consumer:
+            validate_trim_step(step, plan['version'])
+            validate_wave_step(step,plan['version'])
         # Reject malformed mixed-output plans before other expression walkers or input work.
         for op in operations(ops):
             if op['kind'] == 'put_mixed_numeric':
@@ -581,17 +585,21 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
         for op in flat:
             args, kind = op['args'], op['kind']
             payloads = [(args.get('value'), 'assignment')] if kind == 'assign' else [
-                (value, 'other') for key, value in args.items() if key not in ('body', 'operation', 'otherwise')]
+                (value, 'condition' if kind == 'if' and key == 'condition' else 'other')
+                for key, value in args.items() if key not in ('body', 'operation', 'otherwise')]
             for payload, context in payloads:
-                validate_trim_expression(payload, schema, context=context)
-                validate_wave_expression(payload,schema,context=context)
+                if function_consumer:
+                    consumers.validate_payload(payload, schema, context=context)
+                else:
+                    validate_trim_expression(payload, schema, context=context)
+                    validate_wave_expression(payload,schema,context=context)
                 context_error = next(substr_context_errors(payload, context), None)
                 if context_error:
                     raise ValueError(context_error)
                 validate_substr_calls(payload, schema)
                 validate_bitwise_calls(payload, schema)
                 validate_lag_calls(payload, schema, direct=context == 'assignment')
-            if kind == 'numeric_profile':
+            if kind in ('numeric_profile', 'function_profile'):
                 pass  # Independently checked before all recursive schema walkers.
             elif kind == 'declare':
                 name, spec = args['name'], args['spec']
@@ -624,7 +632,9 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                     origin = schema.get(expr['value'], 'number')
                     spec = {'type': 'character', 'length': origin['length']} if column_type(origin) == 'character' else 'number'
                 else:
-                    spec = (assign_spec(expr, schema) if kind == 'assign' and pipeline_engine is not numeric_math else None) or 'number'
+                    spec = ({'type': 'character', 'length': consumers.character_width(expr, schema)}
+                            if function_consumer and kind == 'assign' and consumers.character_form(expr) else
+                            assign_spec(expr, schema) if kind == 'assign' and pipeline_engine is not numeric_math else None) or 'number'
                 if args['name'] in schema and column_type(schema[args['name']]) != column_type(spec):
                     raise ValueError('implicit assignment type conversion is unsupported')
                 schema.setdefault(args['name'], spec)
@@ -893,16 +903,17 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                         value = queue.invoke(number(expression['args'][0], row, schema), difference=family == 'dif')
                     else:
                         try:
-                            value = (pipeline_engine.evaluate(expression, row, arrays, current) if pipeline is not None else
+                            value = (consumers.evaluate_character(expression, row) if function_consumer and consumers.character_form(expression) else
+                                     pipeline_engine.evaluate(expression, row, arrays, current) if pipeline is not None else
                                      binary64.evaluate(expression, row) if rounded_profile else
                                      put_all_value(expression, row) if put_all else number(expression, row, schema, arrays, current))
                         except ValueError as exc:
                             if arrays and contains_array(expression):
                                 raise ValueError(f"SAS line {op['line']}: {exc}") from exc
                             raise
-                    if args['value'].get('kind') == 'call' and args['value'].get('name') == 'catx':
+                    if args['value'].get('kind') == 'call' and args['value'].get('name') in ('catx','cat','cats','catt'):
                         if len(value) > schema[args['name']]['length']:
-                            raise ValueError('CATX destination is too short; buffer/error-flag review required')
+                            raise ValueError(args['value']['name'].upper()+' destination is too short; buffer/error-flag review required')
                     row[args['name']] = coerce(value, schema[args['name']], encoding)
                     if args['name'] in array_members:
                         row[args['name']] = sas_numeric_array_value(row[args['name']])
@@ -1010,7 +1021,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                         if isinstance(v, str): return v.rstrip(' ')
                         return format(v, '.17g')
                     logs.append(' '.join(n + '=' + render(row.get(n)) for n in args['names']))
-                elif kind not in ('lookup', 'read', 'declare', 'array_declare', 'input_list', 'input_numeric', 'projection', 'numeric_profile'):
+                elif kind not in ('lookup', 'read', 'declare', 'array_declare', 'input_list', 'input_numeric', 'projection', 'numeric_profile', 'function_profile'):
                     raise ValueError(f'unsupported operation: {kind}')
                 return True
 

@@ -1,0 +1,52 @@
+{
+  "raw": {
+    "schema": {
+      "label": {
+        "type": "character",
+        "length": 12,
+        "label": "Synthetic label"
+      },
+      "code": {
+        "type": "character",
+        "length": 6,
+        "label": "Synthetic code"
+      },
+      "tag": {
+        "type": "character",
+        "length": 3
+      }
+    },
+    "rows": [
+      {
+        "label": "  Alpha   X",
+        "code": "123",
+        "tag": "AB"
+      },
+      {
+        "label": "beta  beta",
+        "code": "A12",
+        "tag": "x"
+      },
+      {
+        "label": "",
+        "code": "",
+        "tag": ""
+      },
+      {
+        "label": " Mix  Case ",
+        "code": " 7 ",
+        "tag": "Q"
+      },
+      {
+        "label": "---",
+        "code": "9-9",
+        "tag": "Z"
+      },
+      {
+        "label": "a",
+        "code": "00",
+        "tag": " A "
+      }
+    ]
+  }
+}

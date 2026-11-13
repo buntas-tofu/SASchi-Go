@@ -10,7 +10,13 @@ FAMILIES={'case-search':('DS-096',frozenset({'upcase','lowcase','index','find'})
           'character-rewriting':('DS-098',frozenset({'compress','translate','tranwrd'})),
           'missing-summaries':('DS-099',frozenset({'missing','n','nmiss','cmiss','coalesce','coalescec','mean'})),
           'numeric-helpers':('DS-100',frozenset({'abs','sign','ceil','floor'})),
-          'calendar-intervals':('DS-101',frozenset({'year','month','day','intck','intnx'}))}
+          'calendar-intervals':('DS-101',frozenset({'year','month','day','intck','intnx'})),
+          'whitespace-alignment':('DS-102',frozenset({'left','right','compbl','trimn'})),
+          'cat-functions':('DS-103',frozenset({'cat','cats','catt'})),
+          'character-validation':('DS-104',frozenset({'verify','anyalpha','anydigit','anyalnum','anyspace','notdigit'})),
+          'search-extraction':('DS-105',frozenset({'findc','findw','indexc','indexw','substrn'})),
+          'row-statistics':('DS-106',frozenset({'median','range','var','std'})),
+          'datetime-components':('DS-107',frozenset({'qtr','dhms','datepart','timepart','hour','minute','second'}))}
 NAMES=frozenset(name for _,names in FAMILIES.values() for name in names)
 NAME_FAMILY={name:family for family,(_,names) in FAMILIES.items() for name in names}
 RESERVED={'_n_','_error_','_all_','_numeric_','_character_','_infile_','_file_','_ods_','_page_','_blankpage_'}
@@ -69,6 +75,31 @@ def call_width(expr,schema=None):
     if not is_call(expr) or set(expr)!={'kind','name','args'} or type(expr['args']) is not list:
         raise ValueError('function wave requires an exact call shape')
     name,args=expr['name'],expr['args']
+    if name in ('qtr','dhms','datepart','timepart','hour','minute','second'):return datetime_width(expr,schema)
+    if name in ('median','range','var','std'):return row_stat_width(expr,schema)
+    if name in ('findc','findw','indexc','indexw','substrn'):return search_width(expr,schema)
+    if name in ('verify','anyalpha','anydigit','anyalnum','anyspace','notdigit'):
+        minimum,maximum=(2,32) if name=='verify' else (1,2)
+        if not minimum<=len(args)<=maximum:raise ValueError('character validation call arity is outside its bounded contract')
+        for arg in args if name=='verify' else args[:1]:character_argument(arg,schema)
+        if name!='verify' and len(args)==2:
+            numeric_argument(args[1],schema,missing=True)
+            if args[1]['kind'] in ('number','missing'):
+                from sas_semantics import _sas_wave2_integer
+                _sas_wave2_integer(args[1]['value'],missing=True)
+        return None
+    if name in ('cat','cats','catt'):
+        if not 1<=len(args)<=32:raise ValueError('CAT family requires1..32primitive character arguments')
+        widths=[character_argument(arg,schema) for arg in args]
+        if name=='cat' and all(width is not None for width in widths) and sum(widths)>200:
+            raise ValueError('CAT raw argument width exceeds200bytes')
+        if all(arg['kind']=='character' for arg in args):
+            from sas_semantics import sas_cat,sas_cats,sas_catt
+            {'cat':sas_cat,'cats':sas_cats,'catt':sas_catt}[name](*(arg['value'] for arg in args))
+        return 200
+    if name in ('left','right','compbl','trimn'):
+        if len(args)!=1:raise ValueError('whitespace/alignment requires one primitive character argument')
+        return character_argument(args[0],schema)
     if name in ('scan','countw'):return word_width(expr,schema)
     if name in ('compress','translate','tranwrd'):return rewriting_width(expr,schema)
     if name in ('missing','n','nmiss','cmiss','coalesce','coalescec','mean'):return summary_width(expr,schema)
@@ -97,11 +128,72 @@ def call_width(expr,schema=None):
     return widths[0] if name in ('upcase','lowcase') else None
 
 
-def numeric_argument(arg,schema=None,*,missing=False,tags=False):
+
+def search_width(expr,schema=None):
+    """DS-105 primitive operands and explicit, independently qualified controls."""
+    from sas_semantics import _sas_wave2_integer
+    name,args=expr['name'],expr['args']
+    lower,upper={'findc':(2,4),'findw':(3,5),'indexc':(2,32),'indexw':(2,3),'substrn':(2,3)}[name]
+    if not lower<=len(args)<=upper:raise ValueError('search/extraction call arity is outside its bounded contract')
+    width=character_argument(args[0],schema)
+    if name=='substrn':
+        for arg in args[1:]:
+            numeric_argument(arg,schema,missing=True)
+            if arg['kind'] in ('number','missing'):_sas_wave2_integer(arg['value'],missing=True)
+        return width
+    for arg in args[1:] if name=='indexc' else args[1:2]:character_argument(arg,schema)
+    if name=='findc':
+        size=character_argument(args[1],schema)
+        if size is not None and size>64:raise ValueError('FINDC character set exceeds64bytes')
+    if name=='indexw' and len(args)==3:literal_option(args[2],maximum=1,choices={' '})
+    if name=='findw':
+        delimiters=literal_option(args[2])
+        if any('A'<=c<='Z' or 'a'<=c<='z' for c in delimiters):raise ValueError('FINDW alphabetic delimiters need separate evidence')
+    if name in ('findc','findw'):
+        modifiers=False;start=False
+        for arg in args[2 if name=='findc' else 3:]:
+            if type(arg) is dict and arg.get('kind')=='character':
+                if modifiers:raise ValueError('duplicate search modifiers')
+                literal_option(arg,maximum=2 if name=='findc' else 1,empty=True,choices={'','I','K','IK','KI'} if name=='findc' else {'','I'})
+                modifiers=True
+            else:
+                if start:raise ValueError('duplicate search start')
+                numeric_argument(arg,schema)
+                if arg['kind']=='number':_sas_wave2_integer(arg['value'])
+                start=True
+    return None
+
+
+
+def row_stat_width(expr,schema=None):
+    from sas_semantics import _sas_wave2_integer
+    args=expr['args']
+    if not 1<=len(args)<=32:raise ValueError('row statistics require1..32primitive numeric operands')
+    for arg in args:
+        numeric_argument(arg,schema,missing=True)
+        if arg['kind'] in ('number','missing'):_sas_wave2_integer(arg['value'],-1000000,1000000,missing=True)
+    return None
+
+
+
+def datetime_width(expr,schema=None):
+    from sas_semantics import _sas_wave2_integer,SAS_CALENDAR_MIN_DAY,SAS_CALENDAR_MAX_DAY
+    name,args=expr['name'],expr['args']
+    if len(args)!=(4 if name=='dhms' else 1):raise ValueError('datetime component call requires its bounded argument count')
+    bounds=([(SAS_CALENDAR_MIN_DAY,SAS_CALENDAR_MAX_DAY),(0,23),(0,59),(0,59)] if name=='dhms' else
+            [(SAS_CALENDAR_MIN_DAY,SAS_CALENDAR_MAX_DAY)] if name=='qtr' else
+            [(SAS_CALENDAR_MIN_DAY*86400,SAS_CALENDAR_MAX_DAY*86400+86399)])
+    for arg,(low,high) in zip(args,bounds):
+        numeric_argument(arg,schema,missing=True,limit=max(abs(low),abs(high)))
+        if arg['kind'] in ('number','missing'):_sas_wave2_integer(arg['value'],low,high,missing=True)
+    return None
+
+
+def numeric_argument(arg,schema=None,*,missing=False,tags=False,limit=2147483647):
     if type(arg) is not dict or set(arg)!={'kind','value'}:raise ValueError('function requires a primitive numeric operand')
     kind,value=arg['kind'],arg['value']
     if kind=='number':
-        if type(value) not in (int,float) or abs(value)>2147483647 or not math.isfinite(value):
+        if type(value) not in (int,float) or abs(value)>limit or not math.isfinite(value):
             raise ValueError('function numeric literal is outside the bounded finite domain')
     elif kind=='missing':
         if not missing or value is not None:raise ValueError('function ordinary missing operand requires separate admission')

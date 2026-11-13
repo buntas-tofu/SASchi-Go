@@ -1,0 +1,37 @@
+{
+  "raw": {
+    "schema": {
+      "a": {
+        "type": "character",
+        "length": 8,
+        "label": "Synthetic first field"
+      },
+      "b": {
+        "type": "character",
+        "length": 5
+      }
+    },
+    "rows": [
+      {
+        "a": " A  ",
+        "b": " b "
+      },
+      {
+        "a": "   ",
+        "b": " "
+      },
+      {
+        "a": "xy",
+        "b": "Z"
+      },
+      {
+        "a": "   k",
+        "b": " v"
+      },
+      {
+        "a": "",
+        "b": "x"
+      }
+    ]
+  }
+}

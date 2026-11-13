@@ -1,0 +1,10 @@
+data located;
+set raw;
+chars=findc(text,'aA');
+words=findw(text,'ab',' ,');
+indexed=indexc(text,'x','Z');
+bounded=indexw(text,'ab');
+piece=substrn(text,position,take);
+output;
+put 'located';
+run;

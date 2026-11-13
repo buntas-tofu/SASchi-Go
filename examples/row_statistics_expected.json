@@ -1,0 +1,139 @@
+{
+  "datasets": {
+    "raw": {
+      "schema": {
+        "a": {
+          "type": "number",
+          "label": "Synthetic first reading"
+        },
+        "b": "number",
+        "c": "number"
+      },
+      "rows": [
+        {
+          "a": 1,
+          "b": 2,
+          "c": 3
+        },
+        {
+          "a": null,
+          "b": 4,
+          "c": 8
+        },
+        {
+          "a": 5,
+          "b": null,
+          "c": null
+        },
+        {
+          "a": null,
+          "b": null,
+          "c": null
+        },
+        {
+          "a": -2,
+          "b": -2,
+          "c": -2
+        },
+        {
+          "a": 1000000,
+          "b": 999999,
+          "c": 999998
+        },
+        {
+          "a": 0,
+          "b": 1,
+          "c": null
+        }
+      ]
+    },
+    "stats": {
+      "schema": {
+        "a": {
+          "type": "number",
+          "label": "Synthetic first reading"
+        },
+        "b": "number",
+        "c": "number",
+        "mid": "number",
+        "spread": "number",
+        "variance": "number",
+        "deviation": "number"
+      },
+      "rows": [
+        {
+          "a": 1,
+          "b": 2,
+          "c": 3,
+          "mid": 2,
+          "spread": 2,
+          "variance": 1,
+          "deviation": 1
+        },
+        {
+          "a": null,
+          "b": 4,
+          "c": 8,
+          "mid": 6,
+          "spread": 4,
+          "variance": 8,
+          "deviation": 2.8284271247461903
+        },
+        {
+          "a": 5,
+          "b": null,
+          "c": null,
+          "mid": 5,
+          "spread": 0,
+          "variance": null,
+          "deviation": null
+        },
+        {
+          "a": null,
+          "b": null,
+          "c": null,
+          "mid": null,
+          "spread": null,
+          "variance": null,
+          "deviation": null
+        },
+        {
+          "a": -2,
+          "b": -2,
+          "c": -2,
+          "mid": -2,
+          "spread": 0,
+          "variance": 0,
+          "deviation": 0
+        },
+        {
+          "a": 1000000,
+          "b": 999999,
+          "c": 999998,
+          "mid": 999999,
+          "spread": 2,
+          "variance": 1,
+          "deviation": 1
+        },
+        {
+          "a": 0,
+          "b": 1,
+          "c": null,
+          "mid": 0.5,
+          "spread": 1,
+          "variance": 0.5,
+          "deviation": 0.7071067811865476
+        }
+      ]
+    }
+  },
+  "log": [
+    "measured",
+    "measured",
+    "measured",
+    "measured",
+    "measured",
+    "measured",
+    "measured"
+  ]
+}

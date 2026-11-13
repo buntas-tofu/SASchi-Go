@@ -1,0 +1,233 @@
+[
+  [
+    "cat",
+    [
+      " a ",
+      " b "
+    ],
+    " a  b "
+  ],
+  [
+    "cats",
+    [
+      " a ",
+      " b "
+    ],
+    "ab"
+  ],
+  [
+    "catt",
+    [
+      " a ",
+      " b "
+    ],
+    " a b"
+  ],
+  [
+    "cat",
+    [
+      "a",
+      " ",
+      "b"
+    ],
+    "a b"
+  ],
+  [
+    "cats",
+    [
+      "a",
+      " ",
+      "b"
+    ],
+    "ab"
+  ],
+  [
+    "catt",
+    [
+      "a",
+      " ",
+      "b"
+    ],
+    "ab"
+  ],
+  [
+    "cat",
+    [
+      " ",
+      "  "
+    ],
+    "   "
+  ],
+  [
+    "cats",
+    [
+      " ",
+      "  "
+    ],
+    ""
+  ],
+  [
+    "catt",
+    [
+      " ",
+      "  "
+    ],
+    ""
+  ],
+  [
+    "cat",
+    [
+      " x  "
+    ],
+    " x  "
+  ],
+  [
+    "cats",
+    [
+      " x  "
+    ],
+    "x"
+  ],
+  [
+    "catt",
+    [
+      " x  "
+    ],
+    " x"
+  ],
+  [
+    "cat",
+    [
+      "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    ],
+    "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  ],
+  [
+    "cats",
+    [
+      "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    ],
+    "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  ],
+  [
+    "catt",
+    [
+      "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    ],
+    "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  ],
+  [
+    "cat",
+    [
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x"
+    ],
+    "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  ],
+  [
+    "cats",
+    [
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x"
+    ],
+    "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  ],
+  [
+    "catt",
+    [
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x",
+      "x"
+    ],
+    "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  ]
+]

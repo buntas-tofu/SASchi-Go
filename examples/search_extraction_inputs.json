@@ -1,0 +1,45 @@
+{
+  "raw": {
+    "schema": {
+      "text": {
+        "type": "character",
+        "length": 12,
+        "label": "Synthetic search text"
+      },
+      "position": "number",
+      "take": "number"
+    },
+    "rows": [
+      {
+        "text": "ab x",
+        "position": 1,
+        "take": 2
+      },
+      {
+        "text": "z,ab,Z",
+        "position": 3,
+        "take": 2
+      },
+      {
+        "text": "AB ab",
+        "position": 0,
+        "take": 3
+      },
+      {
+        "text": "tabs",
+        "position": -1,
+        "take": 4
+      },
+      {
+        "text": "  ",
+        "position": null,
+        "take": 2
+      },
+      {
+        "text": "x ab",
+        "position": 99,
+        "take": 5
+      }
+    ]
+  }
+}

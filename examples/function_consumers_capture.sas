@@ -1,0 +1,12 @@
+data consumers;
+set raw;
+normalized=upcase(compbl(strip(label)));
+key=cats(substrn(code,1,3),'-',lowcase(tag));
+if verify(code,'0123456789 ')=0 then accepted=1;
+else accepted=0;
+if missing(label)=1 then blank_label=1;
+else blank_label=0;
+output;
+put key;
+put accepted;
+run;

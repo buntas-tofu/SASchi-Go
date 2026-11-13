@@ -1,0 +1,10 @@
+data cleaned;
+set raw;
+lefted=left(text);
+righted=right(text);
+spaced=compbl(text);
+trimmed=trimn(text);
+output;
+if text ne '          ' then put spaced;
+if text ne '          ' then put trimmed;
+run;

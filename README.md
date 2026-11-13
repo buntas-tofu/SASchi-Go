@@ -18,7 +18,7 @@ policies. Receipts record what passed for the source and environment tested.
 ## Current verification
 
 Status: version 0.4.0 development evidence for maintainer review, updated on
-2026-11-12. The current registry contains 119 fixture gates and84 suites, including
+2026-11-12. The current registry contains 128 fixture gates and92 suites, including
 the desktop workflow, data importer and saved-evidence suites. The full receipt
 records the discovered tests and their outcomes. With the pinned Roku corpus present, `python verify_all.py` records the
 source-bound unified verdict. Synthesis separately checks 60 faithful cases and
@@ -32,6 +32,25 @@ Its first profile is the
 [bounded case/search profile](docs/CASE_SEARCH.md). Its current full receipt
 decides acceptance; original source and base-R evidence remain separate from
 live SAS validation.
+
+The [approved 29-function continuation](docs/NEXT_DATA_STEP_WAVE.md) is
+implemented. Its first [whitespace/alignment slice](docs/WHITESPACE_ALIGNMENT.md)
+adds bounded LEFT, RIGHT, COMPBL and TRIMN with an independent original hand/R
+witness; current full verification and workload receipts decide acceptance.
+The subsequent [CAT family slice](docs/CAT_FUNCTIONS.md) adds character-only
+CAT, CATS and CATT with distinct blank policies and explicit buffer refusals.
+The [character validation slice](docs/CHARACTER_VALIDATION.md) adds VERIFY and
+five bounded ASCII class-position functions, with signed and missing starts.
+The [search/extraction slice](docs/SEARCH_EXTRACTION.md) adds FINDC, FINDW,
+INDEXC, INDEXW and SUBSTRN with explicit boundary and clipping contracts.
+The [row statistics slice](docs/ROW_STATISTICS.md) adds bounded MEDIAN, RANGE, VAR
+and STD with ordinary-missing handling and independent numerical qualification.
+The [datetime slice](docs/DATETIME_COMPONENTS.md) adds QTR, DHMS and five supplied
+time/datetime extractors under an integral epoch and civil-time contract.
+The [consumer profile](docs/FUNCTION_CONSUMERS.md) qualifies bounded character
+chains, CATS items and selected validator/MISSING IF comparisons separately.
+The [two complete compositions](docs/FUNCTION_WAVE_2_COMPOSITION.md) qualify
+record cleaning and timestamp/measurement reconciliation across the wave.
 
 [Explicit word parsing](docs/WORD_FUNCTIONS.md) adds SCAN/COUNTW with an explicit
 delimiter set and optional M. The source-width SCAN policy is pinned to the current
@@ -245,7 +264,7 @@ fixed expected output and base-R evidence. Special missings retain their tags.
   sibling plus a fixture verifier (`verify_*.py`). Run any verifier directly,
   or all of them through [verify_all.py](verify_all.py).
 - [docs/sasconversionrulebook.json](docs/sasconversionrulebook.json) : the machine-consumable translation
-  rulebook. 151 rules with equivalence classes (EXACT,
+  rulebook. 158 rules with equivalence classes (EXACT,
   EQUIVALENT-WITH-SETTINGS, APPROXIMATE, NO-DIRECT-EQUIVALENT), required
   settings, forbidden patterns, and validation tests.
 - [docs/capability-manifest.json](docs/capability-manifest.json) : the coverage manifest. Enumerated entries of

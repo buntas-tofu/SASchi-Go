@@ -1,0 +1,49 @@
+{
+  "raw": {
+    "schema": {
+      "a": {
+        "type": "number",
+        "label": "Synthetic first reading"
+      },
+      "b": "number",
+      "c": "number"
+    },
+    "rows": [
+      {
+        "a": 1,
+        "b": 2,
+        "c": 3
+      },
+      {
+        "a": null,
+        "b": 4,
+        "c": 8
+      },
+      {
+        "a": 5,
+        "b": null,
+        "c": null
+      },
+      {
+        "a": null,
+        "b": null,
+        "c": null
+      },
+      {
+        "a": -2,
+        "b": -2,
+        "c": -2
+      },
+      {
+        "a": 1000000,
+        "b": 999999,
+        "c": 999998
+      },
+      {
+        "a": 0,
+        "b": 1,
+        "c": null
+      }
+    ]
+  }
+}
