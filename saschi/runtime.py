@@ -21,6 +21,7 @@ from .put_mixed import validate_items as validate_mixed_put_items
 from .trim_strip import is_call as is_trim_call, validate_expression as validate_trim_expression, validate_step as validate_trim_step
 from .function_wave import validate_expression as validate_wave_expression, validate_step as validate_wave_step
 from . import function_consumers as consumers
+from . import function_consumers_v2 as consumers_v2
 from .input_list import validate_step as validate_input_step
 from .input_numeric import validate_step as validate_numeric_input_step
 from .projection import validate_step as validate_projection_step, selected_names, project_table
@@ -287,11 +288,14 @@ def validate_inline_types(ops, schema, retained):
 
 
 def run_plan(plan, catalog=None, *, allow_partial=False):
+    consumer_v2 = consumers_v2.selected_program(plan)
+    consumer_engine = consumers_v2 if consumer_v2 else consumers
+    consumer_steps = consumers_v2.validate_program(plan) if consumer_v2 else set()
     if plan['version'] not in (1, 2):
         raise ValueError('unsupported plan version')
     if plan['tickets'] and not allow_partial:
         raise RuntimeError('saschi: blocked translation. Nothing from this program was executed.')
-    consumer_steps = consumers.validate_program(plan)
+    if not consumer_v2:consumer_steps = consumers.validate_program(plan)
     from .postal_function import validate_program as validate_postal, run_program as run_postal
     if validate_postal(plan, catalog) is not None:
         return run_postal(plan, catalog)
@@ -589,7 +593,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                 for key, value in args.items() if key not in ('body', 'operation', 'otherwise')]
             for payload, context in payloads:
                 if function_consumer:
-                    consumers.validate_payload(payload, schema, context=context)
+                    consumer_engine.validate_payload(payload, schema, context=context)
                 else:
                     validate_trim_expression(payload, schema, context=context)
                     validate_wave_expression(payload,schema,context=context)
@@ -632,12 +636,23 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                     origin = schema.get(expr['value'], 'number')
                     spec = {'type': 'character', 'length': origin['length']} if column_type(origin) == 'character' else 'number'
                 else:
-                    spec = ({'type': 'character', 'length': consumers.character_width(expr, schema)}
-                            if function_consumer and kind == 'assign' and consumers.character_form(expr) else
+                    spec = ({'type': 'character', 'length': consumer_engine.character_width(expr, schema)}
+                            if function_consumer and kind == 'assign' and consumer_engine.character_form(expr) else
                             assign_spec(expr, schema) if kind == 'assign' and pipeline_engine is not numeric_math else None) or 'number'
                 if args['name'] in schema and column_type(schema[args['name']]) != column_type(spec):
                     raise ValueError('implicit assignment type conversion is unsupported')
                 schema.setdefault(args['name'], spec)
+                if (kind == 'assign' and type(expr) is dict
+                        and expr.get('kind') == 'call' and expr.get('name') == 'quote'
+                        and all(arg.get('kind') == 'character' for arg in expr['args'])):
+                    quoted = apply_function('quote', [arg['value'] for arg in expr['args']])
+                    if len(quoted) > schema[args['name']]['length']:
+                        raise ValueError('QUOTE destination is too short; buffer/diagnostic review required')
+                if (kind == 'assign' and function_consumer and consumer_v2
+                        and consumers_v2.character_form(expr) and expr['name'] == 'cats'
+                        and not any(node.get('kind') == 'variable' for node, _ in expression_nodes(expr))):
+                    if len(consumers_v2.evaluate_assignment(expr, {})) > schema[args['name']]['length']:
+                        raise ValueError('CATS destination is too short; buffer/error-state review required')
                 for value in expressions(args):
                     add_reference(value)
             elif kind == 'do_over':
@@ -903,7 +918,8 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                         value = queue.invoke(number(expression['args'][0], row, schema), difference=family == 'dif')
                     else:
                         try:
-                            value = (consumers.evaluate_character(expression, row) if function_consumer and consumers.character_form(expression) else
+                            value = (consumers_v2.evaluate_assignment(expression, row) if function_consumer and consumer_v2 and consumers_v2.assignment_form(expression) else
+                                     consumer_engine.evaluate_character(expression, row) if function_consumer and consumer_engine.character_form(expression) else
                                      pipeline_engine.evaluate(expression, row, arrays, current) if pipeline is not None else
                                      binary64.evaluate(expression, row) if rounded_profile else
                                      put_all_value(expression, row) if put_all else number(expression, row, schema, arrays, current))
@@ -911,7 +927,7 @@ def run_plan(plan, catalog=None, *, allow_partial=False):
                             if arrays and contains_array(expression):
                                 raise ValueError(f"SAS line {op['line']}: {exc}") from exc
                             raise
-                    if args['value'].get('kind') == 'call' and args['value'].get('name') in ('catx','cat','cats','catt'):
+                    if args['value'].get('kind') == 'call' and args['value'].get('name') in ('catx','cat','cats','catt','quote'):
                         if len(value) > schema[args['name']]['length']:
                             raise ValueError(args['value']['name'].upper()+' destination is too short; buffer/error-flag review required')
                     row[args['name']] = coerce(value, schema[args['name']], encoding)

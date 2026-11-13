@@ -166,6 +166,15 @@ VERIFIERS = [
     ("function-consumers", HERE / "examples" / "verify_function_consumers.py"),
     ("record-cleaning-composition", HERE / "examples" / "verify_record_cleaning_composition.py"),
     ("timestamp-measurement-composition", HERE / "examples" / "verify_timestamp_measurement_composition.py"),
+    ("text-and-quoting", HERE / "examples" / "verify_text_quoting.py"),
+    ("ascii-positions", HERE / "examples" / "verify_ascii_positions.py"),
+    ("selection-and-lookup", HERE / "examples" / "verify_selection_lookup.py"),
+    ("ranks-and-sums-of-squares", HERE / "examples" / "verify_rank_squares.py"),
+    ("zero-fuzz-numeric", HERE / "examples" / "verify_zero_fuzz_numeric.py"),
+    ("calendar-constructors", HERE / "examples" / "verify_calendar_constructors.py"),
+    ("nested-and-if-consumers", HERE / "examples" / "verify_selection_consumers.py"),
+    ("quoted-record-classification", HERE / "examples" / "verify_quoted_record_classification.py"),
+    ("quarterly-measurement-reconciliation", HERE / "examples" / "verify_quarterly_reconciliation.py"),
 ]
 
 # The translator suites, run as unittest modules. They carry the same weight as
@@ -265,6 +274,15 @@ SUITES = [
     ("suite-datetime-components", "saschi.test_datetime_components"),
     ("suite-function-consumers", "saschi.test_function_consumers"),
     ("suite-function-wave2-composition", "saschi.test_function_wave2_composition"),
+    ("suite-text-and-quoting", "saschi.test_text_quoting"),
+    ("suite-ascii-positions", "saschi.test_ascii_positions"),
+    ("suite-selection-and-lookup", "saschi.test_selection_lookup"),
+    ("suite-ranks-and-sums-of-squares", "saschi.test_rank_squares"),
+    ("suite-zero-fuzz-numeric", "saschi.test_zero_fuzz_numeric"),
+    ("suite-calendar-constructors", "saschi.test_calendar_constructors"),
+    ("suite-nested-and-if-consumers", "saschi.test_selection_consumers"),
+    ("suite-quoted-record-classification", "saschi.test_quoted_record_classification"),
+    ("suite-quarterly-measurement-reconciliation", "saschi.test_quarterly_reconciliation"),
 ]
 
 

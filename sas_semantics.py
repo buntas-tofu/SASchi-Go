@@ -2893,3 +2893,299 @@ def _sas_consumer_text(name,value):
     if name=='trim':return text.rstrip(' ') or ' '
     if name=='strip':return text.strip(' ')
     return {'left':sas_left,'right':sas_right,'compbl':sas_compbl,'trimn':sas_trimn}[name](text)
+
+
+def sas_propcase(string,delimiters):
+    """DS-109 printable ASCII proper case with explicit delimiter bytes."""
+    text=_sas_wave2_text(string);delimiters=_sas_wave2_text(delimiters)
+    if not 1<=len(delimiters)<=64:raise ValueError('PROPCASE requires1..64explicit delimiter bytes')
+    borders=set(delimiters)
+    return ''.join(c.upper() if i==0 or text[i-1] in borders else c.lower()
+                   for i,c in enumerate(text))
+
+
+def sas_quote(string,quoting='"'):
+    """DS-109 preserve stored blanks, double selected quotes, bound the buffer."""
+    text=_sas_wave2_text(string);quoting=_sas_wave2_text(quoting)
+    if quoting not in ('"',"'"):raise ValueError('QUOTE requires a single or double quoting character')
+    result=quoting+text.replace(quoting,quoting*2)+quoting
+    if len(result)>200:raise ValueError('QUOTE result exceeds200bytes; buffer/diagnostic review required')
+    return result
+
+
+def sas_dequote(string):
+    """DS-109 unescape an initial quote and discard text after its terminator."""
+    text=_sas_wave2_text(string)
+    if not text or text[0] not in ('"',"'"):return text
+    quoting=text[0];result=[];index=1
+    while index<len(text):
+        if text[index]==quoting:
+            if index+1<len(text) and text[index+1]==quoting:
+                result.append(quoting);index+=2;continue
+            break
+        result.append(text[index]);index+=1
+    return ''.join(result)
+
+
+def sas_countc(string,characters,modifiers=''):
+    """DS-109 explicit character-set counts with qualified I/V/T modifiers."""
+    text,characters,modifiers=(_sas_wave2_text(v) for v in (string,characters,modifiers))
+    if len(characters)>64 or len(modifiers)>3 or any(c not in 'iIvVtT' for c in modifiers):
+        raise ValueError('COUNTC requires at most64set bytes and literal I/V/T modifiers')
+    modifiers=modifiers.upper()
+    if 'T' in modifiers:text,characters=text.rstrip(' '),characters.rstrip(' ')
+    if 'I' in modifiers:text,characters=text.lower(),characters.lower()
+    if not characters:return 0
+    selected=set(characters)
+    return sum((c in selected)!=('V' in modifiers) for c in text)
+
+
+def sas_transtrn(string,target,replacement):
+    """DS-109 exact nonoverlapping substitution, including empty temporaries."""
+    text,target,replacement=(_sas_wave2_text(v) for v in (string,target,replacement))
+    if not 1<=len(target)<=64 or len(replacement)>64:
+        raise ValueError('TRANSTRN requires1..64target bytes and0..64replacement bytes')
+    result=text.replace(target,replacement)
+    if len(result)>200:raise ValueError('TRANSTRN result exceeds200qualified bytes')
+    return result
+
+
+def _sas_wave3_position(name,string,start=1):
+    """DS-110 one-based printable ASCII masks with signed search direction."""
+    names=('anylower','anyupper','anypunct','anyxdigit','notalpha','notalnum','notspace')
+    if name not in names:raise ValueError('unqualified ASCII position class')
+    text=_sas_wave2_text(string)
+    start=_sas_wave2_integer(start,missing=name!='anypunct')
+    for position in _sas_position_indices(len(text),1 if start is None else start):
+        c=text[position]
+        lower='a'<=c<='z';upper='A'<=c<='Z';digit='0'<=c<='9'
+        punct='!'<=c<='/' or ':'<=c<='@' or '['<=c<='`' or '{'<=c<='~'
+        selected={'anylower':lower,'anyupper':upper,'anypunct':punct,
+                  'anyxdigit':digit or 'A'<=c<='F' or 'a'<=c<='f',
+                  'notalpha':not (lower or upper),'notalnum':not (lower or upper or digit),
+                  'notspace':c!=' '}[name]
+        if selected:return position+1
+    return 0
+
+
+def sas_anylower(string,start=1):
+    """DS-110 ANYLOWER first qualified ASCII position, or zero."""
+    return _sas_wave3_position('anylower',string,start)
+
+
+def sas_anyupper(string,start=1):
+    """DS-110 ANYUPPER first qualified ASCII position, or zero."""
+    return _sas_wave3_position('anyupper',string,start)
+
+
+def sas_anypunct(string,start=1):
+    """DS-110 ANYPUNCT first qualified ASCII position, or zero."""
+    return _sas_wave3_position('anypunct',string,start)
+
+
+def sas_anyxdigit(string,start=1):
+    """DS-110 ANYXDIGIT first qualified ASCII position, or zero."""
+    return _sas_wave3_position('anyxdigit',string,start)
+
+
+def sas_notalpha(string,start=1):
+    """DS-110 NOTALPHA first qualified ASCII position, or zero."""
+    return _sas_wave3_position('notalpha',string,start)
+
+
+def sas_notalnum(string,start=1):
+    """DS-110 NOTALNUM first qualified ASCII position, or zero."""
+    return _sas_wave3_position('notalnum',string,start)
+
+
+def sas_notspace(string,start=1):
+    """DS-110 NOTSPACE first qualified ASCII position, or zero."""
+    return _sas_wave3_position('notspace',string,start)
+
+
+def _sas_wave3_number(value):
+    """DS-111 finite bounded binary64 numeric value or ordinary missing."""
+    if value is None:return None
+    if type(value) not in (int,float) or abs(value)>1000000 or not math.isfinite(value):
+        raise ValueError('selection requires a finite numeric operand within1000000 or ordinary missing')
+    return float(value)
+
+
+def _sas_wave3_selection(name,args):
+    """DS-111 eager operand validation, signed choices and first-match lookup."""
+    if name not in ('ifn','ifc','choosen','choosec','whichn','whichc'):
+        raise ValueError('unqualified selection function')
+    conditional=name in ('ifn','ifc');character=name in ('ifc','choosec','whichc')
+    if not (3<=len(args)<=4 if conditional else 2<=len(args)<=32):
+        raise ValueError('selection function arity is outside its bounded contract')
+    if name=='whichc':
+        values=[_sas_wave2_text(value) for value in args]
+        if any(len(value)>200 for value in values):raise ValueError('WHICHC character operands exceed200bytes')
+        values=[value.rstrip(' ') for value in values]
+        if not values[0]:return None
+        return next((i for i,value in enumerate(values[1:],1) if value==values[0]),0)
+    if name=='whichn':
+        values=[_sas_wave3_number(value) for value in args]
+        if values[0] is None:return None
+        return next((i for i,value in enumerate(values[1:],1) if value==values[0]),0)
+    control=_sas_wave3_number(args[0])
+    values=[_sas_wave2_text(value) for value in args[1:]] if character else [_sas_wave3_number(value) for value in args[1:]]
+    if character and any(len(value)>200 for value in values):raise ValueError('selection character choices exceed200bytes')
+    if conditional:
+        if control is None and len(values)==3:return values[2]
+        return values[0] if control is not None and control!=0 else values[1]
+    if control is None or control==0 or control!=int(control) or abs(control)>len(values):
+        raise ValueError('CHOOSE index requires a nonzero signed integer within the candidate count')
+    return values[int(control)-1 if control>0 else len(values)+int(control)]
+
+
+def sas_ifn(*args):
+    """DS-111 IFN under the bounded eager selection contract."""
+    return _sas_wave3_selection('ifn',args)
+
+
+def sas_ifc(*args):
+    """DS-111 IFC under the bounded eager selection contract."""
+    return _sas_wave3_selection('ifc',args)
+
+
+def sas_choosen(*args):
+    """DS-111 CHOOSEN under the bounded eager selection contract."""
+    return _sas_wave3_selection('choosen',args)
+
+
+def sas_choosec(*args):
+    """DS-111 CHOOSEC under the bounded eager selection contract."""
+    return _sas_wave3_selection('choosec',args)
+
+
+def sas_whichn(*args):
+    """DS-111 WHICHN under the bounded eager selection contract."""
+    return _sas_wave3_selection('whichn',args)
+
+
+def sas_whichc(*args):
+    """DS-111 WHICHC under the bounded eager selection contract."""
+    return _sas_wave3_selection('whichc',args)
+
+
+def _sas_wave3_rank(name,k,items):
+    """DS-112 validate rank and every measurement before missing removal."""
+    try:rank=_sas_wave2_integer(k,1,len(items))
+    except ValueError as error:raise ValueError('rank requires an integer in1..total argument count') from error
+    values=sorted(_sas_row_stat_values(items),reverse=name=='largest')
+    return values[rank-1] if rank<=len(values) else None
+
+
+def sas_largest(k,*items):
+    """DS-112 descending rank, with ties occupying separate positions."""
+    return _sas_wave3_rank('largest',k,items)
+
+
+def sas_smallest(k,*items):
+    """DS-112 ascending rank, with ties occupying separate positions."""
+    return _sas_wave3_rank('smallest',k,items)
+
+
+def sas_css(*items):
+    """DS-112 exact integral centered numerator and one binary64 division."""
+    values=_sas_row_stat_values(items);n=len(values)
+    return (n*sum(value*value for value in values)-sum(values)**2)/n if n else None
+
+
+def sas_uss(*items):
+    """DS-112 exact uncorrected sum of integral squares."""
+    values=_sas_row_stat_values(items)
+    return sum(value*value for value in values) if values else None
+
+
+def _sas_wave3_zero_value(value):
+    """DS-113 finite bounded binary64 away from underflow-prone inputs."""
+    value=_sas_wave3_number(value)
+    if value is not None and value!=0 and abs(value)<2.**-40:
+        raise ValueError('zero-fuzz nonzero input must have magnitude at least2^-40')
+    return value
+
+
+def _sas_wave3_power(value,*,signed=False):
+    """DS-113 exact dyadic units, tested independently of rounded logarithms."""
+    value=_sas_wave3_number(value)
+    if value is None:return None
+    mantissa,exponent=math.frexp(abs(value))
+    if (not signed and value<=0) or mantissa!=.5 or not -10<=exponent-1<=10:
+        raise ValueError('zero-fuzz unit requires a qualified nonzero power of two')
+    return value
+
+
+def _sas_wave3_zero(name,args):
+    """DS-113 no fuzz, exact half-even dyadic rounding and signed remainder."""
+    if not (len(args)==2 if name=='modz' else 1<=len(args)<=2 if name=='roundz' else len(args)==1):
+        raise ValueError('zero-fuzz call arity is outside its bounded contract')
+    value=_sas_wave3_zero_value(args[0])
+    unit=_sas_wave3_power(args[1],signed=name=='modz') if len(args)==2 else 1.
+    if value is None or unit is None:return None
+    if name=='ceilz':result=math.ceil(value)
+    elif name=='floorz':result=math.floor(value)
+    elif name=='intz':result=math.trunc(value)
+    elif name=='roundz':result=round(value/unit)*unit
+    else:result=math.fmod(value,unit)
+    return 0. if result==0 else result
+
+
+def sas_ceilz(*args):
+    """DS-113 CEILZ in the qualified zero-fuzz domain."""
+    return _sas_wave3_zero('ceilz',args)
+
+
+def sas_floorz(*args):
+    """DS-113 FLOORZ in the qualified zero-fuzz domain."""
+    return _sas_wave3_zero('floorz',args)
+
+
+def sas_intz(*args):
+    """DS-113 INTZ in the qualified zero-fuzz domain."""
+    return _sas_wave3_zero('intz',args)
+
+
+def sas_roundz(*args):
+    """DS-113 ROUNDZ in the qualified zero-fuzz domain."""
+    return _sas_wave3_zero('roundz',args)
+
+
+def sas_modz(*args):
+    """DS-113 MODZ in the qualified zero-fuzz domain."""
+    return _sas_wave3_zero('modz',args)
+
+
+def sas_hms(*args):
+    """DS-114 strict supplied hour, minute and second without normalization."""
+    if len(args)!=3:raise ValueError('HMS requires three components')
+    values=[_sas_wave2_integer(value,0,upper,missing=True) for value,upper in zip(args,(23,59,59))]
+    return None if None in values else values[0]*3600+values[1]*60+values[2]
+
+
+def sas_yyq(*args):
+    """DS-114 first civil day of an explicit four-digit year and quarter."""
+    if len(args)!=2:raise ValueError('YYQ requires year and quarter')
+    year=_sas_wave2_integer(args[0],1753,3999,missing=True)
+    quarter=_sas_wave2_integer(args[1],1,4,missing=True)
+    return None if year is None or quarter is None else sas_mdy(3*(quarter-1)+1,1,year)
+
+
+def sas_datejul(*args):
+    """DS-114 strict numeric seven-digit year and ordinal day."""
+    if len(args)!=1:raise ValueError('DATEJUL requires one ordinal date')
+    try:value=_sas_wave2_integer(args[0],1753001,3999365,missing=True)
+    except ValueError as error:raise ValueError('DATEJUL requires a seven-digit ordinal date in1753..3999') from error
+    if value is None:return None
+    year,ordinal=divmod(value,1000)
+    first=datetime.date(year,1,1);last=datetime.date(year,12,31)
+    if not 1<=ordinal<=(last-first).days+1:raise ValueError('DATEJUL ordinal day is invalid for the supplied year')
+    return (first-SAS_EPOCH).days+ordinal-1
+
+
+def sas_juldate7(*args):
+    """DS-114 numeric seven-digit year and ordinal from an integral epoch date."""
+    if len(args)!=1:raise ValueError('JULDATE7 requires one date')
+    value=_sas_source_date(args[0])
+    return None if value is None else value.year*1000+(value-datetime.date(value.year,1,1)).days+1

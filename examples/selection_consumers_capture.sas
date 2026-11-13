@@ -1,0 +1,13 @@
+data consumers;
+set raw;
+status=ifc(notalnum(code)=0,'OK','REVIEW');
+chosen=ifn(flag,fallback,largest(k,a,b,c));
+identifier=cats(propcase(label,' -'),'-',dequote(code));
+cleaned=transtrn(label,'-',trimn(' '));
+blanked=transtrn(label,'-',' ');
+if anyupper(code)>0 then has_upper=1;
+else has_upper=0;
+output;
+put identifier;
+put chosen;
+run;

@@ -130,6 +130,32 @@ FUNCTIONS: dict[str, FunctionSpec] = {
         FunctionSpec("indexc", "number", "examples/verify_search_extraction.py", 2, 32),
         FunctionSpec("indexw", "number", "examples/verify_search_extraction.py", 2, 3),
         FunctionSpec("substrn", "character", "examples/verify_search_extraction.py", 2, 3),
+        FunctionSpec('propcase','character','examples/verify_text_quoting.py',2,2),
+        FunctionSpec('quote','character','examples/verify_text_quoting.py',1,2),
+        FunctionSpec('dequote','character','examples/verify_text_quoting.py',1,1),
+        FunctionSpec('countc','number','examples/verify_text_quoting.py',2,3),
+        FunctionSpec('transtrn','character','examples/verify_text_quoting.py',3,3),
+        *(FunctionSpec(name,'number','examples/verify_ascii_positions.py',1,2)
+          for name in ('anylower', 'anyupper', 'anypunct', 'anyxdigit', 'notalpha', 'notalnum', 'notspace')),
+        FunctionSpec('ifn','number','examples/verify_selection_lookup.py',3,4),
+        FunctionSpec('ifc','character','examples/verify_selection_lookup.py',3,4),
+        FunctionSpec('choosen','number','examples/verify_selection_lookup.py',2,32),
+        FunctionSpec('choosec','character','examples/verify_selection_lookup.py',2,32),
+        FunctionSpec('whichn','number','examples/verify_selection_lookup.py',2,32),
+        FunctionSpec('whichc','number','examples/verify_selection_lookup.py',2,32),
+        FunctionSpec('largest','number','examples/verify_rank_squares.py',2,33),
+        FunctionSpec('smallest','number','examples/verify_rank_squares.py',2,33),
+        FunctionSpec('css','number','examples/verify_rank_squares.py',1,32),
+        FunctionSpec('uss','number','examples/verify_rank_squares.py',1,32),
+        FunctionSpec('ceilz','number','examples/verify_zero_fuzz_numeric.py',1,1),
+        FunctionSpec('floorz','number','examples/verify_zero_fuzz_numeric.py',1,1),
+        FunctionSpec('intz','number','examples/verify_zero_fuzz_numeric.py',1,1),
+        FunctionSpec('roundz','number','examples/verify_zero_fuzz_numeric.py',1,2),
+        FunctionSpec('modz','number','examples/verify_zero_fuzz_numeric.py',2,2),
+        FunctionSpec('hms','number','examples/verify_calendar_constructors.py',3,3),
+        FunctionSpec('yyq','number','examples/verify_calendar_constructors.py',2,2),
+        FunctionSpec('datejul','number','examples/verify_calendar_constructors.py',1,1),
+        FunctionSpec('juldate7','number','examples/verify_calendar_constructors.py',1,1),
         FunctionSpec("upcase", "character", "examples/verify_case_search.py", 1, 1),
         FunctionSpec("lowcase", "character", "examples/verify_case_search.py", 1, 1),
         FunctionSpec("index", "number", "examples/verify_case_search.py", 2, 2),
@@ -205,6 +231,8 @@ def _width_decimals(fmt) -> tuple[int, int]:
 def apply(name: str, values: list):
     """Evaluate one wired function over already-evaluated argument values."""
     if name in WAVE_FUNCTIONS:
+        from .function_wave3 import NAMES as WAVE3,apply as apply_wave3
+        if name in WAVE3:return apply_wave3(name,values)
         from sas_semantics import sas_upcase, sas_lowcase, sas_index, sas_find, sas_scan, sas_countw, sas_compress, sas_translate, sas_tranwrd
         from sas_semantics import sas_missing_function, sas_n, sas_nmiss, sas_cmiss, sas_coalesce, sas_coalescec, sas_row_mean
         from sas_semantics import sas_abs, sas_sign, sas_ceil, sas_floor

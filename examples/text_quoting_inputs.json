@@ -1,0 +1,41 @@
+{
+  "raw": {
+    "schema": {
+      "label": {
+        "type": "character",
+        "length": 12,
+        "label": "Supplied label"
+      },
+      "code": {
+        "type": "character",
+        "length": 10
+      }
+    },
+    "rows": [
+      {
+        "label": " aB-cD",
+        "code": "\"A\"\"B\"x"
+      },
+      {
+        "label": "ALPHA  beta",
+        "code": "plain"
+      },
+      {
+        "label": "",
+        "code": "\"\"tail"
+      },
+      {
+        "label": "9ABC-XYZ",
+        "code": "'a''b'gone"
+      },
+      {
+        "label": "A--b",
+        "code": "\"open"
+      },
+      {
+        "label": "mixed CASE",
+        "code": "\"Q\""
+      }
+    ]
+  }
+}

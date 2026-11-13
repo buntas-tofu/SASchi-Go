@@ -1,0 +1,91 @@
+{
+  "raw": {
+    "schema": {
+      "label": {
+        "type": "character",
+        "length": 12,
+        "label": "Supplied label"
+      },
+      "code": {
+        "type": "character",
+        "length": 8,
+        "label": "Supplied record key"
+      },
+      "flag": "number",
+      "a": "number",
+      "b": "number",
+      "c": "number",
+      "k": "number",
+      "fallback": "number",
+      "index": "number"
+    },
+    "rows": [
+      {
+        "label": " aB-cD",
+        "code": "\"A\"",
+        "flag": 1,
+        "a": 3,
+        "b": 1,
+        "c": 3,
+        "k": 2,
+        "fallback": 99,
+        "index": 1
+      },
+      {
+        "label": "ALPHA--B",
+        "code": "B",
+        "flag": 0,
+        "a": 10,
+        "b": 20,
+        "c": 30,
+        "k": 1,
+        "fallback": 88,
+        "index": -1
+      },
+      {
+        "label": "",
+        "code": "",
+        "flag": null,
+        "a": null,
+        "b": null,
+        "c": null,
+        "k": 1,
+        "fallback": 7,
+        "index": 2
+      },
+      {
+        "label": "-Case-",
+        "code": "\"A\"\"B\"x",
+        "flag": -1,
+        "a": 5,
+        "b": null,
+        "c": 5,
+        "k": 3,
+        "fallback": 6,
+        "index": -2
+      },
+      {
+        "label": "A--b",
+        "code": "ABcd1234",
+        "flag": 0,
+        "a": 0,
+        "b": 0,
+        "c": 2,
+        "k": 2,
+        "fallback": -5,
+        "index": 3
+      },
+      {
+        "label": "mixed CASE",
+        "code": " aZ",
+        "flag": 1,
+        "a": -2,
+        "b": -1,
+        "c": 0,
+        "k": 1,
+        "fallback": 42,
+        "index": -3
+      }
+    ]
+  }
+}

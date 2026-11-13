@@ -1,0 +1,14 @@
+data resolved;
+set raw;
+numeric=ifn(flag,a,b,c);
+defaulted=ifn(flag,a,b);
+label=ifc(flag,'YES','NO','MISSING');
+defaultlabel=ifc(flag,'Y','N');
+selected=choosen(idx,a,b,c);
+picked=choosec(idx,code,'TWO','END');
+where_n=whichn(a,b,a,a);
+where_c=whichc(code,'A','B','A');
+output;
+put numeric;
+put label;
+run;

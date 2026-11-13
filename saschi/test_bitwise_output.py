@@ -285,9 +285,16 @@ class BitwiseOutputTests(unittest.TestCase):
         self.assertEqual(hashlib.sha256(raw[:124820]).hexdigest(), '6b1420350ec579714fb835fd2e1e69c2e1931864f0191be4e6a70da7599f716a')
         self.assertEqual(hashlib.sha256(raw[:126109]).hexdigest(), '19c30cc847d216682ec16ff37396ae05c244cdfe36b52b1501c3418ea06affdd')
         self.assertEqual(hashlib.sha256(raw[:128210]).hexdigest(), '008cb515ac6fcdfcac82e8af994517c96d6e82c7c75debf765080546fab6cbe5')
-        self.assertEqual(hashlib.sha256(raw).hexdigest(), '9d12bf3f4037478a7b1c7e51369dfa50d8cefc9c927ab7ef8c37ecbf95f0beaa')
+        self.assertEqual(hashlib.sha256(raw[:128823]).hexdigest(), '9d12bf3f4037478a7b1c7e51369dfa50d8cefc9c927ab7ef8c37ecbf95f0beaa')
+        self.assertEqual(hashlib.sha256(raw[:131455]).hexdigest(), 'cf0f881751c3bb3c85c363f5d68eebc4b0d489a9367ed4bf61717cd240f33847')
+        self.assertEqual(hashlib.sha256(raw[:133525]).hexdigest(), '017867893c6670211867fa3729f913732b2f021279472bf165e78e859ad5e46f')
+        self.assertEqual(hashlib.sha256(raw[:136500]).hexdigest(), '0777d918fdb8671a42fc3cd096c65031e5851ff80dc6c596b02229f065118815')
+        self.assertEqual(hashlib.sha256(raw[:137630]).hexdigest(), '1acf938a0bcdf144a7ca616814c7d5edb4000f41b64e603a15a4b76a9a00b0bf')
+        self.assertEqual(hashlib.sha256(raw[:139711]).hexdigest(), '078d427219b8c1a78928a5b63919972a22da42f53c694cf40a231857035ffedd')
+        self.assertEqual(hashlib.sha256(raw[:141396]).hexdigest(), '5b1fba802eb26f8281795bdce39a80ee47b4fd701627e1e2e74ea3133ecd14c0')
+        self.assertEqual(hashlib.sha256(raw).hexdigest(), '5b1fba802eb26f8281795bdce39a80ee47b4fd701627e1e2e74ea3133ecd14c0')
         nodes = [n for n in ast.walk(ast.parse(raw)) if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))]
-        self.assertEqual(len(nodes), 223); self.assertEqual(len({n.name for n in nodes}), 221)
+        self.assertEqual(len(nodes), 261); self.assertEqual(len({n.name for n in nodes}), 259)
         with self.assertRaisesRegex(ValueError, 'beyond 64 columns'):
             sas_put_all([{'name': 'x', 'kind': 'character', 'value': 'q'*46}])
 

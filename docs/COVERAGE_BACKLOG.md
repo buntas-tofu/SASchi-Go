@@ -1,7 +1,7 @@
 # Coverage reconciliation and next gate series
 
-Status: Repository/base-R planning evidence, originally reconciled at main08eaa7b
-on2026-10-27 and updated through DS-095, ST-030, SQL-004 and A0.
+Status: Repository/base-R implementation and planning evidence, originally
+reconciled at main08eaa7b on2026-10-27 and updated through DS-115, ST-030, SQL-004 and A0.
 Accepted entry PR66/main0abf161 completed duplicate partition,owned replacement
 and three-report SORT. New input DROP/directed projection registrations require
 the current full source-bound receipt. The sealed handoff retains the historical accepted entry; current full receipts
@@ -34,15 +34,26 @@ with [nine original program gates](FUNCTION_WAVE_2_COMPOSITION.md). The matching
 current full verification and workload receipts decide acceptance. This adds no
 function-universe denominator or execution proof for other external programs.
 
+PR77 merged that continuation on 2026-11-13 as
+`044b44311816a21d0032f5c1fa2900ca02ba91eb` after all five PR checks passed.
+On 2026-11-13 the principal approved the full [third DATA-step wave](NEXT_DATA_STEP_WAVE_3.md):
+31 selected names, the separately marked DS-115 consumer phase and both complete
+original programs. All six bounded families and nine original gates are
+implemented; the [evidence register](FUNCTION_WAVE_3_COMPOSITION.md) records
+their contracts. Source-stable full verification and both unchanged workloads
+decide acceptance. Selection/order remain engineering inferences, not measured
+corpus frequencies. The functions/CALL denominator and external-program proof
+inventory remain unchanged. Publication requires its own instruction.
+
 ## Inventory reconciled against actual evidence
 
-The golden command registers128 fixture runners,92 application/translator suites and1
+The golden command registers137 fixture runners,101 application/translator suites and1
 synthesis runner. These are registration counts, not passing outcomes. The
 source-bound full receipt records the discovered test count. A source-bound full receipt records actual skips and
 results. Accepted run entry PR66/main0abf161 contained97 fixtures,65 suites and1491
 tests with zero skips,60 faithful synthesis checks and60 naive controls. The
 separate1k workload checks total39:18 ledger and21 text. These counts have
-different units. Neither158 rulebook rules nor221 golden-command runners is a
+different units. Neither165 rulebook rules nor239 golden-command runners is a
 SAS capability denominator.
 
 [The capability manifest](capability-manifest.json) still enumerates108 statements

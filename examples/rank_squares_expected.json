@@ -1,0 +1,200 @@
+{
+  "datasets": {
+    "raw": {
+      "schema": {
+        "tag": {
+          "type": "character",
+          "length": 4,
+          "label": "Supplied row"
+        },
+        "k": "number",
+        "a": "number",
+        "b": "number",
+        "c": "number"
+      },
+      "rows": [
+        {
+          "tag": "ties",
+          "k": 2,
+          "a": 3,
+          "b": 3,
+          "c": 1
+        },
+        {
+          "tag": "few ",
+          "k": 3,
+          "a": null,
+          "b": 5,
+          "c": null
+        },
+        {
+          "tag": "none",
+          "k": 1,
+          "a": null,
+          "b": null,
+          "c": null
+        },
+        {
+          "tag": "one ",
+          "k": 1,
+          "a": null,
+          "b": -4,
+          "c": null
+        },
+        {
+          "tag": "wide",
+          "k": 2,
+          "a": 999998,
+          "b": 999999,
+          "c": 1000000
+        },
+        {
+          "tag": "mix ",
+          "k": 2,
+          "a": -2,
+          "b": 0,
+          "c": 2
+        },
+        {
+          "tag": "thir",
+          "k": 2,
+          "a": 0,
+          "b": 1,
+          "c": 1
+        },
+        {
+          "tag": "near",
+          "k": 2,
+          "a": 999999,
+          "b": 1000000,
+          "c": 1000000
+        }
+      ]
+    },
+    "reconciled": {
+      "schema": {
+        "tag": {
+          "type": "character",
+          "length": 4,
+          "label": "Supplied row"
+        },
+        "k": "number",
+        "a": "number",
+        "b": "number",
+        "c": "number",
+        "high": "number",
+        "low": "number",
+        "centered": "number",
+        "uncentered": "number"
+      },
+      "rows": [
+        {
+          "tag": "ties",
+          "k": 2,
+          "a": 3,
+          "b": 3,
+          "c": 1,
+          "high": 3,
+          "low": 3,
+          "centered": 2.6666666666666665,
+          "uncentered": 19
+        },
+        {
+          "tag": "few ",
+          "k": 3,
+          "a": null,
+          "b": 5,
+          "c": null,
+          "high": null,
+          "low": null,
+          "centered": 0,
+          "uncentered": 25
+        },
+        {
+          "tag": "none",
+          "k": 1,
+          "a": null,
+          "b": null,
+          "c": null,
+          "high": null,
+          "low": null,
+          "centered": null,
+          "uncentered": null
+        },
+        {
+          "tag": "one ",
+          "k": 1,
+          "a": null,
+          "b": -4,
+          "c": null,
+          "high": -4,
+          "low": -4,
+          "centered": 0,
+          "uncentered": 16
+        },
+        {
+          "tag": "wide",
+          "k": 2,
+          "a": 999998,
+          "b": 999999,
+          "c": 1000000,
+          "high": 999999,
+          "low": 999999,
+          "centered": 2,
+          "uncentered": 2999994000005
+        },
+        {
+          "tag": "mix ",
+          "k": 2,
+          "a": -2,
+          "b": 0,
+          "c": 2,
+          "high": 0,
+          "low": 0,
+          "centered": 8,
+          "uncentered": 8
+        },
+        {
+          "tag": "thir",
+          "k": 2,
+          "a": 0,
+          "b": 1,
+          "c": 1,
+          "high": 1,
+          "low": 1,
+          "centered": 0.6666666666666666,
+          "uncentered": 2
+        },
+        {
+          "tag": "near",
+          "k": 2,
+          "a": 999999,
+          "b": 1000000,
+          "c": 1000000,
+          "high": 1000000,
+          "low": 1000000,
+          "centered": 0.6666666666666666,
+          "uncentered": 2999998000001
+        }
+      ]
+    }
+  },
+  "log": [
+    "3 ",
+    "3 ",
+    ". ",
+    ". ",
+    ". ",
+    ". ",
+    "-4 ",
+    "-4 ",
+    "999999 ",
+    "999999 ",
+    "0 ",
+    "0 ",
+    "1 ",
+    "1 ",
+    "1000000 ",
+    "1000000 "
+  ]
+}

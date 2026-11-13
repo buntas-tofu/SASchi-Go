@@ -17,6 +17,12 @@ FAMILIES={'case-search':('DS-096',frozenset({'upcase','lowcase','index','find'})
           'search-extraction':('DS-105',frozenset({'findc','findw','indexc','indexw','substrn'})),
           'row-statistics':('DS-106',frozenset({'median','range','var','std'})),
           'datetime-components':('DS-107',frozenset({'qtr','dhms','datepart','timepart','hour','minute','second'}))}
+FAMILIES['text-and-quoting']=('DS-109',frozenset({'propcase','quote','dequote','countc','transtrn'}))
+FAMILIES['ascii-positions']=('DS-110',frozenset(('anylower', 'anyupper', 'anypunct', 'anyxdigit', 'notalpha', 'notalnum', 'notspace')))
+FAMILIES['selection-and-lookup']=('DS-111',frozenset(('ifn', 'ifc', 'choosen', 'choosec', 'whichn', 'whichc')))
+FAMILIES['ranks-and-sums-of-squares']=('DS-112',frozenset(('largest', 'smallest', 'css', 'uss')))
+FAMILIES['zero-fuzz-numeric']=('DS-113',frozenset(('ceilz', 'floorz', 'intz', 'roundz', 'modz')))
+FAMILIES['calendar-constructors']=('DS-114',frozenset(('hms', 'yyq', 'datejul', 'juldate7')))
 NAMES=frozenset(name for _,names in FAMILIES.values() for name in names)
 NAME_FAMILY={name:family for family,(_,names) in FAMILIES.items() for name in names}
 RESERVED={'_n_','_error_','_all_','_numeric_','_character_','_infile_','_file_','_ods_','_page_','_blankpage_'}
@@ -75,6 +81,8 @@ def call_width(expr,schema=None):
     if not is_call(expr) or set(expr)!={'kind','name','args'} or type(expr['args']) is not list:
         raise ValueError('function wave requires an exact call shape')
     name,args=expr['name'],expr['args']
+    from .function_wave3 import NAMES as WAVE3,call_width as wave3_width
+    if name in WAVE3:return wave3_width(expr,schema)
     if name in ('qtr','dhms','datepart','timepart','hour','minute','second'):return datetime_width(expr,schema)
     if name in ('median','range','var','std'):return row_stat_width(expr,schema)
     if name in ('findc','findw','indexc','indexw','substrn'):return search_width(expr,schema)

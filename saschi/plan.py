@@ -13,6 +13,7 @@ from .functions import FUNCTIONS, format_token, FORMATS, function_call_lines, su
 from .trim_strip import validate_step as validate_trim_step
 from .function_wave import validate_step as validate_wave_step, FAMILIES as WAVE_FAMILIES
 from . import function_consumers as consumers
+from . import function_consumers_v2 as consumers_v2
 from .parser import Kind, ParseError, Statement, split_statements, tokenize
 from .operations import walk_operations as _walk_operations
 from .rules import route_function, route_statement
@@ -240,6 +241,11 @@ def call(text, strict=False):
         value=atom(parts[0])
         if value is None:return _normalization_call(text)
         values=[value]
+    elif name=='ifc' and len(parts)==3:
+        test=predicate(parts[0],strict=strict)
+        values=([{'kind':'comparison',**test}]+[_argument(part,False,strict) for part in parts[1:]]
+                if consumers_v2.ifc_comparison(test) else
+                [_argument(part,index in spec.format_args,strict) for index,part in enumerate(parts)])
     else:
         values=[_argument(part, index in spec.format_args, strict) for index, part in enumerate(parts)]
     if any(value is None for value in values):
@@ -1200,13 +1206,16 @@ def _compile_legacy_body(source: str) -> Plan:
         except ValueError as exc:
             plan.tickets.append(Ticket(compiled.line, 'INPUT', 'input-list', str(exc)))
         function_consumer = False
+        consumer_v2 = consumers_v2.contains_candidate(asdict(compiled))
+        consumer_engine = consumers_v2 if consumer_v2 else consumers
+        consumer_construct = 'selection-consumers' if consumer_v2 else 'function-consumers'
         try:
-            function_consumer = consumers.select_source(asdict(compiled), plan.version)
+            function_consumer = consumer_engine.select_source(asdict(compiled), plan.version)
             if function_consumer:
-                compiled.operations.insert(0, Operation('function_profile', compiled.line, {'profile': consumers.PROFILE}))
-                plan.matched.append(('function-consumers', 'DS-108', compiled.line))
+                compiled.operations.insert(0, Operation('function_profile', compiled.line, {'profile': consumer_engine.PROFILE}))
+                plan.matched.append((consumer_construct, 'DS-115' if consumer_v2 else 'DS-108', compiled.line))
         except ValueError as exc:
-            plan.tickets.append(Ticket(compiled.line, 'function-consumers-v1', 'function-consumers', str(exc)))
+            plan.tickets.append(Ticket(compiled.line, consumer_engine.PROFILE, consumer_construct, str(exc)))
         try:
             if not function_consumer:
                 validate_trim_step(asdict(compiled))
@@ -1256,10 +1265,16 @@ def _compile_legacy_body(source: str) -> Plan:
             plan.tickets.append(Ticket(compiled.line, 'LAG/DIF', 'lag-dif', 'LAG/DIF with PUT _ALL_ requires error-state review'))
         for message in substr_context_errors(compiled.where):
             plan.tickets.append(Ticket(compiled.line, 'SUBSTR', 'substr', message))
+    consumer_v2 = consumers_v2.selected_program(plan.to_dict())
     try:
-        consumers.validate_program(plan.to_dict())
+        (consumers_v2 if consumer_v2 else consumers).validate_program(plan.to_dict())
     except ValueError as exc:
-        plan.tickets.append(Ticket(1, 'function-consumers-v1', 'function-consumers', str(exc)))
+        plan.tickets.append(Ticket(1, consumers_v2.PROFILE if consumer_v2 else consumers.PROFILE,
+                                   'selection-consumers' if consumer_v2 else 'function-consumers', str(exc)))
+    from .function_wave3 import ZERO_NAMES,zero_source_underflows
+    if any(function_call_lines(plan.to_dict(),name) for name in ZERO_NAMES):
+        for statement in zero_source_underflows(statements):
+            reject(statement,'zero-fuzz-numeric','nonzero numeric source text underflows to binary64 zero')
     checked_substr_lines = function_call_lines(plan.to_dict(), 'substr')
     if checked_substr_lines:
         plan.matched.extend(('substr', 'DS-030', line or 1) for line in checked_substr_lines)

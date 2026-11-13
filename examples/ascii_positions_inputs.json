@@ -1,0 +1,31 @@
+{
+  "raw": {
+    "schema": {
+      "code": {
+        "type": "character",
+        "length": 8,
+        "label": "Supplied identifier"
+      }
+    },
+    "rows": [
+      {
+        "code": "aZ9_ f"
+      },
+      {
+        "code": "ABC"
+      },
+      {
+        "code": "123"
+      },
+      {
+        "code": ""
+      },
+      {
+        "code": "!?~"
+      },
+      {
+        "code": " gF0-z"
+      }
+    ]
+  }
+}

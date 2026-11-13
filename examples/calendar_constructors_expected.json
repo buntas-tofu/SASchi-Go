@@ -1,0 +1,195 @@
+{
+  "datasets": {
+    "raw": {
+      "schema": {
+        "tag": {
+          "type": "character",
+          "length": 4,
+          "label": "Supplied calendar"
+        },
+        "year": "number",
+        "quarter": "number",
+        "ordinal": "number",
+        "hour": "number",
+        "minute": "number",
+        "second": "number"
+      },
+      "rows": [
+        {
+          "tag": "base",
+          "year": 1960,
+          "quarter": 1,
+          "ordinal": 1960001,
+          "hour": 0,
+          "minute": 0,
+          "second": 0
+        },
+        {
+          "tag": "prev",
+          "year": 1959,
+          "quarter": 4,
+          "ordinal": 1959365,
+          "hour": 23,
+          "minute": 59,
+          "second": 59
+        },
+        {
+          "tag": "leap",
+          "year": 2000,
+          "quarter": 1,
+          "ordinal": 2000060,
+          "hour": 12,
+          "minute": 34,
+          "second": 56
+        },
+        {
+          "tag": "end ",
+          "year": 2024,
+          "quarter": 2,
+          "ordinal": 2024366,
+          "hour": 6,
+          "minute": 7,
+          "second": 8
+        },
+        {
+          "tag": "year",
+          "year": 2023,
+          "quarter": 4,
+          "ordinal": 2023365,
+          "hour": 23,
+          "minute": 0,
+          "second": 0
+        },
+        {
+          "tag": "miss",
+          "year": null,
+          "quarter": null,
+          "ordinal": null,
+          "hour": null,
+          "minute": null,
+          "second": null
+        }
+      ]
+    },
+    "civil": {
+      "schema": {
+        "tag": {
+          "type": "character",
+          "length": 4,
+          "label": "Supplied calendar"
+        },
+        "year": "number",
+        "quarter": "number",
+        "ordinal": "number",
+        "hour": "number",
+        "minute": "number",
+        "second": "number",
+        "clock": "number",
+        "quarterdate": "number",
+        "date": "number",
+        "quarterordinal": "number",
+        "recovered": "number"
+      },
+      "rows": [
+        {
+          "tag": "base",
+          "year": 1960,
+          "quarter": 1,
+          "ordinal": 1960001,
+          "hour": 0,
+          "minute": 0,
+          "second": 0,
+          "clock": 0,
+          "quarterdate": 0,
+          "date": 0,
+          "quarterordinal": 1960001,
+          "recovered": 1960001
+        },
+        {
+          "tag": "prev",
+          "year": 1959,
+          "quarter": 4,
+          "ordinal": 1959365,
+          "hour": 23,
+          "minute": 59,
+          "second": 59,
+          "clock": 86399,
+          "quarterdate": -92,
+          "date": -1,
+          "quarterordinal": 1959274,
+          "recovered": 1959365
+        },
+        {
+          "tag": "leap",
+          "year": 2000,
+          "quarter": 1,
+          "ordinal": 2000060,
+          "hour": 12,
+          "minute": 34,
+          "second": 56,
+          "clock": 45296,
+          "quarterdate": 14610,
+          "date": 14669,
+          "quarterordinal": 2000001,
+          "recovered": 2000060
+        },
+        {
+          "tag": "end ",
+          "year": 2024,
+          "quarter": 2,
+          "ordinal": 2024366,
+          "hour": 6,
+          "minute": 7,
+          "second": 8,
+          "clock": 22028,
+          "quarterdate": 23467,
+          "date": 23741,
+          "quarterordinal": 2024092,
+          "recovered": 2024366
+        },
+        {
+          "tag": "year",
+          "year": 2023,
+          "quarter": 4,
+          "ordinal": 2023365,
+          "hour": 23,
+          "minute": 0,
+          "second": 0,
+          "clock": 82800,
+          "quarterdate": 23284,
+          "date": 23375,
+          "quarterordinal": 2023274,
+          "recovered": 2023365
+        },
+        {
+          "tag": "miss",
+          "year": null,
+          "quarter": null,
+          "ordinal": null,
+          "hour": null,
+          "minute": null,
+          "second": null,
+          "clock": null,
+          "quarterdate": null,
+          "date": null,
+          "quarterordinal": null,
+          "recovered": null
+        }
+      ]
+    }
+  },
+  "log": [
+    "0 ",
+    "1960001 ",
+    "86399 ",
+    "1959365 ",
+    "45296 ",
+    "2000060 ",
+    "22028 ",
+    "2024366 ",
+    "82800 ",
+    "2023365 ",
+    ". ",
+    ". "
+  ]
+}
