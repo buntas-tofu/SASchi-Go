@@ -1,0 +1,14 @@
+data checked;
+set raw;
+verified=verify(code,'0123456789');
+alpha=anyalpha(code);
+digit=anydigit(code);
+alnum=anyalnum(code);
+space=anyspace(code);
+other=notdigit(code);
+back=anydigit(code,-99);
+output;
+if code ne '      ' then put code;
+put verified;
+put other;
+run;

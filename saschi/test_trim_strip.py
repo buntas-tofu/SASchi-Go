@@ -146,10 +146,15 @@ class TrimStripTests(unittest.TestCase):
         self.assertEqual(result['datasets']['d']['rows'][0]['b'],'    ')
 
     def test_temporary_consumers_and_nested_arguments_refuse(self):
-        for rhs in ("strip(trim(a))","length(strip(a))","reverse(trim(a))","substr(strip(a),1,1)","catx('-',strip(a),'x')","strip(a||'x')","strip(a)+1","strip(a)||reverse(a)"):
+        for rhs in ("strip(reverse(a))","length(strip(a))","reverse(trim(a))","substr(strip(a),1,1)","catx('-',strip(a),'x')","strip(a||'x')","strip(a)+1","strip(a)||reverse(a)"):
             self.assertIn(build_job("data d;a=' X ';b="+rhs+';run;').code,(1,2),rhs)
         for use in ("if strip(a)='X' then b=1;","where strip(a)='X';","put strip(a);"):
             self.assertIn(build_job("data d;a='X';"+use+'run;').code,(1,2))
+
+        # DS-108 owns the marked chain; the original direct validator stays strict.
+        nested={'kind':'call','name':'strip','args':[{'kind':'call','name':'trim','args':[{'kind':'variable','value':'a'}]}]}
+        with self.assertRaises(ValueError):
+            validate_expression(nested,{'a':{'type':'character','length':3}},context='assignment')
 
     def test_global_ascii_macro_guards_and_literal_token_safety(self):
         for suffix in ('unused="&name";','unused="%call(x)";',"unused='é';"):
@@ -198,7 +203,7 @@ class TrimStripTests(unittest.TestCase):
         self.assertEqual(build_job("data d;a="+'strip('*1500+"'x'"+')'*1500+';run;').code,2)
 
     def test_partial_translation_cannot_bypass_refusal(self):
-        source="data d;a='x';b=strip(trim(a));run;"
+        source="data d;a='x';b=strip(reverse(a));run;"
         translated=translate(source,allow_partial=True)
         self.assertTrue(translated.blocked)
         self.assertEqual(build_job(source).code,2)

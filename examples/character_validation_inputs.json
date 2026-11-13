@@ -1,0 +1,31 @@
+{
+  "raw": {
+    "schema": {
+      "code": {
+        "type": "character",
+        "length": 6,
+        "label": "Synthetic identifier"
+      }
+    },
+    "rows": [
+      {
+        "code": "123"
+      },
+      {
+        "code": "A12"
+      },
+      {
+        "code": " 7"
+      },
+      {
+        "code": "---"
+      },
+      {
+        "code": ""
+      },
+      {
+        "code": "9_Z a"
+      }
+    ]
+  }
+}

@@ -157,6 +157,15 @@ VERIFIERS = [
     ("calendar-intervals", HERE / "examples" / "verify_calendar_intervals.py"),
     ("character-function-composition", HERE / "examples" / "verify_character_composition.py"),
     ("numeric-calendar-composition", HERE / "examples" / "verify_numeric_calendar_composition.py"),
+    ("whitespace-alignment", HERE / "examples" / "verify_whitespace_alignment.py"),
+    ("cat-functions", HERE / "examples" / "verify_cat_functions.py"),
+    ("character-validation", HERE / "examples" / "verify_character_validation.py"),
+    ("search-extraction", HERE / "examples" / "verify_search_extraction.py"),
+    ("row-statistics", HERE / "examples" / "verify_row_statistics.py"),
+    ("datetime-components", HERE / "examples" / "verify_datetime_components.py"),
+    ("function-consumers", HERE / "examples" / "verify_function_consumers.py"),
+    ("record-cleaning-composition", HERE / "examples" / "verify_record_cleaning_composition.py"),
+    ("timestamp-measurement-composition", HERE / "examples" / "verify_timestamp_measurement_composition.py"),
 ]
 
 # The translator suites, run as unittest modules. They carry the same weight as
@@ -248,6 +257,14 @@ SUITES = [
     ("suite-numeric-helpers", "saschi.test_numeric_helpers"),
     ("suite-calendar-intervals", "saschi.test_calendar_intervals"),
     ("suite-function-wave-composition", "saschi.test_function_wave_composition"),
+    ("suite-whitespace-alignment", "saschi.test_whitespace_alignment"),
+    ("suite-cat-functions", "saschi.test_cat_functions"),
+    ("suite-character-validation", "saschi.test_character_validation"),
+    ("suite-search-extraction", "saschi.test_search_extraction"),
+    ("suite-row-statistics", "saschi.test_row_statistics"),
+    ("suite-datetime-components", "saschi.test_datetime_components"),
+    ("suite-function-consumers", "saschi.test_function_consumers"),
+    ("suite-function-wave2-composition", "saschi.test_function_wave2_composition"),
 ]
 
 

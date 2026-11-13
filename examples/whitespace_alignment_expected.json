@@ -1,0 +1,102 @@
+{
+  "datasets": {
+    "raw": {
+      "schema": {
+        "text": {
+          "type": "character",
+          "length": 10,
+          "label": "Synthetic padded text"
+        }
+      },
+      "rows": [
+        {
+          "text": "  a  b    "
+        },
+        {
+          "text": "          "
+        },
+        {
+          "text": "a   b     "
+        },
+        {
+          "text": "  A B     "
+        },
+        {
+          "text": "x         "
+        }
+      ]
+    },
+    "cleaned": {
+      "schema": {
+        "text": {
+          "type": "character",
+          "length": 10,
+          "label": "Synthetic padded text"
+        },
+        "lefted": {
+          "type": "character",
+          "length": 10
+        },
+        "righted": {
+          "type": "character",
+          "length": 10
+        },
+        "spaced": {
+          "type": "character",
+          "length": 10
+        },
+        "trimmed": {
+          "type": "character",
+          "length": 10
+        }
+      },
+      "rows": [
+        {
+          "text": "  a  b    ",
+          "lefted": "a  b      ",
+          "righted": "      a  b",
+          "spaced": " a b      ",
+          "trimmed": "  a  b    "
+        },
+        {
+          "text": "          ",
+          "lefted": "          ",
+          "righted": "          ",
+          "spaced": "          ",
+          "trimmed": "          "
+        },
+        {
+          "text": "a   b     ",
+          "lefted": "a   b     ",
+          "righted": "     a   b",
+          "spaced": "a b       ",
+          "trimmed": "a   b     "
+        },
+        {
+          "text": "  A B     ",
+          "lefted": "A B       ",
+          "righted": "       A B",
+          "spaced": " A B      ",
+          "trimmed": "  A B     "
+        },
+        {
+          "text": "x         ",
+          "lefted": "x         ",
+          "righted": "         x",
+          "spaced": "x         ",
+          "trimmed": "x         "
+        }
+      ]
+    }
+  },
+  "log": [
+    "a b ",
+    "a  b ",
+    "a b ",
+    "a   b ",
+    "A B ",
+    "A B ",
+    "x ",
+    "x "
+  ]
+}

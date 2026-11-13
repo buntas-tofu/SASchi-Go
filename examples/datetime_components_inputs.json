@@ -1,0 +1,63 @@
+{
+  "raw": {
+    "schema": {
+      "day": {
+        "type": "number",
+        "label": "Synthetic supplied date"
+      },
+      "hr": "number",
+      "mn": "number",
+      "sc": "number"
+    },
+    "rows": [
+      {
+        "day": -1,
+        "hr": 23,
+        "mn": 59,
+        "sc": 59
+      },
+      {
+        "day": 0,
+        "hr": 0,
+        "mn": 0,
+        "sc": 0
+      },
+      {
+        "day": 59,
+        "hr": 12,
+        "mn": 34,
+        "sc": 56
+      },
+      {
+        "day": 91,
+        "hr": 1,
+        "mn": 2,
+        "sc": 3
+      },
+      {
+        "day": 182,
+        "hr": 0,
+        "mn": 0,
+        "sc": 1
+      },
+      {
+        "day": 274,
+        "hr": 23,
+        "mn": 0,
+        "sc": 0
+      },
+      {
+        "day": null,
+        "hr": 0,
+        "mn": 0,
+        "sc": 0
+      },
+      {
+        "day": 0,
+        "hr": null,
+        "mn": 0,
+        "sc": 0
+      }
+    ]
+  }
+}

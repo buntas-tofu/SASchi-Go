@@ -278,9 +278,16 @@ class BitwiseOutputTests(unittest.TestCase):
         self.assertEqual(hashlib.sha256(legacy).hexdigest(), '5b1fc6fe484fac23fd9e8df5e43b6eff8365d73555151f2fff4e19232cc196ef')
         old_nodes=[n for n in ast.walk(ast.parse(legacy)) if isinstance(n,(ast.FunctionDef,ast.AsyncFunctionDef))]
         self.assertEqual(len(old_nodes),151);self.assertEqual(len({n.name for n in old_nodes}),149)
-        self.assertEqual(hashlib.sha256(raw).hexdigest(), 'a01eb9f0e8baf9aab1588d6cdf0b6fcdafc637898b4fac1a8c684536c0d047ce')
+        self.assertEqual(hashlib.sha256(raw[:115862]).hexdigest(), 'a01eb9f0e8baf9aab1588d6cdf0b6fcdafc637898b4fac1a8c684536c0d047ce')
+        self.assertEqual(hashlib.sha256(raw[:116869]).hexdigest(), 'ac1105744bd11bcca1aca4a06893385e073cf8c71398ef7efaaf58342197328a')
+        self.assertEqual(hashlib.sha256(raw[:117909]).hexdigest(), 'd1053c25efffa8fc1bbcc80d678b268c8f60d8d4f746ed6f6911ff6ed2b22588')
+        self.assertEqual(hashlib.sha256(raw[:120700]).hexdigest(), '4bf65830aba443f2b7acfb7e40e15ff637762b369178f8ef5c736427954fb4e5')
+        self.assertEqual(hashlib.sha256(raw[:124820]).hexdigest(), '6b1420350ec579714fb835fd2e1e69c2e1931864f0191be4e6a70da7599f716a')
+        self.assertEqual(hashlib.sha256(raw[:126109]).hexdigest(), '19c30cc847d216682ec16ff37396ae05c244cdfe36b52b1501c3418ea06affdd')
+        self.assertEqual(hashlib.sha256(raw[:128210]).hexdigest(), '008cb515ac6fcdfcac82e8af994517c96d6e82c7c75debf765080546fab6cbe5')
+        self.assertEqual(hashlib.sha256(raw).hexdigest(), '9d12bf3f4037478a7b1c7e51369dfa50d8cefc9c927ab7ef8c37ecbf95f0beaa')
         nodes = [n for n in ast.walk(ast.parse(raw)) if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))]
-        self.assertEqual(len(nodes), 184); self.assertEqual(len({n.name for n in nodes}), 182)
+        self.assertEqual(len(nodes), 223); self.assertEqual(len({n.name for n in nodes}), 221)
         with self.assertRaisesRegex(ValueError, 'beyond 64 columns'):
             sas_put_all([{'name': 'x', 'kind': 'character', 'value': 'q'*46}])
 

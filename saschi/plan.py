@@ -12,6 +12,7 @@ from sas_semantics import sas_put_literals, sas_put_character_list, sas_put_nume
 from .functions import FUNCTIONS, format_token, FORMATS, function_call_lines, substr_context_errors, catx_arguments_allowed, LAG_FUNCTIONS, validate_lag_calls, expression_nodes
 from .trim_strip import validate_step as validate_trim_step
 from .function_wave import validate_step as validate_wave_step, FAMILIES as WAVE_FAMILIES
+from . import function_consumers as consumers
 from .parser import Kind, ParseError, Statement, split_statements, tokenize
 from .operations import walk_operations as _walk_operations
 from .rules import route_function, route_statement
@@ -198,6 +199,24 @@ def _argument(text, allow_format=False, strict=False):
     return expression(text, strict=strict)
 
 
+
+def _normalization_call(text):
+    """Parse only the finite normalization grammar, without recursive call parsing."""
+    names=[]
+    for _ in range(3):
+        match=CALL.fullmatch(text.strip())
+        if not match or match[1].lower() not in consumers.NORMALS:return None
+        parts=_split_args(match[2])
+        if parts is None or len(parts)!=1:return None
+        names.append(match[1].lower());leaf=atom(parts[0])
+        if leaf is not None:
+            if len(names)<2:return None
+            for name in reversed(names):leaf={'kind':'call','name':name,'args':[leaf]}
+            return leaf
+        text=parts[0]
+    return None
+
+
 def call(text, strict=False):
     """Parse a call to a wired function, or None when it is not wired."""
     match = CALL.fullmatch(text.strip())
@@ -216,9 +235,13 @@ def call(text, strict=False):
         return None
     if spec.max_args >= 0 and len(parts) > spec.max_args:
         return None
-    # B1 admits a single atom. Refuse nested syntax without recursive parsing.
-    values = ([atom(parts[0])] if name in ('trim', 'strip') else
-              [_argument(part, index in spec.format_args, strict) for index, part in enumerate(parts)])
+    # The older atomic TRIM/STRIP parser extends only to the finite new chains.
+    if name in ('trim','strip'):
+        value=atom(parts[0])
+        if value is None:return _normalization_call(text)
+        values=[value]
+    else:
+        values=[_argument(part, index in spec.format_args, strict) for index, part in enumerate(parts)]
     if any(value is None for value in values):
         return None
     return {"kind": "call", "name": name, "args": values}
@@ -1176,12 +1199,22 @@ def _compile_legacy_body(source: str) -> Plan:
             validate_input_step(asdict(compiled))
         except ValueError as exc:
             plan.tickets.append(Ticket(compiled.line, 'INPUT', 'input-list', str(exc)))
+        function_consumer = False
         try:
-            validate_trim_step(asdict(compiled))
+            function_consumer = consumers.select_source(asdict(compiled), plan.version)
+            if function_consumer:
+                compiled.operations.insert(0, Operation('function_profile', compiled.line, {'profile': consumers.PROFILE}))
+                plan.matched.append(('function-consumers', 'DS-108', compiled.line))
+        except ValueError as exc:
+            plan.tickets.append(Ticket(compiled.line, 'function-consumers-v1', 'function-consumers', str(exc)))
+        try:
+            if not function_consumer:
+                validate_trim_step(asdict(compiled))
         except ValueError as exc:
             plan.tickets.append(Ticket(compiled.line, 'TRIM/STRIP', 'trim-strip', str(exc)))
         try:
-            validate_wave_step(asdict(compiled),plan.version)
+            if not function_consumer:
+                validate_wave_step(asdict(compiled),plan.version)
         except ValueError as exc:
             plan.tickets.append(Ticket(compiled.line,'function-wave',getattr(exc,'family','case-search'),str(exc)))
         # Preserve the old serialized shape unless new DO OVER needs source mode.
@@ -1223,6 +1256,10 @@ def _compile_legacy_body(source: str) -> Plan:
             plan.tickets.append(Ticket(compiled.line, 'LAG/DIF', 'lag-dif', 'LAG/DIF with PUT _ALL_ requires error-state review'))
         for message in substr_context_errors(compiled.where):
             plan.tickets.append(Ticket(compiled.line, 'SUBSTR', 'substr', message))
+    try:
+        consumers.validate_program(plan.to_dict())
+    except ValueError as exc:
+        plan.tickets.append(Ticket(1, 'function-consumers-v1', 'function-consumers', str(exc)))
     checked_substr_lines = function_call_lines(plan.to_dict(), 'substr')
     if checked_substr_lines:
         plan.matched.extend(('substr', 'DS-030', line or 1) for line in checked_substr_lines)

@@ -27,10 +27,17 @@ class LoaderTests(unittest.TestCase):
         self.rules = load_rulebook(REPO_ROOT / "docs" / "sasconversionrulebook.json")
 
     def test_registered_rule_count(self):
-        self.assertEqual(len(self.rules), 151)
+        self.assertEqual(len(self.rules), 158)
+        self.assertIn('verify_function_consumers.py',self.rules['DS-108'].validation_test)
+        self.assertIn('verify_datetime_components.py',self.rules['DS-107'].validation_test)
+        self.assertIn('verify_row_statistics.py',self.rules['DS-106'].validation_test)
+        self.assertIn('verify_search_extraction.py',self.rules['DS-105'].validation_test)
+        self.assertIn('verify_character_validation.py',self.rules['DS-104'].validation_test)
         self.assertIn(f"rulebook. {len(self.rules)} rules", (REPO_ROOT / "README.md").read_text())
         self.assertIn('verify_multiply.py',self.rules['DS-045'].validation_test)
         self.assertIn('verify_numeric_discovery.py',self.rules['DS-046'].validation_test)
+        self.assertIn('verify_whitespace_alignment.py',self.rules['DS-102'].validation_test)
+        self.assertIn('verify_cat_functions.py',self.rules['DS-103'].validation_test)
         for rule in ('DS-047', 'DS-048'):
             self.assertIn('verify_projection.py', self.rules[rule].validation_test)
         for rule in ('DS-049', 'DS-050', 'DS-051'):
@@ -68,7 +75,7 @@ class LoaderTests(unittest.TestCase):
 
     def test_family_counts(self):
         counts = family_counts(self.rules)
-        self.assertEqual(counts["DS"], 101)
+        self.assertEqual(counts["DS"], 108)
         self.assertEqual(counts["SQL"], 4)
         self.assertEqual(counts["ST"], 30)
         self.assertEqual(counts["SV"], 6)

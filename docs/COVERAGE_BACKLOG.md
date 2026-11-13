@@ -25,15 +25,24 @@ two original composition programs are now implemented; their
 [evidence register](FUNCTION_WAVE_COMPOSITION.md) requires the matching current
 full verification and workload receipts.
 
+PR76 merged that wave on 2026-11-12 as
+`6cdaea41002c002aba49be84ecac00c05f4717f7` after all five PR checks passed.
+The principal approved the [29-function continuation](NEXT_DATA_STEP_WAVE.md)
+on 2026-11-12, including nested calls, IF conditions and both complete original
+programs. Its six bounded families and DS-108 consumer profile are implemented,
+with [nine original program gates](FUNCTION_WAVE_2_COMPOSITION.md). The matching
+current full verification and workload receipts decide acceptance. This adds no
+function-universe denominator or execution proof for other external programs.
+
 ## Inventory reconciled against actual evidence
 
-The golden command registers119 fixture runners,84 application/translator suites and1
+The golden command registers128 fixture runners,92 application/translator suites and1
 synthesis runner. These are registration counts, not passing outcomes. The
 source-bound full receipt records the discovered test count. A source-bound full receipt records actual skips and
 results. Accepted run entry PR66/main0abf161 contained97 fixtures,65 suites and1491
 tests with zero skips,60 faithful synthesis checks and60 naive controls. The
 separate1k workload checks total39:18 ledger and21 text. These counts have
-different units. Neither151 rulebook rules nor204 golden-command runners is a
+different units. Neither158 rulebook rules nor221 golden-command runners is a
 SAS capability denominator.
 
 [The capability manifest](capability-manifest.json) still enumerates108 statements

@@ -60,7 +60,7 @@ class FunctionWaveCompositionTests(unittest.TestCase):
                             source.replace('data '+table+';','data '+table+';array scratch a b;')):
                 self.assertTrue(compile_plan(changed).blocked)
             self.assertEqual(build_job(source,inputs=gate.inputs,target='cpp').code,2)
-        self.assertTrue(compile_plan(CHARACTER.source.read_text().replace('upcase(text)','upcase(lowcase(text))')).blocked)
+        self.assertTrue(compile_plan(CHARACTER.source.read_text().replace('upcase(text)','upcase(right(text))')).blocked)
         self.assertTrue(compile_plan(NUMERIC.source.read_text().replace('coalesce(amount,backup)','coalesce(abs(amount),backup)')).blocked)
 
     def test_composed_plan_and_emitted_bytes_are_stable_across_hash_seeds(self):

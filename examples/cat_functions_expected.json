@@ -1,0 +1,111 @@
+{
+  "datasets": {
+    "raw": {
+      "schema": {
+        "a": {
+          "type": "character",
+          "length": 8,
+          "label": "Synthetic first field"
+        },
+        "b": {
+          "type": "character",
+          "length": 5
+        }
+      },
+      "rows": [
+        {
+          "a": " A      ",
+          "b": " b   "
+        },
+        {
+          "a": "        ",
+          "b": "     "
+        },
+        {
+          "a": "xy      ",
+          "b": "Z    "
+        },
+        {
+          "a": "   k    ",
+          "b": " v   "
+        },
+        {
+          "a": "        ",
+          "b": "x    "
+        }
+      ]
+    },
+    "joined": {
+      "schema": {
+        "a": {
+          "type": "character",
+          "length": 8,
+          "label": "Synthetic first field"
+        },
+        "b": {
+          "type": "character",
+          "length": 5
+        },
+        "rawcat": {
+          "type": "character",
+          "length": 200
+        },
+        "tight": {
+          "type": "character",
+          "length": 200
+        },
+        "tails": {
+          "type": "character",
+          "length": 200
+        }
+      },
+      "rows": [
+        {
+          "a": " A      ",
+          "b": " b   ",
+          "rawcat": " A       b                                                                                                                                                                                              ",
+          "tight": "Ab                                                                                                                                                                                                      ",
+          "tails": " A b                                                                                                                                                                                                    "
+        },
+        {
+          "a": "        ",
+          "b": "     ",
+          "rawcat": "                                                                                                                                                                                                        ",
+          "tight": "                                                                                                                                                                                                        ",
+          "tails": "                                                                                                                                                                                                        "
+        },
+        {
+          "a": "xy      ",
+          "b": "Z    ",
+          "rawcat": "xy      Z                                                                                                                                                                                               ",
+          "tight": "xyZ                                                                                                                                                                                                     ",
+          "tails": "xyZ                                                                                                                                                                                                     "
+        },
+        {
+          "a": "   k    ",
+          "b": " v   ",
+          "rawcat": "   k     v                                                                                                                                                                                              ",
+          "tight": "kv                                                                                                                                                                                                      ",
+          "tails": "   k v                                                                                                                                                                                                  "
+        },
+        {
+          "a": "        ",
+          "b": "x    ",
+          "rawcat": "        x                                                                                                                                                                                               ",
+          "tight": "x                                                                                                                                                                                                       ",
+          "tails": "x                                                                                                                                                                                                       "
+        }
+      ]
+    }
+  },
+  "log": [
+    "Ab ",
+    "A b ",
+    "xyZ ",
+    "xyZ ",
+    "kv ",
+    "k v ",
+    "x ",
+    "x "
+  ]
+}

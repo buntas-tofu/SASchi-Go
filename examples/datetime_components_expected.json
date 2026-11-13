@@ -1,0 +1,211 @@
+{
+  "datasets": {
+    "raw": {
+      "schema": {
+        "day": {
+          "type": "number",
+          "label": "Synthetic supplied date"
+        },
+        "hr": "number",
+        "mn": "number",
+        "sc": "number"
+      },
+      "rows": [
+        {
+          "day": -1,
+          "hr": 23,
+          "mn": 59,
+          "sc": 59
+        },
+        {
+          "day": 0,
+          "hr": 0,
+          "mn": 0,
+          "sc": 0
+        },
+        {
+          "day": 59,
+          "hr": 12,
+          "mn": 34,
+          "sc": 56
+        },
+        {
+          "day": 91,
+          "hr": 1,
+          "mn": 2,
+          "sc": 3
+        },
+        {
+          "day": 182,
+          "hr": 0,
+          "mn": 0,
+          "sc": 1
+        },
+        {
+          "day": 274,
+          "hr": 23,
+          "mn": 0,
+          "sc": 0
+        },
+        {
+          "day": null,
+          "hr": 0,
+          "mn": 0,
+          "sc": 0
+        },
+        {
+          "day": 0,
+          "hr": null,
+          "mn": 0,
+          "sc": 0
+        }
+      ]
+    },
+    "stamps": {
+      "schema": {
+        "day": {
+          "type": "number",
+          "label": "Synthetic supplied date"
+        },
+        "hr": "number",
+        "mn": "number",
+        "sc": "number",
+        "quarter": "number",
+        "stamp": "number",
+        "recovered": "number",
+        "clock": "number",
+        "h": "number",
+        "m": "number",
+        "s": "number",
+        "shown": {
+          "type": "character",
+          "length": 9
+        }
+      },
+      "rows": [
+        {
+          "day": -1,
+          "hr": 23,
+          "mn": 59,
+          "sc": 59,
+          "quarter": 4,
+          "stamp": -1,
+          "recovered": -1,
+          "clock": 86399,
+          "h": 23,
+          "m": 59,
+          "s": 59,
+          "shown": "31DEC1959"
+        },
+        {
+          "day": 0,
+          "hr": 0,
+          "mn": 0,
+          "sc": 0,
+          "quarter": 1,
+          "stamp": 0,
+          "recovered": 0,
+          "clock": 0,
+          "h": 0,
+          "m": 0,
+          "s": 0,
+          "shown": "01JAN1960"
+        },
+        {
+          "day": 59,
+          "hr": 12,
+          "mn": 34,
+          "sc": 56,
+          "quarter": 1,
+          "stamp": 5142896,
+          "recovered": 59,
+          "clock": 45296,
+          "h": 12,
+          "m": 34,
+          "s": 56,
+          "shown": "29FEB1960"
+        },
+        {
+          "day": 91,
+          "hr": 1,
+          "mn": 2,
+          "sc": 3,
+          "quarter": 2,
+          "stamp": 7866123,
+          "recovered": 91,
+          "clock": 3723,
+          "h": 1,
+          "m": 2,
+          "s": 3,
+          "shown": "01APR1960"
+        },
+        {
+          "day": 182,
+          "hr": 0,
+          "mn": 0,
+          "sc": 1,
+          "quarter": 3,
+          "stamp": 15724801,
+          "recovered": 182,
+          "clock": 1,
+          "h": 0,
+          "m": 0,
+          "s": 1,
+          "shown": "01JUL1960"
+        },
+        {
+          "day": 274,
+          "hr": 23,
+          "mn": 0,
+          "sc": 0,
+          "quarter": 4,
+          "stamp": 23756400,
+          "recovered": 274,
+          "clock": 82800,
+          "h": 23,
+          "m": 0,
+          "s": 0,
+          "shown": "01OCT1960"
+        },
+        {
+          "day": null,
+          "hr": 0,
+          "mn": 0,
+          "sc": 0,
+          "quarter": null,
+          "stamp": null,
+          "recovered": null,
+          "clock": null,
+          "h": null,
+          "m": null,
+          "s": null,
+          "shown": "        ."
+        },
+        {
+          "day": 0,
+          "hr": null,
+          "mn": 0,
+          "sc": 0,
+          "quarter": 1,
+          "stamp": null,
+          "recovered": null,
+          "clock": null,
+          "h": null,
+          "m": null,
+          "s": null,
+          "shown": "        ."
+        }
+      ]
+    }
+  },
+  "log": [
+    "31DEC1959 ",
+    "01JAN1960 ",
+    "29FEB1960 ",
+    "01APR1960 ",
+    "01JUL1960 ",
+    "01OCT1960 ",
+    ". ",
+    ". "
+  ]
+}

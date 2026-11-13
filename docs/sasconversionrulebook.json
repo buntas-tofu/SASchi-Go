@@ -4663,6 +4663,230 @@
       "sources": [
         "https://documentation.sas.com/api/docsets/lefunctionsref/9.4/content/lefunctionsref.pdf"
       ]
+    },
+    {
+      "rule_id": "DS-102",
+      "scope": "DATA step direct character assignments",
+      "sas_pattern": "LEFT,RIGHT,COMPBL and TRIMN printable-ASCII assignments",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "strategy": "Strict byte-domain whitespace helpers with descriptor-derived assignment widths and distinct temporary values."
+      },
+      "r_target": {
+        "strategy": "Independent byte-array alignment,run selection and complete original-program witness."
+      },
+      "required_settings": [
+        "One printable-ASCII character literal or ordinary descriptor-backed variable,width1..32767.",
+        "LEFT/RIGHT preserve argument length; COMPBL collapses ASCII blank runs; TRIMN may return zero length.",
+        "New destination inherits first-argument width; existing assignment padding/truncation policy remains.",
+        "Helper values admit empty strings for qualified temporaries; empty source literals and new consumers remain held.",
+        "Ordinary version2 DATA wave context,eager literal/descriptor checks and atomic reached failures."
+      ],
+      "forbidden_patterns": [
+        "Implicit coercion,Unicode/control-byte input or malformed portable shapes",
+        "Treat TRIMN temporary length as its stored destination width",
+        "Generalize to WHERE,BY,RETAIN,array,C++ or unqualified nested consumers"
+      ],
+      "silent_difference_checks": [
+        "Leading/trailing/internal blanks,zero-length result versus fixed storage,metadata/column/row order,empty and skipped checks,late atomic CLI/emitted errors and independent original hand/R."
+      ],
+      "validation_test": "examples/verify_whitespace_alignment.py",
+      "confidence": "Conditional on current full source-bound repository/base-R receipt; no native SAS comparison.",
+      "sources": [
+        "https://documentation.sas.com/api/docsets/lefunctionsref/9.4/content/lefunctionsref.pdf"
+      ]
+    },
+    {
+      "rule_id": "DS-103",
+      "scope": "DATA step direct character concatenation assignments",
+      "sas_pattern": "CAT,CATS and CATT character-only source calls",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "strategy": "Strict character-only item concatenation with explicit200-byte result and destination buffer refusal."
+      },
+      "r_target": {
+        "strategy": "Independent raw-byte item selection and complete original-program witness."
+      },
+      "required_settings": [
+        "1..32primitive printable-ASCII character arguments; descriptor widths1..32767.",
+        "CAT preserves every item byte,CATS strips both edge-blank regions,CATT strips trailing blanks only.",
+        "New destination200bytes; raw result<=200and actual result must fit an existing destination.",
+        "Validate every item before assembly; malformed/literal checks include empty/skipped paths,reached dynamic errors are atomic.",
+        "Ordinary version2 DATA wave assignments; qualified zero-length helper values remain separate from empty source literals."
+      ],
+      "forbidden_patterns": [
+        "Implicit numeric BEST conversion,OF lists or Unicode/control bytes",
+        "Mask result/destination overflow by silent truncation",
+        "Infer arbitrary temporary,WHERE,BY,RETAIN,array,C++ or specialized-profile joins"
+      ],
+      "silent_difference_checks": [
+        "Stored padding,default width versus operator concatenation,empty trimmed items,32-argument and200-byte bounds,metadata/order,late buffer faults and independent complete hand/R/emitted/CLI."
+      ],
+      "validation_test": "examples/verify_cat_functions.py",
+      "confidence": "Conditional on current full source-bound repository/base-R receipt; no native SAS comparison.",
+      "sources": [
+        "https://documentation.sas.com/api/docsets/lefunctionsref/9.4/content/lefunctionsref.pdf"
+      ]
+    },
+    {
+      "rule_id": "DS-104",
+      "scope": "DATA step direct character-validation assignments",
+      "sas_pattern": "VERIFY,ANYALPHA,ANYDIGIT,ANYALNUM,ANYSPACE and NOTDIGIT source calls",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "strategy": "Strict printable-ASCII character-class positions and excerpt-union validation with bounded signed starts."
+      },
+      "r_target": {
+        "strategy": "Independent raw-byte class masks,ordered candidate positions and complete original-program witness."
+      },
+      "required_settings": [
+        "VERIFY2..32character arguments; other searches1..2arguments. Source characters are primitive literals or ordinary descriptors,width1..32767.",
+        "Return1-based positions or0,never a Boolean match flag; stored padding participates in classification.",
+        "ASCII letters/digits; ANYSPACE sees only ASCII blanks within the admitted printable domain.",
+        "Optional start is primitive integral numeric magnitude<=2147483647 or ordinary missing(default1); negative searches left,zero/forward past end returns0.",
+        "Validate every argument before classification; empty/skipped literal and descriptor checks,reached dynamic errors and atomic publication."
+      ],
+      "forbidden_patterns": [
+        "Implicit conversion,Unicode/control bytes,tagged starts,fractional/nonfinite starts",
+        "Use host locale-sensitive character classes without the fixed ASCII contract",
+        "Infer WHERE,unqualified IF/nested consumers,BY,RETAIN,array,C++ or specialized-profile joins"
+      ],
+      "silent_difference_checks": [
+        "Union of VERIFY excerpts,position versus Boolean,edge blanks,reverse/clipped search starts,ordinary missing start,allblank fields,complete metadata/order and late source/emitted/actualCLI errors."
+      ],
+      "validation_test": "examples/verify_character_validation.py",
+      "confidence": "Conditional on current full source-bound repository/base-R receipt; no native SAS comparison.",
+      "sources": [
+        "https://documentation.sas.com/api/docsets/lefunctionsref/9.4/content/lefunctionsref.pdf"
+      ]
+    },
+    {
+      "rule_id": "DS-105",
+      "scope": "DATA step direct search/extraction assignments",
+      "sas_pattern": "FINDC,FINDW,INDEXC,INDEXW and SUBSTRN source calls",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "strategy": "ASCII set and literal word-boundary search; zero-length substring interval clipping."
+      },
+      "r_target": {
+        "strategy": "Independent byte-array masks,sliding word windows and interval extraction plus complete original."
+      },
+      "required_settings": [
+        "Primitive printable ASCII sources; FINDC set<=64bytes; INDEXC2..32character operands.",
+        "FINDC optional I/K combinations and FINDW optional I; one signed integral bounded start,nonmissing,in either order.",
+        "FINDW explicit1..64nonalphabetic delimiter bytes; literal word may contain delimiters and must have boundaries on both sides.",
+        "INDEXW default/singleblank delimiter and edge-trimmed excerpt; empty excerpt matches only blank/empty source.",
+        "SUBSTRN position/length integral magnitude<=2147483647 or ordinary missing; intersect logical interval with actual source,new destination inherits source width.",
+        "Validate literals/descriptors eagerly and dynamic values only when reached; errors publish atomically."
+      ],
+      "forbidden_patterns": [
+        "Numeric conversion,fractional positions,extra modifiers,default FINDW delimiters or alternate INDEXW delimiters",
+        "Infer unqualified nested/IF/WHERE,BY,RETAIN,array,C++ or specialized-profile joins"
+      ],
+      "silent_difference_checks": [
+        "One-based positions versus Boolean matches,reverse starts,substring words containing delimiters,blank excerpts,negative/clipped SUBSTRN intervals,source width and late actualCLI failures."
+      ],
+      "validation_test": "examples/verify_search_extraction.py",
+      "confidence": "Conditional on current full source-bound repository/base-R receipt; no native SAS comparison.",
+      "sources": [
+        "https://documentation.sas.com/api/docsets/lefunctionsref/9.4/content/lefunctionsref.pdf"
+      ]
+    },
+    {
+      "rule_id": "DS-106",
+      "scope": "DATA step direct missing-aware row statistics",
+      "sas_pattern": "MEDIAN,RANGE,VAR and STD with primitive numeric operands",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "strategy": "Missing-aware ordered median and range; exact integer sample-variance numerator followed by rational division and square root."
+      },
+      "r_target": {
+        "strategy": "Independent pairwise squared-difference sample variance and complete original measurement witness."
+      },
+      "required_settings": [
+        "1..32primitive numeric arguments; finite integral magnitude<=1000000 or ordinary missing. Validate every argument before removing missing.",
+        "All missing yields missing. Singleton MEDIAN preserves the value,RANGE yields0; VAR/STD require at least2present values and divisor n-1.",
+        "MEDIAN/RANGE and masks exact; VAR/STD independently qualify at32normalized binary64 epsilon units. Complete metadata/order/logical records and CLI numeric comparison stay exact.",
+        "Earlier sas_std procedure helper and statistics gates remain unchanged. Static literals/descriptors eager,reached dynamic errors atomic."
+      ],
+      "forbidden_patterns": [
+        "OF lists,weights,fractional/tagged/Boolean/nonfinite or implicitly converted inputs",
+        "Infer PROC statistics,numeric nesting,WHERE,unqualified IF,BY,RETAIN,array,C++ or specialized-profile joins"
+      ],
+      "silent_difference_checks": [
+        "Sample versus population divisor,allmissing/singleton,ties,high-offset small variance,32-argument extremes,independent decimal/R witnesses and one-ULP wrong CLI comparison."
+      ],
+      "validation_test": "examples/verify_row_statistics.py",
+      "confidence": "Conditional on current full source-bound repository/base-R receipt; numerical policy is not exact native SAS binary64 proof.",
+      "sources": [
+        "https://documentation.sas.com/api/docsets/lefunctionsref/9.4/content/lefunctionsref.pdf"
+      ]
+    },
+    {
+      "rule_id": "DS-107",
+      "scope": "DATA step supplied calendar and datetime components",
+      "sas_pattern": "QTR,DHMS,DATEPART,TIMEPART,HOUR,MINUTE and SECOND primitive source calls",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "strategy": "Strict whole-second epoch composition and civil floor-day/nonnegative remainder decomposition using supplied values."
+      },
+      "r_target": {
+        "strategy": "Independent civil UTC timestamps and formatted component extraction with complete original hand/R witness."
+      },
+      "required_settings": [
+        "Gregorian dates1753..3999 and datetime seconds from the first through the last second of that domain; finite integral values or ordinary missing.",
+        "DHMS requires date,hour0..23,minute0..59 and second0..59; validate all components before propagating missing. No normalization.",
+        "DATEPART uses floor-day and TIMEPART nonnegative remainder. Negative-epoch interpretation is a qualified derivation from SAS epoch/civil-time definitions,not native capture.",
+        "HOUR/MINUTE/SECOND extract clock components from bounded supplied times/datetimes; source timestamp literals use family-specific wide bounds without broadening old numeric defaults.",
+        "No system clock or timezone service; exact data,metadata/order and existing stored DATE9 output. Static literals/descriptors eager,reached dynamic errors atomic."
+      ],
+      "forbidden_patterns": [
+        "Fractional seconds,tagged/nonfinite/implicitly converted values,wider dates or out-of-range DHMS normalization",
+        "Infer new datetime formats,nested numeric consumers,WHERE,unqualified IF,BY,RETAIN,array,C++ or specialized-profile joins"
+      ],
+      "silent_difference_checks": [
+        "Day versus second units,pre1960/midnight/leap/quarter boundaries,negative whole-second round trips,domain extrema,all-argument validation,host timezone independence and seven late actualCLI failures."
+      ],
+      "validation_test": "examples/verify_datetime_components.py",
+      "confidence": "Conditional on current full source-bound repository/base-R receipt; negative-epoch civil decomposition is derived and no native SAS comparison is claimed.",
+      "sources": [
+        "https://documentation.sas.com/api/docsets/lefunctionsref/9.4/content/lefunctionsref.pdf",
+        "https://support.sas.com/training/sas94/m13_1.htm",
+        "https://support.sas.com/kb/24/605.html"
+      ]
+    },
+    {
+      "rule_id": "DS-108",
+      "scope": "Separately marked ordinary DATA function consumers",
+      "sas_pattern": "Bounded normalization chains,CATS character items and selected function IF comparisons",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "strategy": "Exact typed consumer grammar and contextual character temporaries,with an independently required function-consumers-v1 marker."
+      },
+      "r_target": {
+        "strategy": "Independent whole consumer witness and frozen normalization,predicate and identifier kernels."
+      },
+      "required_settings": [
+        "Version2 complete ordinary DATA programs with exact unique leading function_profile marker and at least one genuine qualified consumer. Unmarked profiles remain strict.",
+        "Final-assignment2..3unary calls from UPCASE,LOWCASE,TRIM,STRIP,TRIMN,COMPBL over one primitive character leaf; new stored width inherits the leaf.",
+        "Root CATS1..32items,at least one call; each item primitive or one primitive-argument UPCASE,LOWCASE,TRIM,STRIP,LEFT,RIGHT,COMPBL,TRIMN,SUBSTRN call. Maximum2call levels,new width200,actual buffer faults refuse.",
+        "IF left direct primitive-argument MISSING,VERIFY,ANYALPHA,ANYDIGIT,ANYALNUM,ANYSPACE,NOTDIGIT compared with a finite integral literal0..32767 using existing numeric operators.",
+        "Canonical contextual empty temporaries preserve old helper refusals. Static literals/descriptors eager,reached-only dynamic/ELSE IF evaluation,row reset,metadata/order and atomic publication."
+      ],
+      "forbidden_patterns": [
+        "Unmarked,duplicate,moved,malformed or unnecessary profile markers",
+        "Deeper/unlisted/numeric chains,nested raw CAT/CATT buffers,unqualified temporary consumers",
+        "IF bare function truth,swapped sides,compound Boolean expressions or nonliteral comparison targets",
+        "WHERE,subset IF,loops,arrays,BY,RETAIN,multiple driving inputs,C++,SQL or specialized-profile program joins"
+      ],
+      "silent_difference_checks": [
+        "Full12statement/6record consumer and30generated complete catalogs; independent1008normalization,154predicate/operator and235identifier results; old-profile refusal preservation,marker/cycle/shape checks,late actualCLI errors and hash-seed determinism."
+      ],
+      "validation_test": "examples/verify_function_consumers.py",
+      "confidence": "Conditional on current full source-bound repository/base-R receipt; no native SAS comparison.",
+      "sources": [
+        "https://documentation.sas.com/api/docsets/lefunctionsref/9.4/content/lefunctionsref.pdf"
+      ]
     }
   ],
   "runtime_capabilities": {

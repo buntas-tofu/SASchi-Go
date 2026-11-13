@@ -113,6 +113,23 @@ FUNCTIONS: dict[str, FunctionSpec] = {
         FunctionSpec("strip", "character", GATE_TRIM_STRIP, 1, 1),
         FunctionSpec("catx", "character", GATE_CONCAT, 2, 33),
         FunctionSpec("count", "number", GATE_COUNT, 2, 3),
+        *(FunctionSpec(name, "character", "examples/verify_whitespace_alignment.py", 1, 1)
+          for name in ('left','right','compbl','trimn')),
+        *(FunctionSpec(name, "character", "examples/verify_cat_functions.py", 1, 32)
+          for name in ('cat','cats','catt')),
+        FunctionSpec("verify", "number", "examples/verify_character_validation.py", 2, 32),
+        *(FunctionSpec(name, "number", "examples/verify_character_validation.py", 1, 2)
+          for name in ('anyalpha','anydigit','anyalnum','anyspace','notdigit')),
+        FunctionSpec("dhms", "number", "examples/verify_datetime_components.py", 4, 4),
+        *(FunctionSpec(name, "number", "examples/verify_datetime_components.py", 1, 1)
+          for name in ('qtr','datepart','timepart','hour','minute','second')),
+        *(FunctionSpec(name, "number", "examples/verify_row_statistics.py", 1, 32)
+          for name in ('median','range','var','std')),
+        FunctionSpec("findc", "number", "examples/verify_search_extraction.py", 2, 4),
+        FunctionSpec("findw", "number", "examples/verify_search_extraction.py", 3, 5),
+        FunctionSpec("indexc", "number", "examples/verify_search_extraction.py", 2, 32),
+        FunctionSpec("indexw", "number", "examples/verify_search_extraction.py", 2, 3),
+        FunctionSpec("substrn", "character", "examples/verify_search_extraction.py", 2, 3),
         FunctionSpec("upcase", "character", "examples/verify_case_search.py", 1, 1),
         FunctionSpec("lowcase", "character", "examples/verify_case_search.py", 1, 1),
         FunctionSpec("index", "number", "examples/verify_case_search.py", 2, 2),
@@ -192,12 +209,26 @@ def apply(name: str, values: list):
         from sas_semantics import sas_missing_function, sas_n, sas_nmiss, sas_cmiss, sas_coalesce, sas_coalescec, sas_row_mean
         from sas_semantics import sas_abs, sas_sign, sas_ceil, sas_floor
         from sas_semantics import sas_year, sas_month, sas_day, sas_source_intck, sas_source_intnx
+        from sas_semantics import sas_left, sas_right, sas_compbl, sas_trimn
+        from sas_semantics import sas_cat, sas_cats, sas_catt
+        from sas_semantics import sas_verify, sas_anyalpha, sas_anydigit, sas_anyalnum, sas_anyspace, sas_notdigit
+        from sas_semantics import sas_findc, sas_findw, sas_indexc, sas_indexw, sas_substrn
+        from sas_semantics import sas_median, sas_range, sas_row_var, sas_row_std
+        from sas_semantics import sas_qtr, sas_dhms, sas_datepart, sas_timepart, sas_hour, sas_minute, sas_second
         function={'upcase':sas_upcase,'lowcase':sas_lowcase,'index':sas_index,'find':sas_find,'scan':sas_scan,'countw':sas_countw,
                   'compress':sas_compress,'translate':sas_translate,'tranwrd':sas_tranwrd,
                   'missing':sas_missing_function,'n':sas_n,'nmiss':sas_nmiss,'cmiss':sas_cmiss,
                   'coalesce':sas_coalesce,'coalescec':sas_coalescec,'mean':sas_row_mean,
                   'abs':sas_abs,'sign':sas_sign,'ceil':sas_ceil,'floor':sas_floor,
-                  'year':sas_year,'month':sas_month,'day':sas_day,'intck':sas_source_intck,'intnx':sas_source_intnx}[name]
+                  'year':sas_year,'month':sas_month,'day':sas_day,'intck':sas_source_intck,'intnx':sas_source_intnx,
+                  'left':sas_left,'right':sas_right,'compbl':sas_compbl,'trimn':sas_trimn,
+                  'cat':sas_cat,'cats':sas_cats,'catt':sas_catt,
+                  'verify':sas_verify,'anyalpha':sas_anyalpha,'anydigit':sas_anydigit,
+                  'anyalnum':sas_anyalnum,'anyspace':sas_anyspace,'notdigit':sas_notdigit,
+                  'findc':sas_findc,'findw':sas_findw,'indexc':sas_indexc,'indexw':sas_indexw,'substrn':sas_substrn,
+                  'median':sas_median,'range':sas_range,'var':sas_row_var,'std':sas_row_std,
+                  'qtr':sas_qtr,'dhms':sas_dhms,'datepart':sas_datepart,'timepart':sas_timepart,
+                  'hour':sas_hour,'minute':sas_minute,'second':sas_second}[name]
         try:return function(*values)
         except TypeError as exc:raise ValueError('function wave argument shape is outside its bounded contract') from exc
     if name in LAG_FUNCTIONS:

@@ -2583,3 +2583,313 @@ def sas_source_intnx(interval,start,increment,alignment='B'):
     if not SAS_CALENDAR_MIN_DAY<=result<=SAS_CALENDAR_MAX_DAY:
         raise ValueError('calendar result is outside1753..3999')
     return result
+
+
+def _sas_wave2_text(value):
+    """Printable ASCII scalar or qualified zero-length temporary, at most32767bytes."""
+    if (type(value) is not str or len(value)>32767
+            or any(not 32<=ord(character)<=126 for character in value)):
+        raise ValueError('function requires printable ASCII character input, at most32767bytes')
+    return value
+
+
+def sas_left(value):
+    """DS-102 move leading blanks to the end without changing argument length."""
+    text=_sas_wave2_text(value)
+    return text.lstrip(' ').ljust(len(text))
+
+
+def sas_right(value):
+    """DS-102 move trailing blanks to the start without changing argument length."""
+    text=_sas_wave2_text(value)
+    return text.rstrip(' ').rjust(len(text))
+
+
+def sas_compbl(value):
+    """DS-102 collapse each run of ASCII blanks to one blank."""
+    return re.sub(' +',' ',_sas_wave2_text(value))
+
+
+def sas_trimn(value):
+    """DS-102 remove trailing blanks, allowing a zero-length result."""
+    return _sas_wave2_text(value).rstrip(' ')
+
+
+def _sas_cat_items(name,items):
+    """DS-103 character-only CAT family, with explicit argument and result bounds."""
+    if name not in ('cat','cats','catt') or not 1<=len(items)<=32:
+        raise ValueError('CAT family requires1..32character arguments')
+    values=[_sas_wave2_text(item) for item in items]
+    if name=='cats':values=[value.strip(' ') for value in values]
+    elif name=='catt':values=[value.rstrip(' ') for value in values]
+    result=''.join(values)
+    if len(result)>200:
+        raise ValueError('CAT family result exceeds200bytes; buffer/error-state review required')
+    return result
+
+
+def sas_cat(*items):
+    """DS-103 concatenate all character item bytes, preserving edge blanks."""
+    return _sas_cat_items('cat',items)
+
+
+def sas_cats(*items):
+    """DS-103 strip both edge-blank regions from each item before concatenating."""
+    return _sas_cat_items('cats',items)
+
+
+def sas_catt(*items):
+    """DS-103 strip each item's trailing blanks before concatenating."""
+    return _sas_cat_items('catt',items)
+
+
+def _sas_wave2_integer(value,low=-2147483647,high=2147483647,*,missing=False):
+    """A bounded integral scalar, optionally ordinary missing, without coercion."""
+    if value is None and missing:return None
+    if (type(value) not in (int,float) or not low<=value<=high
+            or not math.isfinite(value) or value!=int(value)):
+        raise ValueError('function requires a bounded finite integral numeric operand')
+    return int(value)
+
+
+def _sas_position_indices(length,start):
+    """Qualified one-based start and direction as zero-based candidate positions."""
+    start=_sas_wave2_integer(start)
+    if not length or start==0 or start>length:return range(0)
+    return range(start-1,length) if start>0 else range(min(-start,length)-1,-1,-1)
+
+
+def _sas_class_position(name,string,start=1):
+    """DS-104 first ASCII class match in the requested search direction."""
+    text=_sas_wave2_text(string)
+    start=_sas_wave2_integer(start,missing=True)
+    if name not in ('anyalpha','anydigit','anyalnum','anyspace','notdigit'):
+        raise ValueError('unqualified character class')
+    for position in _sas_position_indices(len(text),1 if start is None else start):
+        character=text[position]
+        alpha='A'<=character<='Z' or 'a'<=character<='z'
+        digit='0'<=character<='9'
+        if (name=='anyalpha' and alpha or name=='anydigit' and digit
+                or name=='anyalnum' and (alpha or digit)
+                or name=='anyspace' and character==' '
+                or name=='notdigit' and not digit):
+            return position+1
+    return 0
+
+
+def sas_verify(string,*excerpts):
+    """DS-104 first source position outside the union of1..31ASCII excerpts."""
+    if not 1<=len(excerpts)<=31:raise ValueError('VERIFY requires source and1..31character excerpts')
+    values=[_sas_wave2_text(value) for value in (string,*excerpts)]
+    allowed=set(''.join(values[1:]))
+    return next((i+1 for i,character in enumerate(values[0]) if character not in allowed),0)
+
+
+def sas_anyalpha(string,start=1):
+    """DS-104 first ASCII letter position, or zero."""
+    return _sas_class_position('anyalpha',string,start)
+
+
+def sas_anydigit(string,start=1):
+    """DS-104 first ASCII digit position, or zero."""
+    return _sas_class_position('anydigit',string,start)
+
+
+def sas_anyalnum(string,start=1):
+    """DS-104 first ASCII letter or digit position, or zero."""
+    return _sas_class_position('anyalnum',string,start)
+
+
+def sas_anyspace(string,start=1):
+    """DS-104 first blank position in the printable-ASCII domain, or zero."""
+    return _sas_class_position('anyspace',string,start)
+
+
+def sas_notdigit(string,start=1):
+    """DS-104 first position that is not an ASCII digit, including padding blanks."""
+    return _sas_class_position('notdigit',string,start)
+
+
+
+def _sas_search_options(options,allowed):
+    """DS-105 one literal modifier and one signed integer start, in either order."""
+    modifiers=None;start=None
+    for value in options:
+        if type(value) is str:
+            value=_sas_wave2_text(value).upper()
+            if modifiers is not None or value not in allowed:
+                raise ValueError('search modifier is outside the qualified subset')
+            modifiers=value
+        else:
+            if start is not None:raise ValueError('search accepts only one start argument')
+            start=_sas_wave2_integer(value)
+    return modifiers or '',1 if start is None else start
+
+
+def sas_findc(*args):
+    """DS-105 first set member or complement position, with ASCII case folding."""
+    if not 2<=len(args)<=4:raise ValueError('FINDC accepts2..4arguments')
+    string,characters=args[:2];options=args[2:]
+    text,characters=(_sas_wave2_text(value) for value in (string,characters))
+    if len(characters)>64:raise ValueError('FINDC character set exceeds64bytes')
+    modifiers,start=_sas_search_options(options,{'','I','K','IK','KI'})
+    if 'I' in modifiers:text,characters=text.lower(),characters.lower()
+    selected=set(characters)
+    return next((i+1 for i in _sas_position_indices(len(text),start)
+                 if (text[i] in selected)!=('K' in modifiers)),0)
+
+
+def _sas_word_position(text,word,delimiters,start):
+    """Boundary-checked literal substring matches; words may contain delimiters."""
+    borders=set(delimiters)
+    matches={match.start() for match in re.finditer('(?='+re.escape(word)+')',text)
+             if (match.start()==0 or text[match.start()-1] in borders)
+             and (match.start()+len(word)==len(text) or text[match.start()+len(word)] in borders)}
+    return next((i+1 for i in _sas_position_indices(len(text),start) if i in matches),0)
+
+
+def sas_findw(*args):
+    """DS-105 explicit nonalphabetic delimiters and signed substring-start search."""
+    if not 3<=len(args)<=5:raise ValueError('FINDW accepts3..5arguments')
+    string,word,delimiters=args[:3];options=args[3:]
+    text,word,delimiters=(_sas_wave2_text(value) for value in (string,word,delimiters))
+    if not word or not 1<=len(delimiters)<=64 or any('A'<=c<='Z' or 'a'<=c<='z' for c in delimiters):
+        raise ValueError('FINDW requires a nonempty word and1..64nonalphabetic delimiter bytes')
+    modifiers,start=_sas_search_options(options,{'','I'})
+    if modifiers=='I':text,word=text.lower(),word.lower()
+    return _sas_word_position(text,word,delimiters,start)
+
+
+def sas_indexc(*args):
+    """DS-105 first position in the union of1..31character excerpts."""
+    if not 2<=len(args)<=32:raise ValueError('INDEXC requires2..32character arguments')
+    string,*excerpts=args
+    values=[_sas_wave2_text(value) for value in (string,*excerpts)]
+    selected=set(''.join(values[1:]))
+    return next((i+1 for i,c in enumerate(values[0]) if c in selected),0)
+
+
+def sas_indexw(*args):
+    """DS-105 blank-delimited word search with the qualified blank-excerpt rule."""
+    if not 2<=len(args)<=3:raise ValueError('INDEXW accepts2..3arguments')
+    string,word=args[:2];delimiter=args[2] if len(args)==3 else ' '
+    text,word,delimiter=(_sas_wave2_text(value) for value in (string,word,delimiter))
+    if delimiter!=' ':raise ValueError('INDEXW alternate delimiters require separate evidence')
+    word=word.strip(' ')
+    if not word:return 1 if not text.strip(' ') else 0
+    return _sas_word_position(text,word,' ',1)
+
+
+def sas_substrn(*args):
+    """DS-105 requested character interval intersected with actual source bounds."""
+    if not 2<=len(args)<=3:raise ValueError('SUBSTRN accepts2..3arguments')
+    string,position=args[:2];length=args[2:]
+    text=_sas_wave2_text(string)
+    position=_sas_wave2_integer(position,missing=True)
+    count=_sas_wave2_integer(length[0],missing=True) if length else None
+    if position is None or length and (count is None or count<=0):return ''
+    last=len(text) if not length else min(len(text),position+count-1)
+    first=max(1,position)
+    return text[first-1:last] if first<=last else ''
+
+
+
+def _sas_row_stat_values(items):
+    """DS-106 validate every row argument before removing ordinary missing."""
+    if not 1<=len(items)<=32:raise ValueError('row statistics require1..32numeric arguments')
+    values=[_sas_wave2_integer(value,-1000000,1000000,missing=True) for value in items]
+    return [value for value in values if value is not None]
+
+
+def sas_median(*items):
+    """DS-106 ordered middle value, averaging the middle pair for an even sample."""
+    values=sorted(_sas_row_stat_values(items));n=len(values)
+    if not n:return None
+    return values[n//2] if n%2 else (values[n//2-1]+values[n//2])/2
+
+
+def sas_range(*items):
+    """DS-106 present maximum minus minimum, including a singleton zero."""
+    values=_sas_row_stat_values(items)
+    return max(values)-min(values) if values else None
+
+
+def sas_row_var(*items):
+    """DS-106 sample variance from an exact integer numerator and rational division."""
+    values=_sas_row_stat_values(items);n=len(values)
+    if n<2:return None
+    return (n*sum(value*value for value in values)-sum(values)**2)/(n*(n-1))
+
+
+def sas_row_std(*items):
+    """DS-106 row sample deviation, separate from the earlier procedure helper."""
+    variance=sas_row_var(*items)
+    return None if variance is None else math.sqrt(variance)
+
+
+
+def _sas_datetime_seconds(args):
+    """DS-107 supplied whole seconds in the qualified1753..3999 civil domain."""
+    if len(args)!=1:raise ValueError('datetime component requires one argument')
+    return _sas_wave2_integer(args[0],SAS_CALENDAR_MIN_DAY*86400,
+                              SAS_CALENDAR_MAX_DAY*86400+86399,missing=True)
+
+
+def sas_qtr(*args):
+    """DS-107 Gregorian date quarter, with ordinary-missing propagation."""
+    if len(args)!=1:raise ValueError('QTR requires one date')
+    date=_sas_source_date(args[0])
+    return None if date is None else (date.month-1)//3+1
+
+
+def sas_dhms(*args):
+    """DS-107 construct datetime from separately bounded integral civil components."""
+    if len(args)!=4:raise ValueError('DHMS requires date,hour,minute and second')
+    bounds=((SAS_CALENDAR_MIN_DAY,SAS_CALENDAR_MAX_DAY),(0,23),(0,59),(0,59))
+    values=[_sas_wave2_integer(value,*limits,missing=True) for value,limits in zip(args,bounds)]
+    if any(value is None for value in values):return None
+    day,hour,minute,second=values
+    return day*86400+hour*3600+minute*60+second
+
+
+def sas_datepart(*args):
+    """DS-107 civil floor-day derivation for signed whole epoch seconds."""
+    seconds=_sas_datetime_seconds(args)
+    return None if seconds is None else seconds//86400
+
+
+def sas_timepart(*args):
+    """DS-107 nonnegative seconds since civil midnight, including negative epochs."""
+    seconds=_sas_datetime_seconds(args)
+    return None if seconds is None else seconds%86400
+
+
+def sas_hour(*args):
+    """DS-107 hour0..23 from a supplied time or datetime in the bounded domain."""
+    seconds=_sas_datetime_seconds(args)
+    return None if seconds is None else seconds%86400//3600
+
+
+def sas_minute(*args):
+    """DS-107 minute0..59 from a supplied whole-second time or datetime."""
+    seconds=_sas_datetime_seconds(args)
+    return None if seconds is None else seconds%3600//60
+
+
+def sas_second(*args):
+    """DS-107 second0..59 from a supplied whole-second time or datetime."""
+    seconds=_sas_datetime_seconds(args)
+    return None if seconds is None else seconds%60
+
+
+
+def _sas_consumer_text(name,value):
+    """DS-108 contextual character temporaries, without widening older helpers."""
+    if type(name) is not str or name not in ('upcase','lowcase','trim','strip','left','right','compbl','trimn'):
+        raise ValueError('unqualified character-consumer transform')
+    text=_sas_wave2_text(value)
+    if name=='upcase':return text.upper()
+    if name=='lowcase':return text.lower()
+    if name=='trim':return text.rstrip(' ') or ' '
+    if name=='strip':return text.strip(' ')
+    return {'left':sas_left,'right':sas_right,'compbl':sas_compbl,'trimn':sas_trimn}[name](text)

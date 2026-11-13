@@ -1,0 +1,152 @@
+{
+  "datasets": {
+    "raw": {
+      "schema": {
+        "label": {
+          "type": "character",
+          "length": 12,
+          "label": "Synthetic label"
+        },
+        "code": {
+          "type": "character",
+          "length": 6,
+          "label": "Synthetic code"
+        },
+        "tag": {
+          "type": "character",
+          "length": 3
+        }
+      },
+      "rows": [
+        {
+          "label": "  Alpha   X ",
+          "code": "123   ",
+          "tag": "AB "
+        },
+        {
+          "label": "beta  beta  ",
+          "code": "A12   ",
+          "tag": "x  "
+        },
+        {
+          "label": "            ",
+          "code": "      ",
+          "tag": "   "
+        },
+        {
+          "label": " Mix  Case  ",
+          "code": " 7    ",
+          "tag": "Q  "
+        },
+        {
+          "label": "---         ",
+          "code": "9-9   ",
+          "tag": "Z  "
+        },
+        {
+          "label": "a           ",
+          "code": "00    ",
+          "tag": " A "
+        }
+      ]
+    },
+    "consumers": {
+      "schema": {
+        "label": {
+          "type": "character",
+          "length": 12,
+          "label": "Synthetic label"
+        },
+        "code": {
+          "type": "character",
+          "length": 6,
+          "label": "Synthetic code"
+        },
+        "tag": {
+          "type": "character",
+          "length": 3
+        },
+        "normalized": {
+          "type": "character",
+          "length": 12
+        },
+        "key": {
+          "type": "character",
+          "length": 200
+        },
+        "accepted": "number",
+        "blank_label": "number"
+      },
+      "rows": [
+        {
+          "label": "  Alpha   X ",
+          "code": "123   ",
+          "tag": "AB ",
+          "normalized": "ALPHA X     ",
+          "key": "123-ab                                                                                                                                                                                                  ",
+          "accepted": 1,
+          "blank_label": 0
+        },
+        {
+          "label": "beta  beta  ",
+          "code": "A12   ",
+          "tag": "x  ",
+          "normalized": "BETA BETA   ",
+          "key": "A12-x                                                                                                                                                                                                   ",
+          "accepted": 0,
+          "blank_label": 0
+        },
+        {
+          "label": "            ",
+          "code": "      ",
+          "tag": "   ",
+          "normalized": "            ",
+          "key": "-                                                                                                                                                                                                       ",
+          "accepted": 1,
+          "blank_label": 1
+        },
+        {
+          "label": " Mix  Case  ",
+          "code": " 7    ",
+          "tag": "Q  ",
+          "normalized": "MIX CASE    ",
+          "key": "7-q                                                                                                                                                                                                     ",
+          "accepted": 1,
+          "blank_label": 0
+        },
+        {
+          "label": "---         ",
+          "code": "9-9   ",
+          "tag": "Z  ",
+          "normalized": "---         ",
+          "key": "9-9-z                                                                                                                                                                                                   ",
+          "accepted": 0,
+          "blank_label": 0
+        },
+        {
+          "label": "a           ",
+          "code": "00    ",
+          "tag": " A ",
+          "normalized": "A           ",
+          "key": "00-a                                                                                                                                                                                                    ",
+          "accepted": 1,
+          "blank_label": 0
+        }
+      ]
+    }
+  },
+  "log": [
+    "123-ab ",
+    "1 ",
+    "A12-x ",
+    "0 ",
+    "- ",
+    "1 ",
+    "7-q ",
+    "1 ",
+    "9-9-z ",
+    "0 ",
+    "00-a ",
+    "1 "
+  ]
+}

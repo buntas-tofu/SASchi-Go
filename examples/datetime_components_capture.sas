@@ -1,0 +1,13 @@
+data stamps;
+set raw;
+quarter=qtr(day);
+stamp=dhms(day,hr,mn,sc);
+recovered=datepart(stamp);
+clock=timepart(stamp);
+h=hour(stamp);
+m=minute(stamp);
+s=second(stamp);
+shown=put(recovered,date9.);
+output;
+put shown;
+run;

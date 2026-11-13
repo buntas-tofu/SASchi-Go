@@ -50,7 +50,8 @@ failures may retain a complete observed result for diagnosis.
 
 ## Acceptance and limits
 
-The golden command now registers119fixtures,84suites and one synthesis runner.
+The golden command now registers128fixtures,92suites and one synthesis runner,
+including the subsequent approved continuation slices.
 Registration counts are not passing outcomes. A source-stable ALL VERIFIED
 receipt and matching18ledger/21text workload checks decide acceptance. Receipts
 regenerate under ignored `telemetry/`; local filesystem and environment details
@@ -67,3 +68,7 @@ This wave adds eight original complete-program gates. It does not add unchanged
 official-example or Roku completions. Live SAS validation,broader modifiers,
 nested temporary consumers,additional numeric domains,calendar methods and
 cross-profile forms remain separate work.
+
+The [second function wave](FUNCTION_WAVE_2_COMPOSITION.md) supplies separate
+bounded evidence for 29 further selected names, typed consumers and two more
+original programs. The 25-name register above remains its own historical scope.

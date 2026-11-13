@@ -1,0 +1,130 @@
+{
+  "datasets": {
+    "raw": {
+      "schema": {
+        "code": {
+          "type": "character",
+          "length": 6,
+          "label": "Synthetic identifier"
+        }
+      },
+      "rows": [
+        {
+          "code": "123   "
+        },
+        {
+          "code": "A12   "
+        },
+        {
+          "code": " 7    "
+        },
+        {
+          "code": "---   "
+        },
+        {
+          "code": "      "
+        },
+        {
+          "code": "9_Z a "
+        }
+      ]
+    },
+    "checked": {
+      "schema": {
+        "code": {
+          "type": "character",
+          "length": 6,
+          "label": "Synthetic identifier"
+        },
+        "verified": "number",
+        "alpha": "number",
+        "digit": "number",
+        "alnum": "number",
+        "space": "number",
+        "other": "number",
+        "back": "number"
+      },
+      "rows": [
+        {
+          "code": "123   ",
+          "verified": 4,
+          "alpha": 0,
+          "digit": 1,
+          "alnum": 1,
+          "space": 4,
+          "other": 4,
+          "back": 3
+        },
+        {
+          "code": "A12   ",
+          "verified": 1,
+          "alpha": 1,
+          "digit": 2,
+          "alnum": 1,
+          "space": 4,
+          "other": 1,
+          "back": 3
+        },
+        {
+          "code": " 7    ",
+          "verified": 1,
+          "alpha": 0,
+          "digit": 2,
+          "alnum": 2,
+          "space": 1,
+          "other": 1,
+          "back": 2
+        },
+        {
+          "code": "---   ",
+          "verified": 1,
+          "alpha": 0,
+          "digit": 0,
+          "alnum": 0,
+          "space": 4,
+          "other": 1,
+          "back": 0
+        },
+        {
+          "code": "      ",
+          "verified": 1,
+          "alpha": 0,
+          "digit": 0,
+          "alnum": 0,
+          "space": 1,
+          "other": 1,
+          "back": 0
+        },
+        {
+          "code": "9_Z a ",
+          "verified": 2,
+          "alpha": 3,
+          "digit": 1,
+          "alnum": 1,
+          "space": 4,
+          "other": 2,
+          "back": 1
+        }
+      ]
+    }
+  },
+  "log": [
+    "123 ",
+    "4 ",
+    "4 ",
+    "A12 ",
+    "1 ",
+    "1 ",
+    "7 ",
+    "1 ",
+    "1 ",
+    "--- ",
+    "1 ",
+    "1 ",
+    "1 ",
+    "1 ",
+    "9_Z a ",
+    "2 ",
+    "2 "
+  ]
+}
