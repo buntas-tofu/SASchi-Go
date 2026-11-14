@@ -111,7 +111,12 @@ class CharacterValidationTests(unittest.TestCase):
         for source in ["data d;if anydigit('1') then x=1;run;",'data d;set raw;where anydigit(a);run;',
                        "data d;retain n 0;x=anydigit('1');run;","data d;array q a;x=anydigit('1');run;",
                        "data d;x=anydigit(cats('1'));run;"]:
-            with self.subTest(source=source):self.assertIn(build_job(source).code,(1,2))
+            admitted={"data d;if anydigit('1') then x=1;run;": 1.0, "data d;x=anydigit(cats('1'));run;": 1.0}
+            if source in admitted:
+                from .expression_test_support import assert_new_expression
+                assert_new_expression(self,source,[admitted[source]])
+            else:
+                with self.subTest(source=source):self.assertIn(build_job(source).code,(1,2))
 
     def test_malformed_portable_shapes(self):
         original=compile_plan("data d;x=anydigit('1');run;").to_dict()

@@ -96,7 +96,11 @@ class MissingSummaryTests(unittest.TestCase):
 
     def test_unqualified_conversions_nested_calls_and_call_routine_refuse(self):
         for rhs in ("n('1')","nmiss('')","coalesce(1,.A)","mean(1.5,2)","mean(.A)","missing(upcase('a'))","coalescec(1)"):
-            self.assertIn(build_job('data d;x='+rhs+';run;').code,(1,2))
+            source='data d;x='+rhs+';run;'
+            if rhs=="missing(upcase('a'))":
+                from .expression_test_support import assert_new_expression
+                assert_new_expression(self,source,[0.])
+            else:self.assertIn(build_job(source).code,(1,2))
         self.assertEqual(build_job('data d;call missing(a);run;').code,2)
 
     def test_numeric_array_names_and_other_profiles_preserve_boundaries(self):

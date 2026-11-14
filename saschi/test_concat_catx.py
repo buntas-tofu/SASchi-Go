@@ -85,12 +85,30 @@ class ConcatCatxTests(unittest.TestCase):
                     self.assertIsNone(job.result)
 
     def test_temporary_catx_contexts_are_compile_refusals(self):
+        from .plan import _compile_before_function_expressions
+        admitted={"length(catx(' ','a','b'))":3.,"catx(' ',catx(' ','a','b'),'c')":'a b c'.ljust(200)}
         for rhs in ("length(catx(' ','a','b'))", "'x'||catx(' ','a','b')", "catx(' ',catx(' ','a','b'),'c')"):
-            job=build_job('data d; c='+rhs+'; run;')
-            self.assertEqual(job.code,2,rhs)
-            self.assertIsNone(job.result)
+            source='data d; c='+rhs+'; run;'
+            self.assertTrue(_compile_before_function_expressions(source).blocked,source)
+            if rhs in admitted:
+                from .expression_test_support import assert_new_expression
+                assert_new_expression(self,source,[admitted[rhs]],field='c')
+            else:
+                job=build_job(source)
+                self.assertEqual(job.code,2,rhs)
+                self.assertIsNone(job.result)
         for source in ("data d; if catx(' ','a') then output; run;", "data d; set raw; where catx(' ',a)='a'; run;"):
-            self.assertTrue(compile_plan(source).blocked)
+            self.assertTrue(_compile_before_function_expressions(source).blocked,source)
+            if 'where' in source:
+                inputs={'raw':{'schema':{'a':{'type':'character','length':4}},'rows':[{'a':'a'},{'a':'b'}]}}
+                plan=compile_plan(source);self.assertFalse(plan.blocked,plan.tickets)
+                self.assertEqual(plan.steps[0].operations[0].args,{'profile':'function-expressions-v1'})
+                result,printed=execute(source,inputs)
+                self.assertEqual(result,run_plan(plan.to_dict(),inputs))
+                self.assertEqual(result['datasets']['d']['rows'],[{'a':'a   '}])
+                self.assertEqual(result['datasets']['d']['schema'],inputs['raw']['schema'])
+                self.assertEqual(printed,'')
+            else:self.assertTrue(compile_plan(source).blocked)
 
     def test_temporary_catx_in_handwritten_plan_is_also_refused(self):
         plan=compile_plan("data d; c=catx(' ','a','b'); run;").to_dict()

@@ -1,7 +1,7 @@
 # Coverage reconciliation and next gate series
 
 Status: Repository/base-R implementation and planning evidence, originally
-reconciled at main08eaa7b on2026-10-27 and updated through DS-115, ST-030, SQL-004 and A0.
+reconciled at main08eaa7b on2026-10-27 and updated through DS-122, ST-030, SQL-004 and A0.
 Accepted entry PR66/main0abf161 completed duplicate partition,owned replacement
 and three-report SORT. New input DROP/directed projection registrations require
 the current full source-bound receipt. The sealed handoff retains the historical accepted entry; current full receipts
@@ -45,15 +45,31 @@ decide acceptance. Selection/order remain engineering inferences, not measured
 corpus frequencies. The functions/CALL denominator and external-program proof
 inventory remain unchanged. Publication requires its own instruction.
 
+On 2026-11-13 the principal selected connecting existing functions through
+broader expressions and conditions as the next planning direction. The
+[fourth-wave proposal](NEXT_DATA_STEP_WAVE_4.md) recommends seven separately
+accepted joins: character trees, numeric trees, computed comparisons, Boolean
+conditions, expression selectors, subsetting IF and WHERE, followed by two
+original complete programs. Its proposed cohort uses 46 already registered
+names and adds no new function name. Entry probes found 28 selected composition
+forms blocked and 10 positive controls compiling. These are compile-only
+planning observations, not accepted implementation or external-program proofs.
+Simple legacy subsetting IF and WHERE remain existing behavior. The principal
+subsequently approved all seven stages and both finish programs in order, with
+full verification and both unchanged workloads passing at every stage. Approval
+does not establish implementation acceptance or authorize publication.
+
+The approved expression wave currently registers 9 original complete program gates and source suites. The [typed expression contract](FUNCTION_EXPRESSIONS.md) records the available joins and held boundaries. Registration requires matching stable full verification and both unchanged workload receipts.
+
 ## Inventory reconciled against actual evidence
 
-The golden command registers137 fixture runners,101 application/translator suites and1
+The golden command registers146 fixture runners,110 application/translator suites and1
 synthesis runner. These are registration counts, not passing outcomes. The
 source-bound full receipt records the discovered test count. A source-bound full receipt records actual skips and
 results. Accepted run entry PR66/main0abf161 contained97 fixtures,65 suites and1491
 tests with zero skips,60 faithful synthesis checks and60 naive controls. The
 separate1k workload checks total39:18 ledger and21 text. These counts have
-different units. Neither165 rulebook rules nor239 golden-command runners is a
+different units. Neither172 rulebook rules nor257 golden-command runners is a
 SAS capability denominator.
 
 [The capability manifest](capability-manifest.json) still enumerates108 statements

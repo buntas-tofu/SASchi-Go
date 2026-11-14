@@ -52,6 +52,10 @@ class AsciiPositionTests(FamilyContract,unittest.TestCase):
         result,_=execute('data d;set raw;if 0 then x=anylower(code,start);run;',inputs)
         self.assertIsNone(result['datasets']['d']['rows'][0]['x'])
         for source in ["data d;if anyupper('A') then x=1;run;","data d;x=notalnum(upcase('a'));run;","data d;x=anylower('a');put anylower('a');run;"]:
-            self.assertIn(build_job(source).code,(1,2))
+            admitted={"data d;if anyupper('A') then x=1;run;":1.,"data d;x=notalnum(upcase('a'));run;":0.}
+            if source in admitted:
+                from .expression_test_support import assert_new_expression
+                assert_new_expression(self,source,[admitted[source]])
+            else:self.assertIn(build_job(source).code,(1,2))
 
 if __name__=='__main__':unittest.main()

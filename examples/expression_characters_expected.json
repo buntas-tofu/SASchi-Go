@@ -1,0 +1,392 @@
+{
+  "datasets": {
+    "raw": {
+      "encoding": "ascii",
+      "label": "Original composition cases",
+      "schema": {
+        "rid": "number",
+        "label": {
+          "type": "character",
+          "length": 16
+        },
+        "code": {
+          "type": "character",
+          "length": 12
+        },
+        "tag": {
+          "type": "character",
+          "length": 4
+        },
+        "a": "number",
+        "b": "number",
+        "c": "number",
+        "k": "number",
+        "flag": "number",
+        "limit": "number",
+        "low": "number",
+        "high": "number"
+      },
+      "rows": [
+        {
+          "rid": 1,
+          "label": " \"a--b\"         ",
+          "code": " ab12       ",
+          "tag": " X  ",
+          "a": 3,
+          "b": -4,
+          "c": 2,
+          "k": 1,
+          "flag": 1,
+          "limit": 5,
+          "low": 0,
+          "high": 10
+        },
+        {
+          "rid": 2,
+          "label": "                ",
+          "code": "AB!         ",
+          "tag": "    ",
+          "a": null,
+          "b": null,
+          "c": null,
+          "k": 1,
+          "flag": 0,
+          "limit": 0,
+          "low": -2,
+          "high": 4
+        },
+        {
+          "rid": 3,
+          "label": "mIxed  CASE     ",
+          "code": "  z9        ",
+          "tag": " q  ",
+          "a": -3,
+          "b": 1,
+          "c": 1,
+          "k": 2,
+          "flag": null,
+          "limit": 3,
+          "low": -3,
+          "high": 8
+        },
+        {
+          "rid": 4,
+          "label": "C- d            ",
+          "code": "\"A1\"        ",
+          "tag": "NA  ",
+          "a": 0,
+          "b": 5,
+          "c": 5,
+          "k": 1,
+          "flag": -1,
+          "limit": 10,
+          "low": 0,
+          "high": 10
+        },
+        {
+          "rid": 5,
+          "label": "a'b             ",
+          "code": "ZZ99        ",
+          "tag": "ZZ99",
+          "a": 6,
+          "b": 6,
+          "c": 2,
+          "k": 3,
+          "flag": 1,
+          "limit": 4,
+          "low": 0,
+          "high": 12
+        },
+        {
+          "rid": 6,
+          "label": " \"\"             ",
+          "code": "            ",
+          "tag": " k  ",
+          "a": 1,
+          "b": null,
+          "c": 2,
+          "k": 1,
+          "flag": 0,
+          "limit": 1,
+          "low": 0,
+          "high": 2
+        },
+        {
+          "rid": 7,
+          "label": "D--e            ",
+          "code": "MiXeD7      ",
+          "tag": "t   ",
+          "a": null,
+          "b": 7,
+          "c": -2,
+          "k": 1,
+          "flag": 1,
+          "limit": 5,
+          "low": 0,
+          "high": 9
+        },
+        {
+          "rid": 8,
+          "label": "Pre - fix       ",
+          "code": "x-y         ",
+          "tag": " y  ",
+          "a": 8,
+          "b": -2,
+          "c": 0,
+          "k": 2,
+          "flag": 0,
+          "limit": 6,
+          "low": 1,
+          "high": 8
+        }
+      ]
+    },
+    "char_trees": {
+      "encoding": "ascii",
+      "label": "Original composition cases",
+      "schema": {
+        "rid": "number",
+        "label": {
+          "type": "character",
+          "length": 16
+        },
+        "code": {
+          "type": "character",
+          "length": 12
+        },
+        "tag": {
+          "type": "character",
+          "length": 4
+        },
+        "a": "number",
+        "b": "number",
+        "c": "number",
+        "k": "number",
+        "flag": "number",
+        "limit": "number",
+        "low": "number",
+        "high": "number",
+        "canon": {
+          "type": "character",
+          "length": 16
+        },
+        "key": {
+          "type": "character",
+          "length": 200
+        },
+        "clean": {
+          "type": "character",
+          "length": 200
+        },
+        "edge": {
+          "type": "character",
+          "length": 200
+        },
+        "sentinel": {
+          "type": "character",
+          "length": 200
+        },
+        "lower": {
+          "type": "character",
+          "length": 200
+        },
+        "spaced": {
+          "type": "character",
+          "length": 200
+        },
+        "deleted": {
+          "type": "character",
+          "length": 200
+        }
+      },
+      "rows": [
+        {
+          "rid": 1,
+          "label": " \"a--b\"         ",
+          "code": " ab12       ",
+          "tag": " X  ",
+          "a": 3,
+          "b": -4,
+          "c": 2,
+          "k": 1,
+          "flag": 1,
+          "limit": 5,
+          "low": 0,
+          "high": 10,
+          "canon": "\"A--B\"          ",
+          "key": "AB12-\"a--B\"                                                                                                                                                                                             ",
+          "clean": "\"AB\"                                                                                                                                                                                                    ",
+          "edge": "X|ab12                                                                                                                                                                                                  ",
+          "sentinel": "Z                                                                                                                                                                                                       ",
+          "lower": "xab12                                                                                                                                                                                                   ",
+          "spaced": "a b                                                                                                                                                                                                     ",
+          "deleted": "ab                                                                                                                                                                                                      "
+        },
+        {
+          "rid": 2,
+          "label": "                ",
+          "code": "AB!         ",
+          "tag": "    ",
+          "a": null,
+          "b": null,
+          "c": null,
+          "k": 1,
+          "flag": 0,
+          "limit": 0,
+          "low": -2,
+          "high": 4,
+          "canon": "                ",
+          "key": "AB!-                                                                                                                                                                                                    ",
+          "clean": "                                                                                                                                                                                                        ",
+          "edge": "AB!                                                                                                                                                                                                     ",
+          "sentinel": "Z                                                                                                                                                                                                       ",
+          "lower": "ab!                                                                                                                                                                                                     ",
+          "spaced": "a b                                                                                                                                                                                                     ",
+          "deleted": "ab                                                                                                                                                                                                      "
+        },
+        {
+          "rid": 3,
+          "label": "mIxed  CASE     ",
+          "code": "  z9        ",
+          "tag": " q  ",
+          "a": -3,
+          "b": 1,
+          "c": 1,
+          "k": 2,
+          "flag": null,
+          "limit": 3,
+          "low": -3,
+          "high": 8,
+          "canon": "MIXED CASE      ",
+          "key": "Z9-Mixed  Case                                                                                                                                                                                          ",
+          "clean": "MIXED  CASE                                                                                                                                                                                             ",
+          "edge": "q|z9                                                                                                                                                                                                    ",
+          "sentinel": "Z                                                                                                                                                                                                       ",
+          "lower": "qz9                                                                                                                                                                                                     ",
+          "spaced": "a b                                                                                                                                                                                                     ",
+          "deleted": "ab                                                                                                                                                                                                      "
+        },
+        {
+          "rid": 4,
+          "label": "C- d            ",
+          "code": "\"A1\"        ",
+          "tag": "NA  ",
+          "a": 0,
+          "b": 5,
+          "c": 5,
+          "k": 1,
+          "flag": -1,
+          "limit": 10,
+          "low": 0,
+          "high": 10,
+          "canon": "C- D            ",
+          "key": "\"A1\"-C- D                                                                                                                                                                                               ",
+          "clean": "C D                                                                                                                                                                                                     ",
+          "edge": "NA|A1                                                                                                                                                                                                   ",
+          "sentinel": "Z                                                                                                                                                                                                       ",
+          "lower": "na\"a1\"                                                                                                                                                                                                  ",
+          "spaced": "a b                                                                                                                                                                                                     ",
+          "deleted": "ab                                                                                                                                                                                                      "
+        },
+        {
+          "rid": 5,
+          "label": "a'b             ",
+          "code": "ZZ99        ",
+          "tag": "ZZ99",
+          "a": 6,
+          "b": 6,
+          "c": 2,
+          "k": 3,
+          "flag": 1,
+          "limit": 4,
+          "low": 0,
+          "high": 12,
+          "canon": "A'B             ",
+          "key": "ZZ99-A'b                                                                                                                                                                                                ",
+          "clean": "A'B                                                                                                                                                                                                     ",
+          "edge": "ZZ99|ZZ99                                                                                                                                                                                               ",
+          "sentinel": "Z                                                                                                                                                                                                       ",
+          "lower": "zz99zz99                                                                                                                                                                                                ",
+          "spaced": "a b                                                                                                                                                                                                     ",
+          "deleted": "ab                                                                                                                                                                                                      "
+        },
+        {
+          "rid": 6,
+          "label": " \"\"             ",
+          "code": "            ",
+          "tag": " k  ",
+          "a": 1,
+          "b": null,
+          "c": 2,
+          "k": 1,
+          "flag": 0,
+          "limit": 1,
+          "low": 0,
+          "high": 2,
+          "canon": "\"\"              ",
+          "key": "-\"\"                                                                                                                                                                                                     ",
+          "clean": "\"\"                                                                                                                                                                                                      ",
+          "edge": "k                                                                                                                                                                                                       ",
+          "sentinel": "Z                                                                                                                                                                                                       ",
+          "lower": "k                                                                                                                                                                                                       ",
+          "spaced": "a b                                                                                                                                                                                                     ",
+          "deleted": "ab                                                                                                                                                                                                      "
+        },
+        {
+          "rid": 7,
+          "label": "D--e            ",
+          "code": "MiXeD7      ",
+          "tag": "t   ",
+          "a": null,
+          "b": 7,
+          "c": -2,
+          "k": 1,
+          "flag": 1,
+          "limit": 5,
+          "low": 0,
+          "high": 9,
+          "canon": "D--E            ",
+          "key": "MIXE-D--E                                                                                                                                                                                               ",
+          "clean": "DE                                                                                                                                                                                                      ",
+          "edge": "t|MiXeD7                                                                                                                                                                                                ",
+          "sentinel": "Z                                                                                                                                                                                                       ",
+          "lower": "tmixed7                                                                                                                                                                                                 ",
+          "spaced": "a b                                                                                                                                                                                                     ",
+          "deleted": "ab                                                                                                                                                                                                      "
+        },
+        {
+          "rid": 8,
+          "label": "Pre - fix       ",
+          "code": "x-y         ",
+          "tag": " y  ",
+          "a": 8,
+          "b": -2,
+          "c": 0,
+          "k": 2,
+          "flag": 0,
+          "limit": 6,
+          "low": 1,
+          "high": 8,
+          "canon": "PRE - FIX       ",
+          "key": "X-Y-Pre - Fix                                                                                                                                                                                           ",
+          "clean": "PRE  FIX                                                                                                                                                                                                ",
+          "edge": "y|x-y                                                                                                                                                                                                   ",
+          "sentinel": "Z                                                                                                                                                                                                       ",
+          "lower": "yx-y                                                                                                                                                                                                    ",
+          "spaced": "a b                                                                                                                                                                                                     ",
+          "deleted": "ab                                                                                                                                                                                                      "
+        }
+      ]
+    }
+  },
+  "log": [
+    "AB12-\"a--B\" ",
+    "AB!- ",
+    "Z9-Mixed  Case ",
+    "\"A1\"-C- D ",
+    "ZZ99-A'b ",
+    "-\"\" ",
+    "MIXE-D--E ",
+    "X-Y-Pre - Fix "
+  ]
+}

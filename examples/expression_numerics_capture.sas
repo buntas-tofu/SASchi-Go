@@ -1,0 +1,11 @@
+data num_trees;
+set raw;
+delta=abs(a-b);
+score=sum(abs(a),abs(b),largest(k,a,b,c));
+rounded=roundz(abs(a-c),0.5);
+coalesced=coalesce(smallest(k,a,b,c),0);
+balance=sum(a,b)-sum(b,c);
+nmissing=nmiss(abs(a),abs(b));
+tie=roundz(abs(-2.5),1);
+put score;
+run;

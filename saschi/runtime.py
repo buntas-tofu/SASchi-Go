@@ -288,6 +288,11 @@ def validate_inline_types(ops, schema, retained):
 
 
 def run_plan(plan, catalog=None, *, allow_partial=False):
+    from . import function_expressions as typed_expressions
+    if typed_expressions.claimed(plan):
+        if allow_partial:
+            raise ValueError('expression programs require complete unticketed execution')
+        return typed_expressions.run_program(plan, catalog, run_plan)
     consumer_v2 = consumers_v2.selected_program(plan)
     consumer_engine = consumers_v2 if consumer_v2 else consumers
     consumer_steps = consumers_v2.validate_program(plan) if consumer_v2 else set()
