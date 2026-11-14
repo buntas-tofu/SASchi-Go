@@ -18,7 +18,7 @@ policies. Receipts record what passed for the source and environment tested.
 ## Current verification
 
 Status: version 0.4.0 development evidence for maintainer review, updated on
-2026-11-13. The current registry contains 146 fixture gates and 110 suites, including
+2026-11-14. The current registry contains 152 fixture gates and 116 suites, including
 the desktop workflow, data importer and saved-evidence suites. The full receipt
 records the discovered tests and their outcomes. With the pinned Roku corpus present, `python verify_all.py` records the
 source-bound unified verdict. Synthesis separately checks 60 faithful cases and
@@ -67,6 +67,18 @@ original complete program gates and source suites within the approved seven
 stages and two finish programs. Independent hand/base-R expectations and
 matching stable full verification plus both unchanged workloads decide
 acceptance. Existing consumer profiles and function names remain unchanged.
+
+[Stateful expression composition](docs/STATEFUL_EXPRESSIONS.md) registers typed
+decision groups and explicit snapshots as DS-123 and fresh numeric retention
+as DS-124, expression sum statements as DS-125 and ordered numeric BY flags as
+DS-126, in a separate bounded profile.
+Its four component programs and BOTH complete originals,
+[record-quality auditing with a review queue](examples/record_quality_audit_capture.sas)
+and [batch reconciliation with a review list](examples/batch_reconciliation_capture.sas),
+have distinct gates and source suites. All six hand/base-R oracles were frozen
+before translator work. Matching source-stable full verification and both unchanged
+workloads at every phase decide acceptance. No scalar name was added; UI changes
+remain deferred.
 
 [Explicit word parsing](docs/WORD_FUNCTIONS.md) adds SCAN/COUNTW with an explicit
 delimiter set and optional M. The source-width SCAN policy is pinned to the current
@@ -280,7 +292,7 @@ fixed expected output and base-R evidence. Special missings retain their tags.
   sibling plus a fixture verifier (`verify_*.py`). Run any verifier directly,
   or all of them through [verify_all.py](verify_all.py).
 - [docs/sasconversionrulebook.json](docs/sasconversionrulebook.json) : the machine-consumable translation
-  rulebook. 172 rules with equivalence classes (EXACT,
+  rulebook. 176 rules with equivalence classes (EXACT,
   EQUIVALENT-WITH-SETTINGS, APPROXIMATE, NO-DIRECT-EQUIVALENT), required
   settings, forbidden patterns, and validation tests.
 - [docs/capability-manifest.json](docs/capability-manifest.json) : the coverage manifest. Enumerated entries of

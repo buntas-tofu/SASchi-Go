@@ -1,0 +1,25 @@
+data quality_audit;
+  length record_key $24;
+  length reason $12;
+  set submissions;
+  record_key=upcase(compbl(dequote(strip(raw_id))));
+  bad_id=notalnum(strip(record_key))>0 or lengthn(strip(record_key))=0;
+  bad_measure=n(value,lower,upper)<3 or lower>upper or value<lower or value>upper;
+  if bad_id then do;
+    reason='IDENTIFIER';
+    output;
+  end;
+  if bad_measure then do;
+    reason='MEASUREMENT';
+    output;
+  end;
+  if not bad_id and not bad_measure then do;
+    reason='ACCEPT';
+    output;
+  end;
+run;
+
+data review_queue;
+  set quality_audit;
+  where reason^='ACCEPT';
+run;

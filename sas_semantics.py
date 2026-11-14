@@ -3319,3 +3319,20 @@ def sas_expression_boolean(operator,values):
         raise ValueError('expression Boolean operator/arity is outside its contract')
     truths=[sas_expression_truth(value) for value in values]
     return int(not truths[0]) if operator=='not' else int(all(truths)) if operator=='and' else int(any(truths))
+
+
+def sas_stateful_expression_state(value):
+    """DS-124 ordinary missing or exact retained integers within one million."""
+    value=_sas_expression_number(value)
+    if value is not None and int(value)!=value:
+        raise ValueError('stateful numeric retention requires an exact integer')
+    return value
+
+
+def sas_stateful_expression_accumulate(current,contribution):
+    """DS-125 checked integer accumulation, with ordinary missing treated as zero."""
+    current=sas_stateful_expression_state(current)
+    contribution=sas_stateful_expression_state(contribution)
+    result=sas_sum_statement(current,contribution)
+    if abs(result)>1000000:raise ValueError('stateful accumulated magnitude exceeds1000000')
+    return sas_stateful_expression_state(result)

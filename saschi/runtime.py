@@ -288,6 +288,11 @@ def validate_inline_types(ops, schema, retained):
 
 
 def run_plan(plan, catalog=None, *, allow_partial=False):
+    from . import stateful_expressions
+    if stateful_expressions.claimed(plan):
+        if allow_partial:
+            raise ValueError('stateful expression programs require complete unticketed execution')
+        return stateful_expressions.run_program(plan, catalog, run_plan)
     from . import function_expressions as typed_expressions
     if typed_expressions.claimed(plan):
         if allow_partial:

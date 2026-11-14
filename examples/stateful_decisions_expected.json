@@ -1,0 +1,258 @@
+{
+  "datasets": {
+    "raw": {
+      "encoding": "ascii",
+      "label": "Original stateful inputs",
+      "schema": {
+        "rid": "number",
+        "code": {
+          "type": "character",
+          "length": 24,
+          "label": "Supplied code"
+        },
+        "amount": {
+          "type": "number",
+          "length": 8,
+          "label": "Measured amount",
+          "format": "8."
+        },
+        "expected": "number",
+        "enable": "number",
+        "batch": "number",
+        "limit": "number"
+      },
+      "rows": [
+        {
+          "rid": 1,
+          "code": " a1                     ",
+          "amount": 3,
+          "expected": 1,
+          "enable": 1,
+          "batch": 1,
+          "limit": 5
+        },
+        {
+          "rid": 2,
+          "code": "B-2                     ",
+          "amount": 9,
+          "expected": 2,
+          "enable": 1,
+          "batch": 1,
+          "limit": 5
+        },
+        {
+          "rid": 3,
+          "code": "                        ",
+          "amount": null,
+          "expected": 1,
+          "enable": 1,
+          "batch": 2,
+          "limit": 5
+        },
+        {
+          "rid": 4,
+          "code": "'z9'                    ",
+          "amount": -2,
+          "expected": -6,
+          "enable": 0,
+          "batch": 2,
+          "limit": 5
+        },
+        {
+          "rid": 5,
+          "code": "\"\"                      ",
+          "amount": 5,
+          "expected": null,
+          "enable": 1,
+          "batch": 3,
+          "limit": 5
+        },
+        {
+          "rid": 6,
+          "code": "Mixed7                  ",
+          "amount": 0,
+          "expected": 0,
+          "enable": 1,
+          "batch": 4,
+          "limit": 5
+        }
+      ]
+    },
+    "decision_rows": {
+      "encoding": "ascii",
+      "label": "Original stateful inputs",
+      "schema": {
+        "canon": {
+          "type": "character",
+          "length": 24
+        },
+        "phase": {
+          "type": "character",
+          "length": 8
+        },
+        "choice": {
+          "type": "character",
+          "length": 8
+        },
+        "rid": "number",
+        "code": {
+          "type": "character",
+          "length": 24,
+          "label": "Supplied code"
+        },
+        "amount": {
+          "type": "number",
+          "length": 8,
+          "label": "Measured amount",
+          "format": "8."
+        },
+        "expected": "number",
+        "enable": "number",
+        "batch": "number",
+        "limit": "number",
+        "invalid": "number",
+        "count": "number",
+        "difference": "number",
+        "magnitude": "number",
+        "scale": "number",
+        "tail": "number"
+      },
+      "rows": [
+        {
+          "canon": "A1                      ",
+          "phase": "PASS    ",
+          "choice": "SMALL   ",
+          "rid": 1,
+          "code": " a1                     ",
+          "amount": 3,
+          "expected": 1,
+          "enable": 1,
+          "batch": 1,
+          "limit": 5,
+          "invalid": 0,
+          "count": 2,
+          "difference": 2,
+          "magnitude": 2,
+          "scale": 3,
+          "tail": null
+        },
+        {
+          "canon": "B-2                     ",
+          "phase": "ID      ",
+          "choice": "REVIEW  ",
+          "rid": 2,
+          "code": "B-2                     ",
+          "amount": 9,
+          "expected": 2,
+          "enable": 1,
+          "batch": 1,
+          "limit": 5,
+          "invalid": 1,
+          "count": 2,
+          "difference": 7,
+          "magnitude": 7,
+          "scale": 9,
+          "tail": null
+        },
+        {
+          "canon": "B-2                     ",
+          "phase": "VALUE   ",
+          "choice": "REVIEW  ",
+          "rid": 2,
+          "code": "B-2                     ",
+          "amount": 9,
+          "expected": 2,
+          "enable": 1,
+          "batch": 1,
+          "limit": 5,
+          "invalid": 1,
+          "count": 2,
+          "difference": 7,
+          "magnitude": 7,
+          "scale": 9,
+          "tail": null
+        },
+        {
+          "canon": "                        ",
+          "phase": "ID      ",
+          "choice": "REVIEW  ",
+          "rid": 3,
+          "code": "                        ",
+          "amount": null,
+          "expected": 1,
+          "enable": 1,
+          "batch": 2,
+          "limit": 5,
+          "invalid": 1,
+          "count": 1,
+          "difference": null,
+          "magnitude": null,
+          "scale": 1,
+          "tail": null
+        },
+        {
+          "canon": "Z9                      ",
+          "phase": "VALUE   ",
+          "choice": "SMALL   ",
+          "rid": 4,
+          "code": "'z9'                    ",
+          "amount": -2,
+          "expected": -6,
+          "enable": 0,
+          "batch": 2,
+          "limit": 5,
+          "invalid": 0,
+          "count": 2,
+          "difference": 4,
+          "magnitude": 4,
+          "scale": 6,
+          "tail": null
+        },
+        {
+          "canon": "                        ",
+          "phase": "ID      ",
+          "choice": "REVIEW  ",
+          "rid": 5,
+          "code": "\"\"                      ",
+          "amount": 5,
+          "expected": null,
+          "enable": 1,
+          "batch": 3,
+          "limit": 5,
+          "invalid": 1,
+          "count": 1,
+          "difference": null,
+          "magnitude": null,
+          "scale": 5,
+          "tail": null
+        },
+        {
+          "canon": "MIXED7                  ",
+          "phase": "PASS    ",
+          "choice": "SMALL   ",
+          "rid": 6,
+          "code": "Mixed7                  ",
+          "amount": 0,
+          "expected": 0,
+          "enable": 1,
+          "batch": 4,
+          "limit": 5,
+          "invalid": 0,
+          "count": 2,
+          "difference": 0,
+          "magnitude": 0,
+          "scale": 0,
+          "tail": null
+        }
+      ]
+    }
+  },
+  "log": [
+    "decision",
+    "decision",
+    "decision",
+    "decision",
+    "decision",
+    "decision"
+  ]
+}

@@ -1,7 +1,7 @@
 # Coverage reconciliation and next gate series
 
 Status: Repository/base-R implementation and planning evidence, originally
-reconciled at main08eaa7b on2026-10-27 and updated through DS-122, ST-030, SQL-004 and A0.
+reconciled at main08eaa7b on2026-10-27 and updated through DS-126, ST-030, SQL-004 and A0.
 Accepted entry PR66/main0abf161 completed duplicate partition,owned replacement
 and three-report SORT. New input DROP/directed projection registrations require
 the current full source-bound receipt. The sealed handoff retains the historical accepted entry; current full receipts
@@ -61,15 +61,40 @@ does not establish implementation acceptance or authorize publication.
 
 The approved expression wave currently registers 9 original complete program gates and source suites. The [typed expression contract](FUNCTION_EXPRESSIONS.md) records the available joins and held boundaries. Registration requires matching stable full verification and both unchanged workload receipts.
 
+PR79 merged the complete expression wave on 2026-11-14 as
+`d25b2e748969e2fa18127557a7081734c61a2714`. Its accepted source passed 146 fixture
+gates, 110 suites, 2,154 tests, zero skips, synthesis and both unchanged workloads.
+The principal then selected continuing composition and approved the
+[fifth-wave proposal](NEXT_DATA_STEP_WAVE_5.md), all four components and BOTH
+complete original target programs, on 2026-11-14. The initial compile-only
+observations belong to that entry source: both complete drafts and six isolated
+joins refused while separate existing component controls executed. Those were
+planning measurements, not current refusal claims.
+
+The [stateful expression profile](STATEFUL_EXPRESSIONS.md) now registers typed
+decision groups/snapshots as DS-123, fresh numeric retention as DS-124, expression
+sum statements as DS-125 and ordered numeric BY flags as DS-126. Each component
+and each complete target has its own gate/source suite. The unchanged
+[record-quality audit/review queue](../examples/record_quality_audit_capture.sas)
+and [batch reconciliation/review list](../examples/batch_reconciliation_capture.sas)
+check all fields, descriptors, rows and downstream results. All six complete
+hand/base-R oracles qualified before translator changes, including 30 whole
+generated catalogs each. Separate source-stable full verification and both
+unchanged workloads at every phase decide acceptance; registration is not a
+passing verdict. No scalar name or external-program proof is added by this wave.
+
+Desktop/browser interface simplification remains a separate, feature-preserving
+review lane. UI changes are explicitly deferred from this composition wave.
+
 ## Inventory reconciled against actual evidence
 
-The golden command registers146 fixture runners,110 application/translator suites and1
+The golden command registers152 fixture runners,116 application/translator suites and1
 synthesis runner. These are registration counts, not passing outcomes. The
 source-bound full receipt records the discovered test count. A source-bound full receipt records actual skips and
 results. Accepted run entry PR66/main0abf161 contained97 fixtures,65 suites and1491
 tests with zero skips,60 faithful synthesis checks and60 naive controls. The
 separate1k workload checks total39:18 ledger and21 text. These counts have
-different units. Neither172 rulebook rules nor257 golden-command runners is a
+different units. Neither176 rulebook rules nor269 golden-command runners is a
 SAS capability denominator.
 
 [The capability manifest](capability-manifest.json) still enumerates108 statements
