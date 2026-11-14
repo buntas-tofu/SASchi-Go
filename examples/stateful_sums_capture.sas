@@ -1,0 +1,17 @@
+data sum_rows;
+  length canon $24;
+  length trace $8;
+  retain offset 5;
+  set raw;
+  canon=upcase(compbl(dequote(strip(code))));
+  if enable then do;
+    total+abs(amount-expected);
+    valid+n(amount,expected);
+    net+(amount-expected);
+  end;
+  offset=offset+1;
+  simple=amount+expected;
+  trace=ifc(enable,'ADD','SKIP');
+  output;
+  put 'sum';
+run;

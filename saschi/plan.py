@@ -1533,3 +1533,13 @@ def compile_plan(source, *, output_contract=None):
         return _compile_before_function_expressions(source, output_contract=output_contract)
     from .function_expressions import compile_program
     return compile_program(source, _compile_before_function_expressions)
+
+
+_compile_before_stateful_expressions = compile_plan
+
+
+def compile_plan(source, *, output_contract=None):
+    if output_contract is not None:
+        return _compile_before_stateful_expressions(source, output_contract=output_contract)
+    from .stateful_expressions import compile_program
+    return compile_program(source, _compile_before_stateful_expressions)

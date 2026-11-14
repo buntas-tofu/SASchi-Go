@@ -1,0 +1,274 @@
+{
+  "datasets": {
+    "ledger": {
+      "schema": {
+        "batch": "number",
+        "label": {
+          "type": "character",
+          "length": 16
+        },
+        "amount": "number",
+        "expected": "number",
+        "limit": "number"
+      },
+      "rows": [
+        {
+          "batch": 101,
+          "label": " batch one      ",
+          "amount": 100,
+          "expected": 98,
+          "limit": 2
+        },
+        {
+          "batch": 101,
+          "label": " batch one      ",
+          "amount": null,
+          "expected": 4,
+          "limit": 2
+        },
+        {
+          "batch": 101,
+          "label": " batch one      ",
+          "amount": 91,
+          "expected": 94,
+          "limit": 2
+        },
+        {
+          "batch": 102,
+          "label": "second          ",
+          "amount": 5,
+          "expected": 4,
+          "limit": 2
+        },
+        {
+          "batch": 102,
+          "label": "second          ",
+          "amount": 8,
+          "expected": 9,
+          "limit": 2
+        },
+        {
+          "batch": 103,
+          "label": "empty           ",
+          "amount": null,
+          "expected": null,
+          "limit": 2
+        },
+        {
+          "batch": 104,
+          "label": "final           ",
+          "amount": 3,
+          "expected": 3,
+          "limit": 2
+        },
+        {
+          "batch": 105,
+          "label": "last missing    ",
+          "amount": 7,
+          "expected": 5,
+          "limit": 2
+        },
+        {
+          "batch": 105,
+          "label": "last missing    ",
+          "amount": null,
+          "expected": 4,
+          "limit": 2
+        }
+      ],
+      "encoding": "ascii",
+      "label": "Original reconciliation ledger"
+    },
+    "batch_summary": {
+      "encoding": "ascii",
+      "label": "Original reconciliation ledger",
+      "schema": {
+        "batch_label": {
+          "type": "character",
+          "length": 24
+        },
+        "status": {
+          "type": "character",
+          "length": 8
+        },
+        "seen": "number",
+        "accepted": "number",
+        "rejected": "number",
+        "net": "number",
+        "magnitude": "number",
+        "worst": "number",
+        "batch": "number",
+        "label": {
+          "type": "character",
+          "length": 16
+        },
+        "amount": "number",
+        "expected": "number",
+        "limit": "number",
+        "delta": "number"
+      },
+      "rows": [
+        {
+          "batch_label": "BATCH ONE               ",
+          "status": "REVIEW  ",
+          "seen": 3,
+          "accepted": 2,
+          "rejected": 1,
+          "net": -1,
+          "magnitude": 5,
+          "worst": 3,
+          "batch": 101,
+          "label": " batch one      ",
+          "amount": 91,
+          "expected": 94,
+          "limit": 2,
+          "delta": -3
+        },
+        {
+          "batch_label": "SECOND                  ",
+          "status": "READY   ",
+          "seen": 2,
+          "accepted": 2,
+          "rejected": 0,
+          "net": 0,
+          "magnitude": 2,
+          "worst": 1,
+          "batch": 102,
+          "label": "second          ",
+          "amount": 8,
+          "expected": 9,
+          "limit": 2,
+          "delta": -1
+        },
+        {
+          "batch_label": "EMPTY                   ",
+          "status": "REVIEW  ",
+          "seen": 1,
+          "accepted": 0,
+          "rejected": 1,
+          "net": 0,
+          "magnitude": 0,
+          "worst": 0,
+          "batch": 103,
+          "label": "empty           ",
+          "amount": null,
+          "expected": null,
+          "limit": 2,
+          "delta": null
+        },
+        {
+          "batch_label": "FINAL                   ",
+          "status": "READY   ",
+          "seen": 1,
+          "accepted": 1,
+          "rejected": 0,
+          "net": 0,
+          "magnitude": 0,
+          "worst": 0,
+          "batch": 104,
+          "label": "final           ",
+          "amount": 3,
+          "expected": 3,
+          "limit": 2,
+          "delta": 0
+        },
+        {
+          "batch_label": "LAST MISSING            ",
+          "status": "REVIEW  ",
+          "seen": 2,
+          "accepted": 1,
+          "rejected": 1,
+          "net": 2,
+          "magnitude": 2,
+          "worst": 2,
+          "batch": 105,
+          "label": "last missing    ",
+          "amount": null,
+          "expected": 4,
+          "limit": 2,
+          "delta": null
+        }
+      ]
+    },
+    "review_batches": {
+      "encoding": "ascii",
+      "label": "Original reconciliation ledger",
+      "schema": {
+        "batch_label": {
+          "type": "character",
+          "length": 24
+        },
+        "status": {
+          "type": "character",
+          "length": 8
+        },
+        "seen": "number",
+        "accepted": "number",
+        "rejected": "number",
+        "net": "number",
+        "magnitude": "number",
+        "worst": "number",
+        "batch": "number",
+        "label": {
+          "type": "character",
+          "length": 16
+        },
+        "amount": "number",
+        "expected": "number",
+        "limit": "number",
+        "delta": "number"
+      },
+      "rows": [
+        {
+          "batch_label": "BATCH ONE               ",
+          "status": "REVIEW  ",
+          "seen": 3,
+          "accepted": 2,
+          "rejected": 1,
+          "net": -1,
+          "magnitude": 5,
+          "worst": 3,
+          "batch": 101,
+          "label": " batch one      ",
+          "amount": 91,
+          "expected": 94,
+          "limit": 2,
+          "delta": -3
+        },
+        {
+          "batch_label": "EMPTY                   ",
+          "status": "REVIEW  ",
+          "seen": 1,
+          "accepted": 0,
+          "rejected": 1,
+          "net": 0,
+          "magnitude": 0,
+          "worst": 0,
+          "batch": 103,
+          "label": "empty           ",
+          "amount": null,
+          "expected": null,
+          "limit": 2,
+          "delta": null
+        },
+        {
+          "batch_label": "LAST MISSING            ",
+          "status": "REVIEW  ",
+          "seen": 2,
+          "accepted": 1,
+          "rejected": 1,
+          "net": 2,
+          "magnitude": 2,
+          "worst": 2,
+          "batch": 105,
+          "label": "last missing    ",
+          "amount": null,
+          "expected": 4,
+          "limit": 2,
+          "delta": null
+        }
+      ]
+    }
+  },
+  "log": []
+}

@@ -184,6 +184,12 @@ VERIFIERS = [
     ("where-composition", HERE / "examples" / "verify_expression_where.py"),
     ("record-eligibility-and-normalization", HERE / "examples" / "verify_record_eligibility.py"),
     ("measurement-exception-triage", HERE / "examples" / "verify_measurement_triage.py"),
+    ("decision-groups-and-output", HERE / "examples" / "verify_stateful_decisions.py"),
+    ("numeric-retention", HERE / "examples" / "verify_stateful_retention.py"),
+    ("expression-sum-statements", HERE / "examples" / "verify_stateful_sums.py"),
+    ("ordered-by-groups", HERE / "examples" / "verify_stateful_groups.py"),
+    ("record-quality-audit", HERE / "examples" / "verify_record_quality_audit.py"),
+    ("batch-reconciliation", HERE / "examples" / "verify_batch_reconciliation.py"),
 ]
 
 # The translator suites, run as unittest modules. They carry the same weight as
@@ -301,6 +307,12 @@ SUITES = [
     ("suite-where-composition", "saschi.test_expression_where"),
     ("suite-record-eligibility-and-normalization", "saschi.test_record_eligibility"),
     ("suite-measurement-exception-triage", "saschi.test_measurement_triage"),
+    ("suite-stateful-decisions", "saschi.test_stateful_decisions"),
+    ("suite-stateful-retention", "saschi.test_stateful_retention"),
+    ("suite-stateful-sums", "saschi.test_stateful_sums"),
+    ("suite-stateful-groups", "saschi.test_stateful_groups"),
+    ("suite-record-quality-audit", "saschi.test_record_quality_audit"),
+    ("suite-batch-reconciliation", "saschi.test_batch_reconciliation"),
 ]
 
 

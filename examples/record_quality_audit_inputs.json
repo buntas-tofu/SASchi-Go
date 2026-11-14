@@ -1,0 +1,68 @@
+{
+  "submissions": {
+    "schema": {
+      "row_id": "number",
+      "raw_id": {
+        "type": "character",
+        "length": 24,
+        "label": "Supplied identifier"
+      },
+      "value": "number",
+      "lower": "number",
+      "upper": "number"
+    },
+    "rows": [
+      {
+        "row_id": 1,
+        "raw_id": " \"a1\" ",
+        "value": 5,
+        "lower": 0,
+        "upper": 10
+      },
+      {
+        "row_id": 2,
+        "raw_id": "b-2",
+        "value": 12,
+        "lower": 0,
+        "upper": 10
+      },
+      {
+        "row_id": 3,
+        "raw_id": "   ",
+        "value": null,
+        "lower": 0,
+        "upper": 10
+      },
+      {
+        "row_id": 4,
+        "raw_id": "c3",
+        "value": 7,
+        "lower": 10,
+        "upper": 5
+      },
+      {
+        "row_id": 5,
+        "raw_id": "\"d4\"",
+        "value": null,
+        "lower": 0,
+        "upper": 10
+      },
+      {
+        "row_id": 6,
+        "raw_id": " e5 ",
+        "value": 0,
+        "lower": 0,
+        "upper": 10
+      },
+      {
+        "row_id": 7,
+        "raw_id": "'F6'",
+        "value": 5,
+        "lower": 0,
+        "upper": 10
+      }
+    ],
+    "encoding": "ascii",
+    "label": "Original quality submissions"
+  }
+}

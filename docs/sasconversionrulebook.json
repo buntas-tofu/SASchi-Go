@@ -5273,6 +5273,118 @@
         "https://documentation.sas.com/api/docsets/lefunctionsref/9.4/content/lefunctionsref.pdf",
         "https://support.sas.com/documentation/cdl/en/lrcon/65287/HTML/default/p00iah2thp63bmn1lt20esag14lh.htm"
       ]
+    },
+    {
+      "rule_id": "DS-123",
+      "scope": "Separately marked bounded ordinary DATA typed decision groups and snapshots",
+      "sas_pattern": "decision-groups-and-output within stateful-expressions-v1",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "strategy": "Existing canonical typed-expression helpers with independently validated grouped actions, row descriptors and explicit snapshots."
+      },
+      "r_target": {
+        "strategy": "Preimplementation complete original hand/base-R witness and30 complete generated catalogs."
+      },
+      "required_settings": [
+        "See docs/NEXT_DATA_STEP_WAVE_5.md for the ten-name cohort and bounded staged contract.",
+        "Require full original/runtime/emitted/actual CLI evidence, stable full verification and both unchanged workloads."
+      ],
+      "forbidden_patterns": [
+        "RETAIN, sum statements, BY, loops, arrays, filtering in marked steps, multiple inputs/destinations, new scalar names, SQL/C++ and broader arithmetic."
+      ],
+      "silent_difference_checks": [
+        "Explicit OUTPUT suppression even on skipped paths, schema discovery before snapshots, deep-copy row identity, eager static and reached dynamic errors, nonmutation and late atomic failure."
+      ],
+      "validation_test": "examples/verify_stateful_decisions.py",
+      "confidence": "Conditional on matching source-stable full verification and both unchanged workloads. No native SAS claim.",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/lestmtsref/63323/HTML/default/n1lltvbis7ye1an1eryo4leh2mck.htm",
+        "https://support.sas.com/documentation/cdl/en/lrcon/62955/HTML/default/a001331122.htm"
+      ]
+    },
+    {
+      "rule_id": "DS-124",
+      "scope": "Fresh bounded numeric retention with typed stateful expressions",
+      "sas_pattern": "numeric-retention within stateful-expressions-v1",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "strategy": "Canonical checked numeric state plus retained per-step values and row scratch reset."
+      },
+      "r_target": {
+        "strategy": "Preimplementation complete hand/base-R retention schedule and30 whole generated catalogs."
+      },
+      "required_settings": [
+        "Extends the separately qualified DS-123 stage. Top-level explicit RETAIN declares one fresh numeric name with a numeric or ordinary-missing literal initializer, at any lexical position. Initializers apply once before input.",
+        "At most16 fresh retained names; finite exact integer state within+/-1000000 or ordinary missing. Check initializers, static known assignments and every reached dynamic assignment. Imported state collisions refuse even on empty input.",
+        "Descriptor discovery follows first declarations/uses; ordinary row scratch resets independently. Full original/runtime/emitted/actual CLI and matching full source-stable verification plus both unchanged workloads are required."
+      ],
+      "forbidden_patterns": [
+        "Character retention, absent/computed/duplicate initializers, input-state collisions, sum statements/BY without their later stages, loops, arrays, new scalar names, multiple inputs/destinations, SQL/C++ and broader arithmetic."
+      ],
+      "silent_difference_checks": [
+        "Retained versus scratch values, later-position declarative initialization, skipped updates, missing initial state, repeated runs, late overflow after working output, exact portable initializer/declaration agreement."
+      ],
+      "validation_test": "examples/verify_stateful_retention.py",
+      "confidence": "Conditional on matching source-stable full verification and both unchanged workloads. No native SAS claim.",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/lestmtsref/63323/HTML/default/p0t2ac0tfzcgbjn112mu96hkgg9o.htm"
+      ]
+    },
+    {
+      "rule_id": "DS-125",
+      "scope": "Bounded expression contributions to fresh numeric sum-statement state",
+      "sas_pattern": "expression-sum-statements within stateful-expressions-v1",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "strategy": "Canonical checked integer accumulation around the unchanged sum-statement helper, with independent typed expression contributions."
+      },
+      "r_target": {
+        "strategy": "Preimplementation complete hand/base-R original, native R sums with missing removed,30 complete generated catalogs and4 shared state pins."
+      },
+      "required_settings": [
+        "Extends the qualified DS-123/DS-124 scheduling and state contract. A fresh sum target implicitly initializes to0 and retains values even when its action is skipped. Explicit literal RETAIN overrides the default initializer.",
+        "All explicit and implicit retained names share the16name cap. Contributions, accumulator state and accumulated result are ordinary missing or finite exact integers within+/-1000000. Ordinary missing contributes0; ordinary expression addition remains separately missing-propagating.",
+        "Static known contribution faults refuse on skipped/empty paths; dynamic contribution faults validate only when reached. Preserve full ordered descriptors, snapshots, nonmutation and program atomicity. Full original/R/runtime/emitted/actual CLI and source-stable full verification plus both unchanged workloads are required."
+      ],
+      "forbidden_patterns": [
+        "Implicit state with a nonzero/missing initializer without explicit RETAIN, imported state collisions, character/fractional/coerced state, BY without its later stage, loops, arrays, multiple inputs/destinations, new scalar names, SQL/C++ and broader arithmetic."
+      ],
+      "silent_difference_checks": [
+        "Implicit zero on all-skipped paths, explicit later-position initializer override, missing accumulation versus ordinary addition, repeated contributions, assignment reset, late overflow, independent portable sum/initializer agreement."
+      ],
+      "validation_test": "examples/verify_stateful_sums.py",
+      "confidence": "Conditional on matching source-stable full verification and both unchanged workloads. No native SAS claim.",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000289454.htm"
+      ]
+    },
+    {
+      "rule_id": "DS-126",
+      "scope": "One ascending numeric BY key with temporary FIRST/LAST flags in typed stateful DATA",
+      "sas_pattern": "ordered-by-groups within stateful-expressions-v1",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "strategy": "Whole-input bounded numeric ordering preflight, stable adjacent-key group flags and local typed-expression proxies that never enter stored rows."
+      },
+      "r_target": {
+        "strategy": "Preimplementation complete hand/base-R original, independent adjacent-key missing-aware flags and30 whole sorted catalogs."
+      },
+      "required_settings": [
+        "Extends the separately qualified DS-123/DS-124/DS-125 component stages. Exactly one imported numeric BY key, finite magnitude at most1000000 or ordinary missing, already ascending with missing first. Check the complete input before any body action; never sort.",
+        "FIRST.key and LAST.key are read-only numeric temporary leaves for the declared key. Singleton groups set both flags. Tied observations retain their input order. Flags and internal proxies never become stored columns unless the source explicitly assigns a separate ordinary result variable.",
+        "Explicit reset actions, implicit/explicit state, nested decisions, snapshots and logical output retain their prior contracts and caps. Preserve exact portable fields, key/type checks on empty/skipped paths, and whole-program atomicity. Complete original/R/runtime/emitted/actual CLI plus full source-stable verification and both unchanged workloads are required."
+      ],
+      "forbidden_patterns": [
+        "Multiple/descending/NOTSORTED BY keys, character/missing-tag/coerced/nonfinite keys, missing imported descriptors, automatic flags for another key or without BY, assignment to flags, silent sorting, loops, arrays, multiple inputs/destinations, new scalar names, SQL/C++ and broader arithmetic."
+      ],
+      "silent_difference_checks": [
+        "Missing-first order, stable ties, singleton first-and-last snapshots, explicit group reset versus unreset global state, skipped/empty key typing, nested inline automatic references, collision-free temporary names, unsorted late-input refusal before output."
+      ],
+      "validation_test": "examples/verify_stateful_groups.py",
+      "confidence": "Conditional on matching source-stable full verification and both unchanged workloads. No native SAS claim.",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/lrcon/62955/HTML/default/a000761931.htm"
+      ]
     }
   ],
   "runtime_capabilities": {

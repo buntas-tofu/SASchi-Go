@@ -1,0 +1,246 @@
+{
+  "datasets": {
+    "raw": {
+      "encoding": "ascii",
+      "label": "Original stateful inputs",
+      "schema": {
+        "rid": "number",
+        "code": {
+          "type": "character",
+          "length": 24,
+          "label": "Supplied code"
+        },
+        "amount": {
+          "type": "number",
+          "length": 8,
+          "label": "Measured amount",
+          "format": "8."
+        },
+        "expected": "number",
+        "enable": "number",
+        "batch": "number",
+        "limit": "number"
+      },
+      "rows": [
+        {
+          "rid": 1,
+          "code": " a1                     ",
+          "amount": 3,
+          "expected": 1,
+          "enable": 1,
+          "batch": 1,
+          "limit": 5
+        },
+        {
+          "rid": 2,
+          "code": "B-2                     ",
+          "amount": 9,
+          "expected": 2,
+          "enable": 1,
+          "batch": 1,
+          "limit": 5
+        },
+        {
+          "rid": 3,
+          "code": "                        ",
+          "amount": null,
+          "expected": 1,
+          "enable": 1,
+          "batch": 2,
+          "limit": 5
+        },
+        {
+          "rid": 4,
+          "code": "'z9'                    ",
+          "amount": -2,
+          "expected": -6,
+          "enable": 0,
+          "batch": 2,
+          "limit": 5
+        },
+        {
+          "rid": 5,
+          "code": "\"\"                      ",
+          "amount": 5,
+          "expected": null,
+          "enable": 1,
+          "batch": 3,
+          "limit": 5
+        },
+        {
+          "rid": 6,
+          "code": "Mixed7                  ",
+          "amount": 0,
+          "expected": 0,
+          "enable": 1,
+          "batch": 4,
+          "limit": 5
+        }
+      ]
+    },
+    "retained_rows": {
+      "encoding": "ascii",
+      "label": "Original stateful inputs",
+      "schema": {
+        "canon": {
+          "type": "character",
+          "length": 24
+        },
+        "trace": {
+          "type": "character",
+          "length": 8
+        },
+        "peak": "number",
+        "seen": "number",
+        "pending": "number",
+        "rid": "number",
+        "code": {
+          "type": "character",
+          "length": 24,
+          "label": "Supplied code"
+        },
+        "amount": {
+          "type": "number",
+          "length": 8,
+          "label": "Measured amount",
+          "format": "8."
+        },
+        "expected": "number",
+        "enable": "number",
+        "batch": "number",
+        "limit": "number",
+        "scratch": "number"
+      },
+      "rows": [
+        {
+          "canon": "A1                      ",
+          "trace": "READ    ",
+          "peak": 2,
+          "seen": 11,
+          "pending": 2,
+          "rid": 1,
+          "code": " a1                     ",
+          "amount": 3,
+          "expected": 1,
+          "enable": 1,
+          "batch": 1,
+          "limit": 5,
+          "scratch": 2
+        },
+        {
+          "canon": "B-2                     ",
+          "trace": "READ    ",
+          "peak": 7,
+          "seen": 12,
+          "pending": 7,
+          "rid": 2,
+          "code": "B-2                     ",
+          "amount": 9,
+          "expected": 2,
+          "enable": 1,
+          "batch": 1,
+          "limit": 5,
+          "scratch": 7
+        },
+        {
+          "canon": "                        ",
+          "trace": "MISS    ",
+          "peak": 7,
+          "seen": 12,
+          "pending": 7,
+          "rid": 3,
+          "code": "                        ",
+          "amount": null,
+          "expected": 1,
+          "enable": 1,
+          "batch": 2,
+          "limit": 5,
+          "scratch": null
+        },
+        {
+          "canon": "                        ",
+          "trace": "MISS    ",
+          "peak": 7,
+          "seen": 12,
+          "pending": 7,
+          "rid": 3,
+          "code": "                        ",
+          "amount": null,
+          "expected": 1,
+          "enable": 1,
+          "batch": 2,
+          "limit": 5,
+          "scratch": 99
+        },
+        {
+          "canon": "Z9                      ",
+          "trace": "READ    ",
+          "peak": 7,
+          "seen": 13,
+          "pending": 7,
+          "rid": 4,
+          "code": "'z9'                    ",
+          "amount": -2,
+          "expected": -6,
+          "enable": 0,
+          "batch": 2,
+          "limit": 5,
+          "scratch": 4
+        },
+        {
+          "canon": "                        ",
+          "trace": "MISS    ",
+          "peak": 7,
+          "seen": 13,
+          "pending": 7,
+          "rid": 5,
+          "code": "\"\"                      ",
+          "amount": 5,
+          "expected": null,
+          "enable": 1,
+          "batch": 3,
+          "limit": 5,
+          "scratch": null
+        },
+        {
+          "canon": "                        ",
+          "trace": "MISS    ",
+          "peak": 7,
+          "seen": 13,
+          "pending": 7,
+          "rid": 5,
+          "code": "\"\"                      ",
+          "amount": 5,
+          "expected": null,
+          "enable": 1,
+          "batch": 3,
+          "limit": 5,
+          "scratch": 99
+        },
+        {
+          "canon": "MIXED7                  ",
+          "trace": "READ    ",
+          "peak": 7,
+          "seen": 14,
+          "pending": 7,
+          "rid": 6,
+          "code": "Mixed7                  ",
+          "amount": 0,
+          "expected": 0,
+          "enable": 1,
+          "batch": 4,
+          "limit": 5,
+          "scratch": 0
+        }
+      ]
+    }
+  },
+  "log": [
+    "retained",
+    "retained",
+    "retained",
+    "retained",
+    "retained",
+    "retained"
+  ]
+}
