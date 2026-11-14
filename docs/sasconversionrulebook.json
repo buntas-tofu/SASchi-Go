@@ -5077,6 +5077,202 @@
       "sources": [
         "https://documentation.sas.com/api/docsets/lefunctionsref/9.4/content/lefunctionsref.pdf"
       ]
+    },
+    {
+      "rule_id": "DS-116",
+      "scope": "Separately marked bounded ordinary DATA typed expressions",
+      "sas_pattern": "character-expressions within function-expressions-v1",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "strategy": "Canonical contextual scalar helpers, exact portable preflight and independently typed source/runtime execution."
+      },
+      "r_target": {
+        "strategy": "Preimplementation independent complete hand/base-R original,30 full catalogs and explicit kernel pins."
+      },
+      "required_settings": [
+        "See docs/FUNCTION_EXPRESSIONS.md and docs/NEXT_DATA_STEP_WAVE_4.md for the staged type/argument-role matrix, caps and conservative admission policies.",
+        "Preserve old profiles; require complete original/runtime/emitted/CLI comparison and both unchanged workloads."
+      ],
+      "forbidden_patterns": [
+        "Stateful calls, coercion, loops/arrays/BY/RETAIN, multiple inputs, SQL/C++ and unqualified operators or contexts."
+      ],
+      "silent_difference_checks": [
+        "Temporary versus stored bytes, numeric domains, missing truth/order, static skipped/empty validation, evaluation/filter timing, exact descriptors/metadata/order, deterministic emission, nonmutation and atomic failure."
+      ],
+      "validation_test": "examples/verify_expression_characters.py",
+      "confidence": "Conditional on source-stable full verification and both unchanged workloads. No native SAS comparison.",
+      "sources": [
+        "https://documentation.sas.com/api/docsets/lefunctionsref/9.4/content/lefunctionsref.pdf",
+        "https://support.sas.com/documentation/cdl/en/lrcon/65287/HTML/default/p00iah2thp63bmn1lt20esag14lh.htm"
+      ]
+    },
+    {
+      "rule_id": "DS-117",
+      "scope": "Separately marked bounded ordinary DATA typed expressions",
+      "sas_pattern": "numeric-expressions within function-expressions-v1",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "strategy": "Canonical contextual scalar helpers, exact portable preflight and independently typed source/runtime execution."
+      },
+      "r_target": {
+        "strategy": "Preimplementation independent complete hand/base-R original,30 full catalogs and explicit kernel pins."
+      },
+      "required_settings": [
+        "See docs/FUNCTION_EXPRESSIONS.md and docs/NEXT_DATA_STEP_WAVE_4.md for the staged type/argument-role matrix, caps and conservative admission policies.",
+        "Preserve old profiles; require complete original/runtime/emitted/CLI comparison and both unchanged workloads."
+      ],
+      "forbidden_patterns": [
+        "Stateful calls, coercion, loops/arrays/BY/RETAIN, multiple inputs, SQL/C++ and unqualified operators or contexts."
+      ],
+      "silent_difference_checks": [
+        "Temporary versus stored bytes, numeric domains, missing truth/order, static skipped/empty validation, evaluation/filter timing, exact descriptors/metadata/order, deterministic emission, nonmutation and atomic failure."
+      ],
+      "validation_test": "examples/verify_expression_numerics.py",
+      "confidence": "Conditional on source-stable full verification and both unchanged workloads. No native SAS comparison.",
+      "sources": [
+        "https://documentation.sas.com/api/docsets/lefunctionsref/9.4/content/lefunctionsref.pdf",
+        "https://support.sas.com/documentation/cdl/en/lrcon/65287/HTML/default/p00iah2thp63bmn1lt20esag14lh.htm"
+      ]
+    },
+    {
+      "rule_id": "DS-118",
+      "scope": "Separately marked bounded ordinary DATA typed expressions",
+      "sas_pattern": "comparisons-and-truth within function-expressions-v1",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "strategy": "Canonical contextual scalar helpers, exact portable preflight and independently typed source/runtime execution."
+      },
+      "r_target": {
+        "strategy": "Preimplementation independent complete hand/base-R original,30 full catalogs and explicit kernel pins."
+      },
+      "required_settings": [
+        "See docs/FUNCTION_EXPRESSIONS.md and docs/NEXT_DATA_STEP_WAVE_4.md for the staged type/argument-role matrix, caps and conservative admission policies.",
+        "Preserve old profiles; require complete original/runtime/emitted/CLI comparison and both unchanged workloads."
+      ],
+      "forbidden_patterns": [
+        "Stateful calls, coercion, loops/arrays/BY/RETAIN, multiple inputs, SQL/C++ and unqualified operators or contexts."
+      ],
+      "silent_difference_checks": [
+        "Temporary versus stored bytes, numeric domains, missing truth/order, static skipped/empty validation, evaluation/filter timing, exact descriptors/metadata/order, deterministic emission, nonmutation and atomic failure."
+      ],
+      "validation_test": "examples/verify_expression_comparisons.py",
+      "confidence": "Conditional on source-stable full verification and both unchanged workloads. No native SAS comparison.",
+      "sources": [
+        "https://documentation.sas.com/api/docsets/lefunctionsref/9.4/content/lefunctionsref.pdf",
+        "https://support.sas.com/documentation/cdl/en/lrcon/65287/HTML/default/p00iah2thp63bmn1lt20esag14lh.htm"
+      ]
+    },
+    {
+      "rule_id": "DS-119",
+      "scope": "Separately marked bounded ordinary DATA typed expressions",
+      "sas_pattern": "boolean-conditions within function-expressions-v1",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "strategy": "Canonical contextual scalar helpers, exact portable preflight and independently typed source/runtime execution."
+      },
+      "r_target": {
+        "strategy": "Preimplementation independent complete hand/base-R original,30 full catalogs and explicit kernel pins."
+      },
+      "required_settings": [
+        "See docs/FUNCTION_EXPRESSIONS.md and docs/NEXT_DATA_STEP_WAVE_4.md for the staged type/argument-role matrix, caps and conservative admission policies.",
+        "Preserve old profiles; require complete original/runtime/emitted/CLI comparison and both unchanged workloads."
+      ],
+      "forbidden_patterns": [
+        "Stateful calls, coercion, loops/arrays/BY/RETAIN, multiple inputs, SQL/C++ and unqualified operators or contexts."
+      ],
+      "silent_difference_checks": [
+        "Temporary versus stored bytes, numeric domains, missing truth/order, static skipped/empty validation, evaluation/filter timing, exact descriptors/metadata/order, deterministic emission, nonmutation and atomic failure."
+      ],
+      "validation_test": "examples/verify_expression_booleans.py",
+      "confidence": "Conditional on source-stable full verification and both unchanged workloads. No native SAS comparison.",
+      "sources": [
+        "https://documentation.sas.com/api/docsets/lefunctionsref/9.4/content/lefunctionsref.pdf",
+        "https://support.sas.com/documentation/cdl/en/lrcon/65287/HTML/default/p00iah2thp63bmn1lt20esag14lh.htm"
+      ]
+    },
+    {
+      "rule_id": "DS-120",
+      "scope": "Separately marked bounded ordinary DATA typed expressions",
+      "sas_pattern": "selector-expressions within function-expressions-v1",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "strategy": "Canonical contextual scalar helpers, exact portable preflight and independently typed source/runtime execution."
+      },
+      "r_target": {
+        "strategy": "Preimplementation independent complete hand/base-R original,30 full catalogs and explicit kernel pins."
+      },
+      "required_settings": [
+        "See docs/FUNCTION_EXPRESSIONS.md and docs/NEXT_DATA_STEP_WAVE_4.md for the staged type/argument-role matrix, caps and conservative admission policies.",
+        "Preserve old profiles; require complete original/runtime/emitted/CLI comparison and both unchanged workloads."
+      ],
+      "forbidden_patterns": [
+        "Stateful calls, coercion, loops/arrays/BY/RETAIN, multiple inputs, SQL/C++ and unqualified operators or contexts."
+      ],
+      "silent_difference_checks": [
+        "Temporary versus stored bytes, numeric domains, missing truth/order, static skipped/empty validation, evaluation/filter timing, exact descriptors/metadata/order, deterministic emission, nonmutation and atomic failure."
+      ],
+      "validation_test": "examples/verify_expression_selectors.py",
+      "confidence": "Conditional on source-stable full verification and both unchanged workloads. No native SAS comparison.",
+      "sources": [
+        "https://documentation.sas.com/api/docsets/lefunctionsref/9.4/content/lefunctionsref.pdf",
+        "https://support.sas.com/documentation/cdl/en/lrcon/65287/HTML/default/p00iah2thp63bmn1lt20esag14lh.htm"
+      ]
+    },
+    {
+      "rule_id": "DS-121",
+      "scope": "Separately marked bounded ordinary DATA typed expressions",
+      "sas_pattern": "subsetting-if within function-expressions-v1",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "strategy": "Canonical contextual scalar helpers, exact portable preflight and independently typed source/runtime execution."
+      },
+      "r_target": {
+        "strategy": "Preimplementation independent complete hand/base-R original,30 full catalogs and explicit kernel pins."
+      },
+      "required_settings": [
+        "See docs/FUNCTION_EXPRESSIONS.md and docs/NEXT_DATA_STEP_WAVE_4.md for the staged type/argument-role matrix, caps and conservative admission policies.",
+        "Preserve old profiles; require complete original/runtime/emitted/CLI comparison and both unchanged workloads."
+      ],
+      "forbidden_patterns": [
+        "Stateful calls, coercion, loops/arrays/BY/RETAIN, multiple inputs, SQL/C++ and unqualified operators or contexts."
+      ],
+      "silent_difference_checks": [
+        "Temporary versus stored bytes, numeric domains, missing truth/order, static skipped/empty validation, evaluation/filter timing, exact descriptors/metadata/order, deterministic emission, nonmutation and atomic failure."
+      ],
+      "validation_test": "examples/verify_expression_subset.py",
+      "confidence": "Conditional on source-stable full verification and both unchanged workloads. No native SAS comparison.",
+      "sources": [
+        "https://documentation.sas.com/api/docsets/lefunctionsref/9.4/content/lefunctionsref.pdf",
+        "https://support.sas.com/documentation/cdl/en/lrcon/65287/HTML/default/p00iah2thp63bmn1lt20esag14lh.htm"
+      ]
+    },
+    {
+      "rule_id": "DS-122",
+      "scope": "Separately marked bounded ordinary DATA typed expressions",
+      "sas_pattern": "where-composition within function-expressions-v1",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "strategy": "Canonical contextual scalar helpers, exact portable preflight and independently typed source/runtime execution."
+      },
+      "r_target": {
+        "strategy": "Preimplementation independent complete hand/base-R original,30 full catalogs and explicit kernel pins."
+      },
+      "required_settings": [
+        "See docs/FUNCTION_EXPRESSIONS.md and docs/NEXT_DATA_STEP_WAVE_4.md for the staged type/argument-role matrix, caps and conservative admission policies.",
+        "Preserve old profiles; require complete original/runtime/emitted/CLI comparison and both unchanged workloads."
+      ],
+      "forbidden_patterns": [
+        "Stateful calls, coercion, loops/arrays/BY/RETAIN, multiple inputs, SQL/C++ and unqualified operators or contexts."
+      ],
+      "silent_difference_checks": [
+        "Temporary versus stored bytes, numeric domains, missing truth/order, static skipped/empty validation, evaluation/filter timing, exact descriptors/metadata/order, deterministic emission, nonmutation and atomic failure."
+      ],
+      "validation_test": "examples/verify_expression_where.py",
+      "confidence": "Conditional on source-stable full verification and both unchanged workloads. No native SAS comparison.",
+      "sources": [
+        "https://documentation.sas.com/api/docsets/lefunctionsref/9.4/content/lefunctionsref.pdf",
+        "https://support.sas.com/documentation/cdl/en/lrcon/65287/HTML/default/p00iah2thp63bmn1lt20esag14lh.htm"
+      ]
     }
   ],
   "runtime_capabilities": {

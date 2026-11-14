@@ -1,0 +1,11 @@
+data booleans;
+set raw;
+if (nmiss(a,b)=0 and abs(a-b)<=limit) or not(flag) then accepted=1;
+else accepted=0;
+precedence=(a=3 or b=5 and c=5);
+neg=(not a=2);
+grouped=not(a=2);
+missing_truth=not(a);
+characters=(upcase(strip(code))='AB12' or missing(strip(label)));
+put accepted;
+run;

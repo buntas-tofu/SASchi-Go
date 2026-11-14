@@ -141,12 +141,26 @@ class SelectionConsumerTests(unittest.TestCase):
         roots=["ifc(anyupper(code)>0,'Y','N')",'ifn(flag,largest(k,a,b,c),fallback)',"cats(quote(code))","cats(propcase(dequote(code),' '))","transtrn(label,'-',trimn('  '))"]
         setup="data d;length code $8;length label $12;code='A';label='A';flag=1;fallback=9;k=1;a=1;b=2;c=3;"
         self.assertEqual(build_job(setup+'run;').code,0)
-        for root in roots:self.assertIn(build_job(setup+'x='+root+';run;').code,(1,2))
+        admitted={"cats(propcase(dequote(code),' '))":'A'.ljust(200),"transtrn(label,'-',trimn('  '))":'A'.ljust(200)}
+        admitted.update({"ifc(anyupper(code)>0,'Y','N')":'Y'.ljust(200),'ifn(flag,largest(k,a,b,c),fallback)':3.})
+        from .plan import _compile_before_function_expressions
+        for root in roots:
+            source=setup+'x='+root+';run;'
+            if root in admitted:
+                self.assertTrue(_compile_before_function_expressions(source).blocked)
+                plan=compile_plan(source);self.assertFalse(plan.blocked,plan.tickets)
+                self.assertEqual(plan.to_dict()['steps'][0]['operations'][0]['args'],{'profile':'function-expressions-v1'})
+                self.assertEqual(run_plan(plan.to_dict())['datasets']['d']['rows'][0]['x'],admitted[root])
+            else:self.assertIn(build_job(source).code,(1,2))
         for prefix in ['retain z 0;','array z a b;','do i=1 to 1;']:
             source=setup+prefix+"x=transtrn(label,'-',trimn(' '));"+('end;' if prefix.startswith('do ') else '')+'run;'
             self.assertIn(build_job(source).code,(1,2))
         for statement in ['if anyupper(code) then x=1;','if anyupper(code)>0 and flag=1 then x=1;','if 0<anyupper(code) then x=1;']:
-            self.assertIn(build_job(setup+statement+'run;').code,(1,2))
+            source=setup+statement+'run;'
+            if statement in ('if anyupper(code) then x=1;','if anyupper(code)>0 and flag=1 then x=1;','if 0<anyupper(code) then x=1;'):
+                from .expression_test_support import assert_new_expression
+                assert_new_expression(self,source,[1.])
+            else:self.assertIn(build_job(source).code,(1,2))
 
     def test_v1_standalone_profile_and_emission_remain_deterministic(self):
         source="data d;length a $4;a=' a ';x=upcase(strip(a));run;";plan=compile_plan(source)

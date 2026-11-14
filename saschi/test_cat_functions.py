@@ -117,7 +117,12 @@ class CatFunctionTests(unittest.TestCase):
         for source in ["data d;x=cat('a');put cat('a');run;","data d;if cats('a')='a' then x=1;run;",
                        'data d;set raw;where cats(a);run;',"data d;retain n 0;x=cat('a');run;",
                        "data d;array q a;x=cats('a');run;","data d;x=cats(sqrt(1));run;"]:
-            with self.subTest(source=source):self.assertIn(build_job(source).code,(1,2))
+            admitted={"data d;if cats('a')='a' then x=1;run;": 1.0}
+            if source in admitted:
+                from .expression_test_support import assert_new_expression
+                assert_new_expression(self,source,[admitted[source]])
+            else:
+                with self.subTest(source=source):self.assertIn(build_job(source).code,(1,2))
 
     def test_malformed_portable_calls(self):
         original=compile_plan("data d;x=cats('a');run;").to_dict()

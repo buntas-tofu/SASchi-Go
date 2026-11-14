@@ -1,0 +1,157 @@
+{
+  "raw": {
+    "encoding": "ascii",
+    "label": "Original composition cases",
+    "schema": {
+      "rid": "number",
+      "label": {
+        "type": "character",
+        "length": 16
+      },
+      "code": {
+        "type": "character",
+        "length": 12
+      },
+      "tag": {
+        "type": "character",
+        "length": 4
+      },
+      "a": "number",
+      "b": "number",
+      "c": "number",
+      "k": "number",
+      "flag": "number",
+      "limit": "number",
+      "low": "number",
+      "high": "number"
+    },
+    "rows": [
+      {
+        "rid": 1,
+        "label": " \"a--b\"         ",
+        "code": " ab12       ",
+        "tag": " X  ",
+        "a": 3,
+        "b": -4,
+        "c": 2,
+        "k": 1,
+        "flag": 1,
+        "limit": 5,
+        "low": 0,
+        "high": 10
+      },
+      {
+        "rid": 2,
+        "label": "                ",
+        "code": "AB!         ",
+        "tag": "    ",
+        "a": null,
+        "b": null,
+        "c": null,
+        "k": 1,
+        "flag": 0,
+        "limit": 0,
+        "low": -2,
+        "high": 4
+      },
+      {
+        "rid": 3,
+        "label": "mIxed  CASE     ",
+        "code": "  z9        ",
+        "tag": " q  ",
+        "a": -3,
+        "b": 1,
+        "c": 1,
+        "k": 2,
+        "flag": null,
+        "limit": 3,
+        "low": -3,
+        "high": 8
+      },
+      {
+        "rid": 4,
+        "label": "C- d            ",
+        "code": "\"A1\"        ",
+        "tag": "NA  ",
+        "a": 0,
+        "b": 5,
+        "c": 5,
+        "k": 1,
+        "flag": -1,
+        "limit": 10,
+        "low": 0,
+        "high": 10
+      },
+      {
+        "rid": 5,
+        "label": "a'b             ",
+        "code": "ZZ99        ",
+        "tag": "ZZ99",
+        "a": 6,
+        "b": 6,
+        "c": 2,
+        "k": 3,
+        "flag": 1,
+        "limit": 4,
+        "low": 0,
+        "high": 12
+      },
+      {
+        "rid": 6,
+        "label": " \"\"             ",
+        "code": "            ",
+        "tag": " k  ",
+        "a": 1,
+        "b": null,
+        "c": 2,
+        "k": 1,
+        "flag": 0,
+        "limit": 1,
+        "low": 0,
+        "high": 2
+      },
+      {
+        "rid": 7,
+        "label": "D--e            ",
+        "code": "MiXeD7      ",
+        "tag": "t   ",
+        "a": null,
+        "b": 7,
+        "c": -2,
+        "k": 1,
+        "flag": 1,
+        "limit": 5,
+        "low": 0,
+        "high": 9
+      },
+      {
+        "rid": 8,
+        "label": "Pre - fix       ",
+        "code": "x-y         ",
+        "tag": " y  ",
+        "a": 8,
+        "b": -2,
+        "c": 0,
+        "k": 2,
+        "flag": 0,
+        "limit": 6,
+        "low": 1,
+        "high": 8
+      },
+      {
+        "rid": 9,
+        "label": "Late rank       ",
+        "code": "GOOD        ",
+        "tag": "n   ",
+        "a": 7,
+        "b": 1,
+        "c": 2,
+        "k": 0,
+        "flag": 1,
+        "limit": 2,
+        "low": 0,
+        "high": 9
+      }
+    ]
+  }
+}

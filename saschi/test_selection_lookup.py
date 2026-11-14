@@ -56,6 +56,9 @@ class SelectionLookupTests(FamilyContract,unittest.TestCase):
         result,_=execute('data d;set raw;if 0 then x=choosen(index,10,20);run;',inputs)
         self.assertIsNone(result['datasets']['d']['rows'][0]['x'])
         for source in ["data d;x=ifn(1,largest(1,2,3),4);run;","data d;x=whichc(dequote('A'),'A');run;"]:
-            self.assertIn(build_job(source).code,(1,2))
+            if source=="data d;x=ifn(1,largest(1,2,3),4);run;":
+                from .expression_test_support import assert_new_expression
+                assert_new_expression(self,source,[3.])
+            else:self.assertIn(build_job(source).code,(1,2))
 
 if __name__=='__main__':unittest.main()

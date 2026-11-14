@@ -1,0 +1,12 @@
+data char_trees;
+set raw;
+canon=upcase(compbl(strip(dequote(label))));
+key=cats(substrn(upcase(strip(code)),1,4),'-',propcase(strip(label),' -'));
+clean=transtrn(upcase(strip(label)),'-',trimn(' '));
+edge=catx('|',strip(tag),dequote(strip(code)));
+sentinel=catx('|',upcase(trimn(' ')),'Z');
+lower=lowcase(cats(strip(tag),strip(code)));
+spaced=transtrn('a-b','-',trim(' '));
+deleted=transtrn('a-b','-',trimn(' '));
+put key;
+run;

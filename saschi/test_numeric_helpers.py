@@ -77,8 +77,17 @@ class NumericHelperTests(unittest.TestCase):
             with self.subTest(mutation=mutation),self.assertRaises(ValueError):run_plan(plan)
 
     def test_nested_arithmetic_and_consumers_remain_refused(self):
+        from .plan import _compile_before_function_expressions
+        admitted={'abs(1+2)':3.,'sign(abs(-1))':1.}
         for rhs in ('abs(1+2)','sign(abs(-1))','sum(ceil(1),2)','ceil(-x)'):
-            self.assertIn(build_job('data d;a='+rhs+';run;').code,(1,2))
+            source='data d;a='+rhs+';run;'
+            if rhs in admitted:
+                self.assertTrue(_compile_before_function_expressions(source).blocked)
+                result,stdout=execute(source)
+                self.assertEqual(result['datasets']['d']['rows'],[{'a':admitted[rhs]}])
+                self.assertEqual(stdout,'')
+                self.assertEqual(compile_plan(source).steps[0].operations[0].args,{'profile':'function-expressions-v1'})
+            else:self.assertIn(build_job(source).code,(1,2))
 
     def test_prior_profiles_array_names_and_cpp_boundaries(self):
         for name in ('abs','sign','ceil','floor'):

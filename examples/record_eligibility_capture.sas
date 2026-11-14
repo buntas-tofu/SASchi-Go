@@ -1,0 +1,15 @@
+data source_filtered;
+set raw;
+where flag or not missing(a);
+run;
+data eligible;
+set source_filtered;
+canon=upcase(compbl(strip(dequote(label))));
+identifier=cats(substrn(upcase(strip(code)),1,4),'-',propcase(strip(label),' -'));
+bad=notalnum(strip(code));
+score=sum(abs(a),abs(b));
+status=ifc(bad=0 and score>=limit,'OK','REVIEW');
+if status='OK';
+put identifier;
+put score;
+run;

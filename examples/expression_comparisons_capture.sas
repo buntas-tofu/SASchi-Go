@@ -1,0 +1,11 @@
+data comparisons;
+set raw;
+hit=(largest(k,a,b,c)>=coalesce(limit,0));
+same=(upcase(strip(code))=upcase(strip(tag)));
+bad=notalnum(upcase(strip(code)));
+size=lengthn(strip(label));
+if notalnum(strip(code)) then review=1;
+else review=0;
+below=(a<0);
+put hit;
+run;
