@@ -95,8 +95,18 @@ class FunctionConsumerTests(unittest.TestCase):
 
     def test_held_call_pairs_and_predicate_shapes(self):
         bad=["x=right(strip(' ab '))","x=reverse(upcase('ab'))","x=cat(upcase('ab'))","x=catt(trimn('ab '))","x=upcase(compbl(strip(trimn(' ab '))))","x=cats(upcase(strip('ab')))","x=substrn(upcase('ab'),1,1)","x=median(abs(1),2)","if anydigit('1') then x=1","if 0=missing(.) then x=1","if anydigit('1')=0 and x=1 then x=1","if anydigit('1')=. then x=1","if missing(.)=-1 then x=1","if missing(.)=32768 then x=1","if indexc('x','x')=1 then x=1"]
+        admitted={"x=upcase(compbl(strip(trimn(' ab '))))":'AB  ',"x=cats(upcase(strip('ab')))":'AB'.ljust(200),"x=substrn(upcase('ab'),1,1)":'A '}
+        admitted.update({"if anydigit('1') then x=1":1.,"if 0=missing(.) then x=1":None,"if anydigit('1')=. then x=1":None,"if missing(.)=-1 then x=1":None,"if missing(.)=32768 then x=1":None})
+        from .plan import _compile_before_function_expressions
         for text in bad:
-            with self.subTest(text=text):self.assertIn(build_job('data d;'+text+';run;').code,(1,2))
+            source='data d;'+text+';run;'
+            if text in admitted:
+                self.assertTrue(_compile_before_function_expressions(source).blocked,source)
+                plan=compile_plan(source);self.assertFalse(plan.blocked,plan.tickets)
+                self.assertEqual(plan.to_dict()['steps'][0]['operations'][0]['args'],{'profile':'function-expressions-v1'})
+                self.assertEqual(run_plan(plan.to_dict())['datasets']['d']['rows'],[{'x':admitted[text]}])
+            else:
+                with self.subTest(text=text):self.assertIn(build_job(source).code,(1,2))
 
     def test_profile_is_selected_only_for_actual_consumer(self):
         direct=compile_plan("data d;x=upcase('ab');run;").to_dict()
@@ -146,7 +156,11 @@ class FunctionConsumerTests(unittest.TestCase):
     def test_profile_retains_where_by_retain_array_and_specialized_boundaries(self):
         forms=["data d;set raw;where a='x';x=upcase(strip(a));run;","data d;set raw;by a;x=upcase(strip(a));run;","data d;retain n 0;x=upcase(strip('x'));run;","data d;array vals a b;x=upcase(strip('x'));run;","data d;y=sqrt(4);x=upcase(strip('x'));run;","data d;do i=1 to 2;x=upcase(strip('x'));end;run;","data a;y=sqrt(4);run;data d;x=upcase(strip('x'));run;"]
         for source in forms:
-            with self.subTest(source=source):self.assertIn(job_with_inputs(source,catalog(['x'])).code,(1,2))
+            if source=="data d;set raw;where a='x';x=upcase(strip(a));run;":
+                from .expression_test_support import assert_new_expression
+                assert_new_expression(self,source,['X'.ljust(8)],catalog(['x']))
+            else:
+                with self.subTest(source=source):self.assertIn(job_with_inputs(source,catalog(['x'])).code,(1,2))
 
     def test_static_literals_and_empty_descriptors_validate_eagerly(self):
         for text in ["if 0 then x=cats(substrn('ab',.5,2))","if 0 then x=upcase(strip(1))","if anydigit('x',.5)=0 then x=1","if verify('x',1)=0 then x=1"]:

@@ -175,6 +175,15 @@ VERIFIERS = [
     ("nested-and-if-consumers", HERE / "examples" / "verify_selection_consumers.py"),
     ("quoted-record-classification", HERE / "examples" / "verify_quoted_record_classification.py"),
     ("quarterly-measurement-reconciliation", HERE / "examples" / "verify_quarterly_reconciliation.py"),
+    ("character-expressions", HERE / "examples" / "verify_expression_characters.py"),
+    ("numeric-expressions", HERE / "examples" / "verify_expression_numerics.py"),
+    ("comparisons-and-truth", HERE / "examples" / "verify_expression_comparisons.py"),
+    ("boolean-conditions", HERE / "examples" / "verify_expression_booleans.py"),
+    ("selector-expressions", HERE / "examples" / "verify_expression_selectors.py"),
+    ("subsetting-if", HERE / "examples" / "verify_expression_subset.py"),
+    ("where-composition", HERE / "examples" / "verify_expression_where.py"),
+    ("record-eligibility-and-normalization", HERE / "examples" / "verify_record_eligibility.py"),
+    ("measurement-exception-triage", HERE / "examples" / "verify_measurement_triage.py"),
 ]
 
 # The translator suites, run as unittest modules. They carry the same weight as
@@ -283,6 +292,15 @@ SUITES = [
     ("suite-nested-and-if-consumers", "saschi.test_selection_consumers"),
     ("suite-quoted-record-classification", "saschi.test_quoted_record_classification"),
     ("suite-quarterly-measurement-reconciliation", "saschi.test_quarterly_reconciliation"),
+    ("suite-character-expressions", "saschi.test_expression_characters"),
+    ("suite-numeric-expressions", "saschi.test_expression_numerics"),
+    ("suite-comparisons-and-truth", "saschi.test_expression_comparisons"),
+    ("suite-boolean-conditions", "saschi.test_expression_booleans"),
+    ("suite-selector-expressions", "saschi.test_expression_selectors"),
+    ("suite-subsetting-if", "saschi.test_expression_subset"),
+    ("suite-where-composition", "saschi.test_expression_where"),
+    ("suite-record-eligibility-and-normalization", "saschi.test_record_eligibility"),
+    ("suite-measurement-exception-triage", "saschi.test_measurement_triage"),
 ]
 
 

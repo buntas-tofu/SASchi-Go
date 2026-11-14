@@ -147,9 +147,23 @@ class TrimStripTests(unittest.TestCase):
 
     def test_temporary_consumers_and_nested_arguments_refuse(self):
         for rhs in ("strip(reverse(a))","length(strip(a))","reverse(trim(a))","substr(strip(a),1,1)","catx('-',strip(a),'x')","strip(a||'x')","strip(a)+1","strip(a)||reverse(a)"):
-            self.assertIn(build_job("data d;a=' X ';b="+rhs+';run;').code,(1,2),rhs)
+            source="data d;a=' X ';b="+rhs+';run;'
+            if rhs=="catx('-',strip(a),'x')":
+                from .plan import _compile_before_function_expressions
+                self.assertTrue(_compile_before_function_expressions(source).blocked)
+                plan=compile_plan(source);self.assertFalse(plan.blocked,plan.tickets)
+                self.assertEqual(plan.to_dict()['steps'][0]['operations'][0]['args'],{'profile':'function-expressions-v1'})
+                self.assertEqual(run_plan(plan.to_dict())['datasets']['d']['rows'][0]['b'],'X-x'.ljust(200))
+            elif rhs=="length(strip(a))":
+                from .expression_test_support import assert_new_expression
+                assert_new_expression(self,source,[1.],field='b')
+            else:self.assertIn(build_job(source).code,(1,2),rhs)
         for use in ("if strip(a)='X' then b=1;","where strip(a)='X';","put strip(a);"):
-            self.assertIn(build_job("data d;a='X';"+use+'run;').code,(1,2))
+            source="data d;a='X';"+use+'run;'
+            if use=="if strip(a)='X' then b=1;":
+                from .expression_test_support import assert_new_expression
+                assert_new_expression(self,source,[1.],field='b')
+            else:self.assertIn(build_job(source).code,(1,2))
 
         # DS-108 owns the marked chain; the original direct validator stays strict.
         nested={'kind':'call','name':'strip','args':[{'kind':'call','name':'trim','args':[{'kind':'variable','value':'a'}]}]}

@@ -27,7 +27,7 @@ class LoaderTests(unittest.TestCase):
         self.rules = load_rulebook(REPO_ROOT / "docs" / "sasconversionrulebook.json")
 
     def test_registered_rule_count(self):
-        self.assertEqual(len(self.rules), 165)
+        self.assertEqual(len(self.rules), 172)
         self.assertIn('verify_function_consumers.py',self.rules['DS-108'].validation_test)
         self.assertIn('verify_datetime_components.py',self.rules['DS-107'].validation_test)
         self.assertIn('verify_row_statistics.py',self.rules['DS-106'].validation_test)
@@ -75,7 +75,7 @@ class LoaderTests(unittest.TestCase):
 
     def test_family_counts(self):
         counts = family_counts(self.rules)
-        self.assertEqual(counts["DS"], 115)
+        self.assertEqual(counts["DS"], 122)
         self.assertEqual(counts["SQL"], 4)
         self.assertEqual(counts["ST"], 30)
         self.assertEqual(counts["SV"], 6)

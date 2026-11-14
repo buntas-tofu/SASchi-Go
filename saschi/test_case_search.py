@@ -75,7 +75,15 @@ class CaseSearchTests(unittest.TestCase):
                        "data d;set raw;where index(a,'a');run;","data d;retain n 0;x=upcase('a');run;",
                        "data d;array x a;b=upcase('a');run;","data d;x=upcase('a');put _all_;run;",
                        "data d;x=find('ab','a',position);run;"]:
-            with self.subTest(source=source):self.assertIn(build_job(source).code,(1,2))
+            with self.subTest(source=source):
+                if source in ("data d;a=lowcase(upcase(trim(strip('a'))));run;","data d;a=length(upcase('a'));run;"):
+                    from .plan import _compile_before_function_expressions
+                    self.assertTrue(_compile_before_function_expressions(source).blocked)
+                    result,stdout=execute(source)
+                    self.assertEqual(result['datasets']['d']['rows'],[{'a':1. if 'length(' in source else 'a'}])
+                    self.assertEqual(stdout,'')
+                    self.assertEqual(compile_plan(source).steps[0].operations[0].args,{'profile':'function-expressions-v1'})
+                else:self.assertIn(build_job(source).code,(1,2))
 
     def test_prior_length_after_set_boundary_remains(self):
         prior=ORIGINAL.read_text().replace('  length short $3;\n  set raw;','  set raw;\n  length short $3;')

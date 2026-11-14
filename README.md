@@ -18,7 +18,7 @@ policies. Receipts record what passed for the source and environment tested.
 ## Current verification
 
 Status: version 0.4.0 development evidence for maintainer review, updated on
-2026-11-13. The current registry contains 137 fixture gates and 101 suites, including
+2026-11-13. The current registry contains 146 fixture gates and 110 suites, including
 the desktop workflow, data importer and saved-evidence suites. The full receipt
 records the discovered tests and their outcomes. With the pinned Roku corpus present, `python verify_all.py` records the
 source-bound unified verdict. Synthesis separately checks 60 faithful cases and
@@ -61,6 +61,12 @@ and calendar-constructor families. Its separate
 independent hand/base-R witnesses. Nine new program gates retain the previous
 profiles and the null functions/CALL denominator. Matching full verification
 and both unchanged workload receipts decide acceptance.
+
+[Typed expression composition](docs/FUNCTION_EXPRESSIONS.md) registers 9
+original complete program gates and source suites within the approved seven
+stages and two finish programs. Independent hand/base-R expectations and
+matching stable full verification plus both unchanged workloads decide
+acceptance. Existing consumer profiles and function names remain unchanged.
 
 [Explicit word parsing](docs/WORD_FUNCTIONS.md) adds SCAN/COUNTW with an explicit
 delimiter set and optional M. The source-width SCAN policy is pinned to the current
@@ -274,7 +280,7 @@ fixed expected output and base-R evidence. Special missings retain their tags.
   sibling plus a fixture verifier (`verify_*.py`). Run any verifier directly,
   or all of them through [verify_all.py](verify_all.py).
 - [docs/sasconversionrulebook.json](docs/sasconversionrulebook.json) : the machine-consumable translation
-  rulebook. 165 rules with equivalence classes (EXACT,
+  rulebook. 172 rules with equivalence classes (EXACT,
   EQUIVALENT-WITH-SETTINGS, APPROXIMATE, NO-DIRECT-EQUIVALENT), required
   settings, forbidden patterns, and validation tests.
 - [docs/capability-manifest.json](docs/capability-manifest.json) : the coverage manifest. Enumerated entries of

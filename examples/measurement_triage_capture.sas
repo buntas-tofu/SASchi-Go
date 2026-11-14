@@ -1,0 +1,16 @@
+data ranked;
+set raw;
+where k>=1;
+chosen=largest(k,a,b,c);
+run;
+data triage;
+set ranked;
+delta=abs(a-b);
+total=sum(abs(a),abs(b),abs(c));
+rounded=roundz(abs(a-c),0.5);
+pick=ifn(flag,coalesce(chosen,0),sum(a,b));
+if nmiss(a,b)=0 and delta>=limit then alert=1;
+else alert=0;
+if alert or not missing(pick);
+put pick;
+run;

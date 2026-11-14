@@ -3189,3 +3189,133 @@ def sas_juldate7(*args):
     if len(args)!=1:raise ValueError('JULDATE7 requires one date')
     value=_sas_source_date(args[0])
     return None if value is None else value.year*1000+(value-datetime.date(value.year,1,1)).days+1
+
+
+# Typed composition contexts retain the original direct helper contracts.
+def _sas_expression_text(value,limit=32767):
+    if type(value) is not str or len(value)>limit or any(not 32<=ord(c)<=126 for c in value):
+        raise ValueError('expression requires bounded printable ASCII text')
+    return value
+
+
+def _sas_expression_number(value):
+    if value is None:return None
+    if type(value) not in (int,float) or abs(value)>1000000 or not math.isfinite(value):
+        raise ValueError('expression numeric value is outside its finite bounded domain')
+    return value
+
+
+def sas_expression_call(name,values):
+    """Contextual temporary bytes and exact bounded scalar arguments."""
+    if type(name) is not str or type(values) is not list:
+        raise ValueError('expression call requires a name and argument list')
+    normal={'upcase','lowcase','trim','strip','trimn','compbl'}
+    characters=normal|{'propcase','dequote','cats','catx','transtrn','substrn'}
+    if name in characters:
+        if name in normal:
+            if len(values)!=1:raise ValueError('expression normalization arity')
+            text=_sas_expression_text(values[0])
+            return _sas_consumer_text(name,text)
+        if name=='substrn':
+            if not 2<=len(values)<=3:raise ValueError('expression SUBSTRN arity')
+            text=_sas_expression_text(values[0]);position=_sas_wave2_integer(values[1],missing=True)
+            count=_sas_wave2_integer(values[2],missing=True) if len(values)==3 else None
+            if position is None or len(values)==3 and (count is None or count<=0):return ''
+            first=max(1,position);last=len(text) if len(values)==2 else min(len(text),position+count-1)
+            return text[first-1:last] if first<=last else ''
+        texts=[_sas_expression_text(v) for v in values]
+        if name=='propcase':
+            if len(texts)!=2 or not 1<=len(texts[1])<=64:raise ValueError('expression PROPCASE delimiter')
+            return sas_propcase(*texts) if texts[0] else ''
+        if name=='dequote':
+            if len(texts)!=1:raise ValueError('expression DEQUOTE arity')
+            return sas_dequote(texts[0]) if texts[0] else ''
+        if name=='cats':
+            if not 1<=len(texts)<=32:raise ValueError('expression CATS arity')
+            result=''.join(v.strip(' ') for v in texts)
+        elif name=='catx':
+            if not 2<=len(texts)<=33 or not 1<=len(texts[0])<=64:raise ValueError('expression CATX delimiter/arity')
+            result=texts[0].join(v.strip(' ') for v in texts[1:] if v.strip(' '))
+        elif name=='transtrn':
+            if len(texts)!=3 or not 1<=len(texts[1])<=64 or len(texts[2])>64:raise ValueError('expression TRANSTRN target/replacement bounds')
+            result=texts[0].replace(texts[1],texts[2])
+        else:raise ValueError('unqualified expression character call')
+        if len(result)>200:raise ValueError('expression constructor buffer exceeds200bytes')
+        return result
+    if name in ('length','lengthn'):
+        if len(values)!=1:raise ValueError('expression length arity')
+        count=len(_sas_expression_text(values[0]).rstrip(' '))
+        return max(1,count) if name=='length' else count
+    if name in ('missing','cmiss'):
+        if not 1<=len(values)<=32 or name=='missing' and len(values)!=1:raise ValueError('expression missing arity')
+        for value in values:
+            (_sas_expression_text if type(value) is str else _sas_expression_number)(value)
+        return sum(sas_missing_function(v) for v in values)
+    positions={'anyalpha','anydigit','anyalnum','anyspace','notdigit','anylower','anyupper','anypunct','anyxdigit','notalpha','notalnum','notspace'}
+    if name in positions or name=='verify':
+        if not values:raise ValueError('expression position arity')
+        text=_sas_expression_text(values[0])
+        helper=globals()['sas_'+name]
+        if text:return helper(*values)
+        helper(' ',*values[1:])
+        return 0
+    if name in ('ifn','ifc'):
+        if name=='ifn':return sas_ifn(*values)
+        if not 3<=len(values)<=4:raise ValueError('expression IFC arity')
+        control=_sas_expression_number(values[0])
+        choices=[_sas_expression_text(value,200) for value in values[1:]]
+        if control is None and len(choices)==3:return choices[2]
+        return choices[0] if control is not None and control!=0 else choices[1]
+    numbers=[_sas_expression_number(v) for v in values]
+    if name in ('min','max','sum'):
+        if not 1<=len(numbers)<=32:raise ValueError('expression summary arity')
+        present=[v for v in numbers if v is not None]
+        if not present:return None
+        if name=='min':return min(present)
+        if name=='max':return max(present)
+        if any(v*1024!=int(v*1024) for v in present):raise ValueError('SUM expression requires the exact dyadic grid')
+        return _sas_expression_number(sum(int(v*1024) for v in present)/1024)
+    if name not in ('coalesce','n','nmiss','largest','smallest','abs','sign','ceilz','floorz','intz','roundz','modz'):
+        raise ValueError('unqualified expression scalar call')
+    return globals()['sas_'+name](*numbers)
+
+
+def sas_expression_arithmetic(operator,values):
+    """DS-117 exact bounded integer arithmetic with checked missing operands."""
+    if operator not in ('+','-') or type(values) is not list or len(values) not in (1,2):
+        raise ValueError('expression arithmetic requires a qualified operator and arity')
+    numbers=[_sas_expression_number(v) for v in values]
+    if any(v is not None and int(v)!=v for v in numbers):
+        raise ValueError('expression arithmetic requires exact integer operands')
+    if None in numbers:return None
+    result=(numbers[0] if operator=='+' else -numbers[0]) if len(numbers)==1 else numbers[0]+numbers[1] if operator=='+' else numbers[0]-numbers[1]
+    return _sas_expression_number(result)
+
+
+def sas_expression_truth(value):
+    """DS-118 ordinary missing and zero are false numeric predicates."""
+    value=_sas_expression_number(value)
+    return int(value is not None and value!=0)
+
+
+def sas_expression_compare(operator,left,right):
+    """DS-118 compatible ASCII padding and ordinary numeric missing ordering."""
+    if type(operator) is not str or operator not in ('eq','ne','lt','le','gt','ge'):
+        raise ValueError('expression comparison operator is outside its contract')
+    if (type(left) is str)!=(type(right) is str):
+        raise ValueError('expression comparison requires compatible types')
+    if type(left) is str:
+        left=_sas_expression_text(left);right=_sas_expression_text(right)
+        width=max(len(left),len(right));left=left.ljust(width);right=right.ljust(width)
+    else:
+        left=_sas_expression_number(left);right=_sas_expression_number(right)
+        left=(0,0) if left is None else (1,left);right=(0,0) if right is None else (1,right)
+    return int({'eq':left==right,'ne':left!=right,'lt':left<right,'le':left<=right,'gt':left>right,'ge':left>=right}[operator])
+
+
+def sas_expression_boolean(operator,values):
+    """DS-119 conservative eager validation of every reached pure operand."""
+    if type(operator) is not str or operator not in ('and','or','not') or type(values) is not list or len(values)!=(1 if operator=='not' else 2):
+        raise ValueError('expression Boolean operator/arity is outside its contract')
+    truths=[sas_expression_truth(value) for value in values]
+    return int(not truths[0]) if operator=='not' else int(all(truths)) if operator=='and' else int(any(truths))
