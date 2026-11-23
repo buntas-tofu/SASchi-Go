@@ -141,3 +141,27 @@ acceptance while retaining its old compiler, bounded-control and R refusal.
 Broader call graphs, jumps across structured bodies, no-INPUT unlinked RETURN,
 zero-column DATA, arrays, rounded values, random streams and physical SAS log
 formatting remain separate work.
+
+## Calls from counted loops
+
+DS-127 adds the separate scalar-counted-link-v1 profile. A direct LINK in a
+top-level counted DO enters one local subroutine and shares the DATA-step
+variables. RETURN inside a nested group or the callee's divisor loop resumes at
+the next statement in the caller's body. The callee cannot write or reuse the
+suspended index. STOP ends the whole step and preserves earlier snapshots.
+
+The counted stop can be SQRT of one nonnegative bounded integer expression.
+The runtime captures it at loop entry. An ascending integer index compares
+against the floor of the root. A descending integer index compares against
+its ceiling. This preserves which indices meet the inclusive stop condition.
+Assignments may store numeric zero or one from two numeric comparisons joined
+by OR. Both comparisons are evaluated, and skipped paths still validate shape
+and literal domains. The existing scalar-flow budgets also apply here.
+
+The [primality gate](../examples/verify_primality.py) binds the unchanged Roku
+source by SHA-256 and compares the entire projected numeric n column against
+the [base-R sieve](../examples/primality.R). All 168 ordered rows agree through
+the portable plan, emitted Python and CLI. The CLI rejects swapped expected
+rows. [Boundary tests](../saschi/test_counted_link.py) cover continuation,
+capture around a perfect square, suspended index protection and atomic failure.
+Native SAS validation remains outstanding.
