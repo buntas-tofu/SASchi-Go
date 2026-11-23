@@ -18,7 +18,7 @@ policies. Receipts record what passed for the source and environment tested.
 ## Current verification
 
 Status: version 0.4.0 development evidence for maintainer review, updated on
-2026-11-14. The current registry contains 152 fixture gates and 116 suites, including
+2026-11-22. The current registry contains 153 fixture gates and 117 suites, including
 the desktop workflow, data importer and saved-evidence suites. The full receipt
 records the discovered tests and their outcomes. With the pinned Roku corpus present, `python verify_all.py` records the
 source-bound unified verdict. Synthesis separately checks 60 faithful cases and
@@ -79,6 +79,11 @@ have distinct gates and source suites. All six hand/base-R oracles were frozen
 before translator work. Matching source-stable full verification and both unchanged
 workloads at every phase decide acceptance. No scalar name was added; UI changes
 remain deferred.
+
+[Counted-loop calls](docs/SCALAR_FLOW.md#calls-from-counted-loops) add DS-127.
+The unchanged Roku primality program produces all 168 primes up to 1,000
+in order, checked against an independent base-R sieve through the runtime,
+emitted Python and CLI. Native SAS validation remains outstanding.
 
 [Explicit word parsing](docs/WORD_FUNCTIONS.md) adds SCAN/COUNTW with an explicit
 delimiter set and optional M. The source-width SCAN policy is pinned to the current
@@ -292,7 +297,7 @@ fixed expected output and base-R evidence. Special missings retain their tags.
   sibling plus a fixture verifier (`verify_*.py`). Run any verifier directly,
   or all of them through [verify_all.py](verify_all.py).
 - [docs/sasconversionrulebook.json](docs/sasconversionrulebook.json) : the machine-consumable translation
-  rulebook. 176 rules with equivalence classes (EXACT,
+  rulebook. 177 rules with equivalence classes (EXACT,
   EQUIVALENT-WITH-SETTINGS, APPROXIMATE, NO-DIRECT-EQUIVALENT), required
   settings, forbidden patterns, and validation tests.
 - [docs/capability-manifest.json](docs/capability-manifest.json) : the coverage manifest. Enumerated entries of

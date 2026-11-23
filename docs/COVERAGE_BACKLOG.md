@@ -1,7 +1,7 @@
 # Coverage reconciliation and next gate series
 
 Status: Repository/base-R implementation and planning evidence, originally
-reconciled at main08eaa7b on2026-10-27 and updated through DS-126, ST-030, SQL-004 and A0.
+reconciled at main08eaa7b on2026-10-27 and updated through DS-127, ST-030, SQL-004 and A0.
 Accepted entry PR66/main0abf161 completed duplicate partition,owned replacement
 and three-report SORT. New input DROP/directed projection registrations require
 the current full source-bound receipt. The sealed handoff retains the historical accepted entry; current full receipts
@@ -86,15 +86,21 @@ passing verdict. No scalar name or external-program proof is added by this wave.
 Desktop/browser interface simplification remains a separate, feature-preserving
 review lane. UI changes are explicitly deferred from this composition wave.
 
+DS-127 adds a complete execution gate for the unchanged Roku primality
+program. The independent base-R sieve checks all 168 ordered rows. The
+gate also checks the emitted Python and actual CLI and detects a swapped
+pair. [The scalar-flow contract](SCALAR_FLOW.md#calls-from-counted-loops)
+records the bounded call and loop changes.
+
 ## Inventory reconciled against actual evidence
 
-The golden command registers152 fixture runners,116 application/translator suites and1
+The golden command registers 153 fixture runners, 117 application/translator suites and 1
 synthesis runner. These are registration counts, not passing outcomes. The
 source-bound full receipt records the discovered test count. A source-bound full receipt records actual skips and
 results. Accepted run entry PR66/main0abf161 contained97 fixtures,65 suites and1491
 tests with zero skips,60 faithful synthesis checks and60 naive controls. The
 separate1k workload checks total39:18 ledger and21 text. These counts have
-different units. Neither176 rulebook rules nor269 golden-command runners is a
+different units. Neither 177 rulebook rules nor 271 golden-command runners is a
 SAS capability denominator.
 
 [The capability manifest](capability-manifest.json) still enumerates108 statements
@@ -259,7 +265,7 @@ logical reports. Acceptance requires the current source-bound full gates;
 cache preparation alone is not execution evidence. Three further SORT examples have whole-source gates described in
 SORT_OPTIONS.md; SORT4 is covered in SORT_INPUT_KEEP.md. SORT5 now has its own
 registered gate under SORT_DUPLICATES.md,requiring current full verification. All vendor programs remain
-separate from the22 Roku proofs registered for conditional current acceptance
+separate from the 23 Roku proofs registered for conditional current acceptance
 among56 pinned files. The bitwise Roku
 proof requires its explicit output contract. The denominators are not combined.
 

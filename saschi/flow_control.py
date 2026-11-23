@@ -1,7 +1,8 @@
-"""DS-064/065 separately marked bounded scalar program-counter flow."""
+"""Separately marked bounded scalar program-counter flow."""
 from copy import deepcopy
 from dataclasses import asdict
 from enum import Enum
+from math import isqrt
 import re
 
 from sas_semantics import (sas_counted_control, sas_counted_capture,
@@ -14,8 +15,14 @@ from .input_list import names_valid as input_names_valid, source_records
 
 PROFILE = 'scalar-jump-v1'
 LINK_PROFILE = 'scalar-link-v1'
-PROFILES = {PROFILE,LINK_PROFILE}
-KINDS = {'flow_profile', 'label', 'goto', 'link', 'return', 'stop'}
+COUNTED_LINK_PROFILE = 'scalar-counted-link-v1'
+FLOW_RULES = {
+    PROFILE: ('scalar-jump', 'DS-064'),
+    LINK_PROFILE: ('scalar-link', 'DS-065'),
+    COUNTED_LINK_PROFILE: ('scalar-counted-link', 'DS-127'),
+}
+PROFILES = set(FLOW_RULES)
+KINDS = {'flow_profile', 'label', 'goto', 'link', 'return', 'stop', 'flow_or_assign'}
 LOOPS = {'do_counted', 'do_while', 'do_until'}
 STEP_FIELDS = {'kind','name','line','inputs','by','operations','nodupkey','where','retained','lengths','display_names'}
 NAME = r'[A-Za-z_][A-Za-z0-9_]{0,31}'
@@ -30,6 +37,27 @@ def ordinary(name):
 
 def integer(value):
     return None if value is None else float(sas_counted_control(value))
+
+
+def is_sqrt_stop(value):
+    return type(value) is dict and value.get('kind') == 'call' and value.get('name') == 'sqrt'
+
+
+def counted_controls(args, row):
+    start = evaluate_control(args['start'], row)
+    bound = args['stop']
+    if not is_sqrt_stop(bound):
+        return start, evaluate_control(bound, row), evaluate_control(args['by'], row)
+    radicand = evaluate_control(bound['args'][0], row)
+    if radicand < 0:
+        raise ValueError('scalar counted LINK SQRT stop requires a nonnegative radicand')
+    by = evaluate_control(args['by'], row)
+    stop = isqrt(radicand)
+    # Integral indices compare to a fractional bound as if it were floored
+    # for an ascending loop or ceiled for a descending loop.
+    if by < 0 and stop * stop != radicand:
+        stop += 1
+    return start, stop, by
 
 
 def guard_structure(value):
@@ -105,6 +133,9 @@ def validate_step(step,version=2,catalog=None):
             or roots[0]!={'kind':'flow_profile','line':step['line'],'args':{'name':roots[0]['args']['name']}}
             or type(roots[0]['line']) is not int):
         raise ValueError('scalar flow requires its first declaration at the DATA line')
+    profile = roots[0]['args']['name']
+    counted_link = profile == COUNTED_LINK_PROFILE
+    caller_indices = set()
     operation_count=0;arithmetic_count=0;features=set();flat=[];declared=set();sums=set();put_ops=[];selections=[];reads=[]
     def expr(node,depth=1,control=False):
         nonlocal arithmetic_count
@@ -125,7 +156,7 @@ def validate_step(step,version=2,catalog=None):
                 raise ValueError('scalar flow requires ordinary names or _N_')
             return False,None
         if kind=='call':
-            if (control or roots[0]['args']['name']!=LINK_PROFILE or set(node)!={'kind','name','args'}
+            if (control or profile not in (LINK_PROFILE, COUNTED_LINK_PROFILE) or set(node)!={'kind','name','args'}
                     or node['name']!='mod' or type(node['args']) is not list or len(node['args'])!=2):
                 raise ValueError('scalar link profile admits only the existing integer MOD call')
             arithmetic_count+=1
@@ -145,7 +176,7 @@ def validate_step(step,version=2,catalog=None):
         expr(test['left'])
         if test['op']!='truth':expr(test['right'])
     def visit(op,depth=0,loops=(),active=(),conditional=False,jumps=True):
-        nonlocal operation_count
+        nonlocal operation_count, arithmetic_count
         operation_count+=1
         if operation_count>1024 or depth>32:raise ValueError('scalar flow exceeds1024 operations or32 mixed container levels')
         if type(op) is not dict or set(op)!={'kind','line','args'} or type(op.get('kind')) is not str or type(op.get('line')) is not int or op['line']<1 or type(op['args']) is not dict:
@@ -156,21 +187,30 @@ def validate_step(step,version=2,catalog=None):
             if depth or set(args)!={'name'} or not ordinary(args.get('name')):raise ValueError('statement labels require unique top-level ordinary names')
             features.add('jump')
         elif kind=='goto':
-            if not jumps or loops or set(args)!={'name'} or not ordinary(args.get('name')):raise ValueError('GOTO requires a top-level or IF action with an ordinary target')
+            if counted_link or not jumps or loops or set(args)!={'name'} or not ordinary(args.get('name')):raise ValueError('GOTO requires a top-level or IF action with an ordinary target')
             features.add('jump')
         elif kind=='stop':
             if args:raise ValueError('STOP takes no arguments')
             features.add('jump')
         elif kind=='link':
-            if not jumps or loops or set(args)!={'name'} or not ordinary(args.get('name')):raise ValueError('LINK requires a top-level or IF action and ordinary target')
-            if roots[0]['args']['name']!=LINK_PROFILE:raise ValueError('LINK requires its separate stage2 profile')
+            if set(args) != {'name'} or not ordinary(args['name']):
+                raise ValueError('LINK requires an ordinary target')
+            if counted_link:
+                if depth != 1 or loops != ('do_counted',):
+                    raise ValueError('counted LINK must be a direct action in a top-level counted DO')
+                caller_indices.add(active[0])
+            else:
+                if not jumps or loops:
+                    raise ValueError('LINK requires a top-level or IF action and ordinary target')
+                if profile != LINK_PROFILE:
+                    raise ValueError('LINK requires its separate stage2 profile')
             features.add('link')
         elif kind=='return':
-            if args or roots[0]['args']['name']!=LINK_PROFILE:raise ValueError('RETURN requires its separate stage2 profile and no arguments')
+            if args or profile not in (LINK_PROFILE, COUNTED_LINK_PROFILE):raise ValueError('RETURN requires its separate LINK profile and no arguments')
             features.add('link')
         elif kind=='input_list':
             if (depth or set(args)!={'names','records','data_line'} or not input_names_valid(args.get('names'))
-                    or any(not ordinary(n) for n in args['names']) or roots[0]['args']['name']!=LINK_PROFILE
+                    or any(not ordinary(n) for n in args['names']) or profile!=LINK_PROFILE
                     or type(args.get('data_line')) is not int or args['data_line']<=op['line']):
                 raise ValueError('scalar flow INPUT requires one first numeric inline source in its stage2 profile')
             decode_rows(args['records'],args['names'])
@@ -198,8 +238,20 @@ def validate_step(step,version=2,catalog=None):
                     raise ValueError('scalar flow counted loop requires captured bounded controls and a distinct index')
                 known=[]
                 for key in ('start','stop','by'):
-                    validate_control(args[key]);known.append(expr(args[key],control=True))
-                    pending=[args[key]]
+                    control = args[key]
+                    sqrt_stop = key == 'stop' and counted_link and is_sqrt_stop(control)
+                    if sqrt_stop:
+                        if (set(control) != {'kind', 'name', 'args'} or type(control['args']) is not list
+                                or len(control['args']) != 1):
+                            raise ValueError('scalar counted LINK SQRT stop requires exactly one argument')
+                        control = control['args'][0]
+                        arithmetic_count += 1
+                    validate_control(control)
+                    constant, value = expr(control, control=True)
+                    if sqrt_stop and constant and value < 0:
+                        raise ValueError('scalar counted LINK SQRT stop requires a nonnegative radicand')
+                    known.append((constant, value))
+                    pending=[control]
                     while pending:
                         node=pending.pop()
                         if isinstance(node,dict):
@@ -207,7 +259,7 @@ def validate_step(step,version=2,catalog=None):
                                 raise ValueError('scalar flow counted controls cannot reference their own index')
                             pending.extend(v for v in node.values() if isinstance(v,dict))
                 if known[2][0] and known[2][1]==0:raise ValueError('scalar flow counted BY is zero')
-                if all(x[0] for x in known):sas_counted_capture(*(x[1] for x in known),0)
+                if all(x[0] for x in known):sas_counted_capture(*counted_controls(args, {}),0)
                 next_active=active+(args['index'],)
             else:
                 if set(args)!={'condition','body'}:raise ValueError('scalar flow conditional loop shape differs')
@@ -218,6 +270,15 @@ def validate_step(step,version=2,catalog=None):
             if set(args)!={'name','value'} or not ordinary(args.get('name')) or args['name'] in active:raise ValueError('scalar flow scalar assignment changes reserved/control state')
             expr(args['value'])
             if kind=='sum_statement':sums.add(args['name'])
+        elif kind == 'flow_or_assign':
+            if (not counted_link or set(args) != {'name', 'conditions'}
+                    or not ordinary(args['name']) or args['name'] in active
+                    or type(args['conditions']) is not list or len(args['conditions']) != 2):
+                raise ValueError('scalar counted LINK OR assignment requires two numeric comparisons')
+            for test in args['conditions']:
+                predicate(test)
+                if test['op'] == 'truth':
+                    raise ValueError('scalar counted LINK OR assignment requires two numeric comparisons')
         elif kind=='subset':
             if set(args)!={'condition'} or loops:raise ValueError('scalar flow subsetting IF remains outside iterative bodies')
             predicate(args['condition'])
@@ -248,7 +309,9 @@ def validate_step(step,version=2,catalog=None):
         else:raise ValueError('operation requires a separate scalar-flow contract')
     for op in roots[1:]:visit(op)
     if not features & {'jump','link'}:raise ValueError('flow profile requires actual local label or flow syntax')
-    if roots[0]['args']['name']==LINK_PROFILE and not features & {'link','input','mod'}:raise ValueError('stage2 marker requires actual LINK/RETURN or numeric composition')
+    if profile==LINK_PROFILE and not features & {'link','input','mod'}:raise ValueError('stage2 marker requires actual LINK/RETURN or numeric composition')
+    if counted_link and not caller_indices:
+        raise ValueError('scalar counted LINK profile requires a LINK in a counted DO')
     labels={}
     for position,op in enumerate(roots):
         if op['kind']=='label':
@@ -282,7 +345,7 @@ def validate_step(step,version=2,catalog=None):
         if any(op['kind'] not in ('flow_profile','declare','projection') for op in roots[:position]):raise ValueError('numeric INPUT must be the first top-level executable operation')
         if any(labels[op['args']['name']]<=position for op in flat if op['kind'] in ('goto','link')):raise ValueError('scalar flow cannot jump to or before its INPUT')
         args=inputs[0]['args'];info['inline_rows']=decode_rows(args['records'],args['names'])
-    validate_links(roots,flat,labels,bool(inputs))
+    validate_links(roots,flat,labels,bool(inputs),caller_indices)
     if not step['inputs']:
         schema_for(step,info,{})
     return info
@@ -312,14 +375,16 @@ def schema_for(step,info,catalog):
                 for value in row.values():integer(value)
         elif kind=='input_list':
             for name in args['names']:add(name)
-        elif kind in ('assign','sum_statement','declare'):add(args['name'])
+        elif kind in ('assign','sum_statement','declare','flow_or_assign'):add(args['name'])
         elif kind=='do_counted':
             add(args['index'])
             for key in ('start','stop','by'):names(args[key])
         if 'value' in args:names(args['value'])
-        if 'condition' in args:
-            names(args['condition']['left'])
-            if args['condition']['op']!='truth':names(args['condition']['right'])
+        tests = [args['condition']] if 'condition' in args else args.get('conditions', [])
+        for test in tests:
+            names(test['left'])
+            if test['op'] != 'truth':
+                names(test['right'])
     if not schema or len(schema)>64:raise ValueError('scalar-flow DATA requires1..64 numeric PDV columns')
     selected=selected_names(schema,info['output'])
     for op in info['puts']:
@@ -339,18 +404,25 @@ def decode_rows(records,names):
     return [dict(zip(names,row)) for row in values]
 
 
-def validate_links(roots,flat,labels,has_input):
-    links=[op for op in flat if op['kind']=='link']
-    targets={op['args']['name'] for op in links}
-    if len(targets)>1:raise ValueError('scalar flow admits one unique LINK destination')
-    target=labels[next(iter(targets))] if targets else len(roots)
-    def contains_link(op):
-        if op['kind']=='link':return True
-        args=op['args']
-        return any(contains_link(child) for child in args.get('body',[])) or any(contains_link(args[key]) for key in ('operation','otherwise') if key in args)
-    if any(contains_link(op) for op in roots[target:]):raise ValueError('LINK target region cannot contain another LINK, including dead code')
+def validate_links(roots,flat,labels,has_input,caller_indices):
+    targets = {op['args']['name'] for op in flat if op['kind'] == 'link'}
+    if len(targets) > 1:
+        raise ValueError('scalar flow admits one unique LINK destination')
+    if targets:
+        entry = roots[labels[next(iter(targets))]]
+        start = next(i for i, op in enumerate(flat) if op is entry)
+        for op in flat[start:]:
+            kind, args = op['kind'], op['args']
+            if kind == 'link':
+                raise ValueError('LINK target region cannot contain another LINK, including dead code')
+            if ((kind in ('assign', 'sum_statement', 'flow_or_assign') and args['name'] in caller_indices)
+                    or (kind == 'do_counted' and args['index'] in caller_indices)):
+                raise ValueError('counted LINK target cannot modify an active caller index')
     def outcomes(op):
         kind,args=op['kind'],op['args']
+        if kind == 'link' and caller_indices:
+            # A return resumes the remaining body as well as reaching the callee.
+            return {('link', args['name']), ('next', None)}
         if kind in ('goto','link'):return {(kind,args['name'])}
         if kind in ('return','stop'):return {(kind,None)}
         if kind=='if':return outcomes(args['operation']) | (outcomes(args['otherwise']) if 'otherwise' in args else {('next',None)})
@@ -394,6 +466,7 @@ def execute_step(step,catalog=None,version=2,trace=None):
     info=validate_step(step,version);tables=normalize_catalog({} if catalog is None else catalog)
     schema,selected,_=schema_for(step,info,tables);rows=info['inline_rows'] if info['inline_rows'] is not None else [{}]
     explicit=any(o['kind']=='output' for o in info['flat'])
+    counted_link = step['operations'][0]['args']['name'] == COUNTED_LINK_PROFILE
     retained={n:integer(e['value']) for n,e in step['retained'].items()};output=[];logs=[];events=0;instructions=0
     def show(value):return '.' if value is None else str(int(value))
     def charge():
@@ -407,12 +480,16 @@ def execute_step(step,catalog=None,version=2,trace=None):
         if trace is not None:trace.append('|'.join((kind,*(str(p) for p in parts))))
     for row_index,incoming in enumerate(rows,1):
         row={n:None for n in schema};row.update(deepcopy(retained));row['_n_']=float(row_index);spent=0;event('row',row_index)
+        caller_active = False
+
         def snapshot():
             if len(output)>=10000:raise ValueError('scalar flow OUTPUT exceeds10000 observations')
             output.append({n:deepcopy(row[n]) for n in selected});event('output',';'.join(n+'='+show(row[n]) for n in selected))
         def sequence(body):
             for op in body:
                 signal=perform(op)
+                if counted_link and op['kind'] == 'link':
+                    signal = call(signal[1], f"line {op['line']}")
                 if signal is not Signal.NORMAL:return signal
             return Signal.NORMAL
         def perform(op):
@@ -427,6 +504,10 @@ def execute_step(step,catalog=None,version=2,trace=None):
             elif kind=='return':event('return');return Signal.RETURN
             elif kind=='stop':event('stop');return Signal.STOP
             elif kind=='assign':row[args['name']]=evaluate(args['value'],row);event('assign',args['name'],show(row[args['name']]))
+            elif kind == 'flow_or_assign':
+                comparisons = [condition(test, row) for test in args['conditions']]
+                row[args['name']] = float(any(comparisons))
+                event('assign', args['name'], show(row[args['name']]))
             elif kind=='sum_statement':
                 value=evaluate(args['value'],row);row[args['name']]=integer((row[args['name']] or 0)+(value or 0));event('sum',args['name'],show(row[args['name']]))
             elif kind=='do_group':event('group','enter');signal=sequence(args['body']);event('group','exit');return signal
@@ -436,7 +517,7 @@ def execute_step(step,catalog=None,version=2,trace=None):
                 value=condition(args['condition'],row);event('subset',int(value));return Signal.NORMAL if value else Signal.REJECT
             elif kind in ('leave','continue'):event('transfer',kind);return Signal.LEAVE if kind=='leave' else Signal.CONTINUE
             elif kind=='do_counted':
-                controls=[evaluate_control(args[k],row) for k in ('start','stop','by')];values,final,spent=sas_counted_capture(*controls,spent);row[args['index']]=integer(controls[0]);event('capture',args['index'],*controls,len(values));left=False
+                controls=counted_controls(args,row);values,final,spent=sas_counted_capture(*controls,spent);row[args['index']]=integer(controls[0]);event('capture',args['index'],*controls,len(values));left=False
                 for value in values:
                     row[args['index']]=integer(value);event('iteration','counted',args['index'],show(row[args['index']]));signal=sequence(args['body'])
                     if signal not in (Signal.NORMAL,Signal.LEAVE,Signal.CONTINUE):return signal
@@ -467,27 +548,48 @@ def execute_step(step,catalog=None,version=2,trace=None):
                 logs.append(text);event('put',text.encode().hex())
             else:raise ValueError('unvalidated scalar-flow operation')
             return Signal.NORMAL
-        pc=0;caller=None;stopped=False;result=Signal.NORMAL
-        while True:
-            if pc==len(step['operations']):
-                if caller is None:break
-                charge();event('resume','implicit',caller);pc=caller;caller=None;continue
-            event('pc',pc);result=perform(step['operations'][pc])
-            if isinstance(result,tuple):
-                if result[0]=='link':
-                    if caller is not None:raise ValueError('scalar flow exceeded one active LINK caller')
-                    caller=pc+1;event('call',caller)
-                pc=info['labels'][result[1]];continue
-            if result is Signal.RETURN:
-                if caller is None:result=Signal.NORMAL;event('next-record');break
-                event('resume','explicit',caller);pc=caller;caller=None;continue
-            if result is Signal.STOP:stopped=True;break
-            if result is Signal.REJECT:break
-            if result is not Signal.NORMAL:raise ValueError('scalar-flow loop transfer escaped its owner')
-            pc+=1
+        def call(target, resume_at):
+            nonlocal caller_active
+            if caller_active:
+                raise ValueError('scalar flow exceeded one active LINK caller')
+            caller_active = True
+            event('call', resume_at)
+            try:
+                return run_from(info['labels'][target], resume_at)
+            finally:
+                caller_active = False
+
+        def run_from(pc, resume_at=None):
+            while pc < len(step['operations']):
+                event('pc', pc)
+                signal = perform(step['operations'][pc])
+                if isinstance(signal, tuple):
+                    transfer, target = signal
+                    if transfer == 'goto':
+                        pc = info['labels'][target]
+                        continue
+                    signal = call(target, pc + 1)
+                if signal is Signal.RETURN:
+                    if resume_at is None:
+                        event('next-record')
+                    else:
+                        event('resume', 'explicit', resume_at)
+                    return Signal.NORMAL
+                if signal is not Signal.NORMAL:
+                    return signal
+                pc += 1
+            if resume_at is not None:
+                charge()
+                event('resume', 'implicit', resume_at)
+            return Signal.NORMAL
+
+        result = run_from(0)
         retained={name:deepcopy(row[name]) for name in retained}
-        if not stopped and result is Signal.NORMAL and not explicit and step['name']!='_null_':snapshot()
-        if stopped:break
+        if result is Signal.NORMAL and not explicit and step['name']!='_null_':snapshot()
+        if result is Signal.STOP:
+            break
+        if result not in (Signal.NORMAL, Signal.REJECT):
+            raise ValueError('scalar-flow loop transfer escaped its owner')
     return (None if step['name']=='_null_' else {'schema':{n:deepcopy(schema[n]) for n in selected},'rows':output}),logs
 
 
@@ -499,7 +601,7 @@ def _trigger(statement):
         or re.fullmatch(r'(?:if\s+.+\s+then|else)\s+(?:go\s*to\s+[A-Za-z_][A-Za-z0-9_]{0,31}|stop|return|link\s+[A-Za-z_][A-Za-z0-9_]{0,31})',text,re.I|re.ASCII))
 
 
-def parse_block(statements):
+def parse_block(statements, *, counted_link=False):
     from .plan import Step,Operation,expression,predicate,atom
     if not statements or statements[-1].text.lower()!='run' or not statements[-1].terminated:raise ValueError('scalar-flow DATA requires explicit final RUN')
     statements=list(statements);data=None;data_line=None
@@ -572,7 +674,13 @@ def parse_block(statements):
                 if test is None:raise ValueError('unsupported scalar flow loop predicate')
                 args={'condition':test,'body':body(depth+1,loops+(kind,),True)}
             else:
-                kind='do_counted';args={'index':counted[1].lower(),'start':parse_control(counted[2]),'stop':parse_control(counted[3]),'by':parse_control(counted[4] or '1'),'profile':'bounded','body':body(depth+1,loops+(kind,),True)}
+                kind = 'do_counted'
+                start = parse_control(counted[2])
+                sqrt = re.fullmatch(r'sqrt\s*\((.+)\)', counted[3], re.I | re.ASCII) if counted_link else None
+                stop = {'kind': 'call', 'name': 'sqrt', 'args': [parse_control(sqrt[1])]} if sqrt else parse_control(counted[3])
+                args = {'index': counted[1].lower(), 'start': start, 'stop': stop,
+                        'by': parse_control(counted[4] or '1'), 'profile': 'bounded',
+                        'body': body(depth+1, loops+(kind,), True)}
             return make(kind,line,args)
         if re.match(r'set\s',text,re.I|re.ASCII):
             if depth or branch or seen_action or step.inputs:raise ValueError('scalar flow SET must be the first executable source')
@@ -604,7 +712,15 @@ def parse_block(statements):
             return make('subset',line,{'condition':test})
         assignment=re.fullmatch('('+NAME+r')\s*=\s*(.+)',text,re.ASCII);summation=re.fullmatch('('+NAME+r')\s*\+\s*(.+)',text,re.ASCII)
         if assignment or summation:
-            match=assignment or summation;target=match[1].lower();value=parsed_expression(match[2])
+            match = assignment or summation
+            target = match[1].lower()
+            if counted_link and assignment:
+                pair = re.fullmatch(r'(.+?)\s+or\s+(.+)', match[2], re.I | re.ASCII)
+                if pair:
+                    return make('flow_or_assign', line, {
+                        'name': target, 'conditions': [predicate(part) for part in pair.groups()],
+                    })
+            value = parsed_expression(match[2])
             if not assignment:step.retained.setdefault(target,{'kind':'number','value':0.0})
             return make('assign' if assignment else 'sum_statement',line,{'name':target,'value':value})
         raise ValueError('statement is outside bounded scalar-flow DATA control: '+text)
@@ -622,7 +738,7 @@ def parse_block(statements):
             stage2|=node.get('kind') in ('link','return','input_list') or node.get('kind')=='call' and node.get('name')=='mod'
             pending.extend(node.values())
         elif isinstance(node,list):pending.extend(node)
-    ops[0]['args']['name']=LINK_PROFILE if stage2 else PROFILE
+    ops[0]['args']['name'] = COUNTED_LINK_PROFILE if counted_link else (LINK_PROFILE if stage2 else PROFILE)
     step.operations=[Operation(**o) for o in ops];validate_step(asdict(step));return step
 
 
@@ -654,8 +770,18 @@ def compile_program(source,legacy):
     for start,stop,block in blocks:
         prior(cursor,start)
         try:
-            step=parse_block(block);combined.steps.append(step);info=validate_step(asdict(step))
-            combined.matched.append(('scalar-link','DS-065',step.line) if step.operations[0].args['name']==LINK_PROFILE else ('scalar-jump','DS-064',step.line))
+            try:
+                step = parse_block(block)
+            except ValueError as previous:
+                if not any(re.fullmatch(r'link\s+' + NAME, st.text, re.I | re.ASCII) for st in block):
+                    raise
+                try:
+                    step = parse_block(block, counted_link=True)
+                except ValueError:
+                    raise previous from None
+            combined.steps.append(step)
+            profile = step.operations[0].args['name']
+            combined.matched.append((*FLOW_RULES[profile], step.line))
         except (ValueError,RecursionError) as exc:combined.tickets.append(Ticket(block[0].line,block[0].text,'scalar-flow',str(exc)))
         cursor=stop
     prior(cursor,len(source));return combined

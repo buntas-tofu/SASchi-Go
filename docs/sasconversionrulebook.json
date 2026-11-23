@@ -5385,6 +5385,36 @@
       "sources": [
         "https://support.sas.com/documentation/cdl/en/lrcon/62955/HTML/default/a000761931.htm"
       ]
+    },
+    {
+      "rule_id": "DS-127",
+      "scope": "Calls from bounded counted DATA-step loops with numeric OR assignment and a SQRT stop",
+      "sas_pattern": "Counted DO body LINK to a local label, RETURN, numeric comparison OR assignment and TO SQRT(expression)",
+      "equivalence_class": "EQUIVALENT-WITH-SETTINGS",
+      "python_target": {
+        "strategy": "Use the bounded scalar-flow runtime and resume the current loop body after the local call returns."
+      },
+      "r_target": {
+        "strategy": "An independent base-R sieve computes the complete ordered prime table for the pinned Roku program."
+      },
+      "required_settings": [
+        "Select the scalar-counted-link-v1 marker for an actual direct LINK in a top-level counted DO. One local target and one active caller share DATA-step variables.",
+        "Use exact integer start and increment controls. A SQRT stop captures one nonnegative bounded integer argument once per loop invocation. For integer indices, the inclusive bound is the floor of the root on ascent and the ceiling on descent.",
+        "Assign numeric zero or one from two eagerly evaluated scalar comparisons joined by OR. RETURN preserves the suspended caller index and resumes after LINK. STOP ends the DATA step with prior snapshots.",
+        "Reuse the scalar-flow resource limits and check the complete portable plan before execution."
+      ],
+      "forbidden_patterns": [
+        "GOTO, other LINK placements, nested calls, changing or reusing an active caller index in the target region, INPUT, SET, general Boolean trees and SQRT outside a counted stop."
+      ],
+      "silent_difference_checks": [
+        "Early return from the divisor loop, restoration of the caller body, fractional versus exact square boundaries, projected column order and all 168 prime rows in encounter order."
+      ],
+      "validation_test": "examples/verify_primality.py",
+      "confidence": "Exact repository and base-R comparison for the pinned program. Native SAS validation remains outstanding.",
+      "sources": [
+        "https://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/a000201276.htm",
+        "https://support.sas.com/documentation/cdl/en/lestmtsref/63323/HTML/default/n132s7tapddkc8n1my90ekgo4v0q.htm"
+      ]
     }
   ],
   "runtime_capabilities": {
@@ -6376,6 +6406,18 @@
       "r_witness": "examples/groupformat.R",
       "boundary_tests": "saschi.test_groupformat",
       "evidence": "Complete original and unchanged vendor hand/base-R qualification before translator; current full verification required, no native SAS."
+    },
+    "scalar_counted_link": {
+      "rule_id": "DS-127",
+      "target": "saschi.runtime.run_plan",
+      "scope": [
+        "Require exact version 2 flow_data and the scalar-counted-link-v1 marker for a direct counted-body LINK. Validate a single local target, one active caller and suspended index protection.",
+        "Admit an integer-domain SQRT stop with the existing loop budgets and an OR assignment of two numeric comparisons. Resume the caller after a linked RETURN."
+      ],
+      "validation_test": "examples/verify_primality.py",
+      "r_witness": "examples/primality.R",
+      "boundary_tests": "saschi.test_counted_link",
+      "evidence": "Pinned unchanged Roku source, complete ordered base-R result, portable and emitted Python execution, actual CLI and rejected row-order mismatch."
     }
   }
 }

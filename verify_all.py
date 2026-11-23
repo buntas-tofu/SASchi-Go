@@ -190,6 +190,7 @@ VERIFIERS = [
     ("ordered-by-groups", HERE / "examples" / "verify_stateful_groups.py"),
     ("record-quality-audit", HERE / "examples" / "verify_record_quality_audit.py"),
     ("batch-reconciliation", HERE / "examples" / "verify_batch_reconciliation.py"),
+    ("primality-by-trial-division", HERE / "examples" / "verify_primality.py"),
 ]
 
 # The translator suites, run as unittest modules. They carry the same weight as
@@ -313,6 +314,7 @@ SUITES = [
     ("suite-stateful-groups", "saschi.test_stateful_groups"),
     ("suite-record-quality-audit", "saschi.test_record_quality_audit"),
     ("suite-batch-reconciliation", "saschi.test_batch_reconciliation"),
+    ("suite-counted-link", "saschi.test_counted_link"),
 ]
 
 
