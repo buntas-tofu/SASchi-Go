@@ -10,6 +10,7 @@ output/
 # Editors / OS
 .DS_Store
 *.swp
+[nN][uU][lL]
 
 # Isolated environments and package builds
 .venv/

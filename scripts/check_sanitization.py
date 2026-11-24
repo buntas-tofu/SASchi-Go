@@ -35,11 +35,17 @@ is exactly what the floor forbids. Exit 0 clean, 1 findings, 2 usage error.
 Pure standard library.
 """
 
+import argparse
 import hashlib
 import json
 import re
 import sys
 from pathlib import Path
+
+if __package__:
+    from .windows_paths import check_windows_paths
+else:
+    from windows_paths import check_windows_paths
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -135,6 +141,9 @@ def run(profile: str, root: Path) -> int:
     else:
         print(f"error: unknown profile {profile!r}", file=sys.stderr)
         return 2
+    path_status = check_windows_paths(root)
+    if path_status:
+        return path_status
     compiled = [(p, re.compile(p, re.I)) for p in patterns]
     nobound = [(p, re.compile(p.replace(r"\b", ""), re.I)) for p in patterns
                if r"\b" in p]
@@ -144,7 +153,7 @@ def run(profile: str, root: Path) -> int:
     for path in sorted(root.rglob("*")):
         if not path.is_file() or is_exempt(path, root, exempt):
             continue
-        rel = path.relative_to(root)
+        rel = path.relative_to(root).as_posix()
         if str(rel) in {"scripts/check_sanitization.py",
                         "scripts/sanitization-allowlist.json"}:
             continue  # the gate and its allowlist ARE the lists; exempt from
@@ -197,13 +206,20 @@ def run(profile: str, root: Path) -> int:
 
 
 def main() -> int:
-    profile = sys.argv[1] if len(sys.argv) > 1 else "desk"
-    target = Path(sys.argv[2]) if len(sys.argv) > 2 else ROOT
-    if profile.startswith("-"):
-        print("check_sanitization.py : the token gate for the sanitization floor.")
-        print("usage: check_sanitization.py [desk|buntas] [target_dir]")
-        return 2
-    return run(profile, target.resolve())
+    parser = argparse.ArgumentParser(description="Check candidates for identity and Windows path issues.")
+    parser.add_argument("profile", choices=("desk", "buntas"), nargs="?", default="desk")
+    parser.add_argument("target", type=Path, nargs="?", default=ROOT)
+    parser.add_argument("--paths-only", action="store_true")
+    parser.add_argument("--tree", help="Check Windows paths in this Git revision")
+    args = parser.parse_args()
+    if args.tree is not None and not args.paths_only:
+        parser.error("--tree requires --paths-only")
+    root = args.target.resolve()
+    if not root.is_dir():
+        parser.error("target must be a directory")
+    if args.paths_only:
+        return check_windows_paths(root, args.tree)
+    return run(args.profile, root)
 
 
 if __name__ == "__main__":
