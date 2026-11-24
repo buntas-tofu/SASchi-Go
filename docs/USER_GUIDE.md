@@ -202,6 +202,13 @@ identical input. The private bench under `testbed/local/` is never written
 to the shipped output; `--include-local` prints a private comparison to
 stdout only.
 
+## Terminal launchers
+
+Run `saschi.bat` from Command Prompt on Windows or
+`./saschi.sh` from Bash on Linux. Use `--help` for a noninteractive
+launcher check. The publication sanitization command checks Windows path
+compatibility. Add `--paths-only --tree REV` to check a specific commit tree.
+
 ## The web workbench
 
 The workbench is a standard-library HTTP server over the same job path the

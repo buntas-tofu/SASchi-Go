@@ -57,5 +57,23 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.x"
-      - name: The tree carries no tokens beyond this instance's allowed identity
-        run: python3 scripts/check_sanitization.py buntas
+      - name: Check identity and Windows paths
+        run: |
+          python3 -m unittest tools.test_windows_paths
+          python3 scripts/check_sanitization.py buntas
+
+  windows-checkout:
+    name: Windows checkout and batch launcher
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check the Windows checkout paths
+        run: python scripts/check_sanitization.py buntas --paths-only
+      - name: Install the terminal interface
+        run: python -m pip install ".[tui]"
+      - name: Run the batch launcher in Command Prompt
+        shell: cmd
+        run: call saschi.bat --help
