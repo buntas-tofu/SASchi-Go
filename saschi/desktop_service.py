@@ -163,9 +163,9 @@ def execute_prepared(prepared, workspace_path):
     with tempfile.TemporaryDirectory(prefix='saschi-desktop-inputs-') as temporary:
         area = Path(temporary)
         inputs, expected = area / 'inputs.json', area / 'expected.json'
-        inputs.write_text(json.dumps(prepared['inputs'], ensure_ascii=False, allow_nan=False), encoding='utf-8')
+        inputs.write_text(json.dumps(prepared['inputs'], ensure_ascii=False, allow_nan=False), encoding='utf-8', newline='')
         if prepared['expected'] is not None:
-            expected.write_text(json.dumps(prepared['expected'], ensure_ascii=False, allow_nan=False), encoding='utf-8')
+            expected.write_text(json.dumps(prepared['expected'], ensure_ascii=False, allow_nan=False), encoding='utf-8', newline='')
         job = build_job(prepared['source'], inputs, expected if prepared['expected'] is not None else None, 'python')
     job.receipt['desktop_imports'] = deepcopy(prepared.get('import_facts', []))
     job.receipt['desktop_warnings'] = list(prepared.get('warnings', []))

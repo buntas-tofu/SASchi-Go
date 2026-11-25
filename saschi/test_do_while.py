@@ -135,10 +135,10 @@ class DoWhileTests(unittest.TestCase):
         t=deepcopy(actual);t['schema']={'m':'number','n':'number'};changes.append(t)
         t=deepcopy(actual);t['rows'][0]['m']=9.;changes.append(t)
         with tempfile.TemporaryDirectory() as d:
-            p=Path(d)/'expected.json';p.write_text(json.dumps({'d':actual}))
+            p=Path(d)/'expected.json';p.write_text(json.dumps({'d':actual}), newline='')
             self.assertTrue(build_job(source,expect=p).receipt['accepted'])
             for changed in changes:
-                p.write_text(json.dumps({'d':changed}));job=build_job(source,expect=p)
+                p.write_text(json.dumps({'d':changed}), newline='');job=build_job(source,expect=p)
                 self.assertEqual(job.code,1);self.assertEqual(job.receipt['comparison'],'failed');self.assertEqual(job.result['datasets']['d'],actual)
 
     def test_full_unmodified_external_program(self):

@@ -40,7 +40,7 @@ def witnesses(cases):
         with (folder/'cases.csv').open('w',newline='') as stream:
             writer=csv.writer(stream);writer.writerow(['source','catalog'])
             for i,(source,catalog) in enumerate(cases):
-                (folder/f'{i}.sas').write_text(source);catalog_files(folder/f'cat{i}',catalog)
+                (folder/f'{i}.sas').write_text(source, newline='');catalog_files(folder/f'cat{i}',catalog)
                 writer.writerow([f'{i}.sas',f'cat{i}'])
         lines=rrun('batch',folder).stdout.splitlines()
     results=[];current=[]
@@ -174,8 +174,8 @@ def refusals(mode):
 
 def cli_check(source,expected):
     with tempfile.TemporaryDirectory() as directory:
-        folder=Path(directory);path=folder/'program.sas';path.write_text(source);out=folder/'job'
-        expect=folder/'expected.json';expect.write_text(json.dumps(expected['datasets']))
+        folder=Path(directory);path=folder/'program.sas';path.write_text(source, newline='');out=folder/'job'
+        expect=folder/'expected.json';expect.write_text(json.dumps(expected['datasets']), newline='')
         process=subprocess.run([sys.executable,'-m','saschi','run',str(path),'--expect',str(expect),'--output',str(out)],
             cwd=ROOT,capture_output=True,text=True,timeout=45)
         receipt=json.loads((out/'receipt.json').read_text())
@@ -227,7 +227,7 @@ def cli_wrong_controls():
     with tempfile.TemporaryDirectory() as directory:
         folder=Path(directory)
         for i,(source,wrong,observed) in enumerate(cases):
-            path=folder/f'{i}.sas';path.write_text(source);expect=folder/f'{i}.json';expect.write_text(json.dumps(wrong));out=folder/f'out{i}'
+            path=folder/f'{i}.sas';path.write_text(source, newline='');expect=folder/f'{i}.json';expect.write_text(json.dumps(wrong), newline='');out=folder/f'out{i}'
             process=subprocess.run([sys.executable,'-m','saschi','run',str(path),'--expect',str(expect),'--output',str(out)],
                 cwd=ROOT,capture_output=True,text=True,timeout=45)
             receipt=json.loads((out/'receipt.json').read_text())

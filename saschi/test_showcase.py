@@ -45,7 +45,7 @@ class ShowcaseTests(unittest.TestCase):
         expected = json.loads((REPO / 'examples' / 'numeric_pictures_expected.json').read_text())
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / 'reports.json'
-            path.write_text(json.dumps(expected['reports']))
+            path.write_text(json.dumps(expected['reports']), newline='')
             job = build_job(source, expect_reports=path)
         document = build_showcase(job, 'report evidence')
         section = document.split('id="stage-compare"', 1)[1].split('</section>', 1)[0]
@@ -55,7 +55,7 @@ class ShowcaseTests(unittest.TestCase):
     def test_requested_comparison_before_execution_failure_is_not_reached(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / 'expected.json'
-            path.write_text('{}')
+            path.write_text('{}', newline='')
             job = build_job('data d; set absent; run;', expect=path)
         self.assertEqual(job.receipt['comparison'], 'not reached')
         document = build_showcase(job, 'unreached comparison')
@@ -101,7 +101,7 @@ class ShowcaseTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             expected = Path(temporary) / 'wrong.json'
             expected.write_text(json.dumps({'d': {'schema': {'x': 'number'},
-                                                   'rows': [{'x': 8.0}]}}))
+                                                   'rows': [{'x': 8.0}]}}), newline='')
             job = build_job('data d; x=7; run;', expect=expected)
         self.assertEqual(job.code, 1)
         self.assertIsNotNone(job.result)
@@ -120,7 +120,7 @@ class ShowcaseTests(unittest.TestCase):
     def test_log_only_expectation_is_distinct_from_dataset_comparison(self):
         with tempfile.TemporaryDirectory() as temporary:
             expected = Path(temporary) / 'log.json'
-            expected.write_text(json.dumps(['hello']))
+            expected.write_text(json.dumps(['hello']), newline='')
             job = build_job("data _null_; put 'hello'; run;", expect_log=expected)
         self.assertEqual(job.code, 0)
         status = self.status(job)

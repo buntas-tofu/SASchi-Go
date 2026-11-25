@@ -196,7 +196,7 @@ class DateProgramTests(unittest.TestCase):
 
     def test_late_cli_failure_does_not_publish_an_earlier_report(self):
         with tempfile.TemporaryDirectory(prefix='saschi-date-atomic-') as temporary:
-            directory=Path(temporary);path=directory/'source.sas';path.write_text(late_failure())
+            directory=Path(temporary);path=directory/'source.sas';path.write_text(late_failure(), newline='')
             run=subprocess.run([sys.executable,'-m','saschi','run',str(path),'--output',str(directory/'job')],
                                capture_output=True,text=True,cwd=ROOT,timeout=120)
             self.assertEqual(run.returncode,1,run.stderr)

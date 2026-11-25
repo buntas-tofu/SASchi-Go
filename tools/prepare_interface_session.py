@@ -43,14 +43,14 @@ def prepare(destination):
     with tempfile.TemporaryDirectory(prefix='saschi-interface-') as temporary:
         area = Path(temporary)
         datasets, reports = area / 'datasets.json', area / 'reports.json'
-        datasets.write_text(json.dumps(expected['datasets']))
-        reports.write_text(json.dumps(expected['reports']))
+        datasets.write_text(json.dumps(expected['datasets']), newline='')
+        reports.write_text(json.dumps(expected['reports']), newline='')
         jobs = [('a.html', build_job(source)),
                 ('b.html', build_job(source, expect=datasets, expect_reports=reports))]
     for name, job in jobs:
         if not job.receipt['accepted']:
             raise ValueError('interface preparation job failed; no session prepared')
-        (destination / name).write_text(build_showcase(job, 'Date evidence ' + name[0].upper()))
+        (destination / name).write_text(build_showcase(job, 'Date evidence ' + name[0].upper()), newline='')
     binding = source_state(ROOT)
     panels = []
     for key, title, prompt, fixture, check in TASKS:
@@ -76,12 +76,12 @@ def prepare(destination):
 </section>''')
     document = TEMPLATE.replace('@@PANELS@@', '\n'.join(panels)).replace('@@BINDING@@',
         json.dumps({'commit': binding['git_commit'], 'source_sha256': binding['source_sha256']}))
-    (destination / 'index.html').write_text(document)
+    (destination / 'index.html').write_text(document, newline='')
     manifest = {'status': 'Prepared first-party human session for principal use. Completed human sessions n=0; no usability outcome or native SAS comparison.',
                 'source': binding, 'tasks': len(TASKS), 'human_sessions': 0,
                 'files': {name: hashlib.sha256((destination/name).read_bytes()).hexdigest()
                           for name in ('index.html', 'a.html', 'b.html')}}
-    (destination / 'preparation.json').write_text(json.dumps(manifest, indent=2) + '\n')
+    (destination / 'preparation.json').write_text(json.dumps(manifest, indent=2) + '\n', newline='')
     return destination / 'index.html'
 
 

@@ -102,7 +102,7 @@ def batch_witness(cases):
         with (folder/'cases.csv').open('w',newline='') as stream:
             writer=csv.writer(stream);writer.writerow(['source','catalog'])
             for index,(source,catalog) in enumerate(cases):
-                (folder/f'{index}.sas').write_text(source)
+                (folder/f'{index}.sas').write_text(source, newline='')
                 catalog_files(folder/f'catalog{index}',catalog)
                 writer.writerow([f'{index}.sas',f'catalog{index}'])
         lines=rrun('batch',folder).stdout.splitlines()
@@ -271,8 +271,8 @@ def promoted_marker_boundary(source,catalog):
 
 def cli_check(source,catalog,expected=None):
     with tempfile.TemporaryDirectory() as directory:
-        folder=Path(directory);path=folder/'program.sas';path.write_text(source)
-        inputs=folder/'inputs.json';inputs.write_text(json.dumps(catalog,allow_nan=False))
+        folder=Path(directory);path=folder/'program.sas';path.write_text(source, newline='')
+        inputs=folder/'inputs.json';inputs.write_text(json.dumps(catalog,allow_nan=False), newline='')
         output=folder/'job'
         process=subprocess.run([sys.executable,'-m','saschi','run',str(path),'--inputs',str(inputs),'--output',str(output)],
             cwd=ROOT,capture_output=True,text=True,timeout=45)

@@ -62,7 +62,7 @@ class RowStatisticTests(unittest.TestCase):
         self.assertFalse(close(1+33*sys.float_info.epsilon,1))
         source='data d;x=std(1,2,3);run;'
         with tempfile.TemporaryDirectory() as directory:
-            path=Path(directory)/'expect.json';path.write_text(json.dumps({'d':{'schema':{'x':'number'},'rows':[{'x':math.nextafter(1.,2.)}]}}))
+            path=Path(directory)/'expect.json';path.write_text(json.dumps({'d':{'schema':{'x':'number'},'rows':[{'x':math.nextafter(1.,2.)}]}}), newline='')
             job=build_job(source,expect=path)
             self.assertEqual(job.code,1);self.assertEqual(job.receipt['comparison'],'failed')
 
@@ -96,9 +96,9 @@ class RowStatisticTests(unittest.TestCase):
 
     def test_actual_cli_bad_second_row_is_atomic(self):
         with tempfile.TemporaryDirectory() as directory:
-            folder=Path(directory);inp=folder/'inputs.json';inp.write_text(json.dumps(catalog([1,.5])))
+            folder=Path(directory);inp=folder/'inputs.json';inp.write_text(json.dumps(catalog([1,.5])), newline='')
             for name in NAMES:
-                src=folder/(name+'.sas');src.write_text(f"data d;set raw;x={name}(a,1);output;put 'made';run;");out=folder/('cli-'+name)
+                src=folder/(name+'.sas');src.write_text(f"data d;set raw;x={name}(a,1);output;put 'made';run;", newline='');out=folder/('cli-'+name)
                 run=subprocess.run([sys.executable,'-B','-m','saschi','run',str(src),'--inputs',str(inp),'--output',str(out)],capture_output=True,text=True,cwd=ROOT,timeout=60)
                 self.assertEqual(run.returncode,1,run.stdout+run.stderr)
                 receipt=json.loads((out/'receipt.json').read_text());self.assertFalse(receipt['accepted']);self.assertEqual(receipt['tickets'],[])

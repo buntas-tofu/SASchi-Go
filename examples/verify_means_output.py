@@ -132,7 +132,7 @@ def batch_witness(cases):
             writer=csv.writer(stream);writer.writerow(['source','catalog'])
             for i,case in enumerate(cases):
                 source,catalog=(case['source'],case.get('catalog',{})) if isinstance(case,dict) else case
-                (folder/f'{i}.sas').write_text(source);catalog_files(folder/f'cat{i}',catalog);writer.writerow([f'{i}.sas',f'cat{i}'])
+                (folder/f'{i}.sas').write_text(source, newline='');catalog_files(folder/f'cat{i}',catalog);writer.writerow([f'{i}.sas',f'cat{i}'])
         r=os.environ.get('ROSETTA_RSCRIPT') or shutil.which('Rscript') or 'Rscript'
         process=subprocess.run([r,str(HERE/'procedures.R'),'batch',str(folder)],capture_output=True,text=True,check=True,timeout=180)
     results=[];current=[]
@@ -237,14 +237,14 @@ def refusal_cases(mode):
 
 def cli_check(source,catalog,expected,*,wrong_dataset=None,wrong_reports=None,code=0):
     with tempfile.TemporaryDirectory() as temp:
-        folder=Path(temp);path=folder/'source.sas';path.write_text(source);inputs=folder/'inputs.json';inputs.write_text(json.dumps(catalog));out=folder/'job'
+        folder=Path(temp);path=folder/'source.sas';path.write_text(source, newline='');inputs=folder/'inputs.json';inputs.write_text(json.dumps(catalog), newline='');out=folder/'job'
         command=[sys.executable,'-B','-m','saschi','run',str(path),'--inputs',str(inputs),'--output',str(out)]
         if expected['datasets']:
             target=wrong_dataset if wrong_dataset is not None else {name:table for name,table in expected['datasets'].items() if name=='summary' or len(expected['datasets'])==1}
             if not target:target=expected['datasets']
-            file=folder/'expected.json';file.write_text(json.dumps(target));command+=['--expect',str(file)]
+            file=folder/'expected.json';file.write_text(json.dumps(target), newline='');command+=['--expect',str(file)]
         if 'reports' in expected or wrong_reports is not None:
-            file=folder/'reports.json';file.write_text(json.dumps(wrong_reports if wrong_reports is not None else expected['reports']));command+=['--expect-reports',str(file)]
+            file=folder/'reports.json';file.write_text(json.dumps(wrong_reports if wrong_reports is not None else expected['reports']), newline='');command+=['--expect-reports',str(file)]
         process=subprocess.run(command,cwd=ROOT,env={**os.environ,'PYTHONPATH':str(ROOT),'PYTHONDONTWRITEBYTECODE':'1'},capture_output=True,text=True,timeout=90)
         assert process.returncode==code,(process.stdout,process.stderr)
         receipt=json.loads((out/'receipt.json').read_text());assert receipt['accepted'] is (code==0)

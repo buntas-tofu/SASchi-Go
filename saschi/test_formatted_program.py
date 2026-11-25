@@ -192,14 +192,14 @@ class FormattedProgramTests(unittest.TestCase):
             for records, accepted in ((['first', 'second'], True), (['second', 'first'], False),
                                       (['first', 'second', 'second'], False), (['first'], False),
                                       (['first ', 'second'], False), (['first', 'Second'], False), ([], False)):
-                expected.write_text(json.dumps(records)); job = build_job(text, expect_log=expected)
+                expected.write_text(json.dumps(records), newline=''); job = build_job(text, expect_log=expected)
                 self.assertEqual(job.receipt['accepted'], accepted)
                 self.assertEqual(job.receipt['log_comparison'], 'passed' if accepted else 'failed')
                 self.assertEqual(job.receipt['expected_log_sha256'], hashlib.sha256(expected.read_bytes()).hexdigest())
 
     def test_actual_CLI_log_pass_wrong_and_invalid_manifest_publish_no_success(self):
         with tempfile.TemporaryDirectory() as directory:
-            folder = Path(directory); src = folder / 'program.sas'; src.write_text("data _null_;put 'first';put 'second';run;")
+            folder = Path(directory); src = folder / 'program.sas'; src.write_text("data _null_;put 'first';put 'second';run;", newline='')
             for index, (raw, accepted) in enumerate(((b'["first","second"]', True),
                     (b'["second","first"]', False), (b'["first","second "]', False),
                     (b'[' * 10000 + b']' * 10000, False))):
@@ -220,7 +220,7 @@ class FormattedProgramTests(unittest.TestCase):
         with tempfile.TemporaryDirectory(prefix='output-prefix-compat-') as temporary:
             folder = Path(temporary)
             source = folder / 'owned.sas'
-            source.write_text("data _null_;put 'prefix roundtrip';run;")
+            source.write_text("data _null_;put 'prefix roundtrip';run;", newline='')
             emitted = []
             for index, alias in enumerate(aliases):
                 with self.subTest(command='run', alias=alias):
@@ -257,8 +257,8 @@ class FormattedProgramTests(unittest.TestCase):
         self.assertEqual(len(record), 67)
         with tempfile.TemporaryDirectory(prefix='output-contract-compat-') as temporary:
             folder = Path(temporary)
-            source = folder / 'owned.sas'; source.write_text(text)
-            expected = folder / 'expected.json'; expected.write_text(json.dumps([record]))
+            source = folder / 'owned.sas'; source.write_text(text, newline='')
+            expected = folder / 'expected.json'; expected.write_text(json.dumps([record]), newline='')
             selected = folder / 'selected'
             process = subprocess.run([sys.executable, '-B', '-m', 'saschi', 'run', str(source),
                 '--output-contract', BITWISE_PROFILE, '--expect-log', str(expected), '--out', str(selected)],

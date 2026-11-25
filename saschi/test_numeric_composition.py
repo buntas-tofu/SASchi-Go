@@ -301,7 +301,7 @@ class NumericCompositionTests(unittest.TestCase):
 
     def test_independent_R_consumes_entire_source(self):
         with tempfile.TemporaryDirectory() as directory:
-            path=Path(directory)/'bad.sas';path.write_text(ORIGINAL.read_text()+'proc print;run;')
+            path=Path(directory)/'bad.sas';path.write_text(ORIGINAL.read_text()+'proc print;run;', newline='')
             with self.assertRaises(subprocess.CalledProcessError):program_witness(path)
 
 

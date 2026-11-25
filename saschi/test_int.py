@@ -92,9 +92,9 @@ class IntTests(unittest.TestCase):
     def test_comparator_controls_preserve_observed_values(self):
         source='data d; x=int(-2.4); run;'; actual=execute(source)[0]['datasets']['d']
         with tempfile.TemporaryDirectory() as d:
-            p=Path(d)/'expected.json';p.write_text(json.dumps({'d':actual}))
+            p=Path(d)/'expected.json';p.write_text(json.dumps({'d':actual}), newline='')
             self.assertTrue(build_job(source,expect=p).receipt['accepted'])
-            changed=deepcopy(actual);changed['rows'][0]['x']=-3.;p.write_text(json.dumps({'d':changed}))
+            changed=deepcopy(actual);changed['rows'][0]['x']=-3.;p.write_text(json.dumps({'d':changed}), newline='')
             job=build_job(source,expect=p);self.assertEqual(job.code,1)
             self.assertEqual(job.receipt['comparison'],'failed');self.assertEqual(job.result['datasets']['d'],actual)
 

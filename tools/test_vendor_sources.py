@@ -127,13 +127,13 @@ class VendorSourcesTests(unittest.TestCase):
 
     def test_duplicate_and_nonfinite_manifest_json_refuse(self):
         path = self.base / 'manifest.json'
-        path.write_text('{"schema_version":1,"schema_version":1}')
+        path.write_text('{"schema_version":1,"schema_version":1}', newline='')
         with self.assertRaisesRegex(ValueError, 'duplicate'):
             read_manifest(path)
-        path.write_text('{"schema_version":NaN}')
+        path.write_text('{"schema_version":NaN}', newline='')
         with self.assertRaisesRegex(ValueError, 'nonfinite'):
             read_manifest(path)
-        path.write_text(json.dumps(self.manifest))
+        path.write_text(json.dumps(self.manifest), newline='')
         self.assertEqual(read_manifest(path), self.manifest)
 
 

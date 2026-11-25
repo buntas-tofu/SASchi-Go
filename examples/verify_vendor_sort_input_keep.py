@@ -92,7 +92,7 @@ def late_failure(area):
     need(not job.plan.blocked and job.code==1 and job.result is None and
          sorts==['first_sorted','second_sorted'] and prints==['print_01.txt'],
          'actual late renderer failure did not follow two SORTs and a buffered first report')
-    source=area/'owned-late.sas';source.write_text(text);output=area/'late-cli'
+    source=area/'owned-late.sas';source.write_text(text, newline='');output=area/'late-cli'
     run,receipt=cli(source,output)
     need(run.returncode==1 and receipt['accepted'] is False,'late actual CLI failure accepted')
     need(not any((output/name).exists() for name in ('reports','exports','result.json','observed.json')),

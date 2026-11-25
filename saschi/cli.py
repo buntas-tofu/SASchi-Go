@@ -20,7 +20,10 @@ def write_json(path, value):
     encoder = json.JSONEncoder(indent=2, allow_nan=False)
     for chunk in encoder.iterencode(value):
         del chunk
-    with path.open('w') as handle:
+    # newline='' keeps the bytes on disk equal to the string hashed above:
+    # text mode would write CRLF on Windows and the receipt's own digest would
+    # then describe a file that is not there.
+    with path.open('w', newline='') as handle:
         json.dump(value, handle, indent=2, allow_nan=False)
         handle.write('\n')
 
@@ -129,7 +132,7 @@ def main(argv=None):
                 **({} if args.output_contract is None else {'output_contract': args.output_contract}))
             args.output.parent.mkdir(parents=True, exist_ok=True)
             # Exclusive creation protects an existing source or generated program.
-            with args.output.open('x') as handle:
+            with args.output.open('x', newline='') as handle:
                 handle.write(translation.code)
             print(json.dumps({'blocked': translation.blocked, 'tickets': [vars(t) for t in translation.tickets]}))
             return 2 if translation.blocked else 0
@@ -147,7 +150,7 @@ def main(argv=None):
             name = args.name or args.source.stem
             html = build_showcase(job, name, args.source.name)
             args.output.parent.mkdir(parents=True, exist_ok=True)
-            with args.output.open('x') as handle:
+            with args.output.open('x', newline='') as handle:
                 handle.write(html)
             print(json.dumps({'accepted': job.receipt['accepted'], 'showcase': str(args.output)}))
             return job.code

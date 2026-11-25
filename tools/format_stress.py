@@ -137,7 +137,7 @@ def campaign(seed, variants, destination):
                   'cases': results, 'passed': sum(r['passed'] for r in results),
                   'failed': sum(not r['passed'] for r in results), 'human_sessions': 0}
         destination.parent.mkdir(parents=True, exist_ok=True)
-        destination.write_text(json.dumps(report, indent=2) + '\n')
+        destination.write_text(json.dumps(report, indent=2) + '\n', newline='')
         return report
 
     def record(case, operation):

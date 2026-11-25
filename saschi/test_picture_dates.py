@@ -180,7 +180,7 @@ class PictureDateTests(unittest.TestCase):
         with patch.object(picture,'validate_reports',observer):job=build_job(late_failure())
         self.assertEqual(seen,[1]);self.assertEqual(job.code,1);self.assertIsNone(job.result)
         with tempfile.TemporaryDirectory(prefix='saschi-picture-atomic-') as temporary:
-            area=Path(temporary);source=area/'owned.sas';source.write_text(late_failure())
+            area=Path(temporary);source=area/'owned.sas';source.write_text(late_failure(), newline='')
             run=subprocess.run([sys.executable,'-m','saschi','run',str(source),'--output',str(area/'job')],cwd=ROOT,capture_output=True,text=True,timeout=120)
             self.assertEqual(run.returncode,1,run.stderr)
             record=json.loads((area/'job'/'receipt.json').read_text());self.assertFalse(record['accepted'])

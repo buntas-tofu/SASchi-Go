@@ -306,7 +306,7 @@ class Workspace:
             staged.mkdir()
             payload = _encoded(record)
             (staged / 'record.json').write_bytes(payload)
-            (staged / 'record.sha256').write_text(hashlib.sha256(payload).hexdigest() + '\n', encoding='ascii')
+            (staged / 'record.sha256').write_text(hashlib.sha256(payload).hexdigest() + '\n', encoding='ascii', newline='')
             staged.rename(self._run_path(run_id))
         return self.load_run(run_id)
 
@@ -438,7 +438,7 @@ class Workspace:
             code_dir = folder / 'code'
             code_dir.mkdir()
             extension = '.cpp' if record['receipt'].get('target') == 'cpp' else '.py'
-            (code_dir / ('converted' + extension)).write_text(record['translation']['code'], encoding='utf-8')
+            (code_dir / ('converted' + extension)).write_text(record['translation']['code'], encoding='utf-8', newline='')
             data_exports = {name: {'status': 'not_applicable', 'files': []}
                             for name in ('typed_json', 'parquet', 'csv')}
             if record['result'] and record['output_names']:
@@ -467,21 +467,21 @@ class Workspace:
                                 writer.writerow([('.' + value['missing'] if isinstance(value, dict) else value)
                                                  for value in (row[k] for k in table['schema'])])
             if record['result'] is not None:
-                (folder / 'execution.log').write_text('\n'.join(record['result'].get('log', [])) + '\n', encoding='utf-8')
+                (folder / 'execution.log').write_text('\n'.join(record['result'].get('log', [])) + '\n', encoding='utf-8', newline='')
                 for category in ('reports', 'exports'):
                     for name, content in record['result'].get(category, {}).items():
                         if not isinstance(name, str) or not re.fullmatch(r'[A-Za-z0-9_][A-Za-z0-9_.-]{0,239}', name):
                             raise ValueError('Unsafe generated artifact name')
                         target = folder / category
                         target.mkdir(exist_ok=True)
-                        (target / name).write_text(content, encoding='utf-8')
+                        (target / name).write_text(content, encoding='utf-8', newline='')
             omissions = []
             if record['output_names'] and not include_parquet:
                 omissions.append('Parquet output was not selected for this package. Typed JSON results retain the saved values and metadata; no Parquet file or sidecar is included.')
                 data_exports['parquet']['reason'] = 'Parquet export was not selected. It requires an available DuckDB installation.'
             if include_source:
                 (folder / 'source').mkdir()
-                (folder / 'source' / 'program.sas').write_text(record['source'], encoding='utf-8')
+                (folder / 'source' / 'program.sas').write_text(record['source'], encoding='utf-8', newline='')
             else:
                 omissions.append('Original SAS program file copy: excluded from package.')
             if not include_csv:
@@ -507,7 +507,7 @@ class Workspace:
                     (target / (str(index) + '-' + Path(entry['name']).name)).write_bytes(raw)
             portable = _portable_record(record, omissions, data_exports)
             (folder / 'run-record.json').write_bytes(_encoded(portable))
-            (folder / 'comparison-report.html').write_text(comparison_report(record, omissions, data_exports=data_exports), encoding='utf-8')
+            (folder / 'comparison-report.html').write_text(comparison_report(record, omissions, data_exports=data_exports), encoding='utf-8', newline='')
             (folder / 'README.txt').write_text(
                 'Saved run evidence for analyst review. Exporting does not rerun the program.\n'
                 'Read comparison-report.html for differences, scope and items not checked.\n'
@@ -519,7 +519,7 @@ class Workspace:
                 'Parquet output: ' + data_exports['parquet']['status'].replace('_', ' ') + '.\n'
                 'CSV output: ' + data_exports['csv']['status'].replace('_', ' ') + '.\n'
                 'See data_exports in run-record.json for the actual files included.\n'
-                'File digests detect changed contents; they do not establish SAS result provenance.\n', encoding='utf-8')
+                'File digests detect changed contents; they do not establish SAS result provenance.\n', encoding='utf-8', newline='')
             archive_path = Path(temporary) / 'package.zip'
             with zipfile.ZipFile(archive_path, 'w', compression=zipfile.ZIP_DEFLATED) as archive:
                 for path in sorted(folder.rglob('*')):

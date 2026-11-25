@@ -20,7 +20,7 @@ def build_job(source, inputs=None, **kwargs):
         return _build_job(source, **kwargs)
     with tempfile.TemporaryDirectory() as directory:
         path = Path(directory) / 'inputs.json'
-        path.write_text(json.dumps(inputs), encoding='utf-8')
+        path.write_text(json.dumps(inputs), encoding='utf-8', newline='')
         return _build_job(source, path, **kwargs)
 
 

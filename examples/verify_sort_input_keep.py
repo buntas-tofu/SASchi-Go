@@ -99,8 +99,8 @@ def batch_witness(sources):
     with tempfile.TemporaryDirectory() as directory:
         folder = Path(directory); paths = []
         for i, text in enumerate(sources):
-            path = folder / f'{i}.sas'; path.write_text(text); paths.append(path)
-        listing = folder / 'sources.txt'; listing.write_text(''.join(str(path) + '\n' for path in paths))
+            path = folder / f'{i}.sas'; path.write_text(text, newline=''); paths.append(path)
+        listing = folder / 'sources.txt'; listing.write_text(''.join(str(path) + '\n' for path in paths), newline='')
         rscript = os.environ.get('ROSETTA_RSCRIPT') or shutil.which('Rscript') or 'Rscript'
         run = subprocess.run([rscript, str(HERE / 'sort_input_keep.R'), str(listing)], cwd=ROOT,
                              env={**os.environ, 'SASCHI_EXAMPLES_ROOT': str(ROOT / 'examples')},
@@ -226,9 +226,9 @@ def execute(text):
 def cli_check(text, truth, wrong=False):
     from saschi.cli import main
     with tempfile.TemporaryDirectory() as directory:
-        folder = Path(directory); src = folder / 'input.sas'; src.write_text(text)
-        expected = folder / 'expected.json'; expected.write_text(json.dumps(truth['datasets']))
-        reports = folder / 'reports.json'; reports.write_text(json.dumps(truth.get('reports', {})))
+        folder = Path(directory); src = folder / 'input.sas'; src.write_text(text, newline='')
+        expected = folder / 'expected.json'; expected.write_text(json.dumps(truth['datasets']), newline='')
+        reports = folder / 'reports.json'; reports.write_text(json.dumps(truth.get('reports', {})), newline='')
         output = folder / 'job'; console = io.StringIO()
         argv = ['run', str(src), '--expect', str(expected), '--output', str(output)]
         if 'reports' in truth: argv += ['--expect-reports', str(reports)]
@@ -304,7 +304,7 @@ def atomic_check(text):
     def observed(*args, **kwargs):
         result = printed(*args, **kwargs); reports.append(deepcopy(result)); return result
     with tempfile.TemporaryDirectory() as directory:
-        path = Path(directory) / 'original.sas'; path.write_text(text); output = Path(directory) / 'job'; console = io.StringIO()
+        path = Path(directory) / 'original.sas'; path.write_text(text, newline=''); output = Path(directory) / 'job'; console = io.StringIO()
         with patch.object(sort_projection, 'execute_sort', later), patch.object(mixed_reports, 'execute_print', observed), contextlib.redirect_stdout(console):
             code = main(['run', str(path), '--output', str(output)])
         receipt = json.loads((output / 'receipt.json').read_text())

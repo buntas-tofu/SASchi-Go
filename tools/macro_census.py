@@ -227,7 +227,7 @@ def emit_markdown(out_path: Path, repos, public_root: Path):
     lines.append("friendly_SAS-macros, HHS-AHRQ_MEPS, PaulSchmidtGit_Heritability.")
     lines.append("A private bench stays out of this report.")
     lines.append("")
-    out_path.write_text("\n".join(lines), encoding="utf-8")
+    out_path.write_text("\n".join(lines), encoding="utf-8", newline='')
 
 
 def main(argv=None):

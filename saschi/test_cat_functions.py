@@ -89,7 +89,7 @@ class CatFunctionTests(unittest.TestCase):
                 source=folder/(name+'.sas');inp=folder/(name+'.json');out=folder/('cli-'+name)
                 text=f'data d;set raw;x={name}(a);output;put x;run;' if name=='cat' else f'data d;length x $2;set raw;x={name}(a);output;put x;run;'
                 values=['ok','é'] if name=='cat' else ['a','abcd']
-                source.write_text(text);inp.write_text(json.dumps(catalog(values)))
+                source.write_text(text, newline='');inp.write_text(json.dumps(catalog(values)), newline='')
                 run=subprocess.run([sys.executable,'-B','-m','saschi','run',str(source),'--inputs',str(inp),'--output',str(out)],capture_output=True,text=True,cwd=ROOT,timeout=60)
                 self.assertEqual(run.returncode,1,run.stdout+run.stderr)
                 receipt=json.loads((out/'receipt.json').read_text());self.assertFalse(receipt['accepted']);self.assertEqual(receipt['tickets'],[])

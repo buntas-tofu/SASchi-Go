@@ -67,6 +67,7 @@ jobs:
         run: |
           python3 -m unittest tools.test_windows_paths
           python3 -m unittest tools.test_sanitization
+          python3 -m unittest tools.test_byte_exact_writes
           python3 scripts/check_sanitization.py buntas
 
   windows-checkout:

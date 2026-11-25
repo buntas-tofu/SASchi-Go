@@ -41,7 +41,7 @@ class BuildJobTests(unittest.TestCase):
     def test_later_checks_remain_not_reached_after_first_comparison_fails(self):
         with tempfile.TemporaryDirectory() as temporary:
             path = Path(temporary) / 'wrong.json'
-            path.write_text('{}')
+            path.write_text('{}', newline='')
             job = build_job('data d; x=1; run;', expect=path, expect_exports=path,
                             expect_reports=path, expect_log=path)
         self.assertFalse(job.receipt['accepted'])
@@ -80,8 +80,8 @@ class BuildJobTests(unittest.TestCase):
             tdir = Path(td)
             ip, ep = tdir / 'inputs.json', tdir / 'expected.json'
             import json
-            ip.write_text(json.dumps(inputs))
-            ep.write_text(json.dumps(expected))
+            ip.write_text(json.dumps(inputs), newline='')
+            ep.write_text(json.dumps(expected), newline='')
             job = build_job(source, ip, ep)
         self.assertFalse(job.receipt['accepted'])
         self.assertEqual(job.code, 1)
@@ -173,7 +173,7 @@ with tempfile.TemporaryDirectory() as td:
 
 
 def legacy_write_json(path, value):
-    path.write_text(json.dumps(value, indent=2, allow_nan=False) + '\n')
+    path.write_text(json.dumps(value, indent=2, allow_nan=False) + '\n', newline='')
 
 
 class JSONArtifactTests(unittest.TestCase):
@@ -249,11 +249,11 @@ with tempfile.TemporaryDirectory() as td:
             for name, source, expected_value, code in cases:
                 with self.subTest(case=name):
                     source_path = root / (name + '.sas')
-                    source_path.write_text(source)
+                    source_path.write_text(source, newline='')
                     rows = [{'id': 2}, {'id': 1}] if name == 'execution' else [{'id': 1}]
-                    inputs.write_text(json.dumps({'raw': {'schema': {'id': 'number'}, 'rows': rows}}))
+                    inputs.write_text(json.dumps({'raw': {'schema': {'id': 'number'}, 'rows': rows}}), newline='')
                     expected.write_text(json.dumps({'out': {'schema': {'id': 'number'},
-                                                           'rows': [{'id': expected_value}]}}))
+                                                           'rows': [{'id': expected_value}]}}), newline='')
                     results = []
                     for writer_name, writer in [('legacy', legacy_write_json), ('streamed', cli.write_json)]:
                         output = root / (name + '-' + writer_name)
@@ -301,7 +301,7 @@ with tempfile.TemporaryDirectory() as td:
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
             source = root / 'job.sas'
-            source.write_text('data out; x=1; run;')
+            source.write_text('data out; x=1; run;', newline='')
             for name, writer in [('legacy', legacy_write_json), ('streamed', cli.write_json)]:
                 with self.subTest(writer=name):
                     output = root / name
@@ -326,9 +326,9 @@ class LogicalReportJobTests(unittest.TestCase):
         ip = directory / 'input.json'
         rp = directory / 'reports.json'
         ep = directory / 'expected.json'
-        ip.write_text(json.dumps(self.inputs))
-        rp.write_text(json.dumps(self.reports if reports is None else reports))
-        ep.write_text(json.dumps(self.inputs if expected is None else expected))
+        ip.write_text(json.dumps(self.inputs), newline='')
+        rp.write_text(json.dumps(self.reports if reports is None else reports), newline='')
+        ep.write_text(json.dumps(self.inputs if expected is None else expected), newline='')
         return ip, ep, rp
 
     def test_dataset_and_report_comparators_are_independent_and_exact(self):
@@ -342,13 +342,13 @@ class LogicalReportJobTests(unittest.TestCase):
             for report in ({'other.txt': self.reports['print.txt']},
                            {'print.txt': 'x\n2\n1\n'}, {'print.txt': 'x\n1\n2'},
                            {'print.txt': 'x\n1.0\n2\n'}, {'print.txt': 'x\r\n1\r\n2\r\n'}):
-                rp.write_text(json.dumps(report))
+                rp.write_text(json.dumps(report), newline='')
                 wrong = build_job(self.source, ip, ep, expect_reports=rp)
                 self.assertEqual(wrong.code, 1)
                 self.assertEqual(wrong.receipt['report_comparison'], 'failed')
                 self.assertEqual(wrong.result['reports'], self.reports)
-            rp.write_text(json.dumps(self.reports))
-            ep.write_text(json.dumps({'raw': {'schema': {'x': 'number'}, 'rows': [{'x': True}, {'x': 2}]}}))
+            rp.write_text(json.dumps(self.reports), newline='')
+            ep.write_text(json.dumps({'raw': {'schema': {'x': 'number'}, 'rows': [{'x': True}, {'x': 2}]}}), newline='')
             wrong = build_job(self.source, ip, ep, expect_reports=rp)
             self.assertEqual(wrong.code, 1)
             self.assertEqual(wrong.receipt['report_comparison'], 'passed')
@@ -368,7 +368,7 @@ class LogicalReportJobTests(unittest.TestCase):
                     path.write_bytes(payload)
                     with self.assertRaises(ValueError):
                         read_expected_reports(path)
-            path.write_text(json.dumps({'other.txt': 'wrong but safe\n'}))
+            path.write_text(json.dumps({'other.txt': 'wrong but safe\n'}), newline='')
             self.assertEqual(read_expected_reports(path)[0], {'other.txt': 'wrong but safe\n'})
 
     def test_cli_publishes_reports_only_on_complete_acceptance(self):
@@ -376,12 +376,12 @@ class LogicalReportJobTests(unittest.TestCase):
             directory = Path(td)
             ip, ep, rp = self.files(directory)
             source = directory / 'program.sas'
-            source.write_text(self.source)
+            source.write_text(self.source, newline='')
             for name, report, expected, code in (
                     ('good', self.reports, self.inputs, 0),
                     ('wrong-report', {'print.txt': 'wrong\n'}, self.inputs, 1),
                     ('wrong-data', self.reports, {'raw': {'schema': {'x': 'number'}, 'rows': []}}, 1)):
-                rp.write_text(json.dumps(report)); ep.write_text(json.dumps(expected))
+                rp.write_text(json.dumps(report), newline=''); ep.write_text(json.dumps(expected), newline='')
                 out = directory / name
                 with contextlib.redirect_stdout(io.StringIO()):
                     actual = cli.main(['run', str(source), '--inputs', str(ip), '--expect', str(ep),
@@ -397,7 +397,7 @@ class LogicalReportJobTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             directory = Path(td)
             ip, ep, rp = self.files(directory)
-            source = directory / 'program.sas'; source.write_text(self.source)
+            source = directory / 'program.sas'; source.write_text(self.source, newline='')
             original = Path.open
             def fail_report(path, *args, **kwargs):
                 if path.name == 'print.txt':
@@ -425,13 +425,13 @@ class LogicalReportJobTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             directory = Path(td)
             ip, ep, rp = self.files(directory)
-            source = directory / 'program.sas'; source.write_text(source_text)
+            source = directory / 'program.sas'; source.write_text(source_text, newline='')
             xp = directory / 'exports.json'
             for name, report, exports, code in (
                     ('good', self.reports, {'values.csv': '1\n2\n'}, 0),
                     ('bad-report', {'print.txt': 'wrong\n'}, {'values.csv': '1\n2\n'}, 1),
                     ('bad-export', self.reports, {'values.csv': 'wrong\n'}, 1)):
-                rp.write_text(json.dumps(report)); xp.write_text(json.dumps(exports))
+                rp.write_text(json.dumps(report), newline=''); xp.write_text(json.dumps(exports), newline='')
                 output = directory / name
                 with contextlib.redirect_stdout(io.StringIO()):
                     actual = cli.main(['run', str(source), '--inputs', str(ip), '--expect-reports', str(rp),
@@ -447,7 +447,7 @@ class LogicalReportJobTests(unittest.TestCase):
                        'data bad;set absent;run;')
         with tempfile.TemporaryDirectory() as td:
             directory = Path(td); ip, ep, rp = self.files(directory)
-            source = directory / 'program.sas'; source.write_text(source_text)
+            source = directory / 'program.sas'; source.write_text(source_text, newline='')
             out = directory / 'failed'
             with contextlib.redirect_stdout(io.StringIO()):
                 code = cli.main(['run', str(source), '--inputs', str(ip), '--output', str(out)])
@@ -460,7 +460,7 @@ class LogicalReportJobTests(unittest.TestCase):
         from .report_artifacts import read_expected_reports
         with tempfile.TemporaryDirectory() as td:
             directory = Path(td); ip, ep, rp = self.files(directory)
-            rp.write_text('{"print.txt":' + '[' * 10000 + '0' + ']' * 10000 + '}')
+            rp.write_text('{"print.txt":' + '[' * 10000 + '0' + ']' * 10000 + '}', newline='')
             self.assertLess(rp.stat().st_size, 1048576)
             with self.assertRaises(ValueError):
                 read_expected_reports(rp)
@@ -469,7 +469,7 @@ class LogicalReportJobTests(unittest.TestCase):
             self.assertFalse(job.receipt['accepted'])
             self.assertEqual(job.receipt['report_comparison'], 'failed')
             self.assertEqual(job.result['reports'], self.reports)
-            source = directory / 'program.sas'; source.write_text(self.source)
+            source = directory / 'program.sas'; source.write_text(self.source, newline='')
             output = directory / 'failed'
             with contextlib.redirect_stdout(io.StringIO()):
                 code = cli.main(['run', str(source), '--inputs', str(ip),
@@ -490,7 +490,7 @@ class ReportContractBoundaryTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory)/'reports.json'
             expected = {'print_01.txt':'obs word\n1 "A"\n','print_02.txt':'obs word\n1 "B"\n'}
-            path.write_text(json.dumps(expected))
+            path.write_text(json.dumps(expected), newline='')
             with self.assertRaisesRegex(ValueError,'one complete'):
                 read_expected_reports(path)
             self.assertEqual(read_expected_reports(path,contract=MIXED_REPORT_CONTRACT)[0],expected)
@@ -521,7 +521,7 @@ class ReportContractBoundaryTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory)/'reports.json'
             for raw in ('{"a.txt":"x","a.txt":"y"}','{"a.txt":"x","b.txt":"y","c.txt":"z"}'):
-                path.write_text(raw)
+                path.write_text(raw, newline='')
                 with self.assertRaises(ValueError):read_expected_reports(path,contract=MIXED_REPORT_CONTRACT)
 
 

@@ -88,9 +88,9 @@ class SearchExtractionTests(unittest.TestCase):
     def test_actual_cli_bad_second_row_is_atomic_for_every_function(self):
         calls={'findc':"findc(a,'x')",'findw':"findw(a,'x',' ')",'indexc':"indexc(a,'x')",'indexw':"indexw(a,'x')",'substrn':'substrn(a,1,2)'}
         with tempfile.TemporaryDirectory() as directory:
-            folder=Path(directory);data=folder/'inputs.json';data.write_text(json.dumps(catalog([{'a':'x','position':1},{'a':'é','position':1}])))
+            folder=Path(directory);data=folder/'inputs.json';data.write_text(json.dumps(catalog([{'a':'x','position':1},{'a':'é','position':1}])), encoding='utf-8', newline='')
             for name,call in calls.items():
-                source=folder/(name+'.sas');source.write_text("data d;set raw;x="+call+";output;put 'made';run;");out=folder/('cli-'+name)
+                source=folder/(name+'.sas');source.write_text("data d;set raw;x="+call+";output;put 'made';run;", newline='');out=folder/('cli-'+name)
                 self.assertEqual(job_with_inputs(source.read_text(),catalog([{'a':'x','position':1}])).code,0)
                 run=subprocess.run([sys.executable,'-B','-m','saschi','run',str(source),'--inputs',str(data),'--output',str(out)],capture_output=True,text=True,cwd=ROOT,timeout=60)
                 self.assertEqual(run.returncode,1,run.stdout+run.stderr)

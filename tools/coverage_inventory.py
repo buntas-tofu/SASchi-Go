@@ -202,7 +202,7 @@ def main():
     args = p.parse_args()
     report = build(args.corpus, args.receipt)
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(report, indent=2) + '\n')
+    args.output.write_text(json.dumps(report, indent=2) + '\n', newline='')
     c = report['corpus']
     print(json.dumps({k: c[k] for k in ('files', 'compile_clean', 'blocked', 'tickets', 'unknown_tickets', 'unknown_category_counts')}))
     return 1 if 'needs-triage' in c['category_counts'] else 0

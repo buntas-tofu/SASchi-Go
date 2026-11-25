@@ -280,7 +280,7 @@ class InputListTests(unittest.TestCase):
             elif change=='schema':table['schema']=dict(reversed(list(table['schema'].items())))
             else:table['rows'].append(deepcopy(table['rows'][0]))
             with tempfile.TemporaryDirectory() as d:
-                path=Path(d)/'expected.json';path.write_text(json.dumps(expected))
+                path=Path(d)/'expected.json';path.write_text(json.dumps(expected), newline='')
                 job=build_job(ORIGINAL.read_text(),expect=path)
             self.assertEqual(job.code,1);self.assertFalse(job.receipt['accepted']);self.assertEqual(job.result,original_expected())
 
@@ -304,7 +304,7 @@ class InputListTests(unittest.TestCase):
         for text in (original+'put "tail";',original.replace('run;',''),original.replace('input a b;','input a b @;'),
                      original.replace('2 999','x 999'),original.replace('output;','unknown;',1)):
             with tempfile.TemporaryDirectory() as d:
-                path=Path(d)/'bad.sas';path.write_text(text)
+                path=Path(d)/'bad.sas';path.write_text(text, newline='')
                 with self.assertRaises(subprocess.CalledProcessError):rrun('program',path)
 
 

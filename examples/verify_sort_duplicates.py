@@ -145,8 +145,8 @@ def batch_witness(sources, r_name='sort_duplicates.R'):
     with tempfile.TemporaryDirectory() as directory:
         folder = Path(directory); paths = []
         for i, text in enumerate(sources):
-            path = folder / f'{i}.sas'; path.write_text(text); paths.append(path)
-        listing = folder / 'sources.txt'; listing.write_text(''.join(str(path) + '\n' for path in paths))
+            path = folder / f'{i}.sas'; path.write_text(text, newline=''); paths.append(path)
+        listing = folder / 'sources.txt'; listing.write_text(''.join(str(path) + '\n' for path in paths), newline='')
         rscript = os.environ.get('ROSETTA_RSCRIPT') or shutil.which('Rscript') or 'Rscript'
         run = subprocess.run([rscript, str(HERE / r_name), str(listing)], cwd=ROOT,
                              env={**os.environ, 'SASCHI_EXAMPLES_ROOT': str(ROOT / 'examples')},
@@ -346,9 +346,9 @@ def check_old_selection(label,text):
 def cli_check(text,truth,wrong=False):
     from saschi.cli import main
     with tempfile.TemporaryDirectory() as directory:
-        folder=Path(directory);src=folder/'input.sas';src.write_text(text)
-        expected=folder/'expected.json';expected.write_text(json.dumps(truth['datasets']))
-        reports=folder/'reports.json';reports.write_text(json.dumps(truth.get('reports',{})))
+        folder=Path(directory);src=folder/'input.sas';src.write_text(text, newline='')
+        expected=folder/'expected.json';expected.write_text(json.dumps(truth['datasets']), newline='')
+        reports=folder/'reports.json';reports.write_text(json.dumps(truth.get('reports',{})), newline='')
         output=folder/'job';console=io.StringIO()
         argv=['run',str(src),'--expect',str(expected),'--output',str(output)]
         if 'reports' in truth:argv+=['--expect-reports',str(reports)]
@@ -374,7 +374,7 @@ def cli_check(text,truth,wrong=False):
 def cli_source_refusal(text):
     from saschi.cli import main
     with tempfile.TemporaryDirectory() as directory:
-        folder=Path(directory);src=folder/'refused.sas';src.write_text(text);output=folder/'job'
+        folder=Path(directory);src=folder/'refused.sas';src.write_text(text, newline='');output=folder/'job'
         with contextlib.redirect_stdout(io.StringIO()):code=main(['run',str(src),'--output',str(output)])
         receipt=json.loads((output/'receipt.json').read_text())
         assert code in (1,2) and receipt['accepted'] is False
@@ -492,7 +492,7 @@ def atomic_check(text,mode):
         return result
     messages={'partition':'DUPOUT fresh partition late runtime fault','replacement':'DUPOUT replacement late runtime fault','third-report':'DUPOUT third report late runtime fault'}
     with tempfile.TemporaryDirectory() as directory:
-        folder=Path(directory);src=folder/'original.sas';src.write_text(text);output=folder/'job'
+        folder=Path(directory);src=folder/'original.sas';src.write_text(text, newline='');output=folder/'job'
         with patch.object(sort_duplicates,'execute_partition',partitioned),patch.object(sort_duplicates,'execute_print',printed),contextlib.redirect_stdout(io.StringIO()):
             code=main(['run',str(src),'--output',str(output)])
         receipt=json.loads((output/'receipt.json').read_text())

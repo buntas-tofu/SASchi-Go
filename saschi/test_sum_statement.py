@@ -134,10 +134,10 @@ class SumStatementTests(unittest.TestCase):
         table=deepcopy(actual); table['rows'].reverse(); changes.append(table)
         table=deepcopy(actual); table['schema']['n']={'type':'number','label':'changed'}; changes.append(table)
         with tempfile.TemporaryDirectory() as d:
-            path=Path(d)/'expected.json'; path.write_text(json.dumps({'d':actual}))
+            path=Path(d)/'expected.json'; path.write_text(json.dumps({'d':actual}), newline='')
             self.assertTrue(build_job(source,expect=path).receipt['accepted'])
             for changed in changes:
-                path.write_text(json.dumps({'d':changed})); job=build_job(source,expect=path)
+                path.write_text(json.dumps({'d':changed}), newline=''); job=build_job(source,expect=path)
                 self.assertEqual(job.code,1); self.assertEqual(job.receipt['comparison'],'failed')
                 self.assertEqual(job.result['datasets']['d'],actual)
 

@@ -98,7 +98,7 @@ class FunctionWaveCompositionTests(unittest.TestCase):
                 self.assertEqual(stream.getvalue(),'');self.assertNotIn('result',namespace)
                 job=job_with_inputs(source,inputs);self.assertEqual(job.code,1);self.assertIsNone(job.result)
                 with tempfile.TemporaryDirectory() as directory:
-                    root=Path(directory);sas=root/'job.sas';sas.write_text(source);supplied=root/'inputs.json';supplied.write_text(json.dumps(inputs));output=root/'output'
+                    root=Path(directory);sas=root/'job.sas';sas.write_text(source, newline='');supplied=root/'inputs.json';supplied.write_text(json.dumps(inputs), newline='');output=root/'output'
                     result=subprocess.run([sys.executable,'-m','saschi','run',str(sas),'--inputs',str(supplied),'--output',str(output)],cwd=CHARACTER.root,capture_output=True,text=True,timeout=30)
                     self.assertEqual(result.returncode,1,result.stdout+result.stderr)
                     receipt=json.loads((output/'receipt.json').read_text());self.assertFalse(receipt['accepted']);self.assertTrue(receipt['error'])

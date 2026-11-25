@@ -52,7 +52,7 @@ def main():
     with tempfile.TemporaryDirectory() as temp:
         path=Path(temp)/'cases.tsv'
         def field(value):return 'C:'+value.encode().hex() if isinstance(value,str) else 'N:'+repr(value)
-        path.write_text(''.join('\t'.join([mode,field(delimiter),*[field(value) for value in values]])+'\n' for mode,delimiter,values,_ in cases))
+        path.write_text(''.join('\t'.join([mode,field(delimiter),*[field(value) for value in values]])+'\n' for mode,delimiter,values,_ in cases), newline='')
         r=os.environ.get('ROSETTA_RSCRIPT') or shutil.which('Rscript') or 'Rscript'
         run=subprocess.run([r,str(HERE/'concat_catx.R'),'fixtures',str(path)],capture_output=True,text=True,check=True,timeout=60)
     records=run.stdout.splitlines();assert len(records)==len(cases)

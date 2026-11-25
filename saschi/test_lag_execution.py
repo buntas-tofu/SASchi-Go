@@ -224,7 +224,7 @@ class LagExecutionTests(unittest.TestCase):
             with contextlib.redirect_stdout(printed),self.assertRaises(ValueError):exec(translated.code,ns)
             self.assertEqual(printed.getvalue(),'');self.assertNotIn('result',ns)
             with tempfile.TemporaryDirectory() as directory:
-                path=Path(directory)/'input.json';path.write_text(json.dumps(data))
+                path=Path(directory)/'input.json';path.write_text(json.dumps(data), newline='')
                 job=build_job(source,path)
             self.assertEqual(job.code,1);self.assertIsNone(job.result);self.assertFalse(job.receipt['accepted'])
 

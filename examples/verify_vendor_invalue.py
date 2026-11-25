@@ -53,7 +53,7 @@ def late_failure(area):
         job = build_job(source)
     need(not job.plan.blocked and seen == ['means completed'] and job.code == 1 and job.result is None,
          'actual late PRINT rendering failure did not remain atomic')
-    path = area / 'owned-late.sas'; path.write_text(source)
+    path = area / 'owned-late.sas'; path.write_text(source, newline='')
     output = area / 'late'
     run, receipt = cli(path, output)
     need(run.returncode == 1 and not receipt['accepted'] and '415' in receipt['error'], 'late actualCLI failure differs')

@@ -15,19 +15,19 @@ class DesktopWorkflow(unittest.TestCase):
         self.addCleanup(self.area.cleanup)
         self.root = Path(self.area.name)
         self.source = self.root / 'net_sales.sas'
-        self.source.write_text('data net_sales; merge orders returns; by order_id; net=gross-refunded; run;')
+        self.source.write_text('data net_sales; merge orders returns; by order_id; net=gross-refunded; run;', newline='')
         self.orders, self.returns = self.root / 'orders.json', self.root / 'returns.json'
         self.orders.write_text(json.dumps({'orders': {'schema': {'order_id': 'number', 'gross': 'number'},
-                                                     'rows': [{'order_id': 3, 'gross': 1000}]}}))
+                                                     'rows': [{'order_id': 3, 'gross': 1000}]}}), newline='')
         self.set_return(40)
         self.expected = self.root / 'net_sales.json'
         self.expected.write_text(json.dumps({'net_sales': {'schema': {'order_id': 'number', 'gross': 'number', 'refunded': 'number', 'net': 'number'},
-                                                          'rows': [{'order_id': 3, 'gross': 1000, 'refunded': 40, 'net': 950}]}}))
+                                                          'rows': [{'order_id': 3, 'gross': 1000, 'refunded': 40, 'net': 950}]}}), newline='')
         self.workspace = self.root / 'saved'
 
     def set_return(self, amount):
         self.returns.write_text(json.dumps({'returns': {'schema': {'order_id': 'number', 'refunded': 'number'},
-                                                       'rows': [{'order_id': 3, 'refunded': amount}]}}))
+                                                       'rows': [{'order_id': 3, 'refunded': amount}]}}), newline='')
 
     def selection(self, compare=True):
         return {'source': str(self.source), 'inputs': [str(self.orders), str(self.returns)],
@@ -64,7 +64,7 @@ class DesktopWorkflow(unittest.TestCase):
         self.assertFalse(self.workspace.exists())
 
     def test_initial_lookup_requires_its_external_dataset_before_execution(self):
-        self.source.write_text('data out; if _n_=1 then set config; set orders; net=gross; run;')
+        self.source.write_text('data out; if _n_=1 then set config; set orders; net=gross; run;', newline='')
         selection = self.selection(compare=False)
         selection['inputs'] = [str(self.orders)]
         prepared = review_setup(selection)
@@ -133,7 +133,7 @@ class DesktopWorkflow(unittest.TestCase):
 
     def test_failed_execution_still_saves_original_evidence(self):
         self.orders.write_text(json.dumps({'orders': {'schema': {'order_id': 'number', 'gross': 'number'},
-                                                     'rows': [{'order_id': 3, 'gross': 1000}, {'order_id': 1, 'gross': 20}]}}))
+                                                     'rows': [{'order_id': 3, 'gross': 1000}, {'order_id': 1, 'gross': 20}]}}), newline='')
         record = execute_prepared(review_setup(self.selection()), self.workspace)
         self.assertEqual(record['execution'], 'failed')
         self.assertIsNone(record['result'])

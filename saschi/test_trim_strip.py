@@ -239,7 +239,7 @@ class TrimStripTests(unittest.TestCase):
             elif mutation=='schema':table['schema']=dict(reversed(list(table['schema'].items())))
             else:table['rows'].append(deepcopy(table['rows'][0]))
             with tempfile.TemporaryDirectory() as d:
-                p=Path(d)/'expected.json';p.write_text(json.dumps(expected));job=build_job(ORIGINAL.read_text(),expect=p)
+                p=Path(d)/'expected.json';p.write_text(json.dumps(expected), newline='');job=build_job(ORIGINAL.read_text(),expect=p)
                 self.assertEqual(job.code,1);self.assertFalse(job.receipt['accepted']);self.assertEqual(job.result,original_expected())
 
     def check_cli(self,path,expected):
@@ -273,7 +273,7 @@ class TrimStripTests(unittest.TestCase):
             # The missing RUN control is explicit, independent of whitespace layout.
             if bad==source:bad=source.replace('run;','',1)
             with tempfile.TemporaryDirectory() as d:
-                p=Path(d)/'bad.sas';p.write_text(bad)
+                p=Path(d)/'bad.sas';p.write_text(bad, newline='')
                 with self.assertRaises(subprocess.CalledProcessError):rrun('program',p)
 
 

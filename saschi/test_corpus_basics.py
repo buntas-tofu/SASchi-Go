@@ -158,7 +158,7 @@ class CorpusBasicsTests(unittest.TestCase):
     def test_independent_scanner_keeps_comment_markers_inside_quotes(self):
         source = "/*outer;*/data _null_;put 'semi; /*literal*/ it''s';/*middle*/run;*tail;"
         with tempfile.TemporaryDirectory() as temporary:
-            path = Path(temporary) / 'original.sas'; path.write_text(source)
+            path = Path(temporary) / 'original.sas'; path.write_text(source, newline='')
             independent, accounting = program_witness(path)
         result, stdout = emitted(source)
         self.assertEqual(independent, result)
@@ -185,7 +185,7 @@ class CorpusBasicsTests(unittest.TestCase):
                                            ('/*a;*/ *b;\n*multi\nline;', 1, 2),
                                            ('%*macro;/*block*/', 1, 1)]:
             with self.subTest(source=source), tempfile.TemporaryDirectory() as temporary:
-                path = Path(temporary) / 'original.sas'; path.write_text(source)
+                path = Path(temporary) / 'original.sas'; path.write_text(source, newline='')
                 result, accounting = program_witness(path)
                 self.assertEqual(result, {'datasets': {}, 'log': []})
                 self.assertEqual(accounting['block_comments'], blocks)
@@ -197,7 +197,7 @@ class CorpusBasicsTests(unittest.TestCase):
         base = (ROKU_CORPUS / 'hello_world_text.sas').read_text()
         for tail in ('proc print;run;', 'data d;x=1;run;', "put 'outside';", 'unknown;'):
             with self.subTest(tail=tail), tempfile.TemporaryDirectory() as temporary:
-                path = Path(temporary) / 'mutation.sas'; path.write_text(base + tail)
+                path = Path(temporary) / 'mutation.sas'; path.write_text(base + tail, newline='')
                 with self.assertRaises(ValueError):
                     program_witness(path)
 
@@ -205,7 +205,7 @@ class CorpusBasicsTests(unittest.TestCase):
         for tail in ('/*unclosed', '*unclosed', 'data _null_;put "unclosed;',
                      'data _null_;put \'record\';', 'data _null_;put \'record\';run'):
             with self.subTest(tail=tail), tempfile.TemporaryDirectory() as temporary:
-                path = Path(temporary) / 'mutation.sas'; path.write_text(tail)
+                path = Path(temporary) / 'mutation.sas'; path.write_text(tail, newline='')
                 with self.assertRaises(ValueError):
                     program_witness(path)
 
@@ -213,7 +213,7 @@ class CorpusBasicsTests(unittest.TestCase):
         for name in PINS:
             source = (ROKU_CORPUS / name).read_text() + "data _null_;put 'tail';run;"
             with self.subTest(name=name), tempfile.TemporaryDirectory() as temporary:
-                path = Path(temporary) / 'mutation.sas'; path.write_text(source)
+                path = Path(temporary) / 'mutation.sas'; path.write_text(source, newline='')
                 independent, accounting = program_witness(path)
                 result, stdout = emitted(source)
                 self.assertEqual(independent, result)
@@ -249,7 +249,7 @@ class CorpusBasicsTests(unittest.TestCase):
     def test_failing_appended_source_publishes_no_partial_result(self):
         source = (ROKU_CORPUS / 'hello_world_text.sas').read_text() + 'proc print;run;'
         with tempfile.TemporaryDirectory() as temporary:
-            path = Path(temporary) / 'mutation.sas'; path.write_text(source)
+            path = Path(temporary) / 'mutation.sas'; path.write_text(source, newline='')
             output = Path(temporary) / 'job'
             process = subprocess.run([sys.executable, '-m', 'saschi', 'run', str(path),
                                       '--output', str(output)], capture_output=True,

@@ -1133,7 +1133,7 @@ class Desktop:
             messagebox.showerror('Choose a new file', 'This file already exists. Choose a new name to preserve existing files.', parent=self.root)
             return
         def write():
-            with Path(destination).open('x', encoding='utf-8') as stream:
+            with Path(destination).open('x', encoding='utf-8', newline='') as stream:
                 stream.write(code)
             return destination
         self.task('Saving converted code.', write, lambda path: self.status.set('Code saved to ' + str(path) + '. Generated code requires its referenced runtime and input catalog.'))

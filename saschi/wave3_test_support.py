@@ -82,10 +82,10 @@ class FamilyContract:
         import contextlib,io
         with tempfile.TemporaryDirectory() as directory:
             folder=Path(directory);src=folder/'job.sas';inp=folder/'inputs.json';out=folder/'actual-cli'
-            src.write_text(source);inp.write_text(json.dumps(inputs))
+            src.write_text(source, newline='');inp.write_text(json.dumps(inputs), newline='')
             first=deepcopy(inputs)
             for table in first.values():table['rows']=table['rows'][:1]
-            first_input=folder/'prefix-inputs.json';first_output=folder/'prefix-cli';first_input.write_text(json.dumps(first))
+            first_input=folder/'prefix-inputs.json';first_output=folder/'prefix-cli';first_input.write_text(json.dumps(first), newline='')
             prefix=subprocess.run([sys.executable,'-B','-m','saschi','run',str(src),'--inputs',str(first_input),'--output',str(first_output)],capture_output=True,text=True,cwd=ROOT,timeout=60)
             self.assertEqual(prefix.returncode,0,prefix.stdout+prefix.stderr)
             first_receipt=json.loads((first_output/'receipt.json').read_text())

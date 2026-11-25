@@ -114,7 +114,7 @@ def batch_witness(cases):
         with (folder/'cases.csv').open('w',newline='') as stream:
             writer=csv.writer(stream);writer.writerow(['path','existing'])
             for index,(source,existing) in enumerate(cases):
-                path=folder/f'{index}.sas';path.write_text(source);writer.writerow([path,','.join(existing)])
+                path=folder/f'{index}.sas';path.write_text(source, newline='');writer.writerow([path,','.join(existing)])
         lines=rrun('batch',folder/'cases.csv').stdout.splitlines()
     results=[];current=[]
     for line in lines:
@@ -171,7 +171,7 @@ def check_helpers():
     except ValueError:pass
     else:raise AssertionError('standalone helper text cap')
     with tempfile.TemporaryDirectory() as directory:
-        path=Path(directory)/'padded.txt';path.write_text(HELPER_RESOURCE_REFUSAL)
+        path=Path(directory)/'padded.txt';path.write_text(HELPER_RESOURCE_REFUSAL, newline='')
         assert rrun('declaration',path).stdout.strip()=='REFUSE'
     # The shared scanner canonicalizes whitespace before helper admission.
     assert equal(batch_witness([(program(HELPER_RESOURCE_REFUSAL),[])]),[
@@ -199,9 +199,9 @@ def cli_check(path,expected,catalog=None):
     with tempfile.TemporaryDirectory() as directory:
         folder=Path(directory);output=folder/'job';command=[sys.executable,'-m','saschi','run',str(path),'--output',str(output)]
         if catalog is not None:
-            inputs=folder/'inputs.json';inputs.write_text(json.dumps(catalog));command+=['--inputs',str(inputs)]
+            inputs=folder/'inputs.json';inputs.write_text(json.dumps(catalog), newline='');command+=['--inputs',str(inputs)]
         if expected is not None:
-            expected_path=folder/'expected.json';expected_path.write_text(json.dumps(expected['datasets']))
+            expected_path=folder/'expected.json';expected_path.write_text(json.dumps(expected['datasets']), newline='')
             command+=['--expect',str(expected_path)]
         result=subprocess.run(command,cwd=ROOT,capture_output=True,text=True,timeout=40)
         receipt=json.loads((output/'receipt.json').read_text())
@@ -227,7 +227,7 @@ def check_program(path,expected,count):
 def cli_compare_failure(path,expected,observed):
     with tempfile.TemporaryDirectory() as directory:
         folder=Path(directory);output=folder/'job';expected_path=folder/'expected.json'
-        expected_path.write_text(json.dumps(expected['datasets']))
+        expected_path.write_text(json.dumps(expected['datasets']), newline='')
         process=subprocess.run([sys.executable,'-m','saschi','run',str(path),'--expect',str(expected_path),
             '--output',str(output)],cwd=ROOT,capture_output=True,text=True,timeout=40)
         receipt=json.loads((output/'receipt.json').read_text())
@@ -269,7 +269,7 @@ def main():
     # Existing destinations refuse, even empty, without partial accepted output.
     source='data earlier;put "EARLIER";run;'+program('create table t (a char(8))')
     with tempfile.TemporaryDirectory() as directory:
-        path=Path(directory)/'collision.sas';path.write_text(source)
+        path=Path(directory)/'collision.sas';path.write_text(source, newline='')
         cli_check(path,None,{'t':{'schema':{'a':'number'},'rows':[]}})
     assert naive_controls(actual_jobs=True)==5
     print(f'VERIFIED: SQL CREATE {len(PINS)} hand pins,400 independent R/source/runtime descriptor cases,'

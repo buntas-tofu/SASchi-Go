@@ -121,8 +121,8 @@ class OperationsTests(unittest.TestCase):
     def test_run_receipt_and_no_clobber(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td); source = root/'job.sas'; expected = root/'expected.json'; output = root/'out'
-            source.write_text('data d; x=1.5; run;')
-            expected.write_text(json.dumps({'d': {'schema': {'x':'number'}, 'rows':[{'x':1.5}]}}))
+            source.write_text('data d; x=1.5; run;', newline='')
+            expected.write_text(json.dumps({'d': {'schema': {'x':'number'}, 'rows':[{'x':1.5}]}}), newline='')
             with contextlib.redirect_stdout(io.StringIO()):
                 self.assertEqual(main(['run',str(source),'--expect',str(expected),'--output',str(output)]),0)
                 receipt = json.loads((output/'receipt.json').read_text())
@@ -135,7 +135,7 @@ class OperationsTests(unittest.TestCase):
     def test_failed_comparison_is_not_published_as_result(self):
         with tempfile.TemporaryDirectory() as td:
             root=Path(td); source=root/'job.sas'; expected=root/'expected.json'; output=root/'out'
-            source.write_text('data d; x=1; run;'); expected.write_text('{"d": {}}')
+            source.write_text('data d; x=1; run;', newline=''); expected.write_text('{"d": {}}', newline='')
             with contextlib.redirect_stdout(io.StringIO()):
                 self.assertEqual(main(['run',str(source),'--expect',str(expected),'--output',str(output)]),1)
             self.assertFalse((output/'result.json').exists())
@@ -144,7 +144,7 @@ class OperationsTests(unittest.TestCase):
 
     def test_blocked_job_has_receipt_without_results(self):
         with tempfile.TemporaryDirectory() as td:
-            root=Path(td); source=root/'job.sas'; output=root/'out'; source.write_text('%macro m; %mend;')
+            root=Path(td); source=root/'job.sas'; output=root/'out'; source.write_text('%macro m; %mend;', newline='')
             with contextlib.redirect_stdout(io.StringIO()):
                 self.assertEqual(main(['run',str(source),'--output',str(output)]),2)
             self.assertFalse((output/'result.json').exists())
@@ -152,8 +152,8 @@ class OperationsTests(unittest.TestCase):
 
     def test_source_fingerprint_changes(self):
         with tempfile.TemporaryDirectory() as td:
-            p=Path(td)/'module.py'; p.write_text('x=1\n'); before=source_state(td)['source_sha256']
-            p.write_text('x=2\n'); self.assertNotEqual(before,source_state(td)['source_sha256'])
+            p=Path(td)/'module.py'; p.write_text('x=1\n', newline=''); before=source_state(td)['source_sha256']
+            p.write_text('x=2\n', newline=''); self.assertNotEqual(before,source_state(td)['source_sha256'])
 
     def test_synthesis_requires_every_planned_case(self):
         incomplete={'ran':0,'fpass':0,'ncaught':0,'blind':0,'ffail':[]}
@@ -170,7 +170,7 @@ class OperationsTests(unittest.TestCase):
 
     def test_synthesis_does_not_reuse_a_stale_result(self):
         with tempfile.TemporaryDirectory() as td:
-            wd=Path(td); (wd/'results.csv').write_text('x\n1\n')
+            wd=Path(td); (wd/'results.csv').write_text('x\n1\n', newline='')
             result,error=synth.run_prog('py','pass',wd)
             self.assertIsNone(result)
             self.assertEqual(error,'no CSV')

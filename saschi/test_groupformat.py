@@ -167,7 +167,7 @@ class GroupFormatTests(unittest.TestCase):
         with patch.object(reports,'validate_reports',observe):job=build_job(late_failure())
         self.assertEqual(seen,[1]);self.assertEqual(job.code,1);self.assertIsNone(job.result)
         with tempfile.TemporaryDirectory(prefix='saschi-group-atomic-') as temporary:
-            area=Path(temporary);path=area/'source.sas';path.write_text(late_failure())
+            area=Path(temporary);path=area/'source.sas';path.write_text(late_failure(), newline='')
             run=subprocess.run([sys.executable,'-m','saschi','run',str(path),'--output',str(area/'job')],capture_output=True,text=True,cwd=ROOT,timeout=120)
             self.assertEqual(run.returncode,1,run.stderr)
             self.assertFalse(json.loads((area/'job'/'receipt.json').read_text())['accepted'])

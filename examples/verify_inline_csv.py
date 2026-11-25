@@ -88,8 +88,8 @@ def witnesses(cases):
     with tempfile.TemporaryDirectory() as directory:
         folder=Path(directory);paths=[]
         for i,text in enumerate(cases):
-            path=folder/f'{i}.sas';path.write_text(text);paths.append(str(path))
-        listing=folder/'files.txt';listing.write_text(''.join(p+'\n' for p in paths))
+            path=folder/f'{i}.sas';path.write_text(text, newline='');paths.append(str(path))
+        listing=folder/'files.txt';listing.write_text(''.join(p+'\n' for p in paths), newline='')
         lines=rrun('batch',listing).stdout.splitlines()
     answers=[];current=[]
     for line in lines:
@@ -163,8 +163,8 @@ def refusal_cases(mode='csv'):
 
 def cli_check(text,expected):
     with tempfile.TemporaryDirectory() as directory:
-        folder=Path(directory);path=folder/'program.sas';path.write_text(text);out=folder/'out'
-        expect=folder/'expected.json';expect.write_text(json.dumps(expected['datasets']))
+        folder=Path(directory);path=folder/'program.sas';path.write_text(text, newline='');out=folder/'out'
+        expect=folder/'expected.json';expect.write_text(json.dumps(expected['datasets']), newline='')
         process=subprocess.run([sys.executable,'-m','saschi','run',str(path),'--expect',str(expect),'--output',str(out)],cwd=ROOT,capture_output=True,text=True,timeout=45)
         receipt=json.loads((out/'receipt.json').read_text())
         assert process.returncode==0 and receipt['accepted'] and receipt['comparison']=='passed',(process.stdout,process.stderr)
@@ -192,9 +192,9 @@ def wrong_expectations():
 def cli_wrong_controls():
     expected=original_expected()
     with tempfile.TemporaryDirectory() as directory:
-        folder=Path(directory);path=folder/'source.sas';path.write_text(ORIGINAL.read_text())
+        folder=Path(directory);path=folder/'source.sas';path.write_text(ORIGINAL.read_text(), newline='')
         for i,(damage,wrong) in enumerate(wrong_expectations()):
-            expect=folder/f'bad{i}.json';expect.write_text(json.dumps(wrong));out=folder/f'out{i}'
+            expect=folder/f'bad{i}.json';expect.write_text(json.dumps(wrong), newline='');out=folder/f'out{i}'
             process=subprocess.run([sys.executable,'-m','saschi','run',str(path),'--expect',str(expect),'--output',str(out)],cwd=ROOT,capture_output=True,text=True,timeout=45)
             receipt=json.loads((out/'receipt.json').read_text())
             assert process.returncode==1 and not receipt['accepted'] and receipt['comparison']=='failed',damage
@@ -219,9 +219,9 @@ def range_comparator_controls():
             target['rows'][0]['x09']=target['rows'][0].pop('x9')
         damages.append((damage,wrong))
     with tempfile.TemporaryDirectory() as directory:
-        folder=Path(directory);path=folder/'ranges.sas';path.write_text(text)
+        folder=Path(directory);path=folder/'ranges.sas';path.write_text(text, newline='')
         for i,(damage,wrong) in enumerate(damages):
-            expect=folder/f'wrong{i}.json';expect.write_text(json.dumps(wrong));out=folder/f'out{i}'
+            expect=folder/f'wrong{i}.json';expect.write_text(json.dumps(wrong), newline='');out=folder/f'out{i}'
             process=subprocess.run([sys.executable,'-m','saschi','run',str(path),'--expect',str(expect),'--output',str(out)],cwd=ROOT,capture_output=True,text=True,timeout=45)
             receipt=json.loads((out/'receipt.json').read_text())
             assert process.returncode==1 and not receipt['accepted'] and receipt['comparison']=='failed',damage

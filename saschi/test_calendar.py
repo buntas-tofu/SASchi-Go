@@ -164,7 +164,7 @@ class CalendarTests(unittest.TestCase):
         self.assertNotIn('result', namespace)
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / 'inputs.json'
-            path.write_text(json.dumps(inputs))
+            path.write_text(json.dumps(inputs), newline='')
             job = build_job(source, path)
         self.assertEqual(job.code, 1)
         self.assertFalse(job.receipt['accepted'])
@@ -185,12 +185,12 @@ class CalendarTests(unittest.TestCase):
         changed = deepcopy(table); changed['schema'] = {'w': 'number', 'x': 'number'}; changes.append(changed)
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / 'expected.json'
-            path.write_text(json.dumps({'d': table}))
+            path.write_text(json.dumps({'d': table}), newline='')
             positive = build_job(source, expect=path)
             self.assertTrue(positive.receipt['accepted'])
             self.assertEqual(positive.receipt['comparison'], 'passed')
             for changed in changes:
-                path.write_text(json.dumps({'d': changed}))
+                path.write_text(json.dumps({'d': changed}), newline='')
                 job = build_job(source, expect=path)
                 self.assertEqual(job.code, 1)
                 self.assertFalse(job.receipt['accepted'])

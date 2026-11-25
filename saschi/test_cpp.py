@@ -28,7 +28,7 @@ class CppTests(unittest.TestCase):
         self.assertEqual(expected[1:5], ['x=0.30000000000000004','x=10','x=-3','x=0.13'])
         with tempfile.TemporaryDirectory() as td:
             cpp, exe = Path(td)/'program.cpp', Path(td)/'program'
-            cpp.write_text(translation.code)
+            cpp.write_text(translation.code, newline='')
             result = subprocess.run([compiler, '-std=c++17', '-O2', '-ffp-contract=off', str(cpp), '-o', str(exe)], capture_output=True, text=True, timeout=60)
             self.assertEqual(result.returncode, 0, result.stderr)
             run = subprocess.run([str(exe)], capture_output=True, text=True, timeout=30)

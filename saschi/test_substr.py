@@ -111,7 +111,7 @@ class SubstrTests(unittest.TestCase):
             self.assertNotIn('result',namespace)
             self.assertEqual(printed.getvalue(),'')
             with tempfile.TemporaryDirectory() as directory:
-                path=Path(directory)/'inputs.json';path.write_text(json.dumps(inputs))
+                path=Path(directory)/'inputs.json';path.write_text(json.dumps(inputs), newline='')
                 with contextlib.redirect_stdout(printed): job=build_job(source,inputs=path)
             self.assertEqual(job.code,1);self.assertIsNone(job.result)
             self.assertEqual(printed.getvalue(),'');self.assertFalse(job.receipt['accepted'])

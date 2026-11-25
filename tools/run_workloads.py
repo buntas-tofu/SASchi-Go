@@ -139,8 +139,8 @@ def invoke(directory, name, command, timeout):
             code = 124
             stderr += '\nworkload process timed out'
     elapsed = time.perf_counter() - start
-    (directory / (name + '.stdout.log')).write_text(stdout)
-    (directory / (name + '.stderr.log')).write_text(stderr)
+    (directory / (name + '.stdout.log')).write_text(stdout, newline='')
+    (directory / (name + '.stderr.log')).write_text(stderr, newline='')
     rss = metrics.read_text().splitlines()[-1] if metrics.exists() and metrics.stat().st_size else ''
     return {'command': list(map(str, command)), 'returncode': code, 'seconds': elapsed,
             'peak_rss_kib': int(rss) if rss.isdigit() else None}
@@ -165,7 +165,7 @@ def run_case(output, name, inputs, rscript, timeout, emitted, *, source=None):
         program = FIXTURE / 'job.sas'
         if source is not None:
             program = directory / 'job.sas'
-            program.write_text(source)
+            program.write_text(source, newline='')
             emitted = directory / 'emitted.py'
             record['translation'] = invoke(directory, 'translate', [sys.executable, '-m', 'saschi', 'translate', program,
                                              '--target', 'python', '--output', emitted], timeout)
@@ -239,7 +239,7 @@ def refusal_probes(output, timeout):
         directory = output / name
         directory.mkdir()
         write_json(directory / 'inputs.json', inputs)
-        (directory / 'job.sas').write_text(program)
+        (directory / 'job.sas').write_text(program, newline='')
         process = invoke(directory, 'cli', [sys.executable, '-m', 'saschi', 'run', directory / 'job.sas',
                                           '--inputs', directory / 'inputs.json', '--output', directory / 'cli'], timeout)
         receipt_path = directory / 'cli/receipt.json'
