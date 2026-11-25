@@ -21,9 +21,11 @@ live SAS comparison. Branch synchronization is separate from a release.
 
 - Unpack the built Debian payload and run the same gate over it in the package
   job: the published artifact is the package, not the tree. Run against the
-  local package built on 2026-11-07, the scan found the estate line in a bundled
-  test module that the published tree had already cleared on 2026-11-10. Trees
-  get scrubbed and artifacts keep shipping, which is why the artifact is scanned.
+  local package built on 2026-11-07, the scan found a fabric term in a bundled
+  test module that the published tree had already cleared on 2026-11-10, which
+  is the whole argument for scanning the artifact. Trees get scrubbed and
+  packages keep shipping. The gate then caught this very paragraph, on its first
+  CI run, for naming what it had removed; the wording above is the second try.
 
 - Pin `eol=lf` in `.gitattributes` and set `PYTHONUTF8=1` in both workflows and
   `saschi.bat`. The fixture pins and the run receipt hash file BYTES, so a
