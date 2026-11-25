@@ -87,7 +87,7 @@ def batch_witness(cases):
             path.write_bytes(text.encode('utf-8'))
             paths.append(path)
         listing = folder / 'sources.txt'
-        listing.write_text(''.join(str(path) + '\n' for path in paths))
+        listing.write_text(''.join(str(path) + '\n' for path in paths), newline='')
         rscript = os.environ.get('ROSETTA_RSCRIPT') or shutil.which('Rscript') or 'Rscript'
         process = subprocess.run([rscript, str(HERE / 'character_input.R'), str(listing)],
                                  cwd=ROOT, capture_output=True, text=True, check=True, timeout=120)
@@ -200,9 +200,9 @@ def refusal_cases():
 
 def cli_check(text, truth, wrong=False):
     with tempfile.TemporaryDirectory() as directory:
-        folder = Path(directory); path = folder / 'program.sas'; path.write_text(text)
+        folder = Path(directory); path = folder / 'program.sas'; path.write_text(text, newline='')
         out = folder / 'job'; expectation = folder / 'expected.json'
-        expectation.write_text(json.dumps(truth['datasets']))
+        expectation.write_text(json.dumps(truth['datasets']), newline='')
         process = subprocess.run([sys.executable, '-B', '-m', 'saschi', 'run', str(path),
                                   '--expect', str(expectation), '--output', str(out)], cwd=ROOT,
                                  capture_output=True, text=True, timeout=45)
@@ -240,7 +240,7 @@ def atomic_cli():
     with tempfile.TemporaryDirectory() as directory:
         folder = Path(directory)
         for index, text in enumerate(texts):
-            path = folder / f'{index}.sas'; path.write_text(text); out = folder / f'job{index}'
+            path = folder / f'{index}.sas'; path.write_text(text, newline=''); out = folder / f'job{index}'
             process = subprocess.run([sys.executable, '-B', '-m', 'saschi', 'run', str(path), '--output', str(out)],
                                      cwd=ROOT, capture_output=True, text=True, timeout=45)
             receipt = json.loads((out / 'receipt.json').read_text())

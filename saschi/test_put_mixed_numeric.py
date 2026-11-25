@@ -222,7 +222,7 @@ class MixedNumericPutTests(unittest.TestCase):
             elif mutation=='schema':t['schema']=dict(reversed(list(t['schema'].items())))
             else:t['rows'].append(deepcopy(t['rows'][0]))
             with tempfile.TemporaryDirectory() as d:
-                p=Path(d)/'expected.json';p.write_text(json.dumps(expected))
+                p=Path(d)/'expected.json';p.write_text(json.dumps(expected), newline='')
                 job=build_job(ORIGINAL.read_text(),expect=p)
                 self.assertEqual(job.code,1);self.assertFalse(job.receipt['accepted']);self.assertEqual(job.result,original_expected())
 
@@ -255,7 +255,7 @@ class MixedNumericPutTests(unittest.TestCase):
         source=(ROKU_CORPUS/'100_doors.sas').read_text()
         for bad in (source+'put "extra";',source.replace('by Pass','by Current')):
             with tempfile.TemporaryDirectory() as d:
-                p=Path(d)/'mutated.sas';p.write_text(bad)
+                p=Path(d)/'mutated.sas';p.write_text(bad, newline='')
                 with self.assertRaises(subprocess.CalledProcessError):rrun('program',p)
 
 

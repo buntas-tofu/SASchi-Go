@@ -99,9 +99,9 @@ class WhitespaceAlignmentTests(unittest.TestCase):
 
     def test_actual_cli_late_errors_publish_no_partial_data(self):
         with tempfile.TemporaryDirectory() as directory:
-            folder=Path(directory);data=folder/'inputs.json';data.write_text(json.dumps(catalog(['OK','é'])))
+            folder=Path(directory);data=folder/'inputs.json';data.write_text(json.dumps(catalog(['OK','é'])), encoding='utf-8', newline='')
             for name in NAMES:
-                source=folder/(name+'.sas');source.write_text(f'data d;set raw;x={name}(a);put x;output;run;')
+                source=folder/(name+'.sas');source.write_text(f'data d;set raw;x={name}(a);put x;output;run;', newline='')
                 out=folder/('cli-'+name)
                 run=subprocess.run([sys.executable,'-B','-m','saschi','run',str(source),'--inputs',str(data),'--output',str(out)],capture_output=True,text=True,cwd=ROOT,timeout=60)
                 self.assertEqual(run.returncode,1,run.stdout+run.stderr)

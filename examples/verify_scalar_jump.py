@@ -75,7 +75,7 @@ def catalog_files(folder,catalog):
     for filename,header,rows in [('tables.csv',table_fields,tables),('descriptors.csv',descriptor_fields,descriptors),('values.csv',value_fields,values)]:
         with (folder/filename).open('w',newline='') as stream:
             writer=csv.writer(stream);writer.writerow(header);writer.writerows(rows)
-    if invalid:(folder/'invalid.flag').write_text('unsupported transport shape')
+    if invalid:(folder/'invalid.flag').write_text('unsupported transport shape', newline='')
 
 
 def batch_witness(cases):
@@ -85,7 +85,7 @@ def batch_witness(cases):
             writer=csv.writer(stream);writer.writerow(['source','catalog'])
             for i,case in enumerate(cases):
                 source,catalog=(case['source'],case.get('catalog',{})) if isinstance(case,dict) else case
-                (folder/f'{i}.sas').write_text(source);catalog_files(folder/f'cat{i}',catalog);writer.writerow([f'{i}.sas',f'cat{i}'])
+                (folder/f'{i}.sas').write_text(source, newline='');catalog_files(folder/f'cat{i}',catalog);writer.writerow([f'{i}.sas',f'cat{i}'])
         r=os.environ.get('ROSETTA_RSCRIPT') or shutil.which('Rscript') or 'Rscript'
         process=subprocess.run([r,str(HERE/'flow_control.R'),'batch',str(folder)],capture_output=True,text=True,check=True,timeout=120)
     results=[];current=[];trace=[];reason=''
@@ -294,9 +294,9 @@ def refusal_cases(mode='jump'):
 
 def cli_check(source,catalog=None,expected=None):
     with tempfile.TemporaryDirectory() as directory:
-        folder=Path(directory);program=folder/'program.sas';program.write_text(source);inputs=folder/'inputs.json';inputs.write_text(json.dumps({} if catalog is None else catalog));out=folder/'job';args=[sys.executable,'-m','saschi','run',str(program),'--inputs',str(inputs),'--output',str(out)]
+        folder=Path(directory);program=folder/'program.sas';program.write_text(source, newline='');inputs=folder/'inputs.json';inputs.write_text(json.dumps({} if catalog is None else catalog), newline='');out=folder/'job';args=[sys.executable,'-m','saschi','run',str(program),'--inputs',str(inputs),'--output',str(out)]
         if expected is not None and expected['datasets']:
-            path=folder/'expected.json';path.write_text(json.dumps(expected['datasets']));args.extend(['--expect',str(path)])
+            path=folder/'expected.json';path.write_text(json.dumps(expected['datasets']), newline='');args.extend(['--expect',str(path)])
         process=subprocess.run(args,cwd=ROOT,capture_output=True,text=True,timeout=45);receipt=json.loads((out/'receipt.json').read_text())
         assert receipt['source_sha256']==hashlib.sha256(program.read_bytes()).hexdigest()
         if expected is None:
@@ -331,7 +331,7 @@ def wrong_comparators(mode='jump',actual_cli=True):
             except AssertionError:pass
             else:raise AssertionError('structural comparator missed '+c['name'])
             if not actual_cli:continue
-            source=folder/f'{index}.sas';source.write_text(c['source']);expect=folder/f'{index}.json';expect.write_text(json.dumps(c['wrong']['datasets']));out=folder/f'out{index}'
+            source=folder/f'{index}.sas';source.write_text(c['source'], newline='');expect=folder/f'{index}.json';expect.write_text(json.dumps(c['wrong']['datasets']), newline='');out=folder/f'out{index}'
             p=subprocess.run([sys.executable,'-m','saschi','run',str(source),'--expect',str(expect),'--output',str(out)],cwd=ROOT,capture_output=True,text=True,timeout=45);r=json.loads((out/'receipt.json').read_text());observed=out/'observed.json'
             assert p.returncode==1 and not r['accepted'] and r['comparison']=='failed';assert not (out/'result.json').exists() and observed.is_file();assert_tree(json.loads(observed.read_text()),c['expected']);assert r['result_sha256']==hashlib.sha256(observed.read_bytes()).hexdigest();assert r['expected_sha256']==hashlib.sha256(expect.read_bytes()).hexdigest()
     valid=controls[0];wrong=deepcopy(valid['expected']);wrong['log'][0]=wrong['log'][0].rstrip()

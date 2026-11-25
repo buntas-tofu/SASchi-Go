@@ -39,7 +39,7 @@ class GateRulesBite(unittest.TestCase):
     def write(self, rel, text):
         path = self.tmp / rel
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(text, encoding="utf-8")
+        path.write_text(text, encoding="utf-8", newline='')
         return path
 
     def test_clean_tree_passes(self):
@@ -85,10 +85,10 @@ class GateRulesBite(unittest.TestCase):
                            ("commit.gpgsign", "false")):
             subprocess.run(["git", "-C", str(repo), "config", key, value], check=True)
         path = repo / "staged.md"
-        path.write_text("token: " + fake("gh", "p_") + "\n", encoding="utf-8")
+        path.write_text("token: " + fake("gh", "p_") + "\n", encoding="utf-8", newline='')
         subprocess.run(["git", "-C", str(repo), "add", "staged.md"], check=True)
         # now make the working tree innocent while the index still holds it
-        path.write_text("clean prose now\n", encoding="utf-8")
+        path.write_text("clean prose now\n", encoding="utf-8", newline='')
         code, out = run_gate(repo)
         self.assertEqual(code, 1, out)
         self.assertIn("staged", out)

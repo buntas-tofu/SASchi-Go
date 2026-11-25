@@ -68,8 +68,8 @@ def assert_cli_result(test,source,expected,catalog=None):
     # --expect requires at least one dataset. DATA _NULL_ keeps its existing
     # actual job/result/log comparison without changing that CLI contract.
     with tempfile.TemporaryDirectory() as directory:
-        folder=Path(directory);path=folder/'program.sas';path.write_text(source)
-        inputs=folder/'inputs.json';inputs.write_text(json.dumps({} if catalog is None else catalog));out=folder/'job'
+        folder=Path(directory);path=folder/'program.sas';path.write_text(source, newline='')
+        inputs=folder/'inputs.json';inputs.write_text(json.dumps({} if catalog is None else catalog), newline='');out=folder/'job'
         process=subprocess.run([sys.executable,'-m','saschi','run',str(path),'--inputs',str(inputs),'--output',str(out)],cwd=ROOT,capture_output=True,text=True,timeout=45)
         receipt=json.loads((out/'receipt.json').read_text())
         test.assertEqual(process.returncode,0,process.stdout+process.stderr);test.assertTrue(receipt['accepted'])

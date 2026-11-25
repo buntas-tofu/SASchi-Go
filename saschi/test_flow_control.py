@@ -87,7 +87,7 @@ class FlowControlTests(unittest.TestCase):
         with contextlib.redirect_stdout(stream),self.assertRaises(ValueError):exec(translate(source).code,ns)
         self.assertEqual(stream.getvalue(),'');self.assertNotIn('result',ns)
         with tempfile.TemporaryDirectory() as temp:
-            folder=Path(temp);sas=folder/'job.sas';sas.write_text(source)
+            folder=Path(temp);sas=folder/'job.sas';sas.write_text(source, newline='')
             proc=subprocess.run([sys.executable,'-m','saschi','run',str(sas),'--output',str(folder/'out')],cwd=ROOT,capture_output=True,text=True)
             self.assertNotEqual(proc.returncode,0);self.assertFalse((folder/'out/result.json').exists())
             receipt=json.loads((folder/'out/receipt.json').read_text());self.assertFalse(receipt['accepted'])

@@ -24,7 +24,7 @@ def external_temporary(prefix):
 
 def witness(text,script):
     with external_temporary('saschi-format-witness-') as temporary:
-        area=Path(temporary);source=area/'original.sas';source.write_text(text,encoding='utf-8')
+        area=Path(temporary);source=area/'original.sas';source.write_text(text,encoding='utf-8', newline='')
         output=area/'R'
         run=subprocess.run([os.environ.get('ROSETTA_RSCRIPT','Rscript'),str(ROOT/'examples'/script),str(source),str(output)],
                            capture_output=True,text=True,timeout=120)
@@ -58,7 +58,7 @@ def execute(text,expected,accounting,expected_trace,runner):
 
 def cli_check(text,expected,contract,*,wrong=None):
     with external_temporary('saschi-format-cli-') as temporary:
-        area=Path(temporary);path=area/'source.sas';path.write_text(text,encoding='utf-8');truth=expected if wrong is None else wrong
+        area=Path(temporary);path=area/'source.sas';path.write_text(text,encoding='utf-8', newline='');truth=expected if wrong is None else wrong
         for name,value in [('datasets',truth['datasets']),('reports',truth.get('reports',{})),('log',truth['log'])]:
             (area/(name+'.json')).write_bytes(encode(value))
         command=[sys.executable,'-m','saschi','run',str(path),'--expect',str(area/'datasets.json'),'--expect-log',str(area/'log.json'),'--output',str(area/'job')]

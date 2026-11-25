@@ -175,7 +175,7 @@ def main():
                   for p in sorted((ROOT / 'saschi/web/static').iterdir()) if p.is_file()}
         assert assets, 'no web assets found'
         program = root / 'smoke.sas'
-        program.write_text('data d; x=mod(-7,3); run;')
+        program.write_text('data d; x=mod(-7,3); run;', newline='')
         print(run([sys.executable, '-I', '-S', '-c', SMOKE, str(installed), rulebook,
                    json.dumps(assets), str(program)], root).splitlines()[-1])
         print(json.dumps({'wheel': wheel.name, 'sha256': hashlib.sha256(wheel.read_bytes()).hexdigest(),

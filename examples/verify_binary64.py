@@ -222,7 +222,7 @@ def check_program(path,expected,accounting,budget=32):
     # A partial parser must fail on both unconsumed and truncated source.
     with tempfile.TemporaryDirectory() as directory:
         for index,bad in enumerate((text+'proc print;run;',text.rsplit('run;',1)[0])):
-            changed=Path(directory)/f'bad{index}.sas';changed.write_text(bad)
+            changed=Path(directory)/f'bad{index}.sas';changed.write_text(bad, newline='')
             assert rrun('program',changed,check=False).returncode!=0
 
 

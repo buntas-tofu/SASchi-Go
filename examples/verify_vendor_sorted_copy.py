@@ -154,7 +154,7 @@ def late_failure(area):
     need(not job.plan.blocked and seen == [1, 2] and job.code == 1 and job.result is None,
          'late second-report failure was not an actual runtime refusal')
     source = area / 'owned-late-failure.sas'
-    source.write_text(text)
+    source.write_text(text, newline='')
     output = area / 'late-cli'
     run, receipt = cli(source, output)
     need(run.returncode == 1 and receipt['accepted'] is False, 'late CLI refusal failed')

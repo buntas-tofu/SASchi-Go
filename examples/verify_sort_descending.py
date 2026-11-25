@@ -99,8 +99,8 @@ def batch_witness(texts):
     with tempfile.TemporaryDirectory() as directory:
         folder = Path(directory); paths = []
         for index, text in enumerate(texts):
-            path = folder / f'{index}.sas'; path.write_text(text); paths.append(path)
-        listing = folder / 'sources.txt'; listing.write_text(''.join(str(path) + '\n' for path in paths))
+            path = folder / f'{index}.sas'; path.write_text(text, newline=''); paths.append(path)
+        listing = folder / 'sources.txt'; listing.write_text(''.join(str(path) + '\n' for path in paths), newline='')
         rscript = os.environ.get('ROSETTA_RSCRIPT') or shutil.which('Rscript') or 'Rscript'
         process = subprocess.run([rscript, str(HERE / 'sort_options.R'), str(listing)], capture_output=True,
                                  text=True, cwd=ROOT, check=True, timeout=120)
@@ -304,7 +304,7 @@ def atomic_checks(mode, text):
     assert len(calls) == 2 and job.code == 1 and job.result is None and not job.receipt['accepted'], (calls, job.code)
     late = text + 'data late;infile datalines dsd;input z :$1. n;datalines4;\nA,0.1\n;;;;\nrun;\n'
     with tempfile.TemporaryDirectory() as directory:
-        path = Path(directory) / 'late.sas'; path.write_text(late); out = Path(directory) / 'job'
+        path = Path(directory) / 'late.sas'; path.write_text(late, newline=''); out = Path(directory) / 'job'
         process = subprocess.run([sys.executable, '-B', '-m', 'saschi', 'run', str(path), '--output', str(out)],
                                  cwd=ROOT, capture_output=True, text=True, timeout=45)
         receipt = json.loads((out / 'receipt.json').read_text())
@@ -325,7 +325,7 @@ def atomic_checks(mode, text):
     def observed_print(*args, **kwargs):
         answer = real_print(*args, **kwargs); reports.append(deepcopy(answer)); return answer
     with tempfile.TemporaryDirectory() as directory:
-        path = Path(directory) / 'runtime-late.sas'; path.write_text(with_report)
+        path = Path(directory) / 'runtime-late.sas'; path.write_text(with_report, newline='')
         out = Path(directory) / 'job'; console = io.StringIO()
         with patch.object(sort_options, 'execute_sort', fail_late), \
              patch.object(sort_options, 'run_program', traced_program), \

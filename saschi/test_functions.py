@@ -237,7 +237,7 @@ class ModFunctionTests(unittest.TestCase):
                     execute(source, inputs)
                 with tempfile.TemporaryDirectory() as directory:
                     path = Path(directory) / 'inputs.json'
-                    path.write_text(json.dumps(inputs))
+                    path.write_text(json.dumps(inputs), newline='')
                     job = build_job(source, inputs=path)
                 self.assertFalse(job.receipt['accepted'])
                 self.assertIsNone(job.result)

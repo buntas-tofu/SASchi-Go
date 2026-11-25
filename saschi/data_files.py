@@ -426,7 +426,7 @@ def write_parquet(table, path):
         finally:
             connection.close()
         manifest['parquet_sha256'] = hashlib.sha256(parquet_tmp.read_bytes()).hexdigest()
-        metadata_tmp.write_text(json.dumps(manifest, indent=2, allow_nan=False) + '\n', encoding='utf-8')
+        metadata_tmp.write_text(json.dumps(manifest, indent=2, allow_nan=False) + '\n', encoding='utf-8', newline='')
         published = False
         try:
             os.link(parquet_tmp, path)

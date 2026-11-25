@@ -40,7 +40,7 @@ def witnesses(cases,mode='sqrt'):
         with (folder/'cases.csv').open('w',newline='') as stream:
             writer=csv.writer(stream);writer.writerow(['source','catalog'])
             for i,(source,catalog) in enumerate(cases):
-                (folder/f'{i}.sas').write_text(source);catalog_files(folder/f'cat{i}',catalog)
+                (folder/f'{i}.sas').write_text(source, newline='');catalog_files(folder/f'cat{i}',catalog)
                 writer.writerow([f'{i}.sas',f'cat{i}'])
         output=subprocess.run([r,str(HERE/entry),'batch',str(folder)],capture_output=True,text=True,check=True,timeout=90)
     seen=[];current=[]
@@ -161,8 +161,8 @@ def high_precision(mode):
 
 def cli_check(source,expected,wrong=False):
     with tempfile.TemporaryDirectory() as directory:
-        folder=Path(directory);path=folder/'program.sas';path.write_text(source);out=folder/'job'
-        expect=folder/'expected.json';expect.write_text(json.dumps(expected['datasets']))
+        folder=Path(directory);path=folder/'program.sas';path.write_text(source, newline='');out=folder/'job'
+        expect=folder/'expected.json';expect.write_text(json.dumps(expected['datasets']), newline='')
         p=subprocess.run([sys.executable,'-B','-m','saschi','run',str(path),'--expect',str(expect),'--output',str(out)],cwd=ROOT,capture_output=True,text=True,timeout=45)
         receipt=json.loads((out/'receipt.json').read_text())
         assert p.returncode==(1 if wrong else 0),(p.stdout,p.stderr,receipt)
@@ -199,7 +199,7 @@ def atomic_cli():
         folder=Path(directory)
         for i,source in enumerate(['data earlier;x=1;put x;run;data d;x=0;y=log(x);run;',
                 'data d;input x;y=sqrt(-1);datalines;\n;\nrun;']):
-            path=folder/f'{i}.sas';path.write_text(source);out=folder/f'job{i}'
+            path=folder/f'{i}.sas';path.write_text(source, newline='');out=folder/f'job{i}'
             p=subprocess.run([sys.executable,'-B','-m','saschi','run',str(path),'--output',str(out)],cwd=ROOT,capture_output=True,text=True,timeout=45)
             receipt=json.loads((out/'receipt.json').read_text());assert p.returncode in (1,2) and not receipt['accepted']
             assert not (out/'result.json').exists() and not (out/'observed.json').exists()

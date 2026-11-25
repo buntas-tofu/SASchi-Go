@@ -187,7 +187,7 @@ class FunctionConsumerTests(unittest.TestCase):
         calls=["x=upcase(strip(a))","x=cats(substrn(a,1,3))","if anydigit(a)=0 then x=1"]
         inputs=catalog(['ab','é'])
         with tempfile.TemporaryDirectory() as directory:
-            folder=Path(directory);data=folder/'inputs.json';data.write_text(json.dumps(inputs))
+            folder=Path(directory);data=folder/'inputs.json';data.write_text(json.dumps(inputs), newline='')
             for index,call in enumerate(calls):
                 source="data d;set raw;"+call+";output;put 'made';run;"
                 self.assertEqual(job_with_inputs(source,catalog(['ab'])).code,0)
@@ -195,7 +195,7 @@ class FunctionConsumerTests(unittest.TestCase):
                 stream=io.StringIO()
                 with contextlib.redirect_stdout(stream),self.assertRaises(ValueError):exec(translate(source).code,{'inputs':inputs})
                 self.assertEqual(stream.getvalue(),'')
-                src=folder/(str(index)+'.sas');src.write_text(source);out=folder/('cli-'+str(index))
+                src=folder/(str(index)+'.sas');src.write_text(source, newline='');out=folder/('cli-'+str(index))
                 run=subprocess.run([sys.executable,'-B','-m','saschi','run',str(src),'--inputs',str(data),'--output',str(out)],capture_output=True,text=True,cwd=ROOT,timeout=60)
                 self.assertEqual(run.returncode,1,run.stdout+run.stderr)
                 receipt=json.loads((out/'receipt.json').read_text());self.assertFalse(receipt['accepted']);self.assertEqual(receipt['tickets'],[])

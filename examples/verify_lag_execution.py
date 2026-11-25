@@ -59,7 +59,7 @@ def main():
             for i,(depth,values,flags) in enumerate(cases):
                 writer.writerows((i,depth,row,token(value),token(flag)) for row,(value,flag) in enumerate(zip(values,flags)))
         rows=list(csv.DictReader(io.StringIO(rrun('cases',path))))
-        invalid_path=Path(directory)/'invalid.txt';invalid_path.write_text(''.join(token(value)+'\n' for value in INVALID))
+        invalid_path=Path(directory)/'invalid.txt';invalid_path.write_text(''.join(token(value)+'\n' for value in INVALID), newline='')
         refused=rrun('values',invalid_path).splitlines()
     assert len(refused)==len(INVALID)
     for value,status in zip(INVALID,refused):

@@ -192,7 +192,7 @@ class LengthReverseTests(unittest.TestCase):
         inputs={'raw':{'schema':{'a':{'type':'character','length':2}},'rows':[{'a':'ab'},{'a':'é'}]}}
         printed=io.StringIO()
         with tempfile.TemporaryDirectory() as directory:
-            path=Path(directory)/'inputs.json';path.write_text(json.dumps(inputs))
+            path=Path(directory)/'inputs.json';path.write_text(json.dumps(inputs), newline='')
             job=build_job(source,path)
             self.assertEqual(job.code,1)
             self.assertIsNone(job.result)

@@ -118,10 +118,10 @@ class DivisionTests(unittest.TestCase):
         t=deepcopy(actual);t['rows'][0]['x']=5.;changes.append(t)
         t=deepcopy(actual);t['schema']={'y':'number','x':'number'};changes.append(t)
         with tempfile.TemporaryDirectory() as d:
-            p=Path(d)/'expected.json';p.write_text(json.dumps({'d':actual}))
+            p=Path(d)/'expected.json';p.write_text(json.dumps({'d':actual}), newline='')
             self.assertTrue(build_job(source,expect=p).receipt['accepted'])
             for changed in changes:
-                p.write_text(json.dumps({'d':changed}));job=build_job(source,expect=p)
+                p.write_text(json.dumps({'d':changed}), newline='');job=build_job(source,expect=p)
                 self.assertEqual(job.code,1);self.assertEqual(job.result['datasets']['d'],actual)
         for target,body in (('cpp','x=8/2;'),('python','x=8/2; put _all_;')):
             job=build_job('data _null_; '+body+' run;',target=target)

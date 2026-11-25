@@ -180,10 +180,10 @@ def main():
             inputs = area / 'orders.json'
             expected = area / 'sas results.json'
             workspace = area / 'workspace'
-            program.write_text('data result; set orders; total = amount - refunded; run;\n', encoding='utf-8')
+            program.write_text('data result; set orders; total = amount - refunded; run;\n', encoding='utf-8', newline='')
             schema = {'amount': 'number', 'refunded': 'number'}
-            inputs.write_text(json.dumps({'orders': {'schema': schema, 'rows': [{'amount': 1000, 'refunded': 50}]}}), encoding='utf-8')
-            expected.write_text(json.dumps({'result': {'schema': {**schema, 'total': 'number'}, 'rows': [{'amount': 1000, 'refunded': 50, 'total': 960}]}}), encoding='utf-8')
+            inputs.write_text(json.dumps({'orders': {'schema': schema, 'rows': [{'amount': 1000, 'refunded': 50}]}}), encoding='utf-8', newline='')
+            expected.write_text(json.dumps({'result': {'schema': {**schema, 'total': 'number'}, 'rows': [{'amount': 1000, 'refunded': 50, 'total': 960}]}}), encoding='utf-8', newline='')
             app.folder.set(str(workspace))
             with patch('tkinter.filedialog.askopenfilename', return_value=str(program)):
                 app.choose('source', '*.sas')
@@ -288,7 +288,7 @@ def main():
             print('PASS export recovery and real evidence package', flush=True)
 
             # Changed input contents require an explicit new-run choice.
-            moved_inputs.write_text(json.dumps({'orders': {'schema': schema, 'rows': [{'amount': 1000, 'refunded': 40}]}}), encoding='utf-8')
+            moved_inputs.write_text(json.dumps({'orders': {'schema': schema, 'rows': [{'amount': 1000, 'refunded': 40}]}}), encoding='utf-8', newline='')
             with patch('tkinter.messagebox.askyesno', return_value=False) as choice:
                 app.new_from_saved()
                 wait(root, app)

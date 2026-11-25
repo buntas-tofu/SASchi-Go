@@ -202,7 +202,7 @@ def refusal_probes(output, timeout):
         d = output / name
         d.mkdir()
         write_json(d / 'inputs.json', inputs)
-        (d / 'job.sas').write_text(program)
+        (d / 'job.sas').write_text(program, newline='')
         process = invoke(d, 'cli', [sys.executable, '-m', 'saschi', 'run', d / 'job.sas',
                           '--inputs', d / 'inputs.json', '--output', d / 'cli'], timeout)
         receipt_path = d / 'cli/receipt.json'

@@ -35,7 +35,7 @@ def main():
               'flags': ['-std=c++17','-O2','-ffp-contract=off']}
     with tempfile.TemporaryDirectory() as td:
         wd=Path(td); py=wd/'job.py'; cpp=wd/'job.cpp'; exe=wd/'job'
-        py.write_text(emit_py(source).code); cpp.write_text(emit_cpp(source).code)
+        py.write_text(emit_py(source).code, newline=''); cpp.write_text(emit_cpp(source).code, newline='')
         report['generated_sha256']={'python':digest(py),'cpp':digest(cpp)}
         start=time.perf_counter()
         subprocess.run([compiler,*report['flags'],str(cpp),'-o',str(exe)],check=True,capture_output=True,timeout=60)
@@ -60,7 +60,7 @@ def main():
     report['outputs_equal']=True
     path=ROOT/'telemetry'/'benchmark-backends.json'
     path.parent.mkdir(exist_ok=True)
-    path.write_text(json.dumps(report,indent=2)+'\n')
+    path.write_text(json.dumps(report,indent=2)+'\n', newline='')
     print(json.dumps(report,indent=2))
     print(f'receipt -> {path}')
 

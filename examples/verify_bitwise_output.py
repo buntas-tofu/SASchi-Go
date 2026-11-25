@@ -76,9 +76,9 @@ def witnesses(cases):
         for index, case in enumerate(cases):
             if isinstance(case, Path): path = case.resolve()
             else:
-                path = folder / f'{index}.sas'; path.write_text(case)
+                path = folder / f'{index}.sas'; path.write_text(case, newline='')
             paths.append(path)
-        listing = folder / 'sources.txt'; listing.write_text(''.join(str(path) + '\n' for path in paths))
+        listing = folder / 'sources.txt'; listing.write_text(''.join(str(path) + '\n' for path in paths), newline='')
         rscript = os.environ.get('ROSETTA_RSCRIPT') or shutil.which('Rscript') or 'Rscript'
         process = subprocess.run([rscript, str(HERE / 'bitwise_output.R'), str(listing)], cwd=ROOT,
                                  capture_output=True, text=True, check=True, timeout=120)
@@ -179,9 +179,9 @@ def cli_check(case, truth, expected_log=None, wrong=False):
     with tempfile.TemporaryDirectory() as directory:
         folder = Path(directory)
         if isinstance(case, Path): path = case
-        else: path = folder / 'program.sas'; path.write_text(case)
+        else: path = folder / 'program.sas'; path.write_text(case, newline='')
         output = folder / 'job'; expectation = folder / 'expected-log.json'
-        expectation.write_text(json.dumps(truth['log'] if expected_log is None else expected_log))
+        expectation.write_text(json.dumps(truth['log'] if expected_log is None else expected_log), newline='')
         command = [sys.executable, '-B', '-m', 'saschi', 'run', str(path), '--output-contract', PROFILE,
                    '--expect-log', str(expectation), '--output', str(output)]
         process = subprocess.run(command, cwd=ROOT, capture_output=True, text=True, timeout=45)
@@ -227,7 +227,7 @@ def atomic_cli():
     with tempfile.TemporaryDirectory() as directory:
         folder = Path(directory)
         for index, case in enumerate([width_source(68)[0], source('a=band(1,1);a=blshift(1,32);')]):
-            path = folder / f'{index}.sas'; path.write_text(case); output = folder / f'job{index}'
+            path = folder / f'{index}.sas'; path.write_text(case, newline=''); output = folder / f'job{index}'
             process = subprocess.run([sys.executable, '-B', '-m', 'saschi', 'run', str(path), '--output-contract', PROFILE,
                                       '--output', str(output)], cwd=ROOT, capture_output=True, text=True, timeout=45)
             receipt = json.loads((output / 'receipt.json').read_text())

@@ -13,9 +13,9 @@ class DesktopJobs(unittest.TestCase):
         with tempfile.TemporaryDirectory(prefix='desktop space ') as area:
             root = Path(area)
             source = root / 'chosen café.sas'
-            source.write_text('data out; set raw; x=x+1; run;')
+            source.write_text('data out; set raw; x=x+1; run;', newline='')
             inputs = root / 'supporting inputs.json'
-            inputs.write_text(json.dumps({'raw': {'schema': {'x': 'number'}, 'rows': [{'x': 2}]}}))
+            inputs.write_text(json.dumps({'raw': {'schema': {'x': 'number'}, 'rows': [{'x': 2}]}}), newline='')
             selection = {'source': str(source), 'inputs': str(inputs)}
             before = source.read_bytes(), inputs.read_bytes()
             first = run_files(selection, root)
@@ -31,8 +31,8 @@ class DesktopJobs(unittest.TestCase):
         with tempfile.TemporaryDirectory() as area:
             root = Path(area)
             source, expected = root / 'job.sas', root / 'expected.json'
-            source.write_text('data out; x=1; run;')
-            expected.write_text('{}')
+            source.write_text('data out; x=1; run;', newline='')
+            expected.write_text('{}', newline='')
             result = run_files({'source': str(source), 'expect': str(expected)}, root)
             self.assertEqual(result['code'], 1)
             self.assertEqual(result['receipt']['comparison'], 'failed')
@@ -44,7 +44,7 @@ class DesktopJobs(unittest.TestCase):
     def test_unsupported_source_saves_tickets_without_result(self):
         with tempfile.TemporaryDirectory() as area:
             source = Path(area) / 'unsupported.sas'
-            source.write_text('proc imaginary; run;')
+            source.write_text('proc imaginary; run;', newline='')
             result = run_files({'source': str(source)}, area)
             self.assertEqual(result['code'], 2)
             self.assertTrue(result['receipt']['tickets'])
@@ -57,7 +57,7 @@ class DesktopJobs(unittest.TestCase):
             source = examples / 'numeric_pictures.sas'
             expected = json.loads((examples / 'numeric_pictures_expected.json').read_text())
             reports = root / 'report expectations.json'
-            reports.write_text(json.dumps(expected['reports']))
+            reports.write_text(json.dumps(expected['reports']), newline='')
             result = run_files({'source': str(source), 'expect_reports': str(reports)}, root)
             self.assertEqual(result['receipt']['report_comparison'], 'passed')
             for name, text in expected['reports'].items():
@@ -72,7 +72,7 @@ class DesktopJobs(unittest.TestCase):
     def test_missing_supporting_input_is_not_silently_omitted(self):
         with tempfile.TemporaryDirectory() as area:
             source = Path(area) / 'job.sas'
-            source.write_text('data out; x=1; run;')
+            source.write_text('data out; x=1; run;', newline='')
             with self.assertRaisesRegex(ValueError, 'supporting file'):
                 run_files({'source': str(source), 'inputs': str(Path(area) / 'absent.json')}, area)
             self.assertEqual(len(list(Path(area).iterdir())), 1)
@@ -93,6 +93,6 @@ class DesktopJobs(unittest.TestCase):
     def test_large_result_preview_is_bounded(self):
         with tempfile.TemporaryDirectory() as area:
             path = Path(area) / 'result.json'
-            path.write_text('x' * 100)
+            path.write_text('x' * 100, newline='')
             self.assertIn('Preview truncated', preview(path, 20))
             self.assertEqual(len(path.read_text()), 100)

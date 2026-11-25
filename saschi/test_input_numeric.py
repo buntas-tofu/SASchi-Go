@@ -191,7 +191,7 @@ class NumericInputTests(unittest.TestCase):
             text='data earlier;put "EARLY";run;'+text
             job=build_job(text);self.assertNotEqual(job.code,0);self.assertIsNone(job.result)
             with tempfile.TemporaryDirectory() as directory:
-                folder=Path(directory);path=folder/'bad.sas';path.write_text(text);out=folder/'out'
+                folder=Path(directory);path=folder/'bad.sas';path.write_text(text, newline='');out=folder/'out'
                 process=subprocess.run([sys.executable,'-m','saschi','run',str(path),'--output',str(out)],cwd=ROOT,capture_output=True,text=True,timeout=45)
                 self.assertNotEqual(process.returncode,0);self.assertNotIn('BUFFERED',process.stdout);self.assertNotIn('EARLY',process.stdout)
                 self.assertFalse((out/'result.json').exists());self.assertFalse(json.loads((out/'receipt.json').read_text())['accepted'])

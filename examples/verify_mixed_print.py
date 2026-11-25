@@ -104,8 +104,8 @@ def batch_witness(sources,mode='print'):
     with tempfile.TemporaryDirectory(prefix='mixed-report-R-') as temporary:
         directory=Path(temporary);paths=[]
         for i,source in enumerate(sources):
-            p=directory/(str(i)+'.sas');p.write_text(source);paths.append(str(p))
-        manifest=directory/'paths.txt';manifest.write_text('\n'.join(paths)+'\n')
+            p=directory/(str(i)+'.sas');p.write_text(source, newline='');paths.append(str(p))
+        manifest=directory/'paths.txt';manifest.write_text('\n'.join(paths)+'\n', newline='')
         r=shutil.which('Rscript');assert r is not None
         twin='mixed_reports.R' if mode=='print' else 'logical_title.R'
         process=subprocess.run([r,str(HERE/twin),str(manifest)],cwd=ROOT,text=True,capture_output=True,timeout=120)
@@ -219,7 +219,7 @@ def refusal_cases(mode):
 def cli_check(source,expected,reports,expected_exit=0):
     with tempfile.TemporaryDirectory(prefix='mixed-report-cli-') as temporary:
         directory=Path(temporary);sp=directory/'source.sas';ep=directory/'expected.json';rp=directory/'reports.json';out=directory/'job'
-        sp.write_text(source);ep.write_text(json.dumps(expected['datasets']));rp.write_text(json.dumps(reports))
+        sp.write_text(source, newline='');ep.write_text(json.dumps(expected['datasets']), newline='');rp.write_text(json.dumps(reports), newline='')
         process=subprocess.run([sys.executable,'-B','-m','saschi','run',str(sp),'--expect',str(ep),'--expect-reports',str(rp),'--output',str(out)],
                                cwd=ROOT,env=dict(os.environ,PYTHONPATH=str(ROOT)),text=True,capture_output=True,timeout=90)
         assert process.returncode==expected_exit,(process.stdout,process.stderr)

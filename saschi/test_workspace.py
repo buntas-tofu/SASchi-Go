@@ -40,9 +40,9 @@ class WorkspaceTests(unittest.TestCase):
         self.source = self.folder / 'program.sas'
         self.input = self.folder / 'inputs.json'
         self.sas = self.folder / 'sas-results.json'
-        self.source.write_text(SOURCE)
-        self.input.write_text(json.dumps(inputs()))
-        self.sas.write_text(json.dumps(expected()))
+        self.source.write_text(SOURCE, newline='')
+        self.input.write_text(json.dumps(inputs()), newline='')
+        self.sas.write_text(json.dumps(expected()), newline='')
 
     def job(self, compare=True):
         return build_job(self.source.read_text(), self.input, self.sas if compare else None)
@@ -67,7 +67,7 @@ class WorkspaceTests(unittest.TestCase):
         self.assertEqual(record['comparison']['differed'], 1)
         self.assertEqual(list(record['result']['datasets']), ['net_sales'])
         self.input.unlink()
-        self.source.write_text('a changed program')
+        self.source.write_text('a changed program', newline='')
         record['source'] = 'caller mutation'
         loaded = self.workspace.load_run(record['id'])
         self.assertEqual(loaded['source'], SOURCE)
@@ -81,7 +81,7 @@ class WorkspaceTests(unittest.TestCase):
         self.input.rename(moved)
         binding = {record['files'][1]['id']: moved}
         self.assertEqual(self.workspace.check_files(record['id'], binding)[1]['status'], 'moved_same')
-        moved.write_text('{}')
+        moved.write_text('{}', newline='')
         self.assertEqual(self.workspace.check_files(record['id'], binding)[1]['status'], 'changed')
         binding[record['files'][1]['id']] = self.folder
         self.assertEqual(self.workspace.check_files(record['id'], binding)[1]['status'], 'unreadable')
@@ -102,7 +102,7 @@ class WorkspaceTests(unittest.TestCase):
 
     def test_between_run_changes_are_not_sas_difference_counts(self):
         earlier = self.save()
-        self.input.write_text(json.dumps(inputs(50)))
+        self.input.write_text(json.dumps(inputs(50)), newline='')
         later = self.save()
         comparison = self.workspace.compare_runs(earlier['id'], later['id'])
         self.assertEqual(comparison['outputs']['differed'], 2)
@@ -119,7 +119,7 @@ class WorkspaceTests(unittest.TestCase):
         earlier = self.save()
         original = self.input
         self.input = self.folder / 'inputs-v2.json'
-        self.input.write_text(json.dumps(inputs(50)))
+        self.input.write_text(json.dumps(inputs(50)), newline='')
         later = self.save()
         comparison = self.workspace.compare_runs(earlier['id'], later['id'])
         self.assertEqual(comparison['files'][1]['values'], 'differed')
@@ -133,7 +133,7 @@ class WorkspaceTests(unittest.TestCase):
     def test_new_baseline_and_missing_comparison_do_not_resolve_original_difference(self):
         earlier = self.save()
         replaced = deepcopy(earlier['result']['datasets'])
-        self.sas.write_text(json.dumps(replaced))
+        self.sas.write_text(json.dumps(replaced), newline='')
         later = self.workspace.save_run(self.job(), files=self.identities(), expected=replaced)
         comparison = self.workspace.compare_runs(earlier['id'], later['id'])
         self.assertEqual(comparison['later_comparison']['matched'], 24)
@@ -156,7 +156,7 @@ class WorkspaceTests(unittest.TestCase):
             path = Path(path)
             original = path.read_bytes()
             try:
-                path.write_text(json.dumps(inputs(50)))
+                path.write_text(json.dumps(inputs(50)), newline='')
                 return load_data_file(path, *args, **kwargs)
             finally:
                 path.write_bytes(original)
@@ -252,12 +252,12 @@ class WorkspaceTests(unittest.TestCase):
 
     def test_selected_original_copies_require_recorded_identity(self):
         record = self.save()
-        self.input.write_text('{}')
+        self.input.write_text('{}', newline='')
         destination = self.folder / 'bad.zip'
         with self.assertRaisesRegex(ValueError, 'changed'):
             self.workspace.export_run(record['id'], destination, include_inputs=True)
         self.assertFalse(destination.exists())
-        self.input.write_text(json.dumps(inputs()))
+        self.input.write_text(json.dumps(inputs()), newline='')
         archive = self.workspace.export_run(record['id'], self.folder / 'complete.zip',
                                              include_inputs=True, include_source=True, include_sas_results=True)
         with zipfile.ZipFile(archive) as package:

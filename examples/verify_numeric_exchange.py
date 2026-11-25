@@ -122,8 +122,8 @@ def witnesses(cases,*,r_file='numeric_exchange.R'):
     with tempfile.TemporaryDirectory(prefix='saschi-exchange-R-') as td:
         folder=Path(td);paths=[]
         for index,text in enumerate(cases):
-            path=folder/f'{index}.sas';path.write_text(text);paths.append(path)
-        listing=folder/'files.txt';listing.write_text(''.join(str(p)+'\n' for p in paths))
+            path=folder/f'{index}.sas';path.write_text(text, newline='');paths.append(path)
+        listing=folder/'files.txt';listing.write_text(''.join(str(p)+'\n' for p in paths), newline='')
         r=os.environ.get('ROSETTA_RSCRIPT') or shutil.which('Rscript') or 'Rscript'
         run=subprocess.run([r,str(HERE/r_file),'batch',str(listing)],cwd=ROOT,capture_output=True,text=True,timeout=120)
         assert run.returncode==0,run.stderr
@@ -197,12 +197,12 @@ def refusal_cases(mode):
 
 def cli_check(text,expected,*,wrong=None):
     with tempfile.TemporaryDirectory(prefix='saschi-exchange-cli-') as td:
-        folder=Path(td);source_path=folder/'job.sas';source_path.write_text(text);out=folder/'job';args=[]
+        folder=Path(td);source_path=folder/'job.sas';source_path.write_text(text, newline='');out=folder/'job';args=[]
         exports=expected.get('exports');datasets=expected['datasets']
         if exports is not None:
-            comparison=exports if wrong is None else wrong;path=folder/'expected-exports.json';path.write_text(json.dumps(comparison));args+=['--expect-exports',str(path)]
+            comparison=exports if wrong is None else wrong;path=folder/'expected-exports.json';path.write_text(json.dumps(comparison), newline='');args+=['--expect-exports',str(path)]
         elif datasets:
-            comparison=datasets if wrong is None else wrong;path=folder/'expected.json';path.write_text(json.dumps(comparison));args+=['--expect',str(path)]
+            comparison=datasets if wrong is None else wrong;path=folder/'expected.json';path.write_text(json.dumps(comparison), newline='');args+=['--expect',str(path)]
         command=[sys.executable,'-m','saschi','run',str(source_path),*args,'--output',str(out)]
         process=subprocess.run(command,cwd=ROOT,capture_output=True,text=True,env={**os.environ,'PYTHONPATH':str(ROOT),'PYTHONDONTWRITEBYTECODE':'1'})
         receipt=json.loads((out/'receipt.json').read_text())

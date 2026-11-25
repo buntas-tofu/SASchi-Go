@@ -21,7 +21,7 @@ def main():
     raw=bound['source'].read_bytes();license_bytes=bound['license'].read_bytes();assert len(raw)==3902 and hashlib.sha256(raw).hexdigest()=='39e8f17657e9aaa31f3940cbff076384a893da6f95b4ed42b49c8a116d06d417'
     assert not bound['source'].resolve().is_relative_to(ROOT)
     with external_temporary('saschi-postal-vendor-') as temp:
-        reference=Path(temp)/'reference.json';reference.write_text(json.dumps(mapping,sort_keys=True,separators=(',',':'))+'\n');text=raw.decode('ascii');values=build(text,reference);frozen(values,PINS)
+        reference=Path(temp)/'reference.json';reference.write_text(json.dumps(mapping,sort_keys=True,separators=(',',':'))+'\n', newline='');text=raw.decode('ascii');values=build(text,reference);frozen(values,PINS)
         assert all(ordered_equal(a,b) for a,b in zip(values,witness(text,'postal_function.R'),strict=True))
         from saschi.postal_function import run_program,REPORT_CONTRACT
         execute(text,*values,run_program);wrong=complete_cli_controls(text,values[0],values[1],REPORT_CONTRACT)

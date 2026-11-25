@@ -256,7 +256,7 @@ class CountedNestedTests(unittest.TestCase):
             elif change=='multiplicity':t['rows'].append(deepcopy(t['rows'][0]))
             else:t['schema']={k:v for k,v in reversed(list(t['schema'].items()))}
             with tempfile.TemporaryDirectory() as d:
-                path=Path(d)/'wrong.json';path.write_text(json.dumps(wrong))
+                path=Path(d)/'wrong.json';path.write_text(json.dumps(wrong), newline='')
                 job=build_job(PROGRAM.read_text(),expect=path)
                 self.assertFalse(job.receipt['accepted']);self.assertNotEqual(job.code,0)
                 self.assertEqual(job.result,hand_result())

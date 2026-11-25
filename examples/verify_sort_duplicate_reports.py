@@ -118,7 +118,7 @@ def expected_report_contract_controls(truth):
     from saschi.report_artifacts import read_expected_reports,report_manifest,MIXED_REPORT_CONTRACT,INFORMAT_REPORT_CONTRACT
     contract='ascii-dupout-mixed-integer-v1';count=0
     with tempfile.TemporaryDirectory() as directory:
-        path=Path(directory)/'reports.json';path.write_text(json.dumps(truth['reports']))
+        path=Path(directory)/'reports.json';path.write_text(json.dumps(truth['reports']), newline='')
         shared.exact(read_expected_reports(path,contract=contract)[0],truth['reports'])
         assert list(report_manifest(truth['reports'],contract=contract))==list(truth['reports'])
         for old in (MIXED_REPORT_CONTRACT,INFORMAT_REPORT_CONTRACT):
@@ -128,7 +128,7 @@ def expected_report_contract_controls(truth):
         bad=[json.dumps({**truth['reports'],'fourth.txt':'wrong\n'}),json.dumps({'../bad.txt':'x'}),json.dumps({'print_01.txt':1}),
              '{"print_01.txt":"a","print_01.txt":"b"}', '{"print_01.txt":NaN}',json.dumps({'print_01.txt':'x'*(4*1024*1024)})]
         for raw in bad:
-            path.write_text(raw)
+            path.write_text(raw, newline='')
             try:read_expected_reports(path,contract=contract)
             except ValueError:count+=1
             else:raise AssertionError('unsafe/oversize expected reports admitted')

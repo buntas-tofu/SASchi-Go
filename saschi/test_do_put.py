@@ -83,7 +83,7 @@ class DoNumericPutIntegrationTests(unittest.TestCase):
         for rows in ([], [{'n': 3}]):
             with self.subTest(rows=rows), tempfile.TemporaryDirectory() as directory:
                 path = Path(directory) / 'inputs.json'
-                path.write_text(json.dumps({'raw': {'schema': {'n': {'type': 'number', 'format': '8.2'}}, 'rows': rows}}))
+                path.write_text(json.dumps({'raw': {'schema': {'n': {'type': 'number', 'format': '8.2'}}, 'rows': rows}}), newline='')
                 job = build_job(source, path)
                 self.assertEqual(job.code, 1)
                 self.assertIsNone(job.result)

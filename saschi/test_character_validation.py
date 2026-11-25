@@ -81,10 +81,10 @@ class CharacterValidationTests(unittest.TestCase):
 
     def test_actual_cli_bad_second_row_publishes_no_result(self):
         with tempfile.TemporaryDirectory() as directory:
-            folder=Path(directory);data=folder/'inputs.json';data.write_text(json.dumps(catalog([{'a':'1'},{'a':'é'}])))
+            folder=Path(directory);data=folder/'inputs.json';data.write_text(json.dumps(catalog([{'a':'1'},{'a':'é'}])), encoding='utf-8', newline='')
             for name in NAMES:
                 rhs="verify(a,'0123456789 ')" if name=='verify' else name+'(a)'
-                source=folder/(name+'.sas');source.write_text('data d;set raw;x='+rhs+';output;put x;run;');out=folder/('cli-'+name)
+                source=folder/(name+'.sas');source.write_text('data d;set raw;x='+rhs+';output;put x;run;', newline='');out=folder/('cli-'+name)
                 self.assertEqual(job_with_inputs(source.read_text(),catalog([{'a':'1'}])).code,0)
                 run=subprocess.run([sys.executable,'-B','-m','saschi','run',str(source),'--inputs',str(data),'--output',str(out)],capture_output=True,text=True,cwd=ROOT,timeout=60)
                 self.assertEqual(run.returncode,1,run.stdout+run.stderr)

@@ -80,8 +80,8 @@ class DatetimeComponentTests(unittest.TestCase):
             folder=Path(directory)
             for name,rhs in calls.items():
                 values=[0,24] if name=='dhms' else [0,.5]
-                inputs=catalog(values);inp=folder/(name+'.json');inp.write_text(json.dumps(inputs))
-                source=folder/(name+'.sas');source.write_text("data d;set raw;a="+rhs+";output;put 'made';run;");out=folder/('cli-'+name)
+                inputs=catalog(values);inp=folder/(name+'.json');inp.write_text(json.dumps(inputs), newline='')
+                source=folder/(name+'.sas');source.write_text("data d;set raw;a="+rhs+";output;put 'made';run;", newline='');out=folder/('cli-'+name)
                 self.assertEqual(job_with_inputs(source.read_text(),catalog(values[:1])).code,0)
                 run=subprocess.run([sys.executable,'-B','-m','saschi','run',str(source),'--inputs',str(inp),'--output',str(out)],capture_output=True,text=True,cwd=ROOT,timeout=60)
                 self.assertEqual(run.returncode,1,run.stdout+run.stderr)

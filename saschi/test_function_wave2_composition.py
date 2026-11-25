@@ -48,7 +48,7 @@ class RecordCleaningCompositionTests(unittest.TestCase):
         with contextlib.redirect_stdout(stream),self.assertRaises(ValueError):exec(translate(source).code,{'inputs':inputs})
         self.assertEqual(stream.getvalue(),'')
         with tempfile.TemporaryDirectory() as directory:
-            folder=Path(directory);data=folder/'inputs.json';data.write_text(json.dumps(inputs));out=folder/'cli'
+            folder=Path(directory);data=folder/'inputs.json';data.write_text(json.dumps(inputs), newline='');out=folder/'cli'
             run=subprocess.run([sys.executable,'-B','-m','saschi','run',str(GATE.source),'--inputs',str(data),'--output',str(out)],capture_output=True,text=True,cwd=ROOT,timeout=60)
             self.assertEqual(run.returncode,1,run.stdout+run.stderr)
             receipt=json.loads((out/'receipt.json').read_text());self.assertFalse(receipt['accepted']);self.assertEqual(receipt['tickets'],[])
@@ -105,7 +105,7 @@ class TimestampMeasurementCompositionTests(unittest.TestCase):
                 stream=io.StringIO()
                 with contextlib.redirect_stdout(stream),self.assertRaises(ValueError):exec(translate(source).code,{'inputs':inputs})
                 self.assertEqual(stream.getvalue(),'')
-                data=folder/(name+'.json');data.write_text(json.dumps(inputs));out=folder/('cli-'+name)
+                data=folder/(name+'.json');data.write_text(json.dumps(inputs), newline='');out=folder/('cli-'+name)
                 run=subprocess.run([sys.executable,'-B','-m','saschi','run',str(gate.source),'--inputs',str(data),'--output',str(out)],capture_output=True,text=True,cwd=ROOT,timeout=60)
                 self.assertEqual(run.returncode,1,run.stdout+run.stderr)
                 receipt=json.loads((out/'receipt.json').read_text());self.assertFalse(receipt['accepted']);self.assertEqual(receipt['tickets'],[])

@@ -257,9 +257,9 @@ class DoOverTests(unittest.TestCase):
         t=deepcopy(actual);t['schema']={'y':'number','x':'number','n':'number'};mutations.append(t)
         with tempfile.TemporaryDirectory() as d:
             p=Path(d)/'expected.json'
-            p.write_text(json.dumps({'d':actual}));self.assertTrue(build_job(source,expect=p).receipt['accepted'])
+            p.write_text(json.dumps({'d':actual}), newline='');self.assertTrue(build_job(source,expect=p).receipt['accepted'])
             for t in mutations:
-                p.write_text(json.dumps({'d':t}));job=build_job(source,expect=p)
+                p.write_text(json.dumps({'d':t}), newline='');job=build_job(source,expect=p)
                 self.assertEqual(job.code,1);self.assertEqual(job.receipt['comparison'],'failed')
 
     def test_full_unmodified_external_program(self):

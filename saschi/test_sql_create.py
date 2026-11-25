@@ -168,7 +168,7 @@ class SQLCreateIntegrationTests(unittest.TestCase):
         with contextlib.redirect_stdout(stream),self.assertRaises(ValueError):exec(translate(source).code,{'inputs':supplied})
         self.assertEqual(stream.getvalue(),'')
         with tempfile.TemporaryDirectory() as directory:
-            path=Path(directory)/'bad.sas';path.write_text(source);cli_check(path,None,supplied)
+            path=Path(directory)/'bad.sas';path.write_text(source, newline='');cli_check(path,None,supplied)
 
     def test_actual_job_comparator_rejects_all_five_naive_descriptors(self):
         self.assertEqual(naive_controls(actual_jobs=True),5)

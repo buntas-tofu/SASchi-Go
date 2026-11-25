@@ -111,8 +111,8 @@ def batch_witness(sources, mode='print'):
     with tempfile.TemporaryDirectory(prefix='informat-report-R-') as temporary:
         area = Path(temporary); paths = []
         for i, source in enumerate(sources):
-            path = area / (str(i) + '.sas'); path.write_text(source); paths.append(str(path))
-        manifest = area / 'paths.txt'; manifest.write_text('\n'.join(paths) + '\n')
+            path = area / (str(i) + '.sas'); path.write_text(source, newline=''); paths.append(str(path))
+        manifest = area / 'paths.txt'; manifest.write_text('\n'.join(paths) + '\n', newline='')
         twin = 'labelled_print.R' if mode == 'print' else 'default_means.R'
         process = subprocess.run([shutil.which('Rscript'), str(HERE / twin), str(manifest)], cwd=ROOT, text=True, capture_output=True, timeout=180)
         assert process.returncode == 0, (process.stdout, process.stderr)
@@ -131,7 +131,7 @@ def round_witness(cases):
     """Invoke the independent limb comparator directly on exact decimal ratios."""
     with tempfile.TemporaryDirectory(prefix='informat-report-round-') as temporary:
         path = Path(temporary) / 'ratios.txt'
-        path.write_text(''.join(kind + '|' + str(value.numerator) + '|' + str(value.denominator) + '\n' for kind, value in cases))
+        path.write_text(''.join(kind + '|' + str(value.numerator) + '|' + str(value.denominator) + '\n' for kind, value in cases), newline='')
         expression = ('source(' + json.dumps(str(HERE / 'informat_reports.R')) + ');'
                       'for(line in readLines(' + json.dumps(str(path)) + ')){p<-strsplit(line,"|",fixed=TRUE)[[1L]];'
                       'cat(rfixed(p[2L],p[3L],p[1L]=="std"),"\\n",sep="")}')
@@ -218,9 +218,9 @@ def refusal_cases(mode='print'):
 
 
 def cli_check(source_text, expected, reports, output, *, expect_code=0):
-    area = output.parent; path = area / (output.name + '.sas'); path.write_text(source_text)
-    data = area / (output.name + '-data.json'); data.write_text(json.dumps(expected))
-    report = area / (output.name + '-reports.json'); report.write_text(json.dumps(reports))
+    area = output.parent; path = area / (output.name + '.sas'); path.write_text(source_text, newline='')
+    data = area / (output.name + '-data.json'); data.write_text(json.dumps(expected), newline='')
+    report = area / (output.name + '-reports.json'); report.write_text(json.dumps(reports), newline='')
     process = subprocess.run([sys.executable, '-B', '-m', 'saschi', 'run', str(path), '--expect', str(data), '--expect-reports', str(report), '--output', str(output)],
                              cwd=ROOT, env={**os.environ, 'PYTHONPATH': str(ROOT), 'PYTHONDONTWRITEBYTECODE': '1'}, text=True, capture_output=True, timeout=120)
     assert process.returncode == expect_code, (process.stdout, process.stderr)
@@ -277,7 +277,7 @@ def main(mode='print'):
         def observe(*args, **kwargs): seen.append('means'); return native(*args, **kwargs)
         with patch.object(informat_reports, 'execute_means', observe): job = build_job(late)
         assert not job.plan.blocked and job.result is None and job.code == 1 and seen == ['means']
-        path = area / 'late.sas'; path.write_text(late); output = area / 'late'
+        path = area / 'late.sas'; path.write_text(late, newline=''); output = area / 'late'
         run = subprocess.run([sys.executable, '-B', '-m', 'saschi', 'run', str(path), '--output', str(output)], cwd=ROOT, env={**os.environ, 'PYTHONPATH': str(ROOT)}, capture_output=True, timeout=120)
         assert run.returncode == 1 and not any((output / name).exists() for name in ['reports', 'exports', 'result.json', 'observed.json'])
     print('VERIFIED: ' + ('labelled-print' if mode == 'print' else 'default-means') + ' ' + str(len(hands)) + ' hand/' + str(len(generated)) + ' generated/' + str(len(refused)) + ' shared refusals;6 actual wrong CLI comparators+late atomic; original14statements/5rows/30events,exact local-label/title/statistics evidence; no live SAS')

@@ -129,7 +129,7 @@ def late_failure(area,variant):
  with patch.object(sort_options,'execute_sort',observer):job=build_job(raw)
  need(not job.plan.blocked and job.code==1 and job.result is None and seen==['ordered','late'],
       'actual late renderer failure did not follow completed SORTs')
- source=area/'owned-late.sas';source.write_text(raw);output=area/'late'
+ source=area/'owned-late.sas';source.write_text(raw, newline='');output=area/'late'
  run,receipt=cli(source,output)
  need(run.returncode==1 and receipt['accepted'] is False,'late CLI accepted')
  need(not any((output/n).exists() for n in ('reports','exports','result.json','observed.json')),'late failure leaked artifacts')

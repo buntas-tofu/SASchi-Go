@@ -288,13 +288,13 @@ class DuplicateTests(unittest.TestCase):
 
     def test_expected_report_contract_has_distinct_entry_and_byte_caps(self):
         with tempfile.TemporaryDirectory() as folder:
-            path = Path(folder) / 'expected.json'; path.write_text(json.dumps({f'print_0{i}.txt': 'x\n' for i in range(1, 4)}))
+            path = Path(folder) / 'expected.json'; path.write_text(json.dumps({f'print_0{i}.txt': 'x\n' for i in range(1, 4)}), newline='')
             self.assertEqual(len(read_expected_reports(path, contract=DUPLICATE_REPORT_CONTRACT)[0]), 3)
             with self.assertRaises(ValueError): read_expected_reports(path, contract=MIXED_REPORT_CONTRACT)
-            path.write_text(json.dumps({'print_01.txt': 'x' * 2200000}))
+            path.write_text(json.dumps({'print_01.txt': 'x' * 2200000}), newline='')
             read_expected_reports(path, contract=DUPLICATE_REPORT_CONTRACT)
             with self.assertRaises(ValueError): read_expected_reports(path, contract=MIXED_REPORT_CONTRACT)
-            path.write_text(json.dumps({'print_01.txt': 'x' * 4200000}))
+            path.write_text(json.dumps({'print_01.txt': 'x' * 4200000}), newline='')
             with self.assertRaises(ValueError): read_expected_reports(path, contract=DUPLICATE_REPORT_CONTRACT)
 
     def test_report_step_shapes_ordinals_and_artifact_validation(self):
@@ -317,13 +317,13 @@ class DuplicateTests(unittest.TestCase):
 
     def test_actual_cli_three_reports_and_failed_comparison_atomicity(self):
         with tempfile.TemporaryDirectory() as folder:
-            area = Path(folder); src = area / 'job.sas'; src.write_text(source(prints=3))
+            area = Path(folder); src = area / 'job.sas'; src.write_text(source(prints=3), newline='')
             output = area / 'accepted'
             command = [sys.executable, '-B', '-m', 'saschi', 'run', str(src), '--output', str(output)]
             run = subprocess.run(command, cwd=ROOT, capture_output=True)
             self.assertEqual(run.returncode, 0, run.stderr)
             self.assertEqual(sorted(p.name for p in (output / 'reports').iterdir()), ['print_01.txt', 'print_02.txt', 'print_03.txt'])
-            expected = area / 'wrong.json'; expected.write_text(json.dumps({'print_01.txt': 'wrong\n'}))
+            expected = area / 'wrong.json'; expected.write_text(json.dumps({'print_01.txt': 'wrong\n'}), newline='')
             failed = area / 'failed'; command[-1] = str(failed); command += ['--expect-reports', str(expected)]
             run = subprocess.run(command, cwd=ROOT, capture_output=True)
             self.assertEqual(run.returncode, 1); self.assertFalse((failed / 'reports').exists())

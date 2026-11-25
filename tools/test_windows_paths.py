@@ -62,7 +62,7 @@ class WindowsPathsTests(unittest.TestCase):
             (root / '.gitignore').write_bytes((ROOT / '.gitignore').read_bytes())
             for name in ('nul', 'NuL', 'NUL'):
                 git('check-ignore', '--no-index', '--', name)
-            (root / 'NuL').write_text('fixture', encoding='utf-8')
+            (root / 'NuL').write_text('fixture', encoding='utf-8', newline='')
             self.assertEqual(scan('--paths-only').returncode, 0)
             git('add', '-f', '--', 'NuL')
             (root / 'NuL').unlink()

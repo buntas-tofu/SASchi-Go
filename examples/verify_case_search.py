@@ -132,8 +132,8 @@ def main():
     assert_result(namespace['result'],wanted)
     assert stream.getvalue()==''.join(line+'\n' for line in wanted['log'])
     with tempfile.TemporaryDirectory() as directory:
-        root=Path(directory);expect=root/'expected.json';expect.write_text(json.dumps(wanted['datasets']))
-        log=root/'log.json';log.write_text(json.dumps(wanted['log']))
+        root=Path(directory);expect=root/'expected.json';expect.write_text(json.dumps(wanted['datasets']), newline='')
+        log=root/'log.json';log.write_text(json.dumps(wanted['log']), newline='')
         job=build_job(source,inputs=INPUTS,expect=expect,expect_log=log)
         assert job.code==0 and job.receipt['accepted']
         command=[sys.executable,'-m','saschi','run',str(ORIGINAL),'--inputs',str(INPUTS),'--expect',str(expect),'--expect-log',str(log),'--output',str(root/'cli')]
@@ -149,14 +149,14 @@ def main():
             elif mutation=='order':bad['clean']['rows'].reverse()
             elif mutation=='column-order':bad['clean']['schema']=dict(reversed(list(bad['clean']['schema'].items())))
             else:del bad['clean']['schema']['key']['label']
-            expect.write_text(json.dumps(bad))
+            expect.write_text(json.dumps(bad), newline='')
             output=root/('wrong-'+mutation)
             wrong=subprocess.run(command[:-1]+[str(output)],capture_output=True,text=True,cwd=ROOT,timeout=60)
             assert wrong.returncode==1,(mutation,wrong.stdout,wrong.stderr)
             receipt=json.loads((output/'receipt.json').read_text())
             assert not receipt['accepted'] and receipt['comparison']=='failed' and receipt['error'].startswith('expected dataset differs:'),receipt
             assert receipt['log_comparison']=='passed' and (output/'observed.json').is_file() and not (output/'result.json').exists()
-        expect.write_text(json.dumps(wanted['datasets']));log.write_text(json.dumps(wanted['log']+['wrong record']))
+        expect.write_text(json.dumps(wanted['datasets']), newline='');log.write_text(json.dumps(wanted['log']+['wrong record']), newline='')
         output=root/'wrong-log'
         wrong=subprocess.run(command[:-1]+[str(output)],capture_output=True,text=True,cwd=ROOT,timeout=60)
         assert wrong.returncode==1,(wrong.stdout,wrong.stderr)

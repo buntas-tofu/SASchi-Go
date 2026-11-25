@@ -402,9 +402,9 @@ class SortCompositionTests(unittest.TestCase):
         expected = {'raw': table(RAW_ROWS[:2]), 'ordered': expected_table([2, 1], rows=RAW_ROWS[:2])}
         reports = {'print_01.txt': 'TITLE: sorted\nobs label k id\n1 "a" 1 2\n2 "b" 2 1\n'}
         with tempfile.TemporaryDirectory(prefix='saschi-composition-cli-') as temporary:
-            area = Path(temporary); source_path = area / 'source.sas'; source_path.write_text(text)
-            data_path = area / 'expected.json'; data_path.write_text(json.dumps(expected))
-            reports_path = area / 'reports.json'; reports_path.write_text(json.dumps(reports))
+            area = Path(temporary); source_path = area / 'source.sas'; source_path.write_text(text, newline='')
+            data_path = area / 'expected.json'; data_path.write_text(json.dumps(expected), newline='')
+            reports_path = area / 'reports.json'; reports_path.write_text(json.dumps(reports), newline='')
             def run(label, source_file=source_path):
                 output = area / label
                 result = subprocess.run([sys.executable, '-B', '-m', 'saschi', 'run', str(source_file), '--expect', str(data_path),
@@ -415,21 +415,21 @@ class SortCompositionTests(unittest.TestCase):
             self.assertTrue(receipt['accepted']); self.assertEqual(receipt['report_contract'], 'ascii-titled-mixed-integer-v1')
             self.assertEqual(json.loads((output / 'result.json').read_text()), {'datasets': expected, 'log': [], 'reports': reports})
             self.assertEqual((output / 'reports/print_01.txt').read_bytes(), reports['print_01.txt'].encode())
-            wrong = deepcopy(expected); wrong['ordered']['rows'].reverse(); data_path.write_text(json.dumps(wrong))
+            wrong = deepcopy(expected); wrong['ordered']['rows'].reverse(); data_path.write_text(json.dumps(wrong), newline='')
             process, output, receipt = run('wrong-data')
             self.assertEqual(process.returncode, 1); self.assertFalse(receipt['accepted']); self.assertFalse((output / 'reports').exists())
             self.assertEqual(receipt['comparison'], 'failed')
             wrong = deepcopy(expected); wrong['ordered']['schema']['label']['length'] = 3
             for row in wrong['ordered']['rows']: row['label'] = row['label'].ljust(3)
-            data_path.write_text(json.dumps(wrong))
+            data_path.write_text(json.dumps(wrong), newline='')
             process, output, receipt = run('wrong-schema')
             self.assertEqual(process.returncode, 1); self.assertFalse(receipt['accepted'])
             self.assertEqual(receipt['comparison'], 'failed'); self.assertFalse((output / 'reports').exists())
-            data_path.write_text(json.dumps(expected)); reports_path.write_text(json.dumps({'print_01.txt': reports['print_01.txt'].rstrip('\n')}))
+            data_path.write_text(json.dumps(expected), newline=''); reports_path.write_text(json.dumps({'print_01.txt': reports['print_01.txt'].rstrip('\n')}), newline='')
             process, output, receipt = run('wrong-report')
             self.assertEqual(process.returncode, 1); self.assertFalse(receipt['accepted']); self.assertFalse((output / 'reports').exists())
             self.assertEqual(receipt['report_comparison'], 'failed')
-            source_path.write_text(self.late_source())
+            source_path.write_text(self.late_source(), newline='')
             process, output, receipt = run('late')
             self.assertEqual(process.returncode, 1); self.assertFalse(receipt['accepted'])
             for name in ('result.json', 'observed.json', 'reports', 'exports'): self.assertFalse((output / name).exists())

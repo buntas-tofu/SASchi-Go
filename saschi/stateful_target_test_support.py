@@ -26,9 +26,9 @@ class StatefulTargetContract(ExpressionContract):
         root=Path(__file__).resolve().parents[1]
         with tempfile.TemporaryDirectory() as directory:
             folder=Path(directory);src=folder/'job.sas';inp=folder/'inputs.json';out=folder/'failed'
-            src.write_text(source);inp.write_text(json.dumps(inputs));first=deepcopy(inputs)
+            src.write_text(source, newline='');inp.write_text(json.dumps(inputs), newline='');first=deepcopy(inputs)
             for table in first.values():table['rows']=table['rows'][:1]
-            prefix_inputs=folder/'prefix.json';prefix_inputs.write_text(json.dumps(first));prefix_out=folder/'accepted'
+            prefix_inputs=folder/'prefix.json';prefix_inputs.write_text(json.dumps(first), newline='');prefix_out=folder/'accepted'
             prefix=subprocess.run([sys.executable,'-B','-m','saschi','run',str(src),'--inputs',str(prefix_inputs),'--output',str(prefix_out)],capture_output=True,text=True,cwd=root,timeout=60)
             self.assertEqual(prefix.returncode,0,prefix.stdout+prefix.stderr)
             self.assertTrue(json.loads((prefix_out/'receipt.json').read_text())['accepted'])

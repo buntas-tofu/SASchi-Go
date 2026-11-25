@@ -115,7 +115,7 @@ def batch_witness(cases, definitions=False):
         folder = Path(directory); paths = []
         for index, text in enumerate(cases):
             path = folder / f'{index}.sas'; path.write_bytes(text.encode()); paths.append(path)
-        listing = folder / 'sources.txt'; listing.write_text(''.join(str(path) + '\n' for path in paths))
+        listing = folder / 'sources.txt'; listing.write_text(''.join(str(path) + '\n' for path in paths), newline='')
         rscript = os.environ.get('ROSETTA_RSCRIPT') or shutil.which('Rscript') or 'Rscript'
         process = subprocess.run([rscript, str(HERE / ('numeric_invalue.R' if definitions else 'formatted_input.R')), str(listing)],
                                  cwd=ROOT, capture_output=True, text=True, timeout=120, check=True)
@@ -289,7 +289,7 @@ def atomic_cli():
     # A valid earlier producer must not publish when a later producer is invalid.
     text = source(['A        High  ']) + source(['B        high  '], name='later', definition='')
     with tempfile.TemporaryDirectory() as directory:
-        folder = Path(directory); path = folder / 'program.sas'; path.write_text(text); out = folder / 'job'
+        folder = Path(directory); path = folder / 'program.sas'; path.write_text(text, newline=''); out = folder / 'job'
         process = subprocess.run([sys.executable, '-B', '-m', 'saschi', 'run', str(path), '--output', str(out)],
                                  cwd=ROOT, capture_output=True, text=True, timeout=45)
         receipt = json.loads((out / 'receipt.json').read_text())

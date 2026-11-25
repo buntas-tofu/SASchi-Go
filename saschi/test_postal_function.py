@@ -121,7 +121,7 @@ class PostalFunctionTests(unittest.TestCase):
         with patch.object(postal,'validate_reports',observe):job=build_job(late_failure())
         self.assertEqual(seen,[1]);self.assertEqual(job.code,1);self.assertIsNone(job.result)
         with tempfile.TemporaryDirectory(prefix='saschi-postal-atomic-') as temp:
-            area=Path(temp);p=area/'source.sas';p.write_text(late_failure());run=subprocess.run([sys.executable,'-m','saschi','run',str(p),'--output',str(area/'job')],capture_output=True,text=True,cwd=ROOT,timeout=120)
+            area=Path(temp);p=area/'source.sas';p.write_text(late_failure(), newline='');run=subprocess.run([sys.executable,'-m','saschi','run',str(p),'--output',str(area/'job')],capture_output=True,text=True,cwd=ROOT,timeout=120)
             self.assertEqual(run.returncode,1,run.stderr);self.assertFalse(json.loads((area/'job/receipt.json').read_text())['accepted'])
             for name in ('reports','exports','result.json','observed.json'):self.assertFalse((area/'job'/name).exists())
 

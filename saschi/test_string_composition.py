@@ -67,7 +67,7 @@ class StringCompositionTests(unittest.TestCase):
                                      'b': {'type': 'character', 'length': 2}},
                           'rows': [{'a': 'A', 'b': ' '}, {'a': 'AA', 'b': 'BB'}]}}
         with tempfile.TemporaryDirectory() as directory:
-            path = Path(directory) / 'inputs.json'; path.write_text(json.dumps(inputs))
+            path = Path(directory) / 'inputs.json'; path.write_text(json.dumps(inputs), newline='')
             job = build_job(source, path)
         self.assertEqual(job.code, 1)
         self.assertFalse(job.receipt['accepted'])
@@ -123,7 +123,7 @@ class StringCompositionTests(unittest.TestCase):
             for predicate in ("reverse(a)='BA'", "length(a||'C')=3"):
                 source = f'data d; length a ${width}; set raw; where {predicate}; run;'
                 with self.subTest(width=width, predicate=predicate), tempfile.TemporaryDirectory() as directory:
-                    path = Path(directory) / 'inputs.json'; path.write_text(json.dumps(inputs))
+                    path = Path(directory) / 'inputs.json'; path.write_text(json.dumps(inputs), newline='')
                     job = build_job(source, path)
                     self.assertEqual(job.code, 0, job.receipt)
                     self.assertEqual(job.result['datasets']['d'], {

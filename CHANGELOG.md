@@ -37,6 +37,14 @@ live SAS comparison. Branch synchronization is separate from a release.
 - Keep the host and the interpreter path out of the published showcase while the
   job receipt behind it keeps the machine detail (`provenance.runtime_versions`).
 
+- Make every write byte-exact. `Path.write_text` and `open(mode='w')` translate
+  a newline to CRLF on Windows, so a program written to disk and then hashed from
+  disk disagreed with the receipt that hashed the same program in memory. That is
+  the residual failure class on Windows: 21 gates where the assertion compared a
+  CRLF digest against an LF one. Applied as a rule rather than a fix, across 335
+  write_text sites and 4 text-mode open() sites, with `tools/test_byte_exact_writes.py` failing any new text-mode
+  write because the defect is invisible on Linux, where nothing translates.
+
 - Add complete character/missing and numeric/calendar composition programs,
   independent whole-program R witnesses,typed ordered comparisons and actual
   CLI receipt checks. Preserve all earlier fixture source and admission boundaries.

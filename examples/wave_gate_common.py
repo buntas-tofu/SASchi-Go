@@ -125,8 +125,8 @@ class FamilyGate:
         assert_result(namespace['result'],wanted)
         assert stream.getvalue()==''.join(x+'\n' for x in wanted['log'])
         with tempfile.TemporaryDirectory() as directory:
-            root=Path(directory);expect=root/'expected.json';expect.write_text(json.dumps(wanted['datasets']))
-            log=root/'log.json';log.write_text(json.dumps(wanted['log']))
+            root=Path(directory);expect=root/'expected.json';expect.write_text(json.dumps(wanted['datasets']), newline='')
+            log=root/'log.json';log.write_text(json.dumps(wanted['log']), newline='')
             job=build_job(source,inputs=self.inputs,expect=expect,expect_log=log)
             assert job.code==0 and job.receipt['accepted']
             assert build_job(source,inputs=self.inputs,target='cpp').code==2
@@ -149,14 +149,14 @@ class FamilyGate:
                 else:
                     spec=table['schema'][column]
                     table['schema'][column]={**({'type':spec} if type(spec) is str else spec),'label':'wrong metadata'}
-                expect.write_text(json.dumps(bad))
+                expect.write_text(json.dumps(bad), newline='')
                 output=root/('wrong-'+mutation)
                 wrong=subprocess.run(command[:-1]+[str(output)],capture_output=True,text=True,cwd=self.root,timeout=60)
                 assert wrong.returncode==1,(mutation,wrong.stdout,wrong.stderr)
                 receipt=json.loads((output/'receipt.json').read_text())
                 assert not receipt['accepted'] and receipt['comparison']=='failed' and receipt['error'].startswith('expected dataset differs:'),receipt
                 assert receipt['log_comparison']=='passed' and (output/'observed.json').is_file() and not (output/'result.json').exists()
-            expect.write_text(json.dumps(wanted['datasets']));log.write_text(json.dumps(wanted['log']+['wrong record']))
+            expect.write_text(json.dumps(wanted['datasets']), newline='');log.write_text(json.dumps(wanted['log']+['wrong record']), newline='')
             output=root/'wrong-log'
             wrong=subprocess.run(command[:-1]+[str(output)],capture_output=True,text=True,cwd=self.root,timeout=60)
             assert wrong.returncode==1,(wrong.stdout,wrong.stderr)

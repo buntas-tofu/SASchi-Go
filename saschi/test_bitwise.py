@@ -148,7 +148,7 @@ class BitwiseTests(unittest.TestCase):
             exec(translate(source).code,ns)
         self.assertEqual(output.getvalue(),'');self.assertNotIn('result',ns)
         with tempfile.TemporaryDirectory() as directory:
-            path=Path(directory)/'input.json';path.write_text(json.dumps(inputs or {}))
+            path=Path(directory)/'input.json';path.write_text(json.dumps(inputs or {}), newline='')
             with contextlib.redirect_stdout(output):job=build_job(source,path)
         self.assertEqual(job.code,1);self.assertIsNone(job.result);self.assertFalse(job.receipt['accepted'])
         self.assertEqual(output.getvalue(),'')

@@ -136,7 +136,7 @@ class SubstrCompositionTests(unittest.TestCase):
         with contextlib.redirect_stdout(printed),self.assertRaises(ValueError):exec(translate(source).code,ns)
         self.assertEqual(printed.getvalue(),'');self.assertNotIn('result',ns)
         with tempfile.TemporaryDirectory() as directory:
-            path=Path(directory)/'input.json';path.write_text(json.dumps(inputs))
+            path=Path(directory)/'input.json';path.write_text(json.dumps(inputs), newline='')
             with contextlib.redirect_stdout(printed):job=build_job(source,path)
         self.assertEqual(job.code,1);self.assertIsNone(job.result);self.assertFalse(job.receipt['accepted'])
         self.assertEqual(printed.getvalue(),'')

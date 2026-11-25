@@ -227,9 +227,9 @@ class NumericExchangeTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             path=Path(td)/'expected.json'
             for text in ('{"x.csv":"a","x.csv":"b"}','[]','null','{"x.csv":1}','{"x.csv":true}','{"x.csv":"a","y.csv":"b"}','{"../x.csv":"a"}'):
-                path.write_text(text)
+                path.write_text(text, newline='')
                 with self.assertRaises(ValueError):read_expected_exports(path)
-            path.write_text('{"x.csv":"a"}');self.assertEqual(read_expected_exports(path)[0],{'x.csv':'a'})
+            path.write_text('{"x.csv":"a"}', newline='');self.assertEqual(read_expected_exports(path)[0],{'x.csv':'a'})
 
     def test_export_buffers_reject_nonASCII_controls_missing_newline_and_oversize(self):
         for text in ('x','x\r\n','é\n','x\v\n','x\t\n','x'*65+'\n','x\n'*10001):
@@ -247,10 +247,10 @@ class NumericExchangeTests(unittest.TestCase):
 
     def test_malformed_unreadable_and_wrong_UTF8_expectations_have_no_exports(self):
         with tempfile.TemporaryDirectory() as td:
-            folder=Path(td);path=folder/'job.sas';path.write_text(source(['1,2,3'],filename='out.csv',name='_null_'))
+            folder=Path(td);path=folder/'job.sas';path.write_text(source(['1,2,3'],filename='out.csv',name='_null_'), newline='')
             for index,contents in enumerate(('{"out.csv":"a","out.csv":"b"}','{"out.csv":7}','{"out.csv":"é"}',None)):
                 expected=folder/f'expected{index}.json'
-                if contents is not None:expected.write_text(contents)
+                if contents is not None:expected.write_text(contents, newline='')
                 out=folder/f'job{index}'
                 with contextlib.redirect_stdout(io.StringIO()):code=cli_main(['run',str(path),'--expect-exports',str(expected),'--output',str(out)])
                 self.assertEqual(code,1);receipt=json.loads((out/'receipt.json').read_text())
@@ -264,7 +264,7 @@ class NumericExchangeTests(unittest.TestCase):
     def test_late_runtime_failure_discards_exports_and_log(self):
         text='data _null_;put "before";run;'+source(['1,2,3','4,0,6'],filename='late.csv',name='_null_',body='put x1-x3;z=x1/x2;')
         with tempfile.TemporaryDirectory() as td:
-            p=Path(td)/'job.sas';p.write_text(text);out=Path(td)/'job'
+            p=Path(td)/'job.sas';p.write_text(text, newline='');out=Path(td)/'job'
             stdout=io.StringIO()
             with contextlib.redirect_stdout(stdout):code=cli_main(['run',str(p),'--output',str(out)])
             self.assertEqual(code,1);self.assertNotIn('before',stdout.getvalue())
@@ -273,7 +273,7 @@ class NumericExchangeTests(unittest.TestCase):
     def test_later_independent_step_failure_discards_whole_export(self):
         text=source(['1,2,3'],filename='first.csv',name='_null_')+'data _null_;d=0;x=1/d;run;'
         with tempfile.TemporaryDirectory() as td:
-            p=Path(td)/'job.sas';p.write_text(text);job=build_job(text)
+            p=Path(td)/'job.sas';p.write_text(text, newline='');job=build_job(text)
             self.assertFalse(job.receipt['accepted']);self.assertIsNone(job.result)
             with contextlib.redirect_stdout(io.StringIO()):code=cli_main(['run',str(p),'--output',str(Path(td)/'job')])
             self.assertEqual(code,1);self.assertFalse((Path(td)/'job/exports').exists())
@@ -281,7 +281,7 @@ class NumericExchangeTests(unittest.TestCase):
     def test_physical_open_partial_write_and_commit_failures_leave_no_job(self):
         for fault in ('open','partial','rename'):
             with self.subTest(fault=fault),tempfile.TemporaryDirectory() as td:
-                folder=Path(td);source_path=folder/'job.sas';source_path.write_text(source(['1,2,3'],filename='out.csv',name='_null_'));out=folder/'job'
+                folder=Path(td);source_path=folder/'job.sas';source_path.write_text(source(['1,2,3'],filename='out.csv',name='_null_'), newline='');out=folder/'job'
                 real_open,real_rename=Path.open,Path.rename
                 def opened(path,*args,**kwargs):
                     if path.name=='out.csv' and args and args[0]=='xb':

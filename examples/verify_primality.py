@@ -41,7 +41,7 @@ def reference_result():
 
 def verify_cli(source, folder, expected, *, matches):
     expected_path = folder.with_suffix('.json')
-    expected_path.write_text(json.dumps(expected['datasets']))
+    expected_path.write_text(json.dumps(expected['datasets']), newline='')
     process = subprocess.run(
         [sys.executable, '-m', 'saschi', 'run', str(source),
          '--expect', str(expected_path), '--output', str(folder)],

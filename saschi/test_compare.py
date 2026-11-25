@@ -46,8 +46,8 @@ class TypedComparisonTests(unittest.TestCase):
     def test_cli_does_not_accept_boolean_as_number(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            (root/'job.sas').write_text('data d; x=1; run;')
-            (root/'expected.json').write_text(json.dumps({'d':{'schema':{'x':'number'},'rows':[{'x':True}]}}))
+            (root/'job.sas').write_text('data d; x=1; run;', newline='')
+            (root/'expected.json').write_text(json.dumps({'d':{'schema':{'x':'number'},'rows':[{'x':True}]}}), newline='')
             with contextlib.redirect_stdout(io.StringIO()):
                 code = main(['run', str(root/'job.sas'), '--expect', str(root/'expected.json'), '--output', str(root/'out')])
             self.assertEqual(code, 1)

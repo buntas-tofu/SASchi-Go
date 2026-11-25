@@ -43,7 +43,7 @@ def main():
     from saschi.catalog import record_pass
     from saschi.plan import compile_plan
     with external_temporary('saschi-postal-expectations-') as temp:
-        path=Path(temp)/'reference.json';path.write_text(json.dumps(mapping,sort_keys=True,separators=(',',':'))+'\n')
+        path=Path(temp)/'reference.json';path.write_text(json.dumps(mapping,sort_keys=True,separators=(',',':'))+'\n', newline='')
         cases=qualification(path)
         for text,(expected,accounting,trace) in cases:
             execute(text,expected,accounting,trace,run_program);cat,c=record_pass(text,compile_plan(text))

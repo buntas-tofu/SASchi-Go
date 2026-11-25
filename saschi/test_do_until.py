@@ -143,10 +143,10 @@ class DoUntilTests(unittest.TestCase):
         t=deepcopy(actual); t['schema']={'m':'number','n':'number'}; changes.append(t)
         t=deepcopy(actual); t['rows'][0]['m']=9; changes.append(t)
         with tempfile.TemporaryDirectory() as d:
-            path=Path(d)/'expected.json'; path.write_text(json.dumps({'d':actual}))
+            path=Path(d)/'expected.json'; path.write_text(json.dumps({'d':actual}), newline='')
             self.assertTrue(build_job(source,expect=path).receipt['accepted'])
             for changed in changes:
-                path.write_text(json.dumps({'d':changed})); job=build_job(source,expect=path)
+                path.write_text(json.dumps({'d':changed}), newline=''); job=build_job(source,expect=path)
                 self.assertEqual(job.code,1); self.assertEqual(job.receipt['comparison'],'failed')
                 self.assertEqual(job.result['datasets']['d'],actual)
 

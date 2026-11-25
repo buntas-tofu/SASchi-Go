@@ -30,7 +30,7 @@ def source(records):
 
 def witness(text):
     with tempfile.TemporaryDirectory(prefix='saschi-date-profile-r-') as temporary:
-        directory=Path(temporary);path=directory/'original.sas';path.write_text(text)
+        directory=Path(temporary);path=directory/'original.sas';path.write_text(text, newline='')
         executable=os.environ.get('ROSETTA_RSCRIPT') or shutil.which('Rscript') or 'Rscript'
         subprocess.run([executable,str(HERE/'date_profile.R'),str(path),str(directory/'out')],
                        check=True,capture_output=True,text=True,timeout=120)
@@ -72,10 +72,10 @@ def qualified_cases():
 
 def cli(text, truth, *, wrong=None):
     with tempfile.TemporaryDirectory(prefix='saschi-date-profile-cli-') as temporary:
-        directory=Path(temporary);path=directory/'original.sas';path.write_text(text)
+        directory=Path(temporary);path=directory/'original.sas';path.write_text(text, newline='')
         expected=truth if wrong is None else wrong
         for name,value in [('tables',expected['datasets']),('reports',expected['reports']),('log',expected['log'])]:
-            (directory/(name+'.json')).write_text(json.dumps(value))
+            (directory/(name+'.json')).write_text(json.dumps(value), newline='')
         run=subprocess.run([sys.executable,'-m','saschi','run',str(path),'--expect',str(directory/'tables.json'),
                             '--expect-reports',str(directory/'reports.json'),'--expect-log',str(directory/'log.json'),
                             '--output',str(directory/'job')],cwd=ROOT,capture_output=True,text=True,timeout=120)

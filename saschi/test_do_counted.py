@@ -30,7 +30,7 @@ def execute(source, inputs=None):
 def job_with_inputs(source, inputs):
     with tempfile.TemporaryDirectory() as directory:
         path=Path(directory)/'inputs.json'
-        path.write_text(json.dumps(inputs))
+        path.write_text(json.dumps(inputs), newline='')
         return build_job(source,inputs=path)
 
 
