@@ -3,6 +3,38 @@
 Status: development changes with original pins and Python/base-R evidence; no
 live SAS comparison. Branch synchronization is separate from a release.
 
+- Gate the CREDENTIAL class by shape rather than by list: provider token
+  prefixes, private key headers and signed tokens now trip the sanitization
+  check, and `tools/test_sanitization.py` proves each rule fires before the gate
+  runs in CI. A rule nobody has watched fire is faith, not a gate.
+
+- Narrow the gate's scan domain to the published surface: tracked files plus
+  untracked files git would include. A local `telemetry/` receipt legitimately
+  records the interpreter path of the machine that produced it, and scanning it
+  turned one real finding into 1,102 true statements about a home directory.
+
+- Read staged content from the git index, so a pre-commit run judges what git
+  will record rather than what the working tree happens to hold. Read
+  extensionless files as text when they decode, which is the shape a packaged
+  licence or copyright file arrives in. Scan `.github`, which the gate had
+  always skipped while calling itself the published-surface check.
+
+- Unpack the built Debian payload and run the same gate over it in the package
+  job: the published artifact is the package, not the tree. Run against the
+  local package built on 2026-11-07, the scan found the estate line in a bundled
+  test module that the published tree had already cleared on 2026-11-10. Trees
+  get scrubbed and artifacts keep shipping, which is why the artifact is scanned.
+
+- Pin `eol=lf` in `.gitattributes` and set `PYTHONUTF8=1` in both workflows and
+  `saschi.bat`. The fixture pins and the run receipt hash file BYTES, so a
+  default Windows checkout gave the same commit two different `source_sha256`
+  values, and a cp1252 stream raised `UnicodeEncodeError` on the Kelvin sign the
+  character gates build at runtime. Measured on Windows hardware: 50 gates
+  passing before, 207 after, with no code change beyond these two settings.
+
+- Keep the host and the interpreter path out of the published showcase while the
+  job receipt behind it keeps the machine detail (`provenance.runtime_versions`).
+
 - Add complete character/missing and numeric/calendar composition programs,
   independent whole-program R witnesses,typed ordered comparisons and actual
   CLI receipt checks. Preserve all earlier fixture source and admission boundaries.

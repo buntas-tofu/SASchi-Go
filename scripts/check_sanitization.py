@@ -27,9 +27,26 @@ with a reason; the gate fails on anything unclassified.
 An optional sha256 field restricts a declaration to the exact file bytes.
 Changing those bytes removes that declaration's effect.
 
+Four classes are forbidden in EVERY instance: estate and fabric terms,
+identifiers of people, credentials, and the lane the tree does not belong to.
+Credentials are matched by SHAPE (provider token prefixes, private key headers,
+signed tokens) so a credential this list has never seen still trips.
+
 Checks: file CONTENT (case-insensitive, word-boundary patterns plus a
-no-boundary pass for whole snake_case identifier segments) and FILE NAMES
-(the published surface). This script is exempt from its own scan by
+no-boundary pass for whole snake_case identifier segments), FILE NAMES, and
+STAGED CONTENT taken from the git index so a pre-commit run judges what git
+will record rather than what the working tree happens to hold.
+
+The scan domain is the PUBLISHED SURFACE: tracked files plus untracked files
+git would include, enumerated with `git ls-files --cached --others
+--exclude-standard`. A gitignored directory of local receipts carries home
+paths by design, and letting it into the scan buries the handful of real
+findings under a thousand true statements about the machine it ran on. When the
+target is not a git worktree, for instance an unpacked package payload, the
+walk covers every file; extensionless files count as text when they decode, so
+a packaged licence or copyright file is read.
+
+This script is exempt from its own scan by
 declaration: it IS the token list, and copying the list into other artifacts
 is exactly what the floor forbids. Exit 0 clean, 1 findings, 2 usage error.
 Pure standard library.
@@ -39,6 +56,7 @@ import argparse
 import hashlib
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -73,8 +91,22 @@ PERSONAL = [
     r"^\s*(?:author|written by)\s*:\s*[A-Z][a-z]+(?:\s+[A-Z]\.?)?\s+[A-Z][a-z]+",
 ]
 
-DESK_FORBIDDEN = ESTATE + PERSONAL + PERSONA + [r"\bseats?\b"]
-BUNTAS_FORBIDDEN = ESTATE + PERSONAL + [
+# Credentials are a class the identity lists do not carry: a token pasted into
+# a doc, a key in a fixture, a signed URL in a recorded receipt. These patterns
+# describe SHAPES, never values, so a new credential trips the gate instead of
+# walking through a list that was written before it existed.
+CREDENTIAL = [
+    r"\bgh[pousr]_[A-Za-z0-9]{32,}",
+    r"github_pat_[A-Za-z0-9_]{40,}",
+    r"\b(?:AKIA|ASIA)[0-9A-Z]{16}\b",
+    r"\bxox[baprs]-[A-Za-z0-9-]{20,}",
+    r"\bsk-(?:proj-)?[A-Za-z0-9_-]{32,}",
+    r"-----BEGIN [A-Z ]{0,40}PRIVATE KEY-----",
+    r"\beyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{15,}",
+]
+
+DESK_FORBIDDEN = ESTATE + PERSONAL + PERSONA + CREDENTIAL + [r"\bseats?(\b|_)"]
+BUNTAS_FORBIDDEN = ESTATE + PERSONAL + CREDENTIAL + [
     r"the-pgh-cid", r"\bclaude\b", r"\banthropic\b", r"\bfable\b",
 ]
 
@@ -82,10 +114,30 @@ TEXT_SUFFIXES = {
     ".md", ".markdown", ".txt", ".rst", ".json", ".yaml", ".yml", ".toml",
     ".ini", ".cfg", ".conf", ".py", ".r", ".R", ".sh", ".sql", ".sas",
     ".js", ".ts", ".html", ".css", ".xml", ".csv", ".tsv", ".thrift",
-    ".bat", ".ps1",
+    ".bat", ".ps1", ".service", ".desktop", ".md5sum",
 }
-SKIP_DIRS = {".git", ".github", "__pycache__", ".venv", "venv",
+# .github is NOT skipped: a workflow is published surface, it carries paths,
+# hosts and secrets, and it was the one directory this gate never read.
+SKIP_DIRS = {".git", "__pycache__", ".venv", "venv",
              "node_modules", "dist", "build"}
+# extensionless files count as text when they decode, because a packaged
+# licence, a copyright file and a launcher shim all arrive without a suffix.
+EXTENSIONLESS_MAX_BYTES = 2 * 1024 * 1024
+
+
+def looks_like_text(path: Path) -> bool:
+    if path.suffix in TEXT_SUFFIXES:
+        return True
+    if path.suffix:
+        return False
+    try:
+        if path.stat().st_size > EXTENSIONLESS_MAX_BYTES:
+            return False
+        path.read_bytes().decode("utf-8")
+    except (OSError, UnicodeDecodeError):
+        return False
+    return True
+
 
 
 def load_allowlist():
@@ -133,6 +185,68 @@ def allowed(allowlist, rel, pattern, path):
     return None
 
 
+def staged_findings(root: Path, compiled: list) -> list:
+    """Scan content staged in the index, not only what is on disk.
+
+    A pre-commit run otherwise reads the working tree while git records the
+    index, so a line added with `git add -p` and then edited back on disk
+    reaches the commit without ever being scanned.
+    """
+    if not (root / ".git").exists():
+        return []
+    try:
+        listed = subprocess.run(
+            ["git", "-C", str(root), "diff", "--cached", "--name-only",
+             "--diff-filter=ACMR", "-z"],
+            capture_output=True, check=True, timeout=30).stdout
+    except (OSError, subprocess.CalledProcessError, subprocess.TimeoutExpired):
+        return []
+    out = []
+    for rel in sorted({n for n in listed.decode("utf-8", "surrogateescape").split("\0") if n}):
+        if set(Path(rel).parts) & SKIP_DIRS:
+            continue
+        if rel in {"scripts/check_sanitization.py",
+                   "scripts/sanitization-allowlist.json"}:
+            continue
+        try:
+            raw = subprocess.run(
+                ["git", "-C", str(root), "show", ":" + rel],
+                capture_output=True, check=True, timeout=30).stdout
+        except (OSError, subprocess.CalledProcessError, subprocess.TimeoutExpired):
+            continue
+        try:
+            text = raw.decode("utf-8")
+        except UnicodeDecodeError:
+            continue
+        for i, line in enumerate(text.splitlines(), 1):
+            for p, rx in compiled:
+                if rx.search(line):
+                    out.append((rel, i, p + " [staged]", line.strip()[:90]))
+    return out
+
+
+def candidate_files(root: Path) -> list:
+    """What git would publish, and nothing else.
+
+    Scanning the whole filesystem makes a single gitignored receipts directory
+    produce a thousand findings that bury the handful of real ones, and every
+    one of them carries the home path the local run legitimately recorded. The
+    scan domain is tracked files plus untracked files git would include, which
+    is the published surface.
+    """
+    if (root / ".git").exists():
+        try:
+            listed = subprocess.run(
+                ["git", "-C", str(root), "ls-files", "-z", "--cached",
+                 "--others", "--exclude-standard"],
+                capture_output=True, check=True, timeout=60).stdout
+            names = {n for n in listed.decode("utf-8", "surrogateescape").split("\0") if n}
+            return sorted((root / n) for n in names if (root / n).is_file())
+        except (OSError, subprocess.CalledProcessError, subprocess.TimeoutExpired):
+            pass
+    return sorted(p for p in root.rglob("*") if p.is_file())
+
+
 def run(profile: str, root: Path) -> int:
     if profile == "desk":
         patterns = DESK_FORBIDDEN
@@ -150,7 +264,7 @@ def run(profile: str, root: Path) -> int:
     allowlist = load_allowlist()
     exempt = stamped_dirs(root)
     findings = []
-    for path in sorted(root.rglob("*")):
+    for path in candidate_files(root):
         if not path.is_file() or is_exempt(path, root, exempt):
             continue
         rel = path.relative_to(root).as_posix()
@@ -165,7 +279,7 @@ def run(profile: str, root: Path) -> int:
                 row = allowed(allowlist, rel, p, path)
                 if not row:
                     findings.append((str(rel), 0, p, "FILENAME"))
-        if path.suffix not in TEXT_SUFFIXES:
+        if not looks_like_text(path):
             continue
         try:
             text = path.read_text(encoding="utf-8", errors="replace")
@@ -192,6 +306,7 @@ def run(profile: str, root: Path) -> int:
                         frag = text[max(0, m.start() - 30):m.end() + 30].replace("\n", " ")
                         findings.append((str(rel), 0, p + " [nobound]", frag[:90]))
                         break
+    findings.extend(staged_findings(root, compiled))
     seen = set()
     for rel, line, p, ctx in findings:
         key = (rel, p)

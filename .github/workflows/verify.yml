@@ -4,6 +4,11 @@ on:
     branches: [main]
   pull_request:
     types: [opened, synchronize, reopened, edited]
+
+# See governance.yml: the gates build non-ASCII test vectors and need UTF-8 mode.
+env:
+  PYTHONUTF8: "1"
+
 jobs:
   verify:
     name: Fixture gates, portable plans, and synthesis
@@ -77,6 +82,17 @@ jobs:
           python -m pip install --upgrade setuptools wheel
       - name: Build the Debian package
         run: python tools/build_desktop_deb.py --output output/saschi-desktop.deb
+      - name: Scan the packaged payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          # The published artifact is the package, not the tree. Unpack it and
+          # run the same gate over the payload, so a licence, a copyright file
+          # or a generated config cannot carry identity past the source scan.
+          payload=$(mktemp -d)
+          dpkg-deb -x output/saschi-desktop.deb "$payload/files"
+          dpkg-deb -e output/saschi-desktop.deb "$payload/control"
+          python3 scripts/check_sanitization.py buntas "$payload"
       - name: Assert the control metadata and payload
         shell: bash
         run: |

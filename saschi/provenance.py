@@ -26,7 +26,18 @@ def command_version(command):
         return None
 
 
-def environment():
+def runtime_versions(details):
+    """Only the version fields, for evidence that leaves this machine.
+
+    A job receipt legitimately records the host and the interpreter path: that
+    is local provenance. Anything published or shown to a reader who is not on
+    this machine carries versions and nothing else.
+    """
+    return {name: details.get(name)
+            for name in ('python', 'packages', 'r_version', 'cpp_version')}
+
+
+def environment(*, include_machine=True):
     packages = {}
     for package in DEPENDENCIES:
         try:
@@ -35,10 +46,11 @@ def environment():
             packages[package] = None
     r = os.environ.get('ROSETTA_RSCRIPT') or shutil.which('Rscript')
     cxx = os.environ.get('CXX') or shutil.which('g++')
-    return {'host': platform.node(), 'platform': platform.platform(),
-            'python': platform.python_version(), 'python_executable': sys.executable,
-            'packages': packages, 'r_executable': r, 'r_version': command_version(r) if r else None,
-            'cpp_executable': cxx, 'cpp_version': command_version(cxx) if cxx else None}
+    details = {'host': platform.node(), 'platform': platform.platform(),
+               'python': platform.python_version(), 'python_executable': sys.executable,
+               'packages': packages, 'r_executable': r, 'r_version': command_version(r) if r else None,
+               'cpp_executable': cxx, 'cpp_version': command_version(cxx) if cxx else None}
+    return details if include_machine else runtime_versions(details)
 
 
 def source_state(root):

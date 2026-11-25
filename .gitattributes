@@ -1,0 +1,23 @@
+# Line endings are a build input, not a preference.
+#
+# The fixture gates pin sha256 over file BYTES, and the run receipt records
+# source_sha256 over every tracked file. Git for Windows defaults
+# core.autocrlf=true, so a plain checkout lands CRLF, git reports a clean
+# status, and the same commit then hashes differently from the Linux receipt.
+# These rules override that default for every clone on every platform.
+* text=auto eol=lf
+*.sas text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.sas7bdat binary
+*.7bdat binary
+*.deb binary
+*.whl binary
+*.gz binary
+*.zip binary
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary
+*.pdf binary

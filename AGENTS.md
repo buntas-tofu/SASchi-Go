@@ -324,12 +324,28 @@ right.
   governance workflow runs the invariant linter, validates
   `agent-manifest.json` against `agent-manifest.schema.json`, and runs the
   sanitization token gate (`scripts/check_sanitization.py buntas`), which
-  fails on any identity token outside this instance's allowed set unless the
-  hit is an adjudicated subject-matter row in
-  `scripts/sanitization-allowlist.json`. The verification
+  fails on any token outside this instance's allowed set unless the hit is an
+  adjudicated subject-matter row in
+  `scripts/sanitization-allowlist.json`. The gate carries four classes: estate
+  and fabric terms, identifiers of people, CREDENTIAL SHAPES (provider token
+  prefixes, private key headers, signed tokens), and the sibling lane's
+  vocabulary. It scans the published surface only (tracked plus untracked files
+  git would include, so a gitignored receipts directory cannot bury a real
+  finding), it reads staged content from the index, and it counts extensionless
+  files as text when they decode. `tools/test_sanitization.py` proves each rule
+  fires and runs ahead of the gate in CI. The verification
   workflow runs `python verify_all.py`: every fixture gate, the capability
   manifest gate, plus the parser, router, and emitter suites, so ALL VERIFIED
-  covers the translator and not only the fixture surface.
+  covers the translator and not only the fixture surface. The package job also
+  unpacks the built Debian payload and runs the same gate over it, because the
+  published artifact is the package and not the tree.
+- **Platform parity**: `.gitattributes` pins `eol=lf` for every clone, because
+  the fixture gates and the run receipt hash file BYTES and a CRLF checkout
+  produces different hashes from the same commit. `PYTHONUTF8=1` is set in both
+  workflows and in `saschi.bat`, because the gates build non-ASCII test vectors
+  and a cp1252 stream raises `UnicodeEncodeError` on them. Neither is a
+  preference: remove either one and the Windows run stops being comparable to
+  the Linux run.
 - **File conventions**: one R twin plus one `verify_*.py` gate per construct
   in `examples/`; `sas_semantics.py` is the single source of the semantics
   reference, and the readable plain-text twin lives in the reference home

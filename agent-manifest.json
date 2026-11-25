@@ -48,7 +48,7 @@
     },
     {
       "tool_id": "check-sanitization",
-      "description": "Sanitization token gate for this instance's allowed identity, with declared exemptions and an adjudicated allowlist (scripts/check_sanitization.py buntas)."
+      "description": "Sanitization gate over the published surface: estate and fabric terms, person identifiers, credential shapes, and the sibling lane's vocabulary, with staged index content, extensionless text, and an adjudicated allowlist (scripts/check_sanitization.py buntas)."
     }
   ],
   "provenance": {

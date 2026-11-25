@@ -142,8 +142,11 @@ def scan_tree(root: Path):
 
 
 def emit_csv(out_path: Path, rows):
+    # lineterminator is explicit so the committed artifact is LF on every
+    # platform: csv.writer defaults to CRLF, which made this the one CRLF file
+    # in an otherwise LF tree and changed its bytes with the gitattributes rule.
     with out_path.open("w", newline="", encoding="utf-8") as fh:
-        w = csv.writer(fh)
+        w = csv.writer(fh, lineterminator="\n")
         w.writerow(["repo", "license", "sas_files", "code_lines",
                     "rule_id", "feature", "occurrences", "files_using",
                     "per_1000_lines"])
