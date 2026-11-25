@@ -13,6 +13,7 @@ from datetime import datetime, timezone
 
 from . import __version__
 from .job import Job
+from .provenance import runtime_versions
 
 MAX_ROWS = 500
 COMPARISONS = [('Dataset', 'comparison', 'expected_sha256'),
@@ -73,7 +74,10 @@ def _step_block(step: dict) -> str:
 
 def build_showcase(job: Job, name: str, source_label: str = "pasted program") -> str:
     plan = job.plan.to_dict()
-    receipt = job.receipt
+    # The showcase is a published surface: versions only, no host and no
+    # interpreter path. The job receipt behind it keeps the machine detail.
+    env = runtime_versions(job.receipt.get('environment', {}))
+    receipt = {**job.receipt, 'environment': env}
     blocked = bool(plan['tickets'])
     verdict = receipt.get('accepted', False)
 
@@ -123,8 +127,7 @@ def build_showcase(job: Job, name: str, source_label: str = "pasted program") ->
     source_html = '<pre class="mono">' + html.escape(job.source) + '</pre>'
 
     env = receipt.get('environment', {})
-    header_meta = (f"host <span class='mono'>{html.escape(str(env.get('host', '?')))}</span> ; "
-                   f"python <span class='mono'>{html.escape(str(env.get('python', '?')))}</span> ; "
+    header_meta = (f"python <span class='mono'>{html.escape(str(env.get('python', '?')))}</span> ; "
                    f"R availability <span class='mono'>{html.escape(str(env.get('r_version') or 'absent')[:60])}</span> ; "
                    f"tool <span class='mono'>{__version__}</span>")
 

@@ -6,6 +6,12 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, edited]
 
+# UTF-8 mode is required on every runner, not only Windows: the gates build
+# non-ASCII test vectors, and a cp1252 or C-locale stream raises
+# UnicodeEncodeError on them. One setting, both platforms.
+env:
+  PYTHONUTF8: "1"
+
 jobs:
   drift:
     name: Invariant linter
@@ -60,6 +66,7 @@ jobs:
       - name: Check identity and Windows paths
         run: |
           python3 -m unittest tools.test_windows_paths
+          python3 -m unittest tools.test_sanitization
           python3 scripts/check_sanitization.py buntas
 
   windows-checkout:

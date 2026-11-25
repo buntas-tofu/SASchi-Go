@@ -1,8 +1,14 @@
 [
   {
-    "path": "^docs/sasconversionrulebook\\.json$",
+    "path": "rulebook[.]json$",
     "pattern": "\\bfable\\b",
     "reason": "SUBJECT MATTER: the CRAN time-series forecasting package named as the R target for a rule, not the model-vendor string the public-lane ruling forbids (the token is not repeated in this prose by the gate's own doctrine)",
-    "ruling": "classification per the review doctrine (a token match is not a finding); operator ruling 2026-09-12 targeted vendor strings. The same collision is allowlisted with the same reason in SASchi-Roku."
+    "ruling": "classification per the review doctrine (a token match is not a finding); operator ruling 2026-09-12 targeted vendor strings. The same collision is allowlisted with the same reason in SASchi-Roku. Path widened 2026-11-24 to the packaged payload copy, because the same gate now reads an unpacked .deb: the vendor string is the same subject matter wherever the rulebook ships."
+  },
+  {
+    "path": "^scripts/inertia-drift-lint$",
+    "pattern": "\\bclaude\\b",
+    "reason": "SUBJECT MATTER: the invariant linter recognises the agent-instruction filenames an adopter might carry, so the vendor string is a filename in a compatibility tuple rather than prose about the vendor. Operator ruling of 2026-09-12 keeps linter compatibility; the token is not repeated in this reason by the gate's own doctrine.",
+    "ruling": "operator ruling 2026-09-12: no vendor strings in public repositories, with linter compatibility explicitly excepted. Surfaced 2026-11-24 when the gate began reading extensionless text; previously invisible because the file has no suffix."
   }
 ]
